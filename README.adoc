@@ -1,0 +1,14 @@
+= Hypervisor backend
+
+image:https://github.com/Provoly/provoly-hypervisor-back/actions/workflows/build.yaml/badge.svg[link=https://github.com/Provoly/provoly-hypervisor-back/actions/workflows/build.yaml, Build]
+image:https://github.com/Provoly/provoly-hypervisor-back/actions/workflows/static-analysis.yaml/badge.svg[link=https://github.com/Provoly/provoly-hypervisor-back/actions/workflows/static-analysis.yaml, Static analysis]
+image:https://github.com/Provoly/provoly-hypervisor-back/actions/workflows/documentation.yaml/badge.svg[link=https://github.com/Provoly/provoly-hypervisor-back/actions/workflows/documentation.yaml, Trigger documentation rebuild]
+
+
+
+== Getting started
+
+. Clone the project
+. Read the getting started https://documentation.provoly.net/provoly-hypervisor-backend/main/index.html[online]
+
+You're done.

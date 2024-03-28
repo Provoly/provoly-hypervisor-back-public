@@ -1,0 +1,82 @@
+quarkus:
+  default-locale: en-GB
+  locales: en-GB,en-US,fr-FR
+
+  kubernetes-client:
+    devservices:
+      enabled: false
+
+  info:
+    os:
+      enabled: false
+
+  management:
+    enabled: true
+    port: 8081
+  oidc:
+    client-id: provoly-hypervisor
+
+  flyway:
+    default-schema: provoly_hypervisor
+    migrate-at-start: true
+    validate-on-migrate: true
+  hibernate-orm:
+    physical-naming-strategy: io.hypersistence.utils.hibernate.naming.CamelCaseToSnakeCaseNamingStrategy
+    database:
+      default-schema: provoly_hypervisor
+
+"%dev":
+  quarkus:
+    smallrye-openapi:
+      path: /openapi.yaml
+
+    flyway:
+      repair-at-start: true
+
+    log:
+      category:
+        "org.hibernate":
+          level: INFO
+        "io.quarkus.oidc":
+          level: DEBUG
+        "com.provoly":
+          level: INFO
+        min-level: TRACE
+      console:
+        format: "%d{HH:mm:ss} %-5p traceId=%X{traceId} parentId=%X{parentId} spanId=%X{spanId} [%c{2.}] (%t) %s%e%n"
+
+    hibernate-orm:
+      log:
+        sql: false
+        bind-parameters: false
+
+    keycloak:
+      devservices:
+        realm-path: src/main/keycloak/realm.json
+        port: 9000
+
+    oidc:
+      token:
+        # Auth Server clock can be xx seconds ahead of resource server
+        lifespan-grace: 120
+      roles:
+        role-claim-path: "realm_access/roles"
+
+    http:
+      access-log:
+        enabled: true
+
+    otel:
+      sdk:
+        disabled: true
+#      exporter:
+#        resource-attributes: env=tracingTest
+#        otlp:
+#          enabled: false
+#          endpoint: http://localhost:4317
+
+"%prod":
+  quarkus:
+    kubernetes-config:
+      enabled: true
+      config-maps: provoly-hypervisor-backend

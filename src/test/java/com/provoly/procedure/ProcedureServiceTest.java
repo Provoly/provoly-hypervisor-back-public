@@ -1,0 +1,101 @@
+package com.provoly.procedure;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.Instant;
+import java.util.UUID;
+
+import jakarta.inject.Inject;
+
+import com.provoly.action.Service;
+import com.provoly.action.TodoAction;
+import com.provoly.event.Status;
+
+import io.quarkus.test.junit.QuarkusTest;
+
+import org.junit.jupiter.api.Test;
+
+@QuarkusTest
+public class ProcedureServiceTest {
+    @Inject
+    ProcedureService procedureService;
+
+    @Test
+    void procedure_progress_action_should_return_half_terminated() {
+        // given
+        var intervention = new Service(UUID.randomUUID(), Instant.now(), Status.NEW, "my_intervention");
+        var todo = new TodoAction(UUID.randomUUID(), Instant.now(), Status.DONE, "my_todo");
+
+        Procedure procedure = new Procedure(UUID.randomUUID(), "my_procedure", Instant.now());
+        procedure.addAction(intervention);
+        procedure.addAction(todo);
+
+        // when
+        var result = procedure.getProcedureProgress();
+
+        //then
+        assertThat(result).isEqualTo(50.0f);
+    }
+
+    @Test
+    void procedure_progress_action_should_return_parsed_long() {
+        // given
+        var intervention = new Service(UUID.randomUUID(), Instant.now(), Status.NEW, "my_intervention");
+        var intervention2 = new Service(UUID.randomUUID(), Instant.now(), Status.NEW, "my_intervention2");
+        var todo = new TodoAction(UUID.randomUUID(), Instant.now(), Status.DONE, "my_todo");
+
+        Procedure procedure = new Procedure(UUID.randomUUID(), "my_procedure", Instant.now());
+        procedure.addAction(intervention);
+        procedure.addAction(intervention2);
+        procedure.addAction(todo);
+
+        // when
+        var result = procedure.getProcedureProgress();
+
+        //then
+        assertThat(result).isEqualTo(33.0f);
+    }
+
+    @Test
+    void procedure_progress_action_should_return_none_when_no_actions() {
+        // given
+        Procedure procedure = new Procedure(UUID.randomUUID(), "my_procedure", Instant.now());
+
+        // when
+        var result = procedure.getProcedureProgress();
+
+        //then
+        assertThat(result).isZero();
+    }
+
+    @Test
+    void procedure_progress_action_should_return_none_when_only_no_done_actions() {
+        // given
+        var intervention = new Service(UUID.randomUUID(), Instant.now(), Status.IN_PROGRESS,
+                "my_intervention");
+        var todo = new TodoAction(UUID.randomUUID(), Instant.now(), Status.NEW, "my_todo");
+
+        Procedure procedure = new Procedure(UUID.randomUUID(), "my_procedure", Instant.now());
+        procedure.addAction(intervention);
+        procedure.addAction(todo);
+
+        // when
+        var result = procedure.getProcedureProgress();
+
+        //then
+        assertThat(result).isZero();
+    }
+
+    @Test
+    void should_close_all_procedure_events() {
+        // given
+        var procedureId = UUID.fromString("f7b37e0e-a3d1-4159-a2c1-f6b7fd1f7a82");
+
+        // when
+        procedureService.closeAllProcedureEvents(procedureId);
+
+        //then
+        assertThat(procedureService.getEventsByProcedureId(procedureId)).extracting("status").containsExactly(Status.DONE);
+    }
+
+}
