@@ -38,20 +38,20 @@ values ('93e66ff4-ebea-42ab-89e8-ac3a2f9e87f7');
 
 /* Insert Equipments */
 
-insert into equipment (id, name, family_id, equipment_entity_id)
-values ('0c728960-d5fd-49ea-8fe8-f72cb9cfcccd', 'P-1000', 2, 4);
+insert into equipment (id, external_id, name, code, family_id, equipment_entity_id, domain_id)
+values ('0c728960-d5fd-49ea-8fe8-f72cb9cfcccd', 'id1', 'P-1000', 'P-1000', 2, 4, 1);
 
-insert into equipment (id, name, family_id, equipment_entity_id)
-values ('4ead3c85-f120-4144-8ca2-29ac9882ff5e', 'A-230', 1, 5);
+insert into equipment (id, external_id, name, code, family_id, equipment_entity_id, domain_id)
+values ('4ead3c85-f120-4144-8ca2-29ac9882ff5e', 'id2', 'A-230', 'A-230', 1, 5, 1);
 
-insert into equipment (id, name, family_id, equipment_entity_id)
-values ('4ead3c85-f120-4144-8ca2-29ac9882ff5f', 'A-4901', 1, 3);
+insert into equipment (id, external_id, name, code, family_id, equipment_entity_id, domain_id)
+values ('4ead3c85-f120-4144-8ca2-29ac9882ff5f', 'id3', 'A-4901', 'A-4901', 1, 3, 1);
 
-insert into equipment (id, name, family_id, equipment_entity_id)
-values ('12a64ae7-70ca-4d12-bcd9-9f1c75f23915', 'C-1034', 3, 3);
+insert into equipment (id, external_id, name, code, family_id, equipment_entity_id, domain_id)
+values ('12a64ae7-70ca-4d12-bcd9-9f1c75f23915', 'id4', 'C-1034', 'C-1034', 3, 3, 1);
 
-insert into equipment(id, name, family_id, equipment_entity_id)
-values ('12a64ae7-70ca-4d12-bcd9-9f1c75f23916', 'C-761', 3, 2);
+insert into equipment(id, external_id, name, code, family_id, equipment_entity_id, domain_id)
+values ('12a64ae7-70ca-4d12-bcd9-9f1c75f23916', 'id5', 'C-761', 'C-761', 3, 2, 1);
 
 -- /* Insert Events */
 

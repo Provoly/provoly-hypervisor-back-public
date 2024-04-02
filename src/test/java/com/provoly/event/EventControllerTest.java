@@ -217,7 +217,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of("EP_O"));
         //then
-        assertThat(events).extracting("equipment").extracting("type").containsOnly("Ouvrage");
+        assertThat(events).extracting("equipment").extracting("family").containsOnly("Ouvrage");
     }
 
     @Test

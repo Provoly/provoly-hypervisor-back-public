@@ -9,8 +9,8 @@ import java.util.UUID;
 
 import jakarta.inject.Inject;
 
-import com.provoly.DatabaseReader;
 import com.provoly.event.Criticality;
+import com.provoly.event.EventDatabaseReader;
 import com.provoly.event.ReportCategory;
 import com.provoly.event.dto.ReportEventWriteDto;
 
@@ -25,7 +25,7 @@ public class ProcedureControllerTest {
     ProcedureController procedureController;
 
     @Inject
-    DatabaseReader databaseReader;
+    EventDatabaseReader databaseReader;
 
     @Test
     @TestSecurity(user = "reader")

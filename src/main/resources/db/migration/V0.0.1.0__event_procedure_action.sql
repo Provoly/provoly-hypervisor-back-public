@@ -11,18 +11,24 @@ create table family
     code varchar(10) unique  not null
 );
 
-create table equipment
-(
-    id                  uuid primary key,
-    name                varchar(200) unique not null,
-    family_id           bigint              not null references family,
-    equipment_entity_id bigint              not null references equipment_entity
-);
-
 create table domain
 (
     id   bigint primary key,
     name varchar(200) unique not null
+);
+
+create table equipment
+(
+    id                  uuid primary key,
+    external_id         varchar(200) unique not null,
+    name                varchar(200)        not null,
+    code                varchar(200) unique not null,
+    domain_id           bigint              not null references domain,
+    family_id           bigint              not null references family,
+    equipment_entity_id bigint              not null references equipment_entity,
+    attributes          jsonb default '{}',
+    parent_id           uuid,
+    constraint fk_parent foreign key (parent_id) references equipment (id)
 );
 
 create table procedure

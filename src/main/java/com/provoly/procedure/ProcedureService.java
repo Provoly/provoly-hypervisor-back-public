@@ -6,8 +6,8 @@ import java.util.UUID;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
-import com.provoly.DatabaseReader;
 import com.provoly.event.Event;
+import com.provoly.event.EventDatabaseReader;
 import com.provoly.event.EventService;
 import com.provoly.event.dto.AlertEventWriteDto;
 import com.provoly.event.dto.OperatorEventWriteDto;
@@ -17,11 +17,11 @@ import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class ProcedureService {
-    private DatabaseReader databaseReader;
+    private EventDatabaseReader databaseReader;
     private EventService eventService;
     private Logger logger;
 
-    public ProcedureService(DatabaseReader databaseReader, EventService eventService, Logger logger) {
+    public ProcedureService(EventDatabaseReader databaseReader, EventService eventService, Logger logger) {
         this.databaseReader = databaseReader;
         this.eventService = eventService;
         this.logger = logger;

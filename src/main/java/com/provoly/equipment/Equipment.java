@@ -1,12 +1,14 @@
 package com.provoly.equipment;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.UUID;
+import java.util.*;
 
 import jakarta.persistence.*;
 
 import com.provoly.action.Service;
+import com.provoly.event.Domain;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 public class Equipment {
@@ -14,7 +16,14 @@ public class Equipment {
     @Id
     private UUID id;
 
+    private String externalId;
+
     private String name;
+
+    private String code;
+
+    @ManyToOne
+    private Domain domain;
 
     @ManyToOne
     @JoinColumn(name = "equipment_entity_id")
@@ -24,38 +33,93 @@ public class Equipment {
     @JoinColumn(name = "family_id")
     private Family family;
 
-    @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "equipment", fetch = FetchType.EAGER)
     Collection<Service> services = new ArrayList<>();
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> attributes = new HashMap<>();
+
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Equipment parent;
 
     public Equipment() {
         // Only for JPA
     }
 
-    public Equipment(UUID id, String name, EquipmentEntity entity, Family family, Collection<Service> services) {
+    public Equipment(UUID id) {
         this.id = id;
-        this.name = name;
-        this.entity = entity;
-        this.family = family;
-        this.services = services;
     }
 
     public UUID getId() {
         return id;
     }
 
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(String technicalId) {
+        this.externalId = technicalId;
+    }
+
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public Domain getDomain() {
+        return domain;
+    }
+
+    public void setDomain(Domain domain) {
+        this.domain = domain;
     }
 
     public EquipmentEntity getEntity() {
         return entity;
     }
 
+    public void setEntity(EquipmentEntity entity) {
+        this.entity = entity;
+    }
+
     public Family getFamily() {
         return family;
     }
 
+    public void setFamily(Family family) {
+        this.family = family;
+    }
+
     public Collection<Service> getServices() {
         return services;
+    }
+
+    public void setServices(Collection<Service> services) {
+        this.services = services;
+    }
+
+    public Map<String, Object> getAttributes() {
+        return attributes == null ? new HashMap<>() : attributes;
+    }
+
+    public Equipment getParent() {
+        return parent;
+    }
+
+    public void setParent(Equipment parent) {
+        this.parent = parent;
     }
 }

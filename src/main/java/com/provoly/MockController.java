@@ -25,9 +25,9 @@ public class MockController {
     private Random rand = new Random();
 
     private EntityManager entityManager;
-    private DatabaseReader databaseReader;
+    private EventDatabaseReader databaseReader;
 
-    public MockController(EntityManager entityManager, DatabaseReader databaseReader) {
+    public MockController(EntityManager entityManager, EventDatabaseReader databaseReader) {
         this.entityManager = entityManager;
         this.databaseReader = databaseReader;
     }

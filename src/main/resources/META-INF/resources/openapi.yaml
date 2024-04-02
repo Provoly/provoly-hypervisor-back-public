@@ -212,7 +212,7 @@ paths:
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden is missing a required property
+          description: Forbidden if missing a required property
       security:
         - oidc:
             - authenticated
@@ -265,7 +265,7 @@ paths:
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden is missing a required property
+          description: Forbidden if missing a required property
       security:
         - oidc:
             - authenticated
@@ -522,7 +522,7 @@ paths:
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden is missing a required property
+          description: Forbidden if missing a required property
       security:
         - oidc:
             - authenticated
@@ -691,6 +691,86 @@ paths:
         - oidc:
             - authenticated
   /equipments:
+    post:
+      tags:
+        - Equipment Controller
+      summary: Save or update equipments
+      operationId: com.provoly.event.EquipmentController_saveOrUpdateEquipments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/EquipmentWriteDto'
+            examples:
+              default:
+                summary: Create equipments with parents
+                value: |
+                  [
+                    {
+                      "id": "technical_unique_id",
+                      "code":"C306",
+                      "name":"C306",
+                      "family": "Armoire",
+                      "domain": "EP",
+                      "entity": "FAGNIERES_COMMUN",
+                      "activeEnergy":30,
+                      "EREQ_LEVEL": 2,
+                      "parent": "C307"
+                    },
+                    {
+                      "id": "technical_unique_id2",
+                      "code":"C307",
+                      "name":"C307",
+                      "family": "Armoire",
+                      "domain": "EP",
+                      "entity": "FAGNIERES_COMMUN",
+                      "activeEnergy": 70,
+                      "EREQ_LEVEL": 1,
+                      "parent": null
+                    },
+                    {
+                      "id": "technical_unique_id3",
+                      "code":"C308",
+                      "name":"C308",
+                      "family": "Armoire",
+                      "domain": "EP",
+                      "entity": "FAGNIERES_COMMUN",
+                      "activeEnergy":null,
+                      "EREQ_LEVEL": 2,
+                      "parent": "C307"
+                    }
+                  ]
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                invalidName:
+                  description: Occurs when name already exists
+                  value: |
+                    {
+                        "code": 400,
+                        "message": "Event with name 'event report' already exists"
+                    }
+                invalidEquipment:
+                  description: Occurs when equipment parent not exist
+                  value: |
+                    {
+                        "code": 400,
+                        "message": "Equipment with code 'C397' not exists"
+                    }
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden if missing a required property
+      security:
+        - oidc:
+            - authenticated
     get:
       tags:
         - Equipment Controller
@@ -699,9 +779,8 @@ paths:
       parameters:
         - name: entity
           in: query
-          schema:
-            $ref: '#/components/schemas/EquipmentEntity'
-          example: 'FAGNIERES'
+          description: must match one of `EquipmentEntity` name
+          example: 'FAGNIERES_COMMUN'
       responses:
         "401":
           description: Not Authorized
@@ -718,10 +797,24 @@ paths:
                   value: |
                     [
                       {
-                        "id": "0c728960-d5fd-49ea-8fe8-f72cb9cfcccd",
-                        "name": "P-1000",
-                        "type": "Point Lumineux",
-                        "entity": "FAGNIERES"
+                        "id": "c538a660-6450-4281-9fa9-c925f340eb54",
+                        "externalId": "technical_unique_id",
+                        "name": "C306",
+                        "code": "C306",
+                        "family": "Armoire",
+                        "entity": "FAGNIERES_COMMUN",
+                        "parent": {
+                          "id": "c6cfac35-0939-4bb0-860e-fb00c6ff0ed7",
+                          "externalId": "technical_unique_id2",
+                          "name": "C307",
+                          "code": "C307",
+                          "family": "Armoire",
+                          "domain": "EP",
+                          "entity": "FAGNIERES_COMMUN",
+                          "parent": null,
+                          "activeEnergy": 70
+                        },
+                        "activeEnergy": 30
                       }
                     ]
       security:
@@ -757,10 +850,25 @@ paths:
                 default:
                   value: |
                     {
-                      "id": "0c728960-d5fd-49ea-8fe8-f72cb9cfcccd",
-                      "name": "P-1000",
-                      "type": "Point Lumineux",
-                      "entity": "FAGNIERES"
+                      "id": "c538a660-6450-4281-9fa9-c925f340eb54",
+                      "externalId": "technical_unique_id",
+                      "name": "C306",
+                      "code": "C306",
+                      "family": "Armoire",
+                      "domain": "EP",
+                      "entity": "FAGNIERES_COMMUN",
+                      "parent": {
+                        "id": "c6cfac35-0939-4bb0-860e-fb00c6ff0ed7",
+                        "externalId": "technical_unique_id2",
+                        "name": "C307",
+                        "code": "C307",
+                        "family": "Armoire",
+                        "domain": "EP",
+                        "entity": "FAGNIERES_COMMUN",
+                        "parent": null,
+                        "activeEnergy": 70
+                      },
+                      "activeEnergy": 30
                     }
       security:
         - oidc:
@@ -819,6 +927,7 @@ paths:
                 type: array
                 items:
                   type: string
+                example: ["FAGNIERES_COMMUN", "CHALONS_AGGLOS"]
       security:
         - oidc:
             - authenticated
@@ -904,17 +1013,60 @@ components:
           $ref: '#/components/schemas/UUID'
         name:
           type: string
+    EquipmentWriteDto:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+          required: true
+        code:
+          type: string
+          required: true
+        name:
+          type: string
+          required: true
+        family:
+          type: string
+          required: true
+          description: Value must match one of `Family` name
+        domain:
+          type: string
+          required: true
+          description: Value must match one of `Domain` name
+        entity:
+          type: string
+          required: true
+          description: Value must match one of `Equipment Entity` name
+        EREQ_LEVEL:
+          type: integer
+          required: true
+          description: Corresponds to the level to determine whether it will have a parent or not. If the value is 1, then it can be referenced in children equipments and will not itself have a parent equipment.
+        parent:
+          type: string
+          description: The value must be the parent `code` property
     EquipmentReadDto:
       type: object
       properties:
         id:
           $ref: '#/components/schemas/UUID'
+        externalId:
+          type: string
+        code:
+          type: string
         name:
           type: string
         family:
-          $ref: '#/components/schemas/Family'
+          type: string
+          description: Value match one of `Family` name
+        domain:
+          type: string
+          description: Value match one of `Domain` name
         entity:
-          $ref: '#/components/schemas/EquipmentEntity'
+          type: string
+          description: Value match one of `Equipment Entity` name
+        parent:
+          $ref: '#/components/schemas/EquipmentReadDto'
     ActionReadDto:
       type: object
       properties:

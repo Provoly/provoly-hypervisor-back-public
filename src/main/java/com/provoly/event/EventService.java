@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
-import com.provoly.DatabaseReader;
 import com.provoly.action.Action;
 import com.provoly.action.ActionType;
 import com.provoly.action.Service;
@@ -18,12 +17,12 @@ import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class EventService {
-    private DatabaseReader databaseReader;
+    private EventDatabaseReader databaseReader;
     private EventMapper eventMapper;
     private EquipmentService equipmentService;
     private Logger logger;
 
-    public EventService(DatabaseReader databaseReader, EventMapper eventMapper, EquipmentService equipmentService,
+    public EventService(EventDatabaseReader databaseReader, EventMapper eventMapper, EquipmentService equipmentService,
             Logger logger) {
         this.databaseReader = databaseReader;
         this.eventMapper = eventMapper;

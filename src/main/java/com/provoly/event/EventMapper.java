@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
-import com.provoly.DatabaseReader;
 import com.provoly.equipment.EquipmentMapper;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.event.dto.*;
@@ -19,10 +18,10 @@ public class EventMapper {
     private EquipmentMapper equipmentMapper;
     private ProcedureService procedureService;
     private EquipmentService equipmentService;
-    private DatabaseReader databaseReader;
+    private EventDatabaseReader databaseReader;
 
     public EventMapper(EquipmentService equipmentService, EquipmentMapper equipmentMapper,
-            ProcedureService procedureService, DatabaseReader databaseReader) {
+            ProcedureService procedureService, EventDatabaseReader databaseReader) {
         this.equipmentService = equipmentService;
         this.equipmentMapper = equipmentMapper;
         this.procedureService = procedureService;

@@ -3,8 +3,7 @@ package com.provoly.equipment;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.util.NoSuchElementException;
-import java.util.UUID;
+import java.util.*;
 
 import jakarta.inject.Inject;
 
@@ -37,7 +36,7 @@ public class EquipmentServiceTest {
     }
 
     @Test
-    void should_throw_exception_when_equipment_id_not_exists() {
+    void should_throw_exception_when_get_equipment_id_not_exists() {
         // when
         assertThatThrownBy(() -> equipmentService.getEquipmentById(UUID.randomUUID()))
                 .isInstanceOf(NoSuchElementException.class)
@@ -45,7 +44,7 @@ public class EquipmentServiceTest {
     }
 
     @Test
-    void should_throw_exception_when_equipment_name_not_exists() {
+    void should_throw_exception_when_get_equipment_name_not_exists() {
         // when
         assertThatThrownBy(() -> equipmentService.getEquipmentByName("toto"))
                 .isInstanceOf(NoSuchElementException.class)
@@ -53,7 +52,7 @@ public class EquipmentServiceTest {
     }
 
     @Test
-    void should_return_equipments_with_good_entity() {
+    void should_get_equipments_with_good_entity() {
         // when
         var result = equipmentService.getEquipments("FAGNIERES_COMMUN");
 
@@ -62,10 +61,90 @@ public class EquipmentServiceTest {
     }
 
     @Test
-    void should_throw_exception_when_equipment_entity_not_exists() {
+    void should_throw_exception_when_get_equipment_entity_not_exists() {
         // when
         assertThatThrownBy(() -> equipmentService.getEquipments("invalid_entity"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("entity invalid");
     }
+
+    @Test
+    void should_throw_exception_when_save_equipments_parent_not_exists() {
+        // given
+        var equipment = new EquipmentWriteDto("id", 0, "name", "code", "EP", "Armoire", "FAGNIERES_COMMUN", "invalid_code",
+                null);
+
+        // when
+        assertThatThrownBy(() -> equipmentService.saveOrUpdateEquipments(List.of(equipment)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("parent");
+    }
+
+    @Test
+    void should_throw_exception_and_abort_save_equipments_when_at_least_one_error() {
+        // given
+        var equipment1 = new EquipmentWriteDto("new_technical_id", 0, "name", "code", "EP", "Armoire", "FAGNIERES_COMMUN", null,
+                null);
+        var equipment2 = new EquipmentWriteDto("new_technical_id1", 0, "name1", "code1", "invalid domain", "Armoire",
+                "FAGNIERES_COMMUN", null, null);
+
+        var actualEquipmentSize = equipmentService.getEquipments(null).size();
+
+        // when
+        assertThatThrownBy(() -> equipmentService.saveOrUpdateEquipments(List.of(equipment1, equipment2)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("domain");
+        var sameEquipmentSize = equipmentService.getEquipments(null).size();
+
+        // then
+        assertThat(actualEquipmentSize).isEqualTo(sameEquipmentSize);
+    }
+
+    @Test
+    void should_update_equipment_by_adding_attributes() {
+        // given
+        var equipment1 = new EquipmentWriteDto("id1", 0, "P-1000", "P-1000", "EP", "Foyer Lumineux", "FAGNIERES_COMMUN", null,
+                Map.of("activeEnergy", 30));
+
+        // when
+        equipmentService.saveOrUpdateEquipments(List.of(equipment1));
+        var updatedEquipment = equipmentService.getEquipmentByName("P-1000");
+
+        // then
+        assertThat(updatedEquipment.getAttributes()).containsEntry("activeEnergy", 30);
+    }
+
+    @Test
+    void should_update_equipment_attributes_with_null_value() {
+        // given
+        var equipment = new EquipmentWriteDto("id1", 0, "P-1000", "P-1000", "EP", "Foyer Lumineux", "FAGNIERES_COMMUN", null,
+                new HashMap<>(Map.of("activeEnergy", 30)));
+        equipmentService.saveOrUpdateEquipments(List.of(equipment));
+
+        // when
+        equipment.attributes().put("activeEnergy", null);
+        equipmentService.saveOrUpdateEquipments(List.of(equipment));
+        var updatedEquipment = equipmentService.getEquipmentByName("P-1000");
+
+        // then
+        assertThat(updatedEquipment.getAttributes()).containsEntry("activeEnergy", null);
+    }
+
+    @Test
+    void should_update_equipment_only_filled_in_attributes() {
+        // given
+        var equipment = new EquipmentWriteDto("id1", 0, "P-1000", "P-1000", "EP", "Foyer Lumineux", "FAGNIERES_COMMUN", null,
+                new HashMap<>(Map.of("activeEnergy", 30)));
+        equipmentService.saveOrUpdateEquipments(List.of(equipment));
+
+        // when
+        equipment.attributes().put("activePower", "20");
+        equipmentService.saveOrUpdateEquipments(List.of(equipment));
+        var updatedEquipment = equipmentService.getEquipmentByName("P-1000");
+
+        // then
+        assertThat(updatedEquipment.getAttributes()).containsEntry("activeEnergy", 30);
+        assertThat(updatedEquipment.getAttributes()).containsEntry("activePower", "20");
+    }
+
 }

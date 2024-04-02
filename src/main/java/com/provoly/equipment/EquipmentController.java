@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+
+import io.quarkus.security.Authenticated;
 
 import org.jboss.resteasy.reactive.RestQuery;
 
@@ -25,7 +25,14 @@ public class EquipmentController {
         this.equipmentMapper = equipmentMapper;
     }
 
+    @POST
+    @Authenticated
+    public void saveOrUpdateEquipments(@Valid Collection<EquipmentWriteDto> equipments) {
+        equipmentService.saveOrUpdateEquipments(equipments);
+    }
+
     @GET
+    @Authenticated
     public Collection<EquipmentReadDto> getEquipments(@RestQuery String entity) {
         var equipments = equipmentService.getEquipments(entity);
         return equipmentMapper.mapToEquipmentReadDto(equipments);
@@ -33,6 +40,7 @@ public class EquipmentController {
     }
 
     @GET
+    @Authenticated
     @Path("/id/{id}")
     public EquipmentReadDto getEquipmentDetails(UUID id) {
         var equipment = equipmentService.getEquipmentById(id);
@@ -41,6 +49,7 @@ public class EquipmentController {
     }
 
     @GET
+    @Authenticated
     @Path("/name/{name}")
     public EquipmentReadDto getEquipmentDetails(String name) {
         var equipment = equipmentService.getEquipmentByName(name);
@@ -49,6 +58,7 @@ public class EquipmentController {
     }
 
     @GET
+    @Authenticated
     @Path("/entities")
     public List<String> getEquipmentEntitiesName() {
         return equipmentService.getEquipmentEntitiesName();

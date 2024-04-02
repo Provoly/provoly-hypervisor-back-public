@@ -5,18 +5,37 @@ import java.util.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
-import com.provoly.DatabaseReader;
-
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class EquipmentService {
-    private DatabaseReader databaseReader;
+    private EquipmentDatabaseReader databaseReader;
+    private EquipmentMapper equipmentMapper;
     private Logger logger;
 
-    public EquipmentService(DatabaseReader databaseReader, Logger logger) {
+    public EquipmentService(EquipmentDatabaseReader databaseReader, EquipmentMapper equipmentMapper, Logger logger) {
         this.databaseReader = databaseReader;
+        this.equipmentMapper = equipmentMapper;
         this.logger = logger;
+    }
+
+    @Transactional
+    public void saveOrUpdateEquipments(Collection<EquipmentWriteDto> dtos) {
+        logger.infof("Save or update %s equipments", dtos.size());
+        dtos.stream()
+                .sorted(Comparator.comparing(EquipmentWriteDto::level))
+                .forEach(dto -> databaseReader.getEquipmentWithExternalId(dto.id())
+                        .ifPresentOrElse(
+                                equipment -> {
+                                    logger.infof("Equipment with external id %s already exists, update it", dto.id());
+                                    equipmentMapper.updateEquipment(dto, equipment);
+                                },
+                                () -> {
+                                    logger.infof("Equipment with external id %s not exists, create it", dto.id());
+                                    Equipment equipment = new Equipment(UUID.randomUUID());
+                                    equipmentMapper.updateEquipment(dto, equipment);
+                                    databaseReader.saveEquipment(equipment);
+                                }));
     }
 
     @Transactional

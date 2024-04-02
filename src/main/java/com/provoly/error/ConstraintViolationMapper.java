@@ -29,9 +29,13 @@ public class ConstraintViolationMapper implements ExceptionMapper<ConstraintViol
 
     private String getMessageForViolation(ConstraintViolation constraintViolation) {
         String propertyName = "";
+        Integer index = null; // To manage constraint violations on entities collection
+
         for (Path.Node node : constraintViolation.getPropertyPath()) {
             propertyName = node.getName();
+            index = node.getIndex();
         }
-        return "'%s' %s".formatted(propertyName, constraintViolation.getMessage());
+        return index == null ? "'%s' %s".formatted(propertyName, constraintViolation.getMessage())
+                : "Entity n°%s : '%s' %s".formatted(index, propertyName, constraintViolation.getMessage());
     }
 }
