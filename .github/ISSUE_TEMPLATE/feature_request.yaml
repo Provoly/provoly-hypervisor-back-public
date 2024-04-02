@@ -1,0 +1,45 @@
+name: Feature Request
+labels: ["feature"]
+description: A new feature for Provoly Hypervisor
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Summary
+
+  - type: textarea
+    id: resources
+    attributes:
+      label: Resources
+      description: Provide the chalons-doc issue
+      value: |
+        https://github.com/connecte-chalons/chalons-doc/issues/{issue_number}
+
+  - type: textarea
+    id: Todo
+    attributes:
+      label: Feature Description
+      description: Describe the wanted feature
+
+  - type: markdown
+    attributes:
+      value: |
+        # Interface Contract
+
+  - type: textarea
+    id: api
+    attributes:
+      label: API
+      description: Provide a request example and the associated wanted response
+      value: |
+        ## [Method] URL
+        ### Query params
+        ### Path params
+        ### Body
+             
+        ### Responses
+        #### XXX
+        -  description
+        ____
+        
