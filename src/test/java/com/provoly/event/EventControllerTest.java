@@ -273,11 +273,11 @@ public class EventControllerTest {
 
     @Test
     @TestSecurity(user = "reader")
-    void should_return_event_with_default_sort_on_status() {
+    void should_return_event_with_default_sort_on_status_criticality() {
         // when
         var events = eventController.getEvents(
                 1,
-                3,
+                5,
                 null,
                 null,
                 null,
@@ -287,7 +287,10 @@ public class EventControllerTest {
                 List.of(),
                 List.of());
         //then
-        assertThat(events).extracting("status").containsExactly(Status.NEW, Status.NEW, Status.IN_PROGRESS);
+        assertThat(events).extracting("status").containsExactly(Status.NEW, Status.NEW, Status.IN_PROGRESS, Status.IN_PROGRESS,
+                Status.DONE);
+        assertThat(events).extracting("criticality").containsExactly(Criticality.LOW, Criticality.LOW, Criticality.HIGH,
+                Criticality.MEDIUM, Criticality.MEDIUM);
     }
 
     @Test

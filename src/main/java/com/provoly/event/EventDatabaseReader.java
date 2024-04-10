@@ -131,6 +131,7 @@ public class EventDatabaseReader extends DatabaseReader {
         if (sort == null) {
             logger.debugf("No sort provided, use default sort: by status and last modification date");
             orders.add(builder.asc(getStatusOrder(builder, root)));
+            orders.add(builder.asc(getCriticalityOrder(builder, root)));
             orders.add(builder.desc(root.get(Event_.lastModificationDate)));
             return orders;
         }
@@ -159,6 +160,14 @@ public class EventDatabaseReader extends DatabaseReader {
                 .when(Status.NEW, Status.NEW.getPriority())
                 .when(Status.IN_PROGRESS, Status.IN_PROGRESS.getPriority())
                 .when(Status.DONE, Status.DONE.getPriority())
+                .otherwise(10);
+    }
+
+    private Expression<Object> getCriticalityOrder(CriteriaBuilder builder, Root<Event> root) {
+        return builder.selectCase(root.get(Event_.criticality))
+                .when(Criticality.HIGH, Criticality.HIGH.getPriority())
+                .when(Criticality.MEDIUM, Criticality.MEDIUM.getPriority())
+                .when(Criticality.LOW, Criticality.LOW.getPriority())
                 .otherwise(10);
     }
 

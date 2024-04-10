@@ -53,7 +53,7 @@ quarkus:
     keycloak:
       devservices:
         realm-path: src/main/keycloak/realm.json
-        port: 9000
+        port: 9080
 
     oidc:
       token:

@@ -12,7 +12,7 @@ paths:
         - Event Controller
       summary: Retrieve all events with pagination
       description: |
-        Default sort on `status` (NEW,IN_PROGRESS,DONE) and `lastModificationDate` (reversed). It's possible to override it by sorting on other attributes.
+        Default sort on `status` (NEW,IN_PROGRESS,DONE), `criticality` (HIGH,MEDIUM,LOW) and `lastModificationDate` (reversed). It's possible to override it by sorting on other attributes.
         If order is no provided when sort, the default is asc.
         It's possible to filter on one or more criticalities or statuses.
       operationId: com.provoly.event.EventController_getEvents
