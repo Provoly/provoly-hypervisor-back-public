@@ -51,6 +51,20 @@ public class Equipment {
         this.id = id;
     }
 
+    public Equipment(UUID id, String externalId, String name, String code, Domain domain, EquipmentEntity entity, Family family,
+            Collection<Service> services, Map<String, Object> attributes, Equipment parent) {
+        this.id = id;
+        this.externalId = externalId;
+        this.name = name;
+        this.code = code;
+        this.domain = domain;
+        this.entity = entity;
+        this.family = family;
+        this.services = services;
+        this.attributes = attributes;
+        this.parent = parent;
+    }
+
     public UUID getId() {
         return id;
     }
@@ -113,6 +127,10 @@ public class Equipment {
 
     public Map<String, Object> getAttributes() {
         return attributes == null ? new HashMap<>() : attributes;
+    }
+
+    public void setAttributes(Map<String, Object> attributes) {
+        this.attributes = attributes;
     }
 
     public Equipment getParent() {

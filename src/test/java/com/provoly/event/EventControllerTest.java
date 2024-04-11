@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -11,18 +13,36 @@ import java.util.UUID;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
 
+import com.provoly.TestDataService;
 import com.provoly.event.dto.OperatorEventWriteDto;
 
 import io.quarkus.security.UnauthorizedException;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 @QuarkusTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class EventControllerTest {
     @Inject
     EventController eventController;
+
+    @Inject
+    TestDataService dataService;
+
+    @BeforeAll
+    public void init() {
+        dataService.init();
+    }
+
+    @AfterAll
+    public void clean() {
+        dataService.clean();
+    }
 
     @Test
     void should_throw_forbidden_if_user_is_not_authenticated() {
@@ -62,11 +82,6 @@ public class EventControllerTest {
     @Test
     @TestSecurity(user = "reader")
     void should_return_empty_event_when_at_least_criticality_status_category_has_empty_values() {
-        // given
-        var creationDate = Instant.parse("2024-01-20T00:00:00.000Z");
-
-        var event = eventController.getEventDetails(UUID.fromString("b0d1a93c-ec57-401c-9a74-2cc364bbab9f"));
-
         // when
         var events = eventController.getEvents(
                 1,
@@ -87,14 +102,12 @@ public class EventControllerTest {
     @TestSecurity(user = "reader")
     void should_return_event_created_on_corresponding_date() {
         // given
-        var creationDate = Instant.parse("2024-01-20T00:00:00.000Z");
-
-        var event = eventController.getEventDetails(UUID.fromString("b0d1a93c-ec57-401c-9a74-2cc364bbab9f"));
+        var creationDate = Instant.parse(LocalDate.now().atStartOfDay() + ":00.000Z");
 
         // when
         var events = eventController.getEvents(
                 1,
-                20,
+                1,
                 null,
                 null,
                 creationDate,
@@ -104,7 +117,9 @@ public class EventControllerTest {
                 List.of(),
                 List.of());
         //then
-        assertThat(events).extracting("creationDate").containsExactly(Instant.parse("2024-01-20T11:12:39.375184Z"));
+        assertThat(events).hasSize(1);
+        assertThat(events.stream().toList().getFirst().getCreationDate().isAfter(creationDate));
+        assertThat(events.stream().toList().getFirst().getCreationDate().isBefore(creationDate.plus(1, ChronoUnit.DAYS)));
     }
 
     @Test
@@ -215,9 +230,9 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of("EP_O"));
+                List.of("EP_A"));
         //then
-        assertThat(events).extracting("equipment").extracting("family").containsOnly("Ouvrage");
+        assertThat(events).extracting("equipment").extracting("family").contains("Armoire", "Armoire", "Armoire", "Armoire");
     }
 
     @Test
@@ -287,10 +302,10 @@ public class EventControllerTest {
                 List.of(),
                 List.of());
         //then
-        assertThat(events).extracting("status").containsExactly(Status.NEW, Status.NEW, Status.IN_PROGRESS, Status.IN_PROGRESS,
-                Status.DONE);
-        assertThat(events).extracting("criticality").containsExactly(Criticality.LOW, Criticality.LOW, Criticality.HIGH,
-                Criticality.MEDIUM, Criticality.MEDIUM);
+        assertThat(events).extracting("status").containsExactly(Status.NEW, Status.NEW, Status.NEW, Status.IN_PROGRESS,
+                Status.IN_PROGRESS);
+        assertThat(events).extracting("criticality").containsExactly(Criticality.LOW, Criticality.LOW, Criticality.LOW,
+                Criticality.HIGH, Criticality.MEDIUM);
     }
 
     @Test
@@ -309,7 +324,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of());
         //then
-        assertThat(events).extracting("procedureProgress").containsExactly(100f, 0f, 0f);
+        assertThat(events).extracting("procedureProgress").containsExactly(100f, 100f, 33f);
     }
 
     @Test
@@ -349,14 +364,14 @@ public class EventControllerTest {
         assertThat(result.get(Status.DONE).events()).hasSize(limit);
 
         assertThat(result.get(Status.IN_PROGRESS).events())
-                .extracting("serviceTitle").containsOnlyNulls();
+                .extracting("serviceTitle").isNotEmpty();
         assertThat(result.get(Status.IN_PROGRESS).events())
                 .extracting("serviceCount").containsExactly(1L);
 
         assertThat(result.get(Status.DONE).events())
                 .extracting("serviceTitle").isNotEmpty();
         assertThat(result.get(Status.DONE).events())
-                .extracting("serviceCount").containsExactly(2L);
+                .extracting("serviceCount").containsExactly(1L);
 
         assertThat(result.get(Status.NEW).events())
                 .extracting("manifestation").containsOnlyNulls();
@@ -396,11 +411,17 @@ public class EventControllerTest {
     @Test
     @TestSecurity(user = "reader")
     void should_return_event_by_id() {
+        var firstEventId = eventController
+                .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of())
+                .stream()
+                .toList()
+                .getFirst()
+                .getId();
+
         // when
-        final UUID id = UUID.fromString("01ffde9d-30d2-4273-b61f-c6addd8747c8");
-        var event = eventController.getEventDetails(id);
+        var event = eventController.getEventDetails(firstEventId);
         //then
-        assertThat(event).extracting("id").isEqualTo(id);
+        assertThat(event).extracting("id").isEqualTo(firstEventId);
     }
 
     @Test

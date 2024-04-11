@@ -7,15 +7,31 @@ import java.util.List;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
 
+import com.provoly.TestDataService;
+
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 @QuarkusTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class EquipmentControllerTest {
     @Inject
     EquipmentController equipmentController;
+
+    @Inject
+    TestDataService dataService;
+
+    @BeforeAll
+    public void init() {
+        dataService.init();
+    }
+
+    @AfterAll
+    public void clean() {
+        dataService.clean();
+    }
 
     @Test
     @TestSecurity(user = "reader")

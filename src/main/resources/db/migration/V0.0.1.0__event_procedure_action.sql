@@ -99,3 +99,11 @@ create table event_alert
     category            varchar(50) not null check (category in ('ALERT_LIMIT', 'ALERT_MALFUNCTION')),
     external_source_ref varchar     not null
 );
+
+
+create or replace view all_event as
+select event.*, coalesce(event_alert.category, event_report.category, event_operator.category) category
+from event
+ left outer join event_alert on event.id = event_alert.id
+ left outer join event_operator on event.id = event_operator.id
+ left outer join event_report on event.id = event_report.id;

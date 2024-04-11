@@ -7,20 +7,38 @@ import java.util.*;
 
 import jakarta.inject.Inject;
 
+import com.provoly.TestDataService;
+
 import io.quarkus.test.junit.QuarkusTest;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 @QuarkusTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class EquipmentServiceTest {
 
     @Inject
     EquipmentService equipmentService;
 
+    @Inject
+    TestDataService dataService;
+
+    @BeforeAll
+    public void init() {
+        dataService.init();
+    }
+
+    @AfterAll
+    public void clean() {
+        dataService.clean();
+    }
+
     @Test
     void should_get_equipment_by_id() {
+        // given
+        var equip = equipmentService.getEquipmentByName("A-230");
         // when
-        var equipment = equipmentService.getEquipmentById(UUID.fromString("0c728960-d5fd-49ea-8fe8-f72cb9cfcccd"));
+        var equipment = equipmentService.getEquipmentById(equip.getId());
 
         //then
         assertThat(equipment).isInstanceOf(Equipment.class);
@@ -103,7 +121,8 @@ public class EquipmentServiceTest {
     @Test
     void should_update_equipment_by_adding_attributes() {
         // given
-        var equipment1 = new EquipmentWriteDto("id1", 0, "P-1000", "P-1000", "EP", "Foyer Lumineux", "FAGNIERES_COMMUN", null,
+        var equipment1 = new EquipmentWriteDto("P-1000", 0, "P-1000", "P-1000", "EP", "Foyer Lumineux", "FAGNIERES_COMMUN",
+                null,
                 Map.of("activeEnergy", 30));
 
         // when
@@ -117,7 +136,7 @@ public class EquipmentServiceTest {
     @Test
     void should_update_equipment_attributes_with_null_value() {
         // given
-        var equipment = new EquipmentWriteDto("id1", 0, "P-1000", "P-1000", "EP", "Foyer Lumineux", "FAGNIERES_COMMUN", null,
+        var equipment = new EquipmentWriteDto("P-1000", 0, "P-1000", "P-1000", "EP", "Foyer Lumineux", "FAGNIERES_COMMUN", null,
                 new HashMap<>(Map.of("activeEnergy", 30)));
         equipmentService.saveOrUpdateEquipments(List.of(equipment));
 
@@ -133,7 +152,7 @@ public class EquipmentServiceTest {
     @Test
     void should_update_equipment_only_filled_in_attributes() {
         // given
-        var equipment = new EquipmentWriteDto("id1", 0, "P-1000", "P-1000", "EP", "Foyer Lumineux", "FAGNIERES_COMMUN", null,
+        var equipment = new EquipmentWriteDto("P-1000", 0, "P-1000", "P-1000", "EP", "Foyer Lumineux", "FAGNIERES_COMMUN", null,
                 new HashMap<>(Map.of("activeEnergy", 30)));
         equipmentService.saveOrUpdateEquipments(List.of(equipment));
 

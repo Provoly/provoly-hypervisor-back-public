@@ -7,18 +7,36 @@ import java.util.UUID;
 
 import jakarta.inject.Inject;
 
+import com.provoly.TestDataService;
 import com.provoly.action.Service;
 import com.provoly.action.TodoAction;
 import com.provoly.event.Status;
 
 import io.quarkus.test.junit.QuarkusTest;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 @QuarkusTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ProcedureServiceTest {
     @Inject
     ProcedureService procedureService;
+
+    @Inject
+    TestDataService dataService;
+
+    @BeforeAll
+    public void init() {
+        dataService.init();
+    }
+
+    @AfterAll
+    public void clean() {
+        dataService.clean();
+    }
 
     @Test
     void procedure_progress_action_should_return_half_terminated() {
@@ -89,7 +107,7 @@ public class ProcedureServiceTest {
     @Test
     void should_close_all_procedure_events() {
         // given
-        var procedureId = UUID.fromString("f7b37e0e-a3d1-4159-a2c1-f6b7fd1f7a82");
+        var procedureId = dataService.getProcedureId1();
 
         // when
         procedureService.closeAllProcedureEvents(procedureId);

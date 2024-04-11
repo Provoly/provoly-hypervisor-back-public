@@ -21,6 +21,11 @@ public class Service extends Action {
         super();
     }
 
+    public Service(UUID id, Instant lastModificationDate, Status status, String name, Equipment equipment) {
+        super(id, ActionType.SERVICE, lastModificationDate, status, name);
+        this.equipment = equipment;
+    }
+
     public Service(UUID id, Instant lastModificationDate, Status status, String name) {
         super(id, ActionType.SERVICE, lastModificationDate, status, name);
     }

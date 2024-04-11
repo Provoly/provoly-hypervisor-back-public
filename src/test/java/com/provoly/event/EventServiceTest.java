@@ -4,28 +4,47 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.inject.Inject;
 
+import com.provoly.TestDataService;
 import com.provoly.event.dto.AlertEventWriteDto;
 import com.provoly.event.dto.OperatorEventWriteDto;
 import com.provoly.event.dto.ReportEventWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 @QuarkusTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class EventServiceTest {
 
     @Inject
     EventService eventService;
 
+    @Inject
+    TestDataService dataService;
+
+    @BeforeAll
+    public void init() {
+        dataService.init();
+    }
+
+    @AfterAll
+    public void clean() {
+        dataService.clean();
+    }
+
     @Test
     void should_throw_exception_create_event_name_with_already_exists() {
         // given
-        var event = new OperatorEventWriteDto(UUID.randomUUID(), "Signalement encombrant", "desc", Criticality.HIGH,
+        var event = new OperatorEventWriteDto(UUID.randomUUID(), "operator1", "desc", Criticality.HIGH,
                 null, null, OperatorCategory.OPERATOR_EVENT, null, null, null);
 
         // then
@@ -73,19 +92,35 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_update_alert_event() {
         // given
-        var event = new AlertEventWriteDto(UUID.fromString("01ffde9d-30d2-4273-b61f-c6addd8747c8"), "tutu",
+        var eventAlertId = eventService
+                .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of(AlertCategory.ALERT_LIMIT.name()), List.of(),
+                        List.of())
+                .stream()
+                .toList()
+                .getFirst()
+                .getId();
+
+        var event = new AlertEventWriteDto(eventAlertId, "tutu",
                 "desc", Criticality.HIGH, null, null, null, "ref", null);
 
         // then
         assertThatThrownBy(() -> eventService.saveAlertEvent(event))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("it's not possible to update it");
+                .hasMessageContaining("already exists, it's not possible to update it");
     }
 
     @Test
     void should_throw_exception_update_report_event_externalSourceRef_property() {
         // given
-        var event = new ReportEventWriteDto(UUID.fromString("ebbfbbd1-b8de-467c-8a9b-88443a49f807"), "toto",
+        var eventReportId = eventService
+                .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of(ReportCategory.REPORT.name()), List.of(),
+                        List.of())
+                .stream()
+                .toList()
+                .getFirst()
+                .getId();
+
+        var event = new ReportEventWriteDto(eventReportId, "toto",
                 "desc", Criticality.HIGH, null, null, null, "ref", null);
 
         // then
@@ -109,13 +144,19 @@ public class EventServiceTest {
     @Test
     void should_close_event() {
         // given
-        var eventId = UUID.fromString("9f15215e-94bd-4056-89e6-1e69f0691419");
+        var eventIdInProgress = eventService
+                .getEvents(1, 1, null, null, null, List.of(), List.of(Status.IN_PROGRESS.name()), List.of(), List.of(),
+                        List.of())
+                .stream()
+                .toList()
+                .getFirst()
+                .getId();
 
         // when
-        eventService.closeEventById(eventId);
+        eventService.closeEventById(eventIdInProgress);
 
         // then
-        var event = eventService.getEventDetails(eventId);
+        var event = eventService.getEventDetails(eventIdInProgress);
         assertThat(event.getCloseDate()).isNotNull();
         assertThat(event.getStatus()).isEqualTo(Status.DONE);
 
@@ -124,14 +165,19 @@ public class EventServiceTest {
     @Test
     void should_not_close_already_closed_event() {
         // given
-        var eventId = UUID.fromString("01ffde9d-30d2-4273-b61f-c6addd8747c8");
-        var oldEvent = eventService.getEventDetails(eventId);
+        var eventIdDone = eventService
+                .getEvents(1, 1, null, null, null, List.of(), List.of(Status.DONE.name()), List.of(), List.of(), List.of())
+                .stream()
+                .toList()
+                .getFirst()
+                .getId();
+        var oldEvent = eventService.getEventDetails(eventIdDone);
 
         // when
-        eventService.closeEventById(eventId);
+        eventService.closeEventById(eventIdDone);
 
         // then
-        var event = eventService.getEventDetails(eventId);
+        var event = eventService.getEventDetails(eventIdDone);
         assertThat(event.getCloseDate()).isEqualTo(oldEvent.getCloseDate());
     }
 }

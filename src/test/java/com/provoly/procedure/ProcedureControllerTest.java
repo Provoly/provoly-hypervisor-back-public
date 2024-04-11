@@ -9,36 +9,53 @@ import java.util.UUID;
 
 import jakarta.inject.Inject;
 
+import com.provoly.TestDataService;
 import com.provoly.event.Criticality;
-import com.provoly.event.EventDatabaseReader;
+import com.provoly.event.EventController;
 import com.provoly.event.ReportCategory;
 import com.provoly.event.dto.ReportEventWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 @QuarkusTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ProcedureControllerTest {
     @Inject
     ProcedureController procedureController;
 
     @Inject
-    EventDatabaseReader databaseReader;
+    EventController eventController;
+
+    @Inject
+    TestDataService dataService;
+
+    @BeforeAll
+    public void init() {
+        dataService.init();
+    }
+
+    @AfterAll
+    public void clean() {
+        dataService.clean();
+    }
 
     @Test
     @TestSecurity(user = "reader")
     void should_return_procedure_by_id() {
         // given
-        final UUID id = UUID.fromString("5c925baf-7164-4bfe-af37-f0860aacc570");
-
+        UUID id = dataService.getProcedureId1();
         // when
         var procedure = procedureController.getProcedureDetail(id);
 
         //then
         assertThat(procedure).extracting("id").isEqualTo(id);
-        assertThat(procedure.events()).hasSize(2);
+        assertThat(procedure.events()).hasSize(1);
     }
 
     @Test
@@ -53,18 +70,26 @@ public class ProcedureControllerTest {
     @TestSecurity(user = "reader")
     void should_update_report_event_in_procedure() {
         // given
-        final UUID eventReportId = UUID.fromString("eb8e2f6b-f33e-408c-bb6c-e042f204d687");
+        UUID eventReportId = eventController
+                .getEvents(1, 1, null, null, null, List.of(Criticality.HIGH.name()), List.of(),
+                        List.of(ReportCategory.REPORT.name()),
+                        List.of(), List.of())
+                .stream()
+                .toList()
+                .getFirst()
+                .getId();
+
         ReportEventWriteDto reportDto = new ReportEventWriteDto(eventReportId,
                 "Maintenance ouvrage updated",
                 "description",
-                Criticality.MEDIUM,
+                Criticality.HIGH,
                 "new address",
                 null,
                 ReportCategory.REPORT,
-                "external_source3",
+                "external_source",
                 null);
 
-        UUID procedureId = UUID.fromString("5c925baf-7164-4bfe-af37-f0860aacc570");
+        UUID procedureId = dataService.getProcedureId3();
         ProcedureWriteDto dto = new ProcedureWriteDto(
                 procedureId,
                 "procedure maintenance",
@@ -72,7 +97,7 @@ public class ProcedureControllerTest {
 
         // when
         procedureController.updateProcedure(dto);
-        var updatedEvent = databaseReader.getEventById(eventReportId);
+        var updatedEvent = eventController.getEventDetails(eventReportId);
 
         // then
         assertThat(updatedEvent)
