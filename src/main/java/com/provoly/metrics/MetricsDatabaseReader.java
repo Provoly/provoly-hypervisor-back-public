@@ -40,7 +40,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
 
     public Map<String, Long> getEquipmentsWithUnDoneEvent() {
         List<Tuple> result = em.createNativeQuery("""
-                select family.code as code, (attributes->>'managed')::::boolean as managed, count(*) as count
+                select family.code as code, (attributes->>'managed')::::boolean as managed, count(distinct family.code) as count
                 from {h-schema}equipment eqt
                 join {h-schema}event on event.equipment_id = eqt.id
                 join {h-schema}family on eqt.family_id = family.id

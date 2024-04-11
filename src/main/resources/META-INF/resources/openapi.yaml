@@ -531,7 +531,7 @@ paths:
       tags:
         - Procedure Controller
       summary: Update events procedure
-      operationId: com.provoly.event.ProcedureController_updateProcedure
+      operationId: com.provoly.procedure.ProcedureController_updateProcedure
       requestBody:
         content:
           application/json:
@@ -577,7 +577,7 @@ paths:
       tags:
         - Procedure Controller
       summary: Retrieve procedure by id
-      operationId: com.provoly.event.ProcedureController_getProcedureDetails
+      operationId: com.provoly.procedure.ProcedureController_getProcedureDetails
       parameters:
         - name: id
           in: path
@@ -672,7 +672,7 @@ paths:
         - Procedure Controller
       summary: Close all procedure events by id
       description: Set status to DONE. Close date is not updated if event is already closed
-      operationId: com.provoly.event.EventController_closeEvent
+      operationId: com.provoly.procedure.ProcedureController_closeAllProcedureEvents
       parameters:
         - name: id
           in: path
@@ -695,7 +695,7 @@ paths:
       tags:
         - Equipment Controller
       summary: Save or update equipments
-      operationId: com.provoly.event.EquipmentController_saveOrUpdateEquipments
+      operationId: com.provoly.equipment.EquipmentController_saveOrUpdateEquipments
       requestBody:
         content:
           application/json:
@@ -775,7 +775,7 @@ paths:
       tags:
         - Equipment Controller
       summary: Retrieve all equipments or only equipments with entity in param
-      operationId: com.provoly.event.EquipmentController_getEquipments
+      operationId: com.provoly.equipment.EquipmentController_getEquipments
       parameters:
         - name: entity
           in: query
@@ -825,7 +825,7 @@ paths:
       tags:
         - Equipment Controller
       summary: Retrieve an equipment by id
-      operationId: com.provoly.event.EquipmentController_getEquipmentsDetails
+      operationId: com.provoly.equipment.EquipmentController_getEquipmentsDetails
       parameters:
         - name: id
           in: path
@@ -878,7 +878,7 @@ paths:
       tags:
         - Equipment Controller
       summary: Retrieve an equipment by name
-      operationId: com.provoly.event.EquipmentController_getEquipmentsDetails
+      operationId: com.provoly.equipment.EquipmentController_getEquipmentsDetails
       parameters:
         - name: name
           in: path
@@ -916,7 +916,7 @@ paths:
       tags:
         - Equipment Controller
       summary: Retrieve all equipment entities
-      operationId: com.provoly.event.EquipmentController_getEquipmentEntitiesName
+      operationId: com.provoly.equipment.EquipmentController_getEquipmentEntitiesName
       responses:
         "401":
           description: Not Authorized
@@ -928,6 +928,44 @@ paths:
                 items:
                   type: string
                 example: ["FAGNIERES_COMMUN", "CHALONS_AGGLOS"]
+      security:
+        - oidc:
+            - authenticated
+  /metrics/equipments-with-events:
+    get:
+      tags:
+        - Metrics Controller
+      summary: Retrieve equipments with event metrics
+      description: |
+        Returns the number of cabinets, light fittings and unmanaged equipment connected to 
+        at least one event that has not been closed, the number of services requested for this equipment, 
+        and the number of services in progress.
+      operationId: com.provoly.metrics.MetricsController_getEquipmentWithEvent
+      responses:
+        "401":
+          description: Not Authorized
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentWithEventDto'
+              examples:
+                default:
+                  value: |
+                    {
+                      "nbEquipWithEvent_A": 0,
+                      "totalEquipWithEvent_A": 2,
+                      "nbServiceTodoWithEquip_A": 0,
+                      "nbServiceInProgressWithEquip_A": 0,
+                      "nbEquipWithEvent_FL": 2,
+                      "totalEquipWithEvent_FL": 1,
+                      "nbServiceTodoWithEquip_FL": 0,
+                      "nbServiceInProgressWithEquip_FL": 0,
+                      "nbEquipWithEvent_unmanaged": 0,
+                      "totalEquipWithEvent_unmanaged": 4,
+                      "nbServiceTodoWithEquip_unmanaged": 0,
+                      "nbServiceInProgressWithEquip_unmanaged": 0
+                    }
       security:
         - oidc:
             - authenticated
@@ -1367,4 +1405,44 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EventSummaryDto'
+
+    EquipmentWithEventDto:
+      type: object
+      properties:
+        nbEquipWithEvent_A:
+          type: integer
+          description: Count of equipments "Armoire" with at least one event not finished and that is not a "MANIFESTATION"
+        totalEquipWithEvent_A:
+          type: integer
+          description: Total count of equipments "Armoire"
+        nbServiceTodoWithEquip_A:
+          type: integer
+          description: Count of requested services linked to an "Armoire" equipment
+        nbServiceInProgressWithEquip_A:
+          type: integer
+          description: Count of in progress services linked to an "Armoire" equipment
+        nbEquipWithEvent_FL:
+          type: integer
+          description: Count of equipments "Foyer Lumineux" with at least one event not finished and that is not a "MANIFESTATION"
+        totalEquipWithEvent_FL:
+          type: integer
+          description: Total count of equipments "Foyer Lumineux"
+        nbServiceTodoWithEquip_FL:
+          type: integer
+          description: Count of requested services linked to an "Foyer Lumineux" equipment
+        nbServiceInProgressWithEquip_FL:
+          type: integer
+          description: Count of in progress services linked to an "Foyer Lumineux" equipment
+        nbEquipWithEvent_unmanaged:
+          type: integer
+          description: Count of unmanaged equipments with at least one event not finished and that is not a "MANIFESTATION"
+        totalEquipWithEvent_unmanaged:
+          type: integer
+          description: Total count of unmanaged equipments
+        nbServiceTodoWithEquip_unmanaged:
+          type: integer
+          description: Count of requested services linked to an unmanaged equipment
+        nbServiceInProgressWithEquip_unmanaged:
+          type: integer
+          description: Count of in progress services linked to an unmanaged equipment
 
