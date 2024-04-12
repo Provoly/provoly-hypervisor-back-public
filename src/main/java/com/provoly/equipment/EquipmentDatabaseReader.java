@@ -43,7 +43,7 @@ public class EquipmentDatabaseReader extends DatabaseReader {
                 .orElseThrow(() -> new NoSuchElementException("Equipment with name %s not found".formatted(name)));
     }
 
-    public Collection<Equipment> getEquipments(EquipmentEntity entity) {
+    public Collection<Equipment> getEquipmentsByEntity(EquipmentEntity entity) {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<Equipment> criteriaQuery = builder.createQuery(Equipment.class);
         Root<Equipment> root = criteriaQuery.from(Equipment.class);

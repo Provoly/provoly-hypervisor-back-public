@@ -64,7 +64,7 @@ paths:
             type: array
             items:
               type: string
-            example: ['CHALONS_COMMUN']
+            example: [ 'CHALONS_COMMUN' ]
         - name: family
           in: query
           description: The equipment family code. It must be known to the system.
@@ -72,11 +72,11 @@ paths:
             type: array
             items:
               type: string
-            example: ['EP_O','EP_FL','EP_A']
+            example: [ 'EP_O','EP_FL','EP_A' ]
         - name: sort
           in: query
           schema:
-              $ref: '#/components/schemas/Sort'
+            $ref: '#/components/schemas/Sort'
         - name: order
           in: query
           schema:
@@ -558,7 +558,7 @@ paths:
                       }
                     ]
                   }
-        
+      
 
       responses:
         "201":
@@ -927,7 +927,7 @@ paths:
                 type: array
                 items:
                   type: string
-                example: ["FAGNIERES_COMMUN", "CHALONS_AGGLOS"]
+                example: [ "FAGNIERES_COMMUN", "CHALONS_AGGLOS" ]
       security:
         - oidc:
             - authenticated
@@ -965,6 +965,46 @@ paths:
                       "totalEquipWithEvent_unmanaged": 4,
                       "nbServiceTodoWithEquip_unmanaged": 0,
                       "nbServiceInProgressWithEquip_unmanaged": 0
+                    }
+      security:
+        - oidc:
+            - authenticated
+  /metrics/equipments-by-entity:
+    get:
+      tags:
+        - Metrics Controller
+      summary: Retrieve equipments by entity for `EP` domain
+      description: |
+        Returns the number of equipments for `EP` domain in a given family grouped by entity. 
+        The number of managed equipments is separated from the number of unmanaged equipments.
+      operationId: com.provoly.metrics.MetricsController_getEquipmentByEntity
+      parameters:
+        - name: family
+          in: path
+          schema:
+            type: string
+          example: EP_FL
+          required: true
+      responses:
+        "401":
+          description: Not Authorized
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentsByEntity'
+              examples:
+                default:
+                  value: |
+                    {
+                      "CHA_managed": 0,
+                      "CHA_unmanaged": 0,
+                      "CH_managed": 0,
+                      "CH_unmanaged": 0,
+                      "FAGN_managed": 2,
+                      "FAGN_unmanaged": 1,
+                      "SMP_managed": 0,
+                      "SMP_unmanaged": 0
                     }
       security:
         - oidc:
@@ -1034,7 +1074,7 @@ components:
       enum:
         - ASC
         - DESC
-      default:  ASC
+      default: ASC
     Family:
       type: object
       properties:
@@ -1384,7 +1424,7 @@ components:
             - $ref: '#/components/schemas/ReportCategory'
         interventionRequestTitle:
           type: string
-          description:  The last in progress or new intervention request title
+          description: The last in progress or new intervention request title
         interventionRequestCount:
           type: integer
           description: The total number of intervention requests linked to the procedure event
@@ -1445,4 +1485,30 @@ components:
         nbServiceInProgressWithEquip_unmanaged:
           type: integer
           description: Count of in progress services linked to an unmanaged equipment
-
+    EquipmentsByEntity:
+      type: object
+      properties:
+        CHA_managed:
+          type: integer
+          description: Count of managed equipments where entity is `AGGLO_EP` or `AGGLO_COMMUN`
+        CHA_unmanaged:
+          type: integer
+          description: Count of unmanaged equipments where entity is `AGGLO_EP` or `AGGLO_COMMUN`
+        CH_managed:
+          type: integer
+          description: Count of managed equipments where entity is `CHALONS_EP` or `CHALONS_COMMUN`
+        CH_unmanaged:
+          type: integer
+          description: Count of unmanaged equipments where entity is `CHALONS_EP` or `CHALONS_COMMUN`
+        FAGN_managed:
+          type: integer
+          description: Count of managed equipments where entity is `FAGNIERES_COMMUN`
+        FAGN_unmanaged:
+          type: integer
+          description: Count of unmanaged equipments where entity is `FAGNIERES_COMMUN`
+        SMP_managed:
+          type: integer
+          description: Count of managed equipments where entity is `SAINT_MARTIN_COMMUN`
+        SMP_unmanaged:
+          type: integer
+          description: Count of unmanaged equipments where entity is `SAINT_MARTIN_COMMUN`

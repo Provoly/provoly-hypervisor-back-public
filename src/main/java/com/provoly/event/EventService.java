@@ -77,7 +77,7 @@ public class EventService {
             List<String> status,
             List<String> category,
             List<String> entity,
-            List<String> familiy) {
+            List<String> family) {
         logger.infof("""
                 Get events with from page %s and size %s with :
                 creation date : %s
@@ -87,9 +87,9 @@ public class EventService {
                 equipment entity : %s,
                 equipment family : %s
                 sort by %s
-                """.formatted(page, pageSize, creationDate, criticality, status, category, entity, familiy, sort));
+                """.formatted(page, pageSize, creationDate, criticality, status, category, entity, family, sort));
 
-        if (oneOfFilterIsEmpty(criticality, status, category, entity, familiy)) {
+        if (oneOfFilterIsEmpty(criticality, status, category, entity, family)) {
             return List.of();
         }
 
@@ -105,8 +105,8 @@ public class EventService {
                 .map(e -> equipmentService.getEquipmentEntity(e))
                 .toList();
 
-        var families = familiy.stream()
-                .map(t -> equipmentService.getFamiliyByCode(t)).toList();
+        var families = family.stream()
+                .map(t -> equipmentService.getFamilyByCode(t)).toList();
 
         var operatorCategories = category.stream()
                 .filter(OperatorCategory::isOperatorCategory)

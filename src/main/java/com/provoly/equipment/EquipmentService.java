@@ -62,7 +62,7 @@ public class EquipmentService {
     @Transactional
     public Collection<Equipment> getEquipments(String entity) {
         logger.debugf("Get all equipments with entity %s", entity);
-        return databaseReader.getEquipments(getEquipmentEntity(entity));
+        return databaseReader.getEquipmentsByEntity(getEquipmentEntity(entity));
     }
 
     @Transactional
@@ -89,7 +89,7 @@ public class EquipmentService {
     }
 
     @Transactional
-    public Family getFamiliyByCode(String code) {
+    public Family getFamilyByCode(String code) {
         logger.debugf("Get equipment family by code  %s", code);
         return databaseReader.getFamilyByCode(code)
                 .orElseThrow(() -> new IllegalArgumentException("Code %s invalid".formatted(code)));

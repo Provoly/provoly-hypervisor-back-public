@@ -1,6 +1,7 @@
 package com.provoly.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -135,6 +136,68 @@ public class MetricsServiceTest {
         assertThat(result).extracting("totalEquipWithEvent_unmanaged").isEqualTo(0L);
         assertThat(result).extracting("nbServiceTodoWithEquip_unmanaged").isEqualTo(0L);
         assertThat(result).extracting("nbServiceInProgressWithEquip_unmanaged").isEqualTo(0L);
+    }
+
+    @Test
+    void should_get_equipment_FL_by_entities() {
+        // when
+        var result = metricsService.getEquipmentByEntity("EP_FL");
+
+        //then
+        assertThat(result).extracting("CHA_managed").isEqualTo(1L);
+        assertThat(result).extracting("CHA_unmanaged").isEqualTo(0L);
+        assertThat(result).extracting("CH_managed").isEqualTo(0L);
+        assertThat(result).extracting("CH_unmanaged").isEqualTo(0L);
+
+        assertThat(result).extracting("FAGN_managed").isEqualTo(0L);
+        assertThat(result).extracting("FAGN_unmanaged").isEqualTo(1L);
+        assertThat(result).extracting("SMP_managed").isEqualTo(0L);
+        assertThat(result).extracting("SMP_unmanaged").isEqualTo(0L);
+    }
+
+    @Test
+    void should_get_equipment_A_by_entities() {
+        // when
+        var result = metricsService.getEquipmentByEntity("EP_A");
+
+        //then
+        assertThat(result).extracting("CHA_managed").isEqualTo(0L);
+        assertThat(result).extracting("CHA_unmanaged").isEqualTo(1L);
+        assertThat(result).extracting("CH_managed").isEqualTo(0L);
+        assertThat(result).extracting("CH_unmanaged").isEqualTo(0L);
+
+        assertThat(result).extracting("FAGN_managed").isEqualTo(0L);
+        assertThat(result).extracting("FAGN_unmanaged").isEqualTo(0L);
+        assertThat(result).extracting("SMP_managed").isEqualTo(1L);
+        assertThat(result).extracting("SMP_unmanaged").isEqualTo(0L);
+    }
+
+    @Test
+    void should_get_equipment_A_by_entities_no_equipment() {
+        // given
+        dataService.clean();
+
+        // when
+        var result = metricsService.getEquipmentByEntity("EP_A");
+
+        //then
+        assertThat(result).extracting("CHA_managed").isEqualTo(0L);
+        assertThat(result).extracting("CHA_unmanaged").isEqualTo(0L);
+        assertThat(result).extracting("CH_managed").isEqualTo(0L);
+        assertThat(result).extracting("CH_unmanaged").isEqualTo(0L);
+
+        assertThat(result).extracting("FAGN_managed").isEqualTo(0L);
+        assertThat(result).extracting("FAGN_unmanaged").isEqualTo(0L);
+        assertThat(result).extracting("SMP_managed").isEqualTo(0L);
+        assertThat(result).extracting("SMP_unmanaged").isEqualTo(0L);
+    }
+
+    @Test
+    void should_get_equipment_null_family_should_throw_exception() {
+        //then
+        assertThatThrownBy(() -> metricsService.getEquipmentByEntity(null))
+                .hasMessageContaining("Code null invalid");
+
     }
 
 }

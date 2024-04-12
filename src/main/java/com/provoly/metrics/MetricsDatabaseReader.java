@@ -9,17 +9,13 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 
 import com.provoly.DatabaseReader;
 import com.provoly.action.Service;
 import com.provoly.action.Service_;
-import com.provoly.equipment.Equipment;
-import com.provoly.equipment.Equipment_;
-import com.provoly.equipment.Family_;
+import com.provoly.equipment.*;
+import com.provoly.event.Domain;
 import com.provoly.event.Domain_;
 import com.provoly.event.Status;
 
@@ -32,7 +28,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
         super(em);
     }
 
-    private record EquipmentWithEvents(String code, Boolean managed, long count) {
+    private record QueryResult(String code, boolean managed, long count) {
     }
 
     private record ServiceWithEquipments(String code, Status status, Boolean managed, long count) {
@@ -54,65 +50,72 @@ public class MetricsDatabaseReader extends DatabaseReader {
                 """, Tuple.class)
                 .getResultList();
 
-        var tupleToEquipmentWithEvents = result.stream()
-                .map(t -> new EquipmentWithEvents(t.get("code").toString(), (boolean) t.get(MANAGED), (long) t.get("count")))
+        var queryResults = result
+                .stream()
+                .map(t -> new QueryResult(t.get("code").toString(), (boolean) t.get(MANAGED), (long) t.get("count")))
                 .toList();
-        return separateUnmanagedFromManagedEquipments(tupleToEquipmentWithEvents);
+        return gatherUnmanagedEquipments(queryResults);
     }
 
     public Map<String, Long> getEquipmentGroupedByFamilyAndManaged() {
         var builder = em.getCriteriaBuilder();
-        CriteriaQuery<EquipmentWithEvents> criteriaQuery = builder.createQuery(EquipmentWithEvents.class);
-        Root<Equipment> root = criteriaQuery.from(Equipment.class);
-        var family = root.join(Equipment_.family, JoinType.LEFT);
-        var domain = root.join(Equipment_.domain, JoinType.LEFT);
+        CriteriaQuery<QueryResult> criteriaQuery = builder.createQuery(QueryResult.class);
+        Root<Equipment> equipment = criteriaQuery.from(Equipment.class);
+        var family = equipment.join(Equipment_.family, JoinType.LEFT);
+        var domain = equipment.join(Equipment_.domain, JoinType.LEFT);
 
-        final Expression<Boolean> managed = builder.function("jsonb_extract_path_text", Boolean.class,
-                root.get(Equipment_.attributes), builder.literal(MANAGED));
+        final Expression<Boolean> managed = getManagedPath(builder, equipment.get(Equipment_.attributes));
 
         var query = criteriaQuery
                 .multiselect(
                         family.get(Family_.code),
                         managed,
-                        builder.count(root))
+                        builder.count(equipment))
                 .where(builder.equal(domain.get(Domain_.name), "EP"))
                 .groupBy(family.get(Family_.code), managed);
 
         var result = em.createQuery(query)
                 .getResultList();
 
-        return separateUnmanagedFromManagedEquipments(result);
+        return gatherUnmanagedEquipments(result);
     }
 
     public Map<String, Map<Status, Long>> getEquipmentServicesByStatus() {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<ServiceWithEquipments> criteriaQuery = builder.createQuery(ServiceWithEquipments.class);
-        Root<Service> root = criteriaQuery.from(Service.class);
-        var equipment = root.join(Service_.equipment, JoinType.LEFT);
+        Root<Service> service = criteriaQuery.from(Service.class);
+        var equipment = service.join(Service_.equipment, JoinType.LEFT);
         var family = equipment.join(Equipment_.family, JoinType.LEFT);
         var domain = equipment.join(Equipment_.domain, JoinType.LEFT);
 
-        final Expression<Boolean> managed = builder.function("jsonb_extract_path_text", Boolean.class,
-                equipment.get(Equipment_.attributes), builder.literal(MANAGED));
+        Expression<Boolean> managed = getManagedPath(builder, equipment.get(Equipment_.attributes));
 
         var query = criteriaQuery
                 .multiselect(
                         family.get(Family_.code),
-                        root.get(Service_.status),
+                        service.get(Service_.status),
                         managed,
-                        builder.count(root))
+                        builder.count(service))
                 .where(builder.and(
                         builder.equal(domain.get(Domain_.name), "EP"),
-                        root.get(Service_.status).in(List.of(Status.NEW, Status.IN_PROGRESS))))
-                .groupBy(family.get(Family_.code), root.get(Service_.status), managed);
+                        service.get(Service_.status).in(List.of(Status.NEW, Status.IN_PROGRESS))))
+                .groupBy(family.get(Family_.code), service.get(Service_.status), managed);
 
         var result = em.createQuery(query)
                 .getResultList();
 
-        if (result.isEmpty()) {
-            return Map.of();
-        }
+        var linkedServicesByStatus = getServiceCountByManagedEquipAndStatus(result);
 
+        linkedServicesByStatus.put(UNMANAGED,
+                result.stream()
+                        .filter(r -> !r.managed())
+                        .collect(Collectors.groupingBy(ServiceWithEquipments::status,
+                                Collectors.summingLong(ServiceWithEquipments::count))));
+
+        return linkedServicesByStatus;
+    }
+
+    private Map<String, Map<Status, Long>> getServiceCountByManagedEquipAndStatus(List<ServiceWithEquipments> result) {
         Map<String, Map<Status, Long>> linkedServicesByStatus = new HashMap<>();
 
         result.stream()
@@ -124,27 +127,47 @@ public class MetricsDatabaseReader extends DatabaseReader {
                         linkedServicesByStatus.put(s.code(), new EnumMap<>(Map.of(s.status(), s.count())));
                     }
                 });
-
-        linkedServicesByStatus.put(UNMANAGED, result.stream()
-                .filter(r -> !r.managed())
-                .collect(Collectors.groupingBy(ServiceWithEquipments::status,
-                        Collectors.summingLong(ServiceWithEquipments::count))));
-
         return linkedServicesByStatus;
     }
 
-    private Map<String, Long> separateUnmanagedFromManagedEquipments(List<EquipmentWithEvents> result) {
-        if (result.isEmpty()) {
-            return Map.of();
-        }
+    public Map<String, Long> getEquipmentsGroupByEntityAndManaged(Family family, Domain domain) {
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<QueryResult> criteriaQuery = builder.createQuery(QueryResult.class);
+        Root<Equipment> equipment = criteriaQuery.from(Equipment.class);
+        var entity = equipment.join(Equipment_.entity, JoinType.LEFT);
+        Expression<Boolean> managed = getManagedPath(builder, equipment.get(Equipment_.attributes));
+
+        var query = criteriaQuery.multiselect(
+                entity.get(EquipmentEntity_.name),
+                managed,
+                builder.count(equipment))
+                .where(builder.and(
+                        builder.equal(equipment.get(Equipment_.family), family),
+                        builder.equal(equipment.get(Equipment_.domain), domain)))
+                .groupBy(entity.get(EquipmentEntity_.name), managed);
+
+        return em.createQuery(query)
+                .getResultStream()
+                .collect(Collectors.toMap(
+                        r -> "%s_%s".formatted(r.code(), r.managed() ? MANAGED : UNMANAGED),
+                        QueryResult::count));
+
+    }
+
+    private Map<String, Long> gatherUnmanagedEquipments(List<QueryResult> result) {
         var equipmentWithEventsTotal = result.stream()
-                .filter(EquipmentWithEvents::managed)
-                .collect(Collectors.toMap(EquipmentWithEvents::code, EquipmentWithEvents::count));
+                .filter(QueryResult::managed)
+                .collect(Collectors.toMap(QueryResult::code, QueryResult::count));
 
         equipmentWithEventsTotal.put(UNMANAGED, result.stream()
                 .filter(r -> !r.managed())
-                .mapToLong(EquipmentWithEvents::count)
+                .mapToLong(QueryResult::count)
                 .sum());
         return equipmentWithEventsTotal;
+    }
+
+    private Expression<Boolean> getManagedPath(CriteriaBuilder builder, Path<Map<String, Object>> attributes) {
+        return builder.function("jsonb_extract_path_text", Boolean.class,
+                attributes, builder.literal(MANAGED));
     }
 }
