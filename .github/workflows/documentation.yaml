@@ -12,6 +12,6 @@ jobs:
     steps:
       - uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.SA_PERSONAL_ACCESS_TOKEN }}
+          token: ${{ secrets.DISPATCH_EVENT_TOKEN }}
           repository: provoly/provoly-doc
           event-type: build-documentation-request

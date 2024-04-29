@@ -1,0 +1,1602 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Provoly Hypervisor API",
+    "description": "CRUD Operation on repositories data",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://provoly-hypervisor.com"
+    }
+  ],
+  "paths": {
+    "/events": {
+      "get": {
+        "tags": [
+          "Event Controller"
+        ],
+        "summary": "Retrieve all events with pagination",
+        "description": "Default sort on `status` (NEW,IN_PROGRESS,DONE) and `lastModificationDate` (reversed). It's possible to override it by sorting on other attributes.\nIf order is no provided when sort, the default is asc.\nIt's possible to filter on one or more criticalities or statuses.\n",
+        "operationId": "com.provoly.event.EventController_getEvents",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1,
+            "required": true,
+            "description": "Page number requested, triggers an error if not specified or if 0."
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 20,
+            "description": "Page size, returns an empty list if not specified."
+          },
+          {
+            "name": "creationDate",
+            "in": "query",
+            "description": "The date must be set to midnight. The filter will return all events created on that day.",
+            "schema": {
+              "type": "string",
+              "example": "2024-01-20T00:00:00.000Z"
+            }
+          },
+          {
+            "name": "criticality",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Criticality"
+              }
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Status"
+              }
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OperatorCategory"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AlertCategory"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ReportCategory"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "name": "entity",
+            "in": "query",
+            "description": "The equipment entity name. It must be known to the system.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": [
+                "CHALONS_COMMUN"
+              ]
+            }
+          },
+          {
+            "name": "family",
+            "in": "query",
+            "description": "The equipment family code. It must be known to the system.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": [
+                "EP_O",
+                "EP_FL",
+                "EP_A"
+              ]
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Sort"
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/SortOrder"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return 2 events with `status` is `DONE` or `NEW` and `criticality` is `LOW` or `HIGH`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/AlertEventReadDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/ReportEventReadDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/OperatorCategory"
+                      }
+                    ]
+                  }
+                },
+                "examples": {
+                  "default": {
+                    "value": "[\n  {\n    \"id\": \"01ffde9d-30d2-4273-b61f-c6addd8747c8\",\n    \"name\": \"Defaillance lampe\",\n    \"address\": \"112 Av. de Paris, 51000 Châlons-en-Champagne\",\n    \"description\": \"description\",\n    \"criticality\": \"LOW\",\n    \"status\": \"DONE\",\n    \"type\": \"ALERT\",\n    \"lastModificationDate\": \"2024-02-23T11:12:39.375184Z\",\n    \"creationDate\": \"2024-01-22T11:12:39.375184Z\",\n    \"equipment\": {\n      \"id\": \"12a64ae7-70ca-4d12-bcd9-9f1c75f23915\",\n      \"name\": \"C-1034\",\n      \"type\": \"Ouvrage\",\n      \"entity\": \"AGGLO_COMMUN\"\n    },\n    \"procedureId\": \"5c925baf-7164-4bfe-af37-f0860aacc570\",\n    \"linkedEvents\": 2,\n    \"procedureProgress\": 100,\n    \"externalSourceRef\": \"citylinx_1\",\n    \"category\": \"ALERT_MALFUNCTION\"\n  },\n  {\n    \"id\": \"eb8e2f6b-f33e-408c-bb6c-e042f204d687\",\n    \"name\": \"Maintenance ouvrage2\",\n    \"address\": \"63 Rue de Fagnières, 51000 Châlons-en-Champagne\",\n    \"description\": \"description\",\n    \"criticality\": \"MEDIUM\",\n    \"status\": \"DONE\",\n    \"type\": \"REPORT\",\n    \"lastModificationDate\": \"2024-02-22T11:12:39.375184Z\",\n    \"creationDate\": \"2024-01-23T11:12:39.375184Z\",\n    \"equipment\": null,\n    \"procedureId\": \"5c925baf-7164-4bfe-af37-f0860aacc570\",\n    \"linkedEvents\": 2,\n    \"procedureProgress\": 100,\n    \"externalSourceRef\": \"external_source3\",\n    \"category\": \"REPORT\"\n  },\n  {\n    \"id\": \"b0d1a93c-ec57-401c-9a74-2cc364bbab9f\",\n    \"name\": \"Festival Chalons\",\n    \"address\": \"28 E Rue du Général Fery, 51000 Châlons-en-Champagne\",\n    \"description\": \"description\",\n    \"criticality\": \"MEDIUM\",\n    \"status\": \"IN_PROGRESS\",\n    \"type\": \"OPERATOR\",\n    \"lastModificationDate\": \"2024-02-20T11:12:39.375184Z\",\n    \"creationDate\": \"2024-01-20T11:12:39.375184Z\",\n    \"equipment\": null,\n    \"procedureId\": \"585d17af-e7d5-42e1-9052-fabadd23ff42\",\n    \"linkedEvents\": 1,\n    \"procedureProgress\": 0,\n    \"category\": \"MANIFESTATION\",\n    \"startDate\": \"2008-01-02T23:00:00Z\",\n    \"endDate\": \"2008-01-03T23:00:00Z\"\n  }\n]\n"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Forbidden if page not specified"
+          }
+        },
+        "security": [
+          {
+            "oidc": [
+              "authenticated"
+            ]
+          }
+        ]
+      }
+    },
+    "/events/alert": {
+      "post": {
+        "tags": [
+          "Event Controller"
+        ],
+        "summary": "Save an Alert event",
+        "operationId": "com.provoly.event.EventController_saveAlertEvent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertEventWriteDto"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Create \"alert\" event",
+                  "value": "{\n  \"id\":\"d1b44da2-d8ad-4bfb-93f5-4e80c9126111\",\n  \"name\":\"event alert\",\n  \"description\": \"desc\",\n  \"address\": \"1 rue simone veil\",\n  \"criticality\": \"HIGH\",\n  \"category\":\"ALERT_LIMIT\",\n  \"equipmentId\":\"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd\"\n}\n"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidName": {
+                    "description": "Occurs when name already exists",
+                    "value": "{\n    \"code\": 400,\n    \"message\": \"Event with name 'event alert' already exists\"\n}\n"
+                  },
+                  "invalidEquipment": {
+                    "description": "Occurs when equipmentId not exist",
+                    "value": "{\n    \"code\": 400,\n    \"message\": \"Equipment with id '0c728960-d5fd-49ea-8fe8-f72cb9cfcccd' not exists\"\n}\n"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Forbidden if missing a required property"
+          }
+        },
+        "security": [
+          {
+            "oidc": [
+              "authenticated"
+            ]
+          }
+        ]
+      }
+    },
+    "/events/report": {
+      "post": {
+        "tags": [
+          "Event Controller"
+        ],
+        "summary": "Save a Report event",
+        "operationId": "com.provoly.event.EventController_saveReportEvent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportEventWriteDto"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Create \"alert\" event",
+                  "value": "{\n  \"id\":\"d1b44da2-d8ad-4bfb-93f5-4e80c9126111\",\n  \"name\":\"event reporty\",\n  \"description\": \"desc\",\n  \"address\": \"1 rue virginia woolf\",\n  \"criticality\": \"MEDIUM\",\n  \"category\":\"REPORT\",\n  \"equipmentId\":\"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd\"\n}\n"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidName": {
+                    "description": "Occurs when name already exists",
+                    "value": "{\n    \"code\": 400,\n    \"message\": \"Event with name 'event report' already exists\"\n}\n"
+                  },
+                  "invalidEquipment": {
+                    "description": "Occurs when equipmentId not exist",
+                    "value": "{\n    \"code\": 400,\n    \"message\": \"Equipment with id '0c728960-d5fd-49ea-8fe8-f72cb9cfcccd' not exists\"\n}\n"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Forbidden if missing a required property"
+          }
+        },
+        "security": [
+          {
+            "oidc": [
+              "authenticated"
+            ]
+          }
+        ]
+      }
+    },
+    "/events/id/{id}": {
+      "get": {
+        "tags": [
+          "Event Controller"
+        ],
+        "summary": "Retrieve event by id",
+        "operationId": "com.provoly.event.EventController_getEventDetails",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "example": "01ffde9d-30d2-4273-b61f-c6addd8747c8",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns Event Details by id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/AlertEventReadDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ReportEventReadDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OperatorEventReadDto"
+                    }
+                  ]
+                },
+                "examples": {
+                  "default": {
+                    "value": "{\n  \"id\": \"01ffde9d-30d2-4273-b61f-c6addd8747c8\",\n  \"name\": \"Defaillance lampe\",\n  \"address\": null,\n  \"description\": null,\n  \"criticality\": \"LOW\",\n  \"status\": \"DONE\",\n  \"type\": \"ALERT\",\n  \"lastModificationDate\": \"2024-02-23T12:56:00.802501Z\",\n  \"creationDate\": \"2024-02-23T12:56:00.802501Z\",\n  \"category\": \"ALERT_MALFUNCTION\",\n  \"equipment\": {\n    \"id\": \"12a64ae7-70ca-4d12-bcd9-9f1c75f23915\",\n    \"name\": \"C-1034\",\n    \"type\": \"Ouvrage\",\n    \"entity\": \"Châlons Agglo\"\n  },\n  \"externalSourceRef\": \"citylinx_1\"\n}\n"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Forbidden if page not specified"
+          },
+          "404": {
+            "description": "Event Not found"
+          }
+        },
+        "security": [
+          {
+            "oidc": [
+              "authenticated"
+            ]
+          }
+        ]
+      }
+    },
+    "/events/id/{id}/close": {
+      "put": {
+        "tags": [
+          "Event Controller"
+        ],
+        "summary": "Close event by id and update close date",
+        "description": "Set status to DONE. Close date is not updated if event is already closed",
+        "operationId": "com.provoly.event.EventController_closeEvent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "example": "01ffde9d-30d2-4273-b61f-c6addd8747c8",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Updated"
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "404": {
+            "description": "Event Not found"
+          }
+        },
+        "security": [
+          {
+            "oidc": [
+              "authenticated"
+            ]
+          }
+        ]
+      }
+    },
+    "/events/summary": {
+      "get": {
+        "tags": [
+          "Event Controller"
+        ],
+        "summary": "Retrieve summary events grouped by status",
+        "description": "Returns the last n summary events, sorted by last modification date and status. It is possible to sort these summary events by criticality",
+        "operationId": "com.provoly.event.EventController_getEventSummaries",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1,
+            "required": true,
+            "description": "Limit of summary events by status. Default to 5."
+          },
+          {
+            "name": "criticality",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Criticality"
+            },
+            "example": "HIGH",
+            "description": "Filter on the criticality required",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return first summary event by status with a `MEDIUM` criticality",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "NEW": {
+                      "$ref": "#/components/schemas/EventsSummariesByStatusDto"
+                    },
+                    "IN_PROGRESS": {
+                      "$ref": "#/components/schemas/EventsSummariesByStatusDto"
+                    },
+                    "DONE": {
+                      "$ref": "#/components/schemas/EventsSummariesByStatusDto"
+                    }
+                  }
+                },
+                "examples": {
+                  "default": {
+                    "value": "{\n  \"IN_PROGRESS\": {\n    \"count\": 2,\n    \"events\": [\n      {\n        \"id\": \"b0d1a93c-ec57-401c-9a74-2cc364bbab9f\",\n        \"name\": \"Festival Chalons\",\n        \"criticality\": \"MEDIUM\",\n        \"status\": \"IN_PROGRESS\",\n        \"type\": \"OPERATOR\",\n        \"lastModificationDate\": \"2024-02-20T10:37:33.792659Z\",\n        \"category\": \"MANIFESTATION\",\n        \"interventionRequestTitle\": null,\n        \"interventionRequestCount\": 1,\n        \"manifestation\": {\n          \"startDate\": \"2008-01-02T23:00:00Z\",\n          \"endDate\": \"2008-01-03T23:00:00Z\"\n        }\n      }\n    ]\n  },\n  \"DONE\": {\n    \"count\": 1,\n    \"events\": []\n  },\n  \"NEW\": {\n    \"count\": 3,\n    \"events\": [\n      {\n        \"id\": \"eb8e2f6b-f33e-408c-bb6c-e042f204d687\",\n        \"name\": \"Maintenance ouvrage2\",\n        \"criticality\": \"MEDIUM\",\n        \"status\": \"NEW\",\n        \"type\": \"REPORT\",\n        \"lastModificationDate\": \"2024-02-20T10:37:33.792659Z\",\n        \"category\": \"REPORT\",\n        \"interventionRequestTitle\": \"intervention procedure_2\",\n        \"interventionRequestCount\": 2,\n        \"manifestation\": {}\n      }\n    ]\n  }\n}\n"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidCriticality": {
+                    "description": "Occurs when Criticality filter is invalid",
+                    "value": "{\n    \"code\": 400,\n    \"message\": \"No enum constant com.provoly.event.Criticality.toto\"\n}\n"
+                  },
+                  "invalidLimit": {
+                    "description": "Occurs when limit query is invalid",
+                    "value": "{\n    \"code\": 400,\n    \"message\": \"'limit' must be greater than 0\"\n}\n"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidLimit": {
+                    "description": "Occurs when limit query is invalid",
+                    "value": "{\n    \"code\": 403,\n    \"message\": \"'limit' must be greater than 0\"\n}\n"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oidc": [
+              "authenticated"
+            ]
+          }
+        ]
+      }
+    },
+    "/events/operator": {
+      "post": {
+        "tags": [
+          "Event Controller"
+        ],
+        "summary": "Save or update an Operator event",
+        "operationId": "com.provoly.event.EventController_saveEventOperator",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperatorEventWriteDto"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Create \"operator\" event linked to an equipment",
+                  "value": "{\n  \"id\":\"d1b44da2-d8ad-4bfb-93f5-4e80c9126111\",\n  \"name\":\"event operator\",\n  \"description\": \"desc\",\n  \"address\": \"1 rue nina simone\",\n  \"criticality\": \"LOW\",\n  \"category\":\"OPERATOR_EVENT\",\n  \"equipmentId\":\"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd\"\n}\n"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "204": {
+            "description": "Updated"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "missingDates": {
+                    "description": "Occurs when category is MANIFESTATION without start and end dates",
+                    "value": "{\n    \"code\": 400,\n    \"message\": \"Properties 'startDate' and 'endDate' are required for 'MANIFESTATION' category\"\n}\n"
+                  },
+                  "invalidName": {
+                    "description": "Occurs when name already exists",
+                    "value": "{\n    \"code\": 400,\n    \"message\": \"Event with name 'event operator' already exists\"\n}\n"
+                  },
+                  "invalidEquipment": {
+                    "description": "Occurs when equipmentId not exist",
+                    "value": "{\n    \"code\": 400,\n    \"message\": \"Equipment with id '0c728960-d5fd-49ea-8fe8-f72cb9cfcccd' not exists\"\n}\n"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Forbidden if missing a required property"
+          }
+        },
+        "security": [
+          {
+            "oidc": [
+              "authenticated"
+            ]
+          }
+        ]
+      }
+    },
+    "/procedures": {
+      "post": {
+        "tags": [
+          "Procedure Controller"
+        ],
+        "summary": "Update events procedure",
+        "operationId": "com.provoly.event.ProcedureController_updateProcedure",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcedureWriteDto"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Update Report event from procedure",
+                  "value": "{\n  \"id\": \"f7b37e0e-a3d1-4159-a2c1-f6b7fd1f7a82\",\n  \"name\": \"procedure_1\",\n  \"events\": [\n    {\n      \"id\": \"ebbfbbd1-b8de-467c-8a9b-88443a49f807\",\n      \"name\": \"Accident voiture UPDATE\",\n      \"address\": \"10 Rue du Camp d'Attila, 51000 Châlons-en-Champagne\",\n      \"description\": \"description\",\n      \"criticality\": \"HIGH\",\n      \"type\": \"REPORT\",\n      \"equipmentId\": \"4ead3c85-f120-4144-8ca2-29ac9882ff5f\",\n      \"externalSourceRef\": \"external_source2\",\n      \"category\": \"REPORT\"\n    }\n  ]\n}\n"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Procedure Created"
+          },
+          "204": {
+            "description": "Updated"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Not Authorized"
+          }
+        },
+        "security": [
+          {
+            "oidc": [
+              "authenticated"
+            ]
+          }
+        ]
+      }
+    },
+    "/procedures/id/{id}": {
+      "get": {
+        "tags": [
+          "Procedure Controller"
+        ],
+        "summary": "Retrieve procedure by id",
+        "operationId": "com.provoly.event.ProcedureController_getProcedureDetails",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "example": "01ffde9d-30d2-4273-b61f-c6addd8747c8",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns procedure Details by id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcedureReadDto"
+                },
+                "examples": {
+                  "default": {
+                    "value": "{\n  \"id\": \"5c925baf-7164-4bfe-af37-f0860aacc570\",\n  \"name\": \"procedure maintenance\",\n  \"creationDate\": \"2024-02-23T12:56:00.802501Z\",\n  \"actions\": [\n    {\n      \"id\": \"6b5ca865-87e5-467b-a996-4c0629e8f94c\",\n      \"name\": \"intervention procedure_2\",\n      \"type\": \"INTERVENTION_REQUEST\",\n      \"status\": \"IN_PROGRESS\",\n      \"lastModificationDate\": \"2024-02-23T12:56:00.802501Z\"\n    },\n    {\n      \"id\": \"a08e2110-3a9c-4f77-bf65-31150201bbfa\",\n      \"name\": \"intervention procedure_2 bis\",\n      \"type\": \"INTERVENTION_REQUEST\",\n      \"status\": \"DONE\",\n      \"lastModificationDate\": \"2024-02-23T12:56:00.802501Z\"\n    }\n  ],\n  \"events\": [\n    {\n      \"id\": \"01ffde9d-30d2-4273-b61f-c6addd8747c8\",\n      \"name\": \"Defaillance lampe\",\n      \"address\": null,\n      \"description\": null,\n      \"criticality\": \"LOW\",\n      \"status\": \"DONE\",\n      \"type\": \"ALERT\",\n      \"lastModificationDate\": \"2024-02-23T12:56:00.802501Z\",\n      \"creationDate\": \"2024-02-23T12:56:00.802501Z\",\n      \"category\": \"ALERT_MALFUNCTION\",\n      \"equipment\": {\n        \"id\": \"12a64ae7-70ca-4d12-bcd9-9f1c75f23915\",\n        \"name\": \"C-1034\",\n        \"type\": \"Ouvrage\",\n        \"entity\": \"Châlons Agglo\"\n      },\n      \"externalSourceRef\": \"citylinx_1\"\n    },\n    {\n      \"id\": \"eb8e2f6b-f33e-408c-bb6c-e042f204d687\",\n      \"name\": \"Maintenance ouvrage2\",\n      \"address\": null,\n      \"description\": null,\n      \"criticality\": \"MEDIUM\",\n      \"status\": \"NEW\",\n      \"type\": \"REPORT\",\n      \"lastModificationDate\": \"2024-02-23T12:56:00.802501Z\",\n      \"creationDate\": \"2024-02-23T12:56:00.802501Z\",\n      \"category\": \"REPORT\",\n      \"equipment\": {\n        \"id\": \"12a64ae7-70ca-4d12-bcd9-9f1c75f23916\",\n        \"name\": \"C-761\",\n        \"type\": \"Ouvrage\",\n        \"entity\": \"Châlons Agglo\"\n      },\n      \"externalSourceRef\": \"external_source3\"\n    }\n  ],\n  \"progress\": 50.0\n}\n"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Forbidden if page not specified"
+          },
+          "404": {
+            "description": "Procedure Not found"
+          }
+        },
+        "security": [
+          {
+            "oidc": [
+              "authenticated"
+            ]
+          }
+        ]
+      }
+    },
+    "/procedures/id/{id}/close": {
+      "put": {
+        "tags": [
+          "Procedure Controller"
+        ],
+        "summary": "Close all procedure events by id",
+        "description": "Set status to DONE. Close date is not updated if event is already closed",
+        "operationId": "com.provoly.event.EventController_closeEvent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "example": "01ffde9d-30d2-4273-b61f-c6addd8747c8",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Updated"
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "404": {
+            "description": "Event Not found"
+          }
+        },
+        "security": [
+          {
+            "oidc": [
+              "authenticated"
+            ]
+          }
+        ]
+      }
+    },
+    "/equipments": {
+      "post": {
+        "tags": [
+          "Equipment Controller"
+        ],
+        "summary": "Save or update equipments",
+        "operationId": "com.provoly.event.EquipmentController_saveOrUpdateEquipments",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EquipmentWriteDto"
+                }
+              },
+              "examples": {
+                "default": {
+                  "summary": "Create equipments with parents",
+                  "value": "[\n  {\n    \"id\": \"technical_unique_id\",\n    \"code\":\"C306\",\n    \"name\":\"C306\",\n    \"family\": \"Armoire\",\n    \"domain\": \"EP\",\n    \"entity\": \"FAGNIERES_COMMUN\",\n    \"activeEnergy\":30,\n    \"EREQ_LEVEL\": 2,\n    \"parent\": \"C307\"\n  },\n  {\n    \"id\": \"technical_unique_id2\",\n    \"code\":\"C307\",\n    \"name\":\"C307\",\n    \"family\": \"Armoire\",\n    \"domain\": \"EP\",\n    \"entity\": \"FAGNIERES_COMMUN\",\n    \"activeEnergy\": 70,\n    \"EREQ_LEVEL\": 1,\n    \"parent\": null\n  },\n  {\n    \"id\": \"technical_unique_id3\",\n    \"code\":\"C308\",\n    \"name\":\"C308\",\n    \"family\": \"Armoire\",\n    \"domain\": \"EP\",\n    \"entity\": \"FAGNIERES_COMMUN\",\n    \"activeEnergy\":null,\n    \"EREQ_LEVEL\": 2,\n    \"parent\": \"C307\"\n  }\n]\n"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "invalidName": {
+                    "description": "Occurs when name already exists",
+                    "value": "{\n    \"code\": 400,\n    \"message\": \"Event with name 'event report' already exists\"\n}\n"
+                  },
+                  "invalidEquipment": {
+                    "description": "Occurs when equipment parent not exist",
+                    "value": "{\n    \"code\": 400,\n    \"message\": \"Equipment with code 'C397' not exists\"\n}\n"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Forbidden if missing a required property"
+          }
+        },
+        "security": [
+          {
+            "oidc": [
+              "authenticated"
+            ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Equipment Controller"
+        ],
+        "summary": "Retrieve all equipments or only equipments with entity in param",
+        "operationId": "com.provoly.event.EquipmentController_getEquipments",
+        "parameters": [
+          {
+            "name": "entity",
+            "in": "query",
+            "description": "must match one of `EquipmentEntity` name",
+            "example": "FAGNIERES_COMMUN"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns equipment Details by id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentReadDto"
+                },
+                "examples": {
+                  "default": {
+                    "value": "[\n  {\n    \"id\": \"c538a660-6450-4281-9fa9-c925f340eb54\",\n    \"externalId\": \"technical_unique_id\",\n    \"name\": \"C306\",\n    \"code\": \"C306\",\n    \"family\": \"Armoire\",\n    \"entity\": \"FAGNIERES_COMMUN\",\n    \"parent\": {\n      \"id\": \"c6cfac35-0939-4bb0-860e-fb00c6ff0ed7\",\n      \"externalId\": \"technical_unique_id2\",\n      \"name\": \"C307\",\n      \"code\": \"C307\",\n      \"family\": \"Armoire\",\n      \"domain\": \"EP\",\n      \"entity\": \"FAGNIERES_COMMUN\",\n      \"parent\": null,\n      \"activeEnergy\": 70\n    },\n    \"activeEnergy\": 30\n  }\n]\n"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Forbidden if page not specified"
+          }
+        },
+        "security": [
+          {
+            "oidc": [
+              "authenticated"
+            ]
+          }
+        ]
+      }
+    },
+    "/equipments/id/{id}": {
+      "get": {
+        "tags": [
+          "Equipment Controller"
+        ],
+        "summary": "Retrieve an equipment by id",
+        "operationId": "com.provoly.event.EquipmentController_getEquipmentsDetails",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/UUID"
+            },
+            "example": "01ffde9d-30d2-4273-b61f-c6addd8747c8",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns equipment Details by id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentReadDto"
+                },
+                "examples": {
+                  "default": {
+                    "value": "{\n  \"id\": \"c538a660-6450-4281-9fa9-c925f340eb54\",\n  \"externalId\": \"technical_unique_id\",\n  \"name\": \"C306\",\n  \"code\": \"C306\",\n  \"family\": \"Armoire\",\n  \"domain\": \"EP\",\n  \"entity\": \"FAGNIERES_COMMUN\",\n  \"parent\": {\n    \"id\": \"c6cfac35-0939-4bb0-860e-fb00c6ff0ed7\",\n    \"externalId\": \"technical_unique_id2\",\n    \"name\": \"C307\",\n    \"code\": \"C307\",\n    \"family\": \"Armoire\",\n    \"domain\": \"EP\",\n    \"entity\": \"FAGNIERES_COMMUN\",\n    \"parent\": null,\n    \"activeEnergy\": 70\n  },\n  \"activeEnergy\": 30\n}\n"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Forbidden if page not specified"
+          },
+          "404": {
+            "description": "Equipment Not found"
+          }
+        },
+        "security": [
+          {
+            "oidc": [
+              "authenticated"
+            ]
+          }
+        ]
+      }
+    },
+    "/equipments/name/{name}": {
+      "get": {
+        "tags": [
+          "Equipment Controller"
+        ],
+        "summary": "Retrieve an equipment by name",
+        "operationId": "com.provoly.event.EquipmentController_getEquipmentsDetails",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "example": "P-1000",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns equipment Details by name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentReadDto"
+                },
+                "examples": {
+                  "default": {
+                    "value": "{\n  \"id\": \"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd\",\n  \"name\": \"P-1000\",\n  \"type\": \"Point Lumineux\",\n  \"entity\": \"FAGNIERES\"\n}\n"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Forbidden if page not specified"
+          },
+          "404": {
+            "description": "Equipment Not found"
+          }
+        },
+        "security": [
+          {
+            "oidc": [
+              "authenticated"
+            ]
+          }
+        ]
+      }
+    },
+    "/equipments/entities": {
+      "get": {
+        "tags": [
+          "Equipment Controller"
+        ],
+        "summary": "Retrieve all equipment entities",
+        "operationId": "com.provoly.event.EquipmentController_getEquipmentEntitiesName",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "FAGNIERES_COMMUN",
+                    "CHALONS_AGGLOS"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          }
+        },
+        "security": [
+          {
+            "oidc": [
+              "authenticated"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "oidc": {
+        "type": "openIdConnect",
+        "description": "Authentication",
+        "openIdConnectUrl": "https://auth/realms/provoly/.well-known/openid-configuration"
+      }
+    },
+    "schemas": {
+      "UUID": {
+        "format": "uuid",
+        "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
+        "type": "string",
+        "example": "ebbfbbd1-b8de-467c-8a9b-88443a49f807",
+        "required": true
+      },
+      "DateTime": {
+        "format": "date-time",
+        "type": "string",
+        "example": "2024-02-20T08:33:14.312632Z"
+      },
+      "Criticality": {
+        "type": "string",
+        "required": true,
+        "enum": [
+          "LOW",
+          "MEDIUM",
+          "HIGH"
+        ]
+      },
+      "Status": {
+        "type": "string",
+        "required": true,
+        "enum": [
+          "NEW",
+          "IN_PROGRESS",
+          "DONE"
+        ]
+      },
+      "Type": {
+        "type": "string",
+        "required": true,
+        "enum": [
+          "ALERT",
+          "OPERATOR",
+          "REPORT"
+        ]
+      },
+      "OperatorCategory": {
+        "type": "string",
+        "required": true,
+        "enum": [
+          "MANIFESTATION,",
+          "OPERATOR_EVENT"
+        ]
+      },
+      "AlertCategory": {
+        "type": "string",
+        "required": true,
+        "enum": [
+          "ALERT_LIMIT,",
+          "ALERT_MALFUNCTION"
+        ]
+      },
+      "ReportCategory": {
+        "enum": [
+          "REPORT"
+        ]
+      },
+      "Sort": {
+        "type": "string",
+        "enum": [
+          "creationDate",
+          "lastModificationDate",
+          "status",
+          "procedureProgress"
+        ]
+      },
+      "SortOrder": {
+        "type": "string",
+        "enum": [
+          "ASC",
+          "DESC"
+        ],
+        "default": "ASC"
+      },
+      "Family": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "EquipmentEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "EquipmentWriteDto": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string",
+            "required": true
+          },
+          "code": {
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "type": "string",
+            "required": true
+          },
+          "family": {
+            "type": "string",
+            "required": true,
+            "description": "Value must match one of `Family` name"
+          },
+          "domain": {
+            "type": "string",
+            "required": true,
+            "description": "Value must match one of `Domain` name"
+          },
+          "entity": {
+            "type": "string",
+            "required": true,
+            "description": "Value must match one of `Equipment Entity` name"
+          },
+          "EREQ_LEVEL": {
+            "type": "integer",
+            "required": true,
+            "description": "Corresponds to the level to determine whether it will have a parent or not. If the value is 1, then it can be referenced in children equipments and will not itself have a parent equipment."
+          },
+          "parent": {
+            "type": "string",
+            "description": "The value must be the parent `code` property"
+          }
+        }
+      },
+      "EquipmentReadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "externalId": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "family": {
+            "type": "string",
+            "description": "Value match one of `Family` name"
+          },
+          "domain": {
+            "type": "string",
+            "description": "Value match one of `Domain` name"
+          },
+          "entity": {
+            "type": "string",
+            "description": "Value match one of `Equipment Entity` name"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/EquipmentReadDto"
+          }
+        }
+      },
+      "ActionReadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "lastModificationDate": {
+            "$ref": "#/components/schemas/DateTime"
+          }
+        }
+      },
+      "OperatorEventWriteDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "name": {
+            "type": "string",
+            "required": true
+          },
+          "address": {
+            "type": "string",
+            "required": true
+          },
+          "description": {
+            "type": "string",
+            "required": true
+          },
+          "criticality": {
+            "$ref": "#/components/schemas/Criticality"
+          },
+          "category": {
+            "$ref": "#/components/schemas/OperatorCategory"
+          },
+          "equipmentId": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "endDate": {
+            "$ref": "#/components/schemas/DateTime"
+          },
+          "startDate": {
+            "$ref": "#/components/schemas/DateTime"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "OPERATOR"
+            ],
+            "required": true
+          }
+        }
+      },
+      "AlertEventWriteDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "name": {
+            "type": "string",
+            "required": true
+          },
+          "address": {
+            "type": "string",
+            "required": true
+          },
+          "description": {
+            "type": "string",
+            "required": true
+          },
+          "criticality": {
+            "$ref": "#/components/schemas/Criticality"
+          },
+          "category": {
+            "$ref": "#/components/schemas/AlertCategory"
+          },
+          "equipmentId": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "externalSourceRef": {
+            "type": "string",
+            "required": true
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ALERT"
+            ],
+            "required": true
+          }
+        }
+      },
+      "ReportEventWriteDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "name": {
+            "type": "string",
+            "required": true
+          },
+          "address": {
+            "type": "string",
+            "required": true
+          },
+          "description": {
+            "type": "string",
+            "required": true
+          },
+          "criticality": {
+            "$ref": "#/components/schemas/Criticality"
+          },
+          "category": {
+            "$ref": "#/components/schemas/ReportCategory"
+          },
+          "equipmentId": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "externalSourceRef": {
+            "type": "string",
+            "required": true
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "REPORT"
+            ],
+            "required": true
+          }
+        }
+      },
+      "AlertEventReadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Type"
+          },
+          "criticality": {
+            "$ref": "#/components/schemas/Criticality"
+          },
+          "equipment": {
+            "$ref": "#/components/schemas/EquipmentReadDto"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "category": {
+            "$ref": "#/components/schemas/AlertCategory"
+          },
+          "lastModificationDate": {
+            "$ref": "#/components/schemas/DateTime"
+          },
+          "creationDate": {
+            "$ref": "#/components/schemas/DateTime"
+          },
+          "closeDate": {
+            "$ref": "#/components/schemas/DateTime"
+          },
+          "externalSourceRef": {
+            "type": "string"
+          },
+          "procedureId": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "linkedEvents": {
+            "type": "number",
+            "description": "Number of events that have the same procedure as the current event"
+          },
+          "procedureProgress": {
+            "type": "number",
+            "description": "Percentage progress of the procedure"
+          }
+        }
+      },
+      "ReportEventReadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Type"
+          },
+          "criticality": {
+            "$ref": "#/components/schemas/Criticality"
+          },
+          "equipment": {
+            "$ref": "#/components/schemas/EquipmentReadDto"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "category": {
+            "$ref": "#/components/schemas/ReportCategory"
+          },
+          "lastModificationDate": {
+            "$ref": "#/components/schemas/DateTime"
+          },
+          "creationDate": {
+            "$ref": "#/components/schemas/DateTime"
+          },
+          "closeDate": {
+            "$ref": "#/components/schemas/DateTime"
+          },
+          "externalSourceRef": {
+            "type": "string"
+          },
+          "procedureId": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "linkedEvents": {
+            "type": "number",
+            "description": "Number of events that have the same procedure as the current event"
+          },
+          "procedureProgress": {
+            "type": "number",
+            "description": "Percentage progress of the procedure"
+          }
+        }
+      },
+      "OperatorEventReadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Type"
+          },
+          "criticality": {
+            "$ref": "#/components/schemas/Criticality"
+          },
+          "equipment": {
+            "$ref": "#/components/schemas/EquipmentReadDto"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "category": {
+            "$ref": "#/components/schemas/OperatorCategory"
+          },
+          "lastModificationDate": {
+            "$ref": "#/components/schemas/DateTime"
+          },
+          "creationDate": {
+            "$ref": "#/components/schemas/DateTime"
+          },
+          "closeDate": {
+            "$ref": "#/components/schemas/DateTime"
+          },
+          "endDate": {
+            "$ref": "#/components/schemas/DateTime"
+          },
+          "startDate": {
+            "$ref": "#/components/schemas/DateTime"
+          },
+          "externalSourceRef": {
+            "type": "string"
+          },
+          "procedureId": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "linkedEvents": {
+            "type": "number",
+            "description": "Number of events that have the same procedure as the current event"
+          },
+          "procedureProgress": {
+            "type": "number",
+            "description": "Percentage progress of the procedure"
+          }
+        }
+      },
+      "ProcedureReadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "name": {
+            "type": "string"
+          },
+          "lastModificationDate": {
+            "$ref": "#/components/schemas/DateTime"
+          },
+          "creationDate": {
+            "$ref": "#/components/schemas/DateTime"
+          },
+          "progress": {
+            "type": "number"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/OperatorEventReadDto"
+                },
+                {
+                  "$ref": "#/components/schemas/AlertEventReadDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ReportEventReadDto"
+                }
+              ]
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionReadDto"
+            }
+          }
+        }
+      },
+      "ProcedureWriteDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "name": {
+            "type": "string"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/OperatorEventWriteDto"
+                },
+                {
+                  "$ref": "#/components/schemas/AlertEventWriteDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ReportEventWriteDto"
+                }
+              ]
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionReadDto"
+            }
+          }
+        }
+      },
+      "EventSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "proocedureId": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Type"
+          },
+          "criticality": {
+            "$ref": "#/components/schemas/Criticality"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "lastModificationDate": {
+            "$ref": "#/components/schemas/DateTime"
+          },
+          "category": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AlertCategory"
+              },
+              {
+                "$ref": "#/components/schemas/OperatorCategory"
+              },
+              {
+                "$ref": "#/components/schemas/ReportCategory"
+              }
+            ]
+          },
+          "interventionRequestTitle": {
+            "type": "string",
+            "description": "The last in progress or new intervention request title"
+          },
+          "interventionRequestCount": {
+            "type": "integer",
+            "description": "The total number of intervention requests linked to the procedure event"
+          },
+          "manifestation": {
+            "type": "object",
+            "properties": {
+              "startDate": {
+                "$ref": "#/components/schemas/DateTime"
+              },
+              "endDate": {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            }
+          }
+        }
+      },
+      "EventsSummariesByStatusDto": {
+        "type": "object",
+        "properties": {
+          "counts": {
+            "type": "integer",
+            "description": "total count of events for status"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventSummaryDto"
+            }
+          }
+        }
+      }
+    }
+  }
+}

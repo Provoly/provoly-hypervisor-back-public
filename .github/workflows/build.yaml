@@ -42,9 +42,9 @@ jobs:
       - name: Login to Harbor
         uses: docker/login-action@v3
         with:
-          registry: dh2wltsh.gra7.container-registry.ovh.net
-          username: ${{ secrets.CI_REGISTRY_USER }}
-          password: ${{ secrets.CI_REGISTRY_PASSWORD }}
+          registry: ${{ vars.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -77,6 +77,6 @@ jobs:
       - name: Build with Maven
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify ${{ env.MAVEN_PROFILE }}
         env:
-          CI_REGISTRY_PASSWORD: ${{ secrets.CI_REGISTRY_PASSWORD }}
-          CI_REGISTRY_SERVER: ${{ secrets.CI_REGISTRY_SERVER }}
-          CI_REGISTRY_USER: ${{ secrets.CI_REGISTRY_USER }}
+          CI_REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          CI_REGISTRY_SERVER: ${{ secrets.REGISTRY_URL }}
+          CI_REGISTRY_USER: ${{ secrets.REGISTRY_USER }}
