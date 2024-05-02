@@ -78,5 +78,5 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify ${{ env.MAVEN_PROFILE }}
         env:
           CI_REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
-          CI_REGISTRY_SERVER: ${{ secrets.REGISTRY_URL }}
+          CI_REGISTRY_SERVER: ${{ vars.REGISTRY_URL }}
           CI_REGISTRY_USER: ${{ secrets.REGISTRY_USER }}
