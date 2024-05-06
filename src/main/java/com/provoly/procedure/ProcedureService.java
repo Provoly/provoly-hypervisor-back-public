@@ -9,9 +9,6 @@ import jakarta.transaction.Transactional;
 import com.provoly.event.Event;
 import com.provoly.event.EventDatabaseReader;
 import com.provoly.event.EventService;
-import com.provoly.event.dto.AlertEventWriteDto;
-import com.provoly.event.dto.OperatorEventWriteDto;
-import com.provoly.event.dto.ReportEventWriteDto;
 
 import org.jboss.logging.Logger;
 
@@ -60,12 +57,7 @@ public class ProcedureService {
         logger.debugf("Update procedure %s and its %s events", dto.id(), dto.events().size());
 
         for (var event : dto.events()) {
-            switch (event) {
-                case ReportEventWriteDto e -> eventService.updateReportEvent(e);
-                case AlertEventWriteDto e -> logger.infof("Event %s is not updatable because it's an alert event", e.getId());
-                case OperatorEventWriteDto e -> eventService.updateOperatorEvent(e);
-                default -> throw new IllegalStateException("Unexpected value: " + event);
-            }
+            eventService.saveOrUpdateEvent(event);
         }
     }
 

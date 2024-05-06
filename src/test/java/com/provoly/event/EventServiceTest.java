@@ -48,7 +48,7 @@ public class EventServiceTest {
                 null, null, OperatorCategory.OPERATOR_EVENT, null, null, null);
 
         // then
-        assertThatThrownBy(() -> eventService.saveOrUpdateOperatorEvent(event))
+        assertThatThrownBy(() -> eventService.saveOrUpdateEvent(event))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("already exists");
     }
@@ -60,7 +60,7 @@ public class EventServiceTest {
                 OperatorCategory.MANIFESTATION, null, null, null);
 
         // then
-        assertThatThrownBy(() -> eventService.saveOrUpdateOperatorEvent(event))
+        assertThatThrownBy(() -> eventService.saveOrUpdateEvent(event))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Properties 'startDate' and 'endDate' are required for 'MANIFESTATION' category");
     }
@@ -72,7 +72,7 @@ public class EventServiceTest {
                 OperatorCategory.MANIFESTATION, Instant.now(), Instant.now().minusMillis(1000), null);
 
         // then
-        assertThatThrownBy(() -> eventService.saveOrUpdateOperatorEvent(event))
+        assertThatThrownBy(() -> eventService.saveOrUpdateEvent(event))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("End date is invalid: it must be after start date");
     }
@@ -84,7 +84,7 @@ public class EventServiceTest {
                 null, "ref", null);
 
         // then
-        assertThatThrownBy(() -> eventService.saveAlertEvent(event))
+        assertThatThrownBy(() -> eventService.saveOrUpdateEvent(event))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Alert event must reference an equipment");
     }
@@ -104,9 +104,9 @@ public class EventServiceTest {
                 "desc", Criticality.HIGH, null, null, null, "ref", null);
 
         // then
-        assertThatThrownBy(() -> eventService.saveAlertEvent(event))
+        assertThatThrownBy(() -> eventService.saveOrUpdateEvent(event))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("already exists, it's not possible to update it");
+                .hasMessageContaining("It's not possible to update event");
     }
 
     @Test
@@ -124,7 +124,7 @@ public class EventServiceTest {
                 "desc", Criticality.HIGH, null, null, null, "ref", null);
 
         // then
-        assertThatThrownBy(() -> eventService.saveOrUpdateReportEvent(event))
+        assertThatThrownBy(() -> eventService.saveOrUpdateEvent(event))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("It's not possible to update externalSourceRef value");
     }
@@ -136,7 +136,7 @@ public class EventServiceTest {
                 null, null, OperatorCategory.OPERATOR_EVENT, null, null, "invalid_domain");
 
         // then
-        assertThatThrownBy(() -> eventService.saveOrUpdateOperatorEvent(event))
+        assertThatThrownBy(() -> eventService.saveOrUpdateEvent(event))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("invalid");
     }

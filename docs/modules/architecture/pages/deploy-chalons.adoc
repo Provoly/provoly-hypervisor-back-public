@@ -1,0 +1,71 @@
+== Procédure dédiées à l'application Châlons
+
+== Déploiement
+
+=== Créer les classes et les jeux de données
+
+Lancer l'ensemble des requêtes présentes dans le dossier Postman :
+
+- provoly/[chalons] init env/create
+
+=== Configuration du GeoServer
+
+==== Créer un workspace "chalons"
+
+image::geoserver-workspace.png[]
+
+==== Créer un store "chalons"
+
+Créer un store de type Provoly dans le workspace "chalons"
+
+  * Nom de la source de données : Provoly
+  * uri_ref: http://data-ref:8080/
+  * uri_virt: http://data-virt:8080/
+  * sso_uri: https://sso.chalons-dev.provoly.net/auth/realms/provoly
+  * client_id: provoly
+  * client_secret: dummy
+  * user: iamsuperadmin
+  * password: password
+  * chunkSize: 5000
+  * maxItems: 5000
+  * timeout: 60
+
+image::geoserver-store.png[]
+
+==== Publier les couches
+
+Copier les icones dans le Geoserver
+
+----
+# A lancer depuis le répertoire du projet
+kubectl -n chalons-dev cp assets/icons geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
+----
+
+Créer un style "equipment" en utilisant le fichier assets/equipment.sld
+
+Publier la couche "xxxxxx_equipement-enrichi-mesure"
+Dans l'onglet "Publication" de la couche, choisir le style "equipment" par défaut
+
+
+== Reset d'un environnement
+
+En prérequis, configurer une console Kuzzle pour un serveur sans SSL sur le port 7513, ainsi qu'une connection Postgres pour lancer des commandes SQL sur le port localhost:5435
+Ensuite lancer les port forwards suivants :
+
+[source, shell]
+----
+export CHALONS_ENV=chalons-dev
+kubectl -n $CHALONS_ENV port-forward service/kuzzle 7513:7512
+kubectl -n $CHALONS_ENV port-forward service/provoly-postgresql-rw 5435:5432
+----
+
+[source, postgresql]
+----
+
+----
+
+
+
+
+
+

@@ -5,18 +5,23 @@ import java.util.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
+import com.provoly.EquipmentEnrichedProducer;
+
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class EquipmentService {
-    private EquipmentDatabaseReader databaseReader;
-    private EquipmentMapper equipmentMapper;
-    private Logger logger;
+    private final Logger logger;
+    private final EquipmentDatabaseReader databaseReader;
+    private final EquipmentMapper equipmentMapper;
+    private final EquipmentEnrichedProducer equipmentEnrichedProducer;
 
-    public EquipmentService(EquipmentDatabaseReader databaseReader, EquipmentMapper equipmentMapper, Logger logger) {
+    public EquipmentService(EquipmentDatabaseReader databaseReader, EquipmentMapper equipmentMapper, Logger logger,
+            EquipmentEnrichedProducer equipmentEnrichedProducer) {
         this.databaseReader = databaseReader;
         this.equipmentMapper = equipmentMapper;
         this.logger = logger;
+        this.equipmentEnrichedProducer = equipmentEnrichedProducer;
     }
 
     @Transactional
@@ -29,12 +34,14 @@ public class EquipmentService {
                                 equipment -> {
                                     logger.infof("Equipment with external id %s already exists, update it", dto.id());
                                     equipmentMapper.updateEquipment(dto, equipment);
+                                    equipmentEnrichedProducer.updateFor(equipment);
                                 },
                                 () -> {
                                     logger.infof("Equipment with external id %s not exists, create it", dto.id());
                                     Equipment equipment = new Equipment(UUID.randomUUID());
                                     equipmentMapper.updateEquipment(dto, equipment);
                                     databaseReader.saveEquipment(equipment);
+                                    equipmentEnrichedProducer.updateFor(equipment);
                                 }));
     }
 

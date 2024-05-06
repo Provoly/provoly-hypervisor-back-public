@@ -31,7 +31,7 @@ public class EventController {
     @Path("/operator")
     @Authenticated
     public Response saveEventOperator(@Valid OperatorEventWriteDto eventDto) {
-        var response = eventService.saveOrUpdateOperatorEvent(eventDto);
+        var response = eventService.saveOrUpdateEvent(eventDto);
         return Response.ok().status(response == ResponseCode.UPDATED ? 204 : 201).build();
     }
 
@@ -39,7 +39,7 @@ public class EventController {
     @Path("/report")
     @Authenticated
     public Response saveEventOperator(@Valid ReportEventWriteDto eventDto) {
-        var response = eventService.saveOrUpdateReportEvent(eventDto);
+        var response = eventService.saveOrUpdateEvent(eventDto);
         return Response.ok().status(response == ResponseCode.UPDATED ? 204 : 201).build();
     }
 
@@ -47,7 +47,7 @@ public class EventController {
     @Path("/alert")
     @Authenticated
     public Response saveEventAlert(@Valid AlertEventWriteDto eventDto) {
-        eventService.saveAlertEvent(eventDto);
+        eventService.saveOrUpdateEvent(eventDto);
         return Response.ok().status(Response.Status.CREATED).build();
     }
 

@@ -25,6 +25,15 @@ quarkus:
     database:
       default-schema: provoly_hypervisor
 
+
+mp:
+  messaging:
+    outgoing:
+      equipment:
+        connector: smallrye-kafka
+        topic: equipment
+
+
 "%dev":
   quarkus:
     smallrye-openapi:
@@ -38,9 +47,13 @@ quarkus:
         "org.hibernate":
           level: INFO
         "io.quarkus.oidc":
-          level: DEBUG
+          level: INFO
         "com.provoly":
           level: INFO
+        "org.jboss.resteasy.reactive.server":
+          level: DEBUG
+        "WebApplicationException":
+          level: DEBUG
         min-level: TRACE
       console:
         format: "%d{HH:mm:ss} %-5p traceId=%X{traceId} parentId=%X{parentId} spanId=%X{spanId} [%c{2.}] (%t) %s%e%n"
@@ -52,8 +65,18 @@ quarkus:
 
     keycloak:
       devservices:
+        realm-name: provoly
         realm-path: src/main/keycloak/realm.json
         port: 9080
+
+    datasource:
+      devservices:
+        port: 5433
+
+    kafka:
+      devservices:
+        enabled: true
+        port: 9093
 
     oidc:
       token:
@@ -65,15 +88,19 @@ quarkus:
     http:
       access-log:
         enabled: true
+      port: 8087
+
+    management:
+      enabled: false # Mainly to avoid conflicts with other quarkus process
 
     otel:
       sdk:
         disabled: true
-#      exporter:
-#        resource-attributes: env=tracingTest
-#        otlp:
-#          enabled: false
-#          endpoint: http://localhost:4317
+      exporter:
+        resource-attributes: env=tracingTest
+        otlp:
+          enabled: false
+          endpoint: http://localhost:4317
 
 "%prod":
   quarkus:

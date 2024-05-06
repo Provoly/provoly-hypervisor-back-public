@@ -7,9 +7,11 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
+import com.provoly.EquipmentEnrichedProducer;
 import com.provoly.action.Action;
 import com.provoly.action.ActionType;
 import com.provoly.action.Service;
+import com.provoly.equipment.Equipment;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.event.dto.*;
 
@@ -17,16 +19,20 @@ import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class EventService {
-    private EventDatabaseReader databaseReader;
-    private EventMapper eventMapper;
-    private EquipmentService equipmentService;
-    private Logger logger;
+
+    private final EventDatabaseReader databaseReader;
+    private final EventMapper eventMapper;
+    private final EquipmentService equipmentService;
+    private final EquipmentEnrichedProducer equipmentEnrichedProducer;
+    private final Logger logger;
 
     public EventService(EventDatabaseReader databaseReader, EventMapper eventMapper, EquipmentService equipmentService,
+            EquipmentEnrichedProducer equipmentEnrichedProducer,
             Logger logger) {
         this.databaseReader = databaseReader;
         this.eventMapper = eventMapper;
         this.equipmentService = equipmentService;
+        this.equipmentEnrichedProducer = equipmentEnrichedProducer;
         this.logger = logger;
     }
 
@@ -102,11 +108,11 @@ public class EventService {
                 .toList();
 
         var entities = entity.stream()
-                .map(e -> equipmentService.getEquipmentEntity(e))
+                .map(equipmentService::getEquipmentEntity)
                 .toList();
 
         var families = family.stream()
-                .map(t -> equipmentService.getFamilyByCode(t)).toList();
+                .map(equipmentService::getFamilyByCode).toList();
 
         var operatorCategories = category.stream()
                 .filter(OperatorCategory::isOperatorCategory)
@@ -150,72 +156,53 @@ public class EventService {
     }
 
     @Transactional
-    public ResponseCode saveOrUpdateOperatorEvent(OperatorEventWriteDto dto) {
-        if (databaseReader.isEventWithIdExists(dto.getId())) {
-            updateOperatorEvent(dto);
-            return ResponseCode.UPDATED;
-        }
-        logger.infof("Operator event %s not exists, create it".formatted(dto.getId()));
-        saveOperatorEvent(dto);
-        return ResponseCode.CREATED;
-    }
+    public ResponseCode saveOrUpdateEvent(EventWriteDto eventDto) {
+        boolean isNewEvent = true;
 
-    public void updateOperatorEvent(OperatorEventWriteDto dto) {
-        logger.infof("Operator event %s already exists, update it".formatted(dto.getId()));
-        checkManifestationCategory(dto);
+        UUID previousEquipmentId = null;
+        logger.infof("Update %s event with id %s", eventDto.getType(), eventDto.getId());
 
-        EventOperator eventEntity = (EventOperator) databaseReader.getEventById(dto.getId());
+        if (databaseReader.isEventWithIdExists(eventDto.getId())) {
+            Event eventToUpdate = databaseReader.getEventById(eventDto.getId());
+            previousEquipmentId = eventToUpdate.getEquipment().getId();
 
-        if (!eventEntity.getName().equals(dto.getName())) {
-            checkIsNameAlreadyExists(dto.getName());
-        }
-        eventMapper.updateOperatorEvent(dto, eventEntity);
-        logger.debugf("Event %s successfully updated".formatted(dto.getId()));
-    }
+            if (!eventDto.getName().equals(eventToUpdate.getName())) {
+                checkIsNameAlreadyExists(eventDto.getName());
+            }
 
-    @Transactional
-    public ResponseCode saveOrUpdateReportEvent(ReportEventWriteDto dto) {
-        if (databaseReader.isEventWithIdExists(dto.getId())) {
-            updateReportEvent(dto);
-            return ResponseCode.UPDATED;
-        }
+            switch (eventDto) {
+                case OperatorEventWriteDto dto -> updateOperatorEvent(dto);
+                case ReportEventWriteDto dto -> updateReportEvent(dto);
+                case AlertEventWriteDto dto -> {
+                    logger.errorf("It's not possible to update event %s of type Alert.".formatted(dto.getId()));
+                    throw new IllegalArgumentException(
+                            "It's not possible to update event %s of type Alert.".formatted(dto.getId()));
+                }
+                default -> throw new IllegalStateException("Unexpected value: " + eventDto);
+            }
+            isNewEvent = false;
 
-        logger.infof("Report event %s not exists, create it".formatted(dto.getId()));
-        saveReportEvent(dto);
-        return ResponseCode.CREATED;
-    }
-
-    public void updateReportEvent(ReportEventWriteDto dto) {
-        logger.infof("Report event %s already exists, update it".formatted(dto.getId()));
-
-        EventReport eventEntity = (EventReport) databaseReader.getEventById(dto.getId());
-        if (!eventEntity.getName().equals(dto.getName())) {
-            checkIsNameAlreadyExists(dto.getName());
-        }
-        if (!eventEntity.getExternalSourceRef().equals(dto.getExternalSourceRef())) {
-            throw new IllegalArgumentException("It's not possible to update externalSourceRef value");
-        }
-        eventMapper.updateReportEvent(dto, eventEntity);
-        logger.debugf("Event %s successfully updated".formatted(dto.getId()));
-    }
-
-    @Transactional
-    public void saveAlertEvent(AlertEventWriteDto dto) {
-        checkIsNameAlreadyExists(dto.getName());
-
-        if (databaseReader.isEventWithIdExists(dto.getId())) {
-            logger.errorf("Event %s already exists, it's not possible to update it".formatted(dto.getId()));
-            throw new IllegalArgumentException(
-                    "Event with id %s already exists, it's not possible to update it".formatted(dto.getId()));
+        } else {
+            logger.infof("Event %s of type %s not exists, create it".formatted(eventDto.getId(), eventDto.getType()));
+            checkIsNameAlreadyExists(eventDto.getName());
+            switch (eventDto) {
+                case OperatorEventWriteDto dto -> saveOperatorEvent(dto);
+                case ReportEventWriteDto dto -> saveReportEvent(dto);
+                case AlertEventWriteDto dto -> saveAlertEvent(dto);
+                default -> throw new IllegalStateException("Unexpected value: " + eventDto);
+            }
         }
 
-        if (dto.getEquipmentId() == null) {
-            throw new IllegalArgumentException("Alert event must reference an equipment");
+        Event createdOrUpdatedEvent = databaseReader.getEventById(eventDto.getId());
+        equipmentEnrichedProducer.updateFor(createdOrUpdatedEvent);
+
+        if (previousEquipmentId != null && eventDto.getEquipmentId() != null &&
+                !eventDto.getEquipmentId().equals(previousEquipmentId)) {
+            Equipment equipment = equipmentService.getEquipmentById(previousEquipmentId);
+            equipmentEnrichedProducer.updateFor(equipment);
         }
 
-        EventAlert event = new EventAlert(dto.getId());
-        eventMapper.saveAlertEvent(dto, event);
-        databaseReader.saveEvent(event);
+        return isNewEvent ? ResponseCode.CREATED : ResponseCode.UPDATED;
     }
 
     @Transactional
@@ -232,8 +219,17 @@ public class EventService {
         }
     }
 
+    private void saveAlertEvent(AlertEventWriteDto dto) {
+        if (dto.getEquipmentId() == null) {
+            throw new IllegalArgumentException("Alert event must reference an equipment");
+        }
+
+        EventAlert event = new EventAlert(dto.getId());
+        eventMapper.saveAlertEvent(dto, event);
+        databaseReader.saveEvent(event);
+    }
+
     private void saveOperatorEvent(OperatorEventWriteDto dto) {
-        checkIsNameAlreadyExists(dto.getName());
         checkManifestationCategory(dto);
         EventOperator event = new EventOperator(dto.getId());
         eventMapper.updateOperatorEvent(dto, event);
@@ -242,11 +238,26 @@ public class EventService {
     }
 
     private void saveReportEvent(ReportEventWriteDto dto) {
-        checkIsNameAlreadyExists(dto.getName());
         EventReport event = new EventReport(dto.getId());
         eventMapper.updateReportEvent(dto, event);
         databaseReader.saveEvent(event);
         logger.debugf("Event %s successfully created".formatted(dto.getId()));
+    }
+
+    private void updateOperatorEvent(OperatorEventWriteDto dto) {
+        checkManifestationCategory(dto);
+        EventOperator eventEntity = (EventOperator) databaseReader.getEventById(dto.getId());
+        eventMapper.updateOperatorEvent(dto, eventEntity);
+        logger.debugf("Event %s successfully updated".formatted(dto.getId()));
+    }
+
+    private void updateReportEvent(ReportEventWriteDto dto) {
+        EventReport eventEntity = (EventReport) databaseReader.getEventById(dto.getId());
+        if (!eventEntity.getExternalSourceRef().equals(dto.getExternalSourceRef())) {
+            throw new IllegalArgumentException("It's not possible to update externalSourceRef value");
+        }
+        eventMapper.updateReportEvent(dto, eventEntity);
+        logger.debugf("Event %s successfully updated".formatted(dto.getId()));
     }
 
     private void checkManifestationCategory(OperatorEventWriteDto e) {

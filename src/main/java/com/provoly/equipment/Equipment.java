@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 
 import com.provoly.action.Service;
 import com.provoly.event.Domain;
+import com.provoly.event.Event;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -42,6 +43,9 @@ public class Equipment {
     @ManyToOne
     @JoinColumn(name = "parent_id")
     private Equipment parent;
+
+    @OneToMany(mappedBy = "equipment")
+    private List<Event> events = new ArrayList<>();
 
     public Equipment() {
         // Only for JPA
@@ -139,5 +143,9 @@ public class Equipment {
 
     public void setParent(Equipment parent) {
         this.parent = parent;
+    }
+
+    public List<Event> getEvents() {
+        return events;
     }
 }

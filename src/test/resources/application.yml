@@ -1,0 +1,28 @@
+quarkus:
+  keycloak:
+    devservices:
+      realm-name: provoly
+      realm-path: src/main/keycloak/realm.json
+      port: 9080
+
+  datasource:
+    devservices:
+      port: 5433
+
+  kafka:
+    devservices:
+      enabled: true
+      port: 9092
+
+  oidc:
+    token:
+      # Auth Server clock can be xx seconds ahead of resource server
+      lifespan-grace: 120
+    roles:
+      role-claim-path: "realm_access/roles"
+
+  management:
+    enabled: false # Mainly to avoid conflicts with other quarkus process
+
+  otel:
+    enabled: false

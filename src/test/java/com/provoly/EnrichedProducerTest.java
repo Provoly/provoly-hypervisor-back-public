@@ -1,0 +1,86 @@
+package com.provoly;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.UUID;
+
+import jakarta.inject.Inject;
+
+import com.provoly.equipment.EquipmentService;
+import com.provoly.equipment.EquipmentWriteDto;
+import com.provoly.event.Criticality;
+import com.provoly.event.EventService;
+import com.provoly.event.ReportCategory;
+import com.provoly.event.dto.ReportEventWriteDto;
+
+import io.quarkus.kafka.client.serialization.ObjectMapperSerde;
+import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.kafka.InjectKafkaCompanion;
+import io.quarkus.test.kafka.KafkaCompanionResource;
+import io.smallrye.reactive.messaging.kafka.companion.KafkaCompanion;
+
+import org.apache.kafka.clients.consumer.OffsetResetStrategy;
+import org.junit.jupiter.api.Test;
+
+@QuarkusTest
+@QuarkusTestResource(KafkaCompanionResource.class)
+public class EnrichedProducerTest {
+    @InjectKafkaCompanion
+    KafkaCompanion companion;
+
+    @Inject
+    EquipmentService equipmentService;
+
+    @Inject
+    EventService eventService;
+
+    @Test
+    public void should_consume_enriched_equipment_when_create_equipment() {
+        // given
+        companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
+
+        var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS_COMMUN", null,
+                null);
+        equipmentService.saveOrUpdateEquipments(List.of(equipment));
+
+        // when
+        var result = companion.consume(EquipmentEnriched.class)
+                .withOffsetReset(OffsetResetStrategy.EARLIEST)
+                .fromTopics("equipment").awaitRecords(1, Duration.ofSeconds(5)).getFirstRecord();
+
+        assertThat(result.value()).extracting("externalId").isEqualTo(equipment.id());
+    }
+
+    @Test
+    public void should_consume_enriched_equipment_when_update_events() {
+        // given
+        UUID eventReportId = UUID.randomUUID();
+
+        companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
+        var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS_COMMUN", null,
+                null);
+        var equipment2 = new EquipmentWriteDto("technical_id2", 0, "equipment2", "307", "EP", "Armoire", "AGGLO_COMMUN", null,
+                null);
+        equipmentService.saveOrUpdateEquipments(List.of(equipment, equipment2)); // 2 messages
+
+        var equipId = equipmentService.getEquipments("CHALONS_COMMUN").stream().findFirst().get().getId();
+        var event = new ReportEventWriteDto(eventReportId, "toto",
+                "desc", Criticality.HIGH, "address", equipId, ReportCategory.REPORT, "ref", "EP");
+        eventService.saveOrUpdateEvent(event); // 1 messages
+
+        var equipId2 = equipmentService.getEquipments("AGGLO_COMMUN").stream().findFirst().get().getId();
+        var eventUpdated = new ReportEventWriteDto(eventReportId, "toto",
+                "desc", Criticality.HIGH, "address", equipId2, ReportCategory.REPORT, "ref", "EP");
+        eventService.saveOrUpdateEvent(eventUpdated); // 2 messages : one for updated event and one for previous equipment
+
+        // when
+        var result = companion.consume(EquipmentEnriched.class)
+                .withOffsetReset(OffsetResetStrategy.EARLIEST)
+                .fromTopics("equipment").awaitRecords(5, Duration.ofSeconds(5));
+
+        assertThat(result).hasSize(5);
+    }
+}
