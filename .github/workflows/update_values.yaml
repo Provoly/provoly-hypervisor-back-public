@@ -24,11 +24,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Sets env vars for main branch
         run: |
-          echo CI_SHORT_COMMIT_SHA=$(echo ${GITHUB_SHA} | cut -c1-8) >> $GITHUB_ENV
+          echo CI_SHORT_COMMIT_SHA=$(echo ${{ github.sha }} | cut -c1-8) >> $GITHUB_ENV
+
       - name: Update values on chalons-dev
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.DISPATCH_EVENT_TOKEN }}
+          token: ${{ secrets.GH_DISPATCH_TOKEN }}
           repository: provoly/provoly-chart-values
           event-type: update-chart-value
           client-payload: |
