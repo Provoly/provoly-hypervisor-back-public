@@ -14,7 +14,7 @@
           <PointSymbolizer>
             <Graphic>
               <ExternalGraphic>
-                <OnlineResource xlink:type="simple" xlink:href="icons/armoire.svg"/>
+                <OnlineResource xlink:type="simple" xlink:href="icons/${famille}.svg"/>
                 <Format>image/svg</Format>
               </ExternalGraphic>
               <Size>32</Size>

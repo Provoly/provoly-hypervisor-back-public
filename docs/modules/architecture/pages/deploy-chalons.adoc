@@ -46,6 +46,11 @@ Créer un style "equipment" en utilisant le fichier assets/equipment.sld
 Publier la couche "xxxxxx_equipement-enrichi-mesure"
 Dans l'onglet "Publication" de la couche, choisir le style "equipment" par défaut
 
+La mise à jour du style de la couche peut se faire avec la commande suivante :
+----
+kubectl -n chalons-dev cp assets/equipment.sld geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
+----
+
 
 == Reset d'un environnement
 
