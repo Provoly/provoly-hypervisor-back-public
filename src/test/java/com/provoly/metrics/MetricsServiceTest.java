@@ -141,7 +141,7 @@ public class MetricsServiceTest {
     @Test
     void should_get_equipment_FL_by_entities() {
         // when
-        var result = metricsService.getEquipmentByEntity("EP_FL");
+        var result = metricsService.getEquipmentByEntity("EP_FOYER_LUMINEUX");
 
         //then
         assertThat(result).extracting("CHA_managed").isEqualTo(1L);
@@ -158,7 +158,7 @@ public class MetricsServiceTest {
     @Test
     void should_get_equipment_A_by_entities() {
         // when
-        var result = metricsService.getEquipmentByEntity("EP_A");
+        var result = metricsService.getEquipmentByEntity("EP_ARMOIRE");
 
         //then
         assertThat(result).extracting("CHA_managed").isEqualTo(0L);
@@ -178,7 +178,7 @@ public class MetricsServiceTest {
         dataService.clean();
 
         // when
-        var result = metricsService.getEquipmentByEntity("EP_A");
+        var result = metricsService.getEquipmentByEntity("EP_ARMOIRE");
 
         //then
         assertThat(result).extracting("CHA_managed").isEqualTo(0L);

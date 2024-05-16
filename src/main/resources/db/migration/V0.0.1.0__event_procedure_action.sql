@@ -8,7 +8,7 @@ create table family
 (
     id   bigint primary key,
     name varchar(200) unique not null,
-    code varchar(10) unique  not null
+    code varchar(50) unique  not null
 );
 
 create table domain

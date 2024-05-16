@@ -36,9 +36,9 @@ public class TestDataService {
     public void init() {
         domain = equipmentDatabaseReader.getDomainByName("EP").get();
 
-        var armoire = equipmentDatabaseReader.getFamilyByCode("EP_A").get();
-        var foyerLumineux = equipmentDatabaseReader.getFamilyByCode("EP_FL").get();
-        var ouvrage = equipmentDatabaseReader.getFamilyByCode("EP_O").get();
+        var armoire = equipmentDatabaseReader.getFamilyByCode("EP_ARMOIRE").get();
+        var foyerLumineux = equipmentDatabaseReader.getFamilyByCode("EP_FOYER_LUMINEUX").get();
+        var ouvrage = equipmentDatabaseReader.getFamilyByCode("EP_OUVRAGE").get();
 
         var chalons = equipmentDatabaseReader.getEquipmentEntityByName("CHALONS_COMMUN").get();
         var agglo = equipmentDatabaseReader.getEquipmentEntityByName("AGGLO_COMMUN").get();

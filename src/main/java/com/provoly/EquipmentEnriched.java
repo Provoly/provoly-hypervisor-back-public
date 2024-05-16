@@ -10,6 +10,8 @@ import com.provoly.event.EventAlert;
 import com.provoly.event.EventOperator;
 import com.provoly.event.EventReport;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+
 public class EquipmentEnriched {
     private final UUID id;
     private final String externalId;
@@ -30,7 +32,7 @@ public class EquipmentEnriched {
         this.code = equipment.getCode();
         this.domain = equipment.getDomain().getName();
         this.entity = equipment.getEntity().getName();
-        this.family = "%s_%s".formatted(this.domain, equipment.getFamily().getName().replace(" ", "_").toUpperCase()); // TODO: add label in family table
+        this.family = equipment.getFamily().getName();
         this.attributes = equipment.getAttributes();
         this.parent = equipment.getParent() == null ? null : new EquipmentEnriched(equipment.getParent());
         this.events = equipment
@@ -88,6 +90,7 @@ public class EquipmentEnriched {
         return family;
     }
 
+    @JsonAnyGetter
     public Map<String, Object> getAttributes() {
         return attributes;
     }

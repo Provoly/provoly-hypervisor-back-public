@@ -7,9 +7,9 @@ insert into domain (id,name) values (6,'MOB');
 insert into domain (id,name) values (7,'CDV');
 
 
-insert into family (id,name,code) values (1,'Armoire','EP_A');
-insert into family (id,name,code) values (2,'Foyer Lumineux','EP_FL');
-insert into family (id,name,code) values (3,'Ouvrage','EP_O');
+insert into family (id,name,code) values (1,'Armoire','EP_ARMOIRE');
+insert into family (id,name,code) values (2,'Foyer Lumineux','EP_FOYER_LUMINEUX');
+insert into family (id,name,code) values (3,'Ouvrage','EP_OUVRAGE');
 
 
 insert into equipment_entity (id,name) values (1,'COMMUN');

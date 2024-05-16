@@ -16,8 +16,8 @@ import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class MetricsService {
-    public static final String ARMOIRE_CODE = "EP_A";
-    public static final String FOYER_LUMINEUX_CODE = "EP_FL";
+    public static final String ARMOIRE_CODE = "EP_ARMOIRE";
+    public static final String FOYER_LUMINEUX_CODE = "EP_FOYER_LUMINEUX";
     private Logger logger;
     private MetricsDatabaseReader metricsDatabaseReader;
     private EquipmentService equipmentService;
