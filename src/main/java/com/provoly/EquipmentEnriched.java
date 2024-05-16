@@ -32,7 +32,7 @@ public class EquipmentEnriched {
         this.code = equipment.getCode();
         this.domain = equipment.getDomain().getName();
         this.entity = equipment.getEntity().getName();
-        this.family = equipment.getFamily().getName();
+        this.family = equipment.getFamily().getCode();
         this.attributes = equipment.getAttributes();
         this.parent = equipment.getParent() == null ? null : new EquipmentEnriched(equipment.getParent());
         this.events = equipment
