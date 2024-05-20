@@ -38,7 +38,7 @@ Copier les icones dans le Geoserver
 
 ----
 # A lancer depuis le répertoire du projet
-kubectl -n chalons-dev cp assets/icons geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
+kubectl -n chalons-dev -c geoserver cp assets/icons geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
 ----
 
 Créer un style "equipment" en utilisant le fichier assets/equipment.sld
@@ -48,7 +48,7 @@ Dans l'onglet "Publication" de la couche, choisir le style "equipment" par défa
 
 La mise à jour du style de la couche peut se faire avec la commande suivante :
 ----
-kubectl -n chalons-dev cp assets/equipment.sld geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
+kubectl -n chalons-dev -c geoserver cp assets/equipment.sld geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
 ----
 
 
