@@ -41,7 +41,7 @@ Copier les icones dans le Geoserver
 kubectl -n chalons-dev -c geoserver cp assets/icons geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
 ----
 
-Créer un style "equipment" en utilisant le fichier assets/equipment.sld
+Créer un style "equipment" en utilisant le fichier `assets/equipment.sld`
 
 Publier la couche "xxxxxx_equipement-enrichi-mesure"
 Dans l'onglet "Publication" de la couche, choisir le style "equipment" par défaut
@@ -50,6 +50,8 @@ La mise à jour du style de la couche peut se faire avec la commande suivante :
 ----
 kubectl -n chalons-dev -c geoserver cp assets/equipment.sld geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
 ----
+
+Faire de même avec le style `assets/equipment-getfeature.sld`. Pas besoin d'attacher le style à la couche, mais il doit être présent.
 
 
 == Reset d'un environnement
