@@ -14,7 +14,11 @@
                     <PointSymbolizer>
                         <Graphic>
                             <ExternalGraphic>
-                                <OnlineResource xlink:type="simple" xlink:href="icons/${famille}.svg"/>
+                                <!--
+                                here we don't care about representation, we just need an object that has correct size
+                                changing for ${famille} leads to a NPE
+                                 -->
+                                <OnlineResource xlink:type="simple" xlink:href="icons/EP_ARMOIRE.svg"/>
                                 <Format>image/svg</Format>
                             </ExternalGraphic>
                             <Size>48</Size>
