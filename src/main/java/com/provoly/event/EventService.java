@@ -194,7 +194,7 @@ public class EventService {
         }
 
         Event createdOrUpdatedEvent = databaseReader.getEventById(eventDto.getId());
-        equipmentEnrichedProducer.updateFor(createdOrUpdatedEvent); // FIXME: https://github.com/Provoly/provoly-hypervisor-back/issues/71
+        equipmentEnrichedProducer.updateFor(createdOrUpdatedEvent);
 
         if (previousEquipmentId != null && eventDto.getEquipmentId() != null &&
                 !eventDto.getEquipmentId().equals(previousEquipmentId)) {

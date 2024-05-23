@@ -44,7 +44,7 @@ public class Equipment {
     @JoinColumn(name = "parent_id")
     private Equipment parent;
 
-    @OneToMany(mappedBy = "equipment")
+    @OneToMany(mappedBy = "equipment", fetch = FetchType.EAGER)
     private List<Event> events = new ArrayList<>();
 
     public Equipment() {
@@ -145,7 +145,19 @@ public class Equipment {
         this.parent = parent;
     }
 
+    // equipment events are managed on the event side
     public List<Event> getEvents() {
-        return events;
+        return Collections.unmodifiableList(events);
+    }
+
+    public void addEvent(Event event) {
+        if (events.contains(event)) {
+            events.remove(event);
+        }
+        events.add(event);
+    }
+
+    public void setEvents(List<Event> events) {
+        this.events = events;
     }
 }

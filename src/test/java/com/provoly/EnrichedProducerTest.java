@@ -23,6 +23,7 @@ import io.quarkus.test.kafka.KafkaCompanionResource;
 import io.smallrye.reactive.messaging.kafka.companion.KafkaCompanion;
 
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
@@ -36,6 +37,11 @@ public class EnrichedProducerTest {
 
     @Inject
     EventService eventService;
+
+    @AfterEach
+    public void cleanTopic() {
+        companion.topics().delete("equipment");
+    }
 
     @Test
     public void should_consume_enriched_equipment_when_create_equipment() {
@@ -69,7 +75,7 @@ public class EnrichedProducerTest {
         var equipId = equipmentService.getEquipments("CHALONS_COMMUN").stream().findFirst().get().getId();
         var event = new ReportEventWriteDto(eventReportId, "toto",
                 "desc", Criticality.HIGH, "address", equipId, ReportCategory.REPORT, "ref", "EP");
-        eventService.saveOrUpdateEvent(event); // 1 messages
+        eventService.saveOrUpdateEvent(event); // 1 message
 
         var equipId2 = equipmentService.getEquipments("AGGLO_COMMUN").stream().findFirst().get().getId();
         var eventUpdated = new ReportEventWriteDto(eventReportId, "toto",
@@ -82,5 +88,30 @@ public class EnrichedProducerTest {
                 .fromTopics("equipment").awaitRecords(5, Duration.ofSeconds(5));
 
         assertThat(result).hasSize(5);
+    }
+
+    @Test
+    public void should_consume_enriched_equipment_when_create_events() {
+        // given
+        UUID eventReportId = UUID.randomUUID();
+
+        companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
+        var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS_COMMUN", null,
+                null);
+        var equipment2 = new EquipmentWriteDto("technical_id2", 0, "equipment2", "307", "EP", "Armoire", "AGGLO_COMMUN", null,
+                null);
+        equipmentService.saveOrUpdateEquipments(List.of(equipment, equipment2)); // 2 messages
+
+        var equipId = equipmentService.getEquipments("CHALONS_COMMUN").stream().findFirst().get().getId();
+        var event = new ReportEventWriteDto(eventReportId, "tutu",
+                "desc", Criticality.HIGH, "address", equipId, ReportCategory.REPORT, "ref", "EP");
+        eventService.saveOrUpdateEvent(event); // 1 messages
+
+        // when
+        var result = companion.consume(EquipmentEnriched.class)
+                .withOffsetReset(OffsetResetStrategy.EARLIEST)
+                .fromTopics("equipment").awaitRecords(3, Duration.ofSeconds(5));
+
+        assertThat(result.getLastRecord().value().getEvents()).hasSize(1);
     }
 }

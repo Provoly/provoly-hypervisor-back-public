@@ -1,6 +1,7 @@
 package com.provoly.event;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
 import jakarta.persistence.*;
@@ -136,6 +137,9 @@ public abstract class Event {
     }
 
     public void setEquipment(Equipment equipment) {
+        if (equipment != null) {
+            equipment.addEvent(this);
+        }
         this.equipment = equipment;
     }
 
@@ -153,5 +157,20 @@ public abstract class Event {
 
     public void setDomain(Domain domain) {
         this.domain = domain;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Event entityId = (Event) o;
+        return id.equals(entityId.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
