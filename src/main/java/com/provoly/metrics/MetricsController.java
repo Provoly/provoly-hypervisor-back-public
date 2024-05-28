@@ -1,5 +1,7 @@
 package com.provoly.metrics;
 
+import java.util.List;
+
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
@@ -21,14 +23,16 @@ public class MetricsController {
     @Path("/equipments-with-events")
     @GET
     @Authenticated
-    public EquipmentWithEventsDto getEquipmentWithEvent() {
-        return metricsService.getEquipmentsWithEventMetrics();
+    public EquipmentWithEventsDto getEquipmentWithEvent(@RestQuery List<String> criticality,
+            @RestQuery List<String> category,
+            @RestQuery List<String> entity) {
+        return metricsService.getEquipmentsWithEventMetrics(criticality, category, entity);
     }
 
     @Path("/equipments-by-entity")
     @GET
     @Authenticated
-    public EquipmentByEntityDto getEquipmentByEntity(@RestQuery String family) {
-        return metricsService.getEquipmentByEntity(family);
+    public EquipmentByEntityDto getTotalEquipmentsByEntity(@RestQuery String family) {
+        return metricsService.getTotalEquipmentsByEntity(family);
     }
 }

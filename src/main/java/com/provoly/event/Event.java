@@ -28,6 +28,9 @@ public abstract class Event {
     private Criticality criticality;
 
     @Enumerated(EnumType.STRING)
+    private Category category;
+
+    @Enumerated(EnumType.STRING)
     private EventType type;
 
     @Enumerated(EnumType.STRING)
@@ -94,6 +97,14 @@ public abstract class Event {
 
     public void setCriticality(Criticality criticality) {
         this.criticality = criticality;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public EventType getType() {

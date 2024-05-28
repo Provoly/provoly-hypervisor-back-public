@@ -114,17 +114,8 @@ public class EventService {
         var families = family.stream()
                 .map(equipmentService::getFamilyByCode).toList();
 
-        var operatorCategories = category.stream()
-                .filter(OperatorCategory::isOperatorCategory)
-                .map(OperatorCategory::valueOf).toList();
-
-        var alertCategories = category.stream()
-                .filter(AlertCategory::isAlertCategory)
-                .map(AlertCategory::valueOf).toList();
-
-        var reportCategories = category.stream()
-                .filter(ReportCategory::isReportCategory)
-                .map(ReportCategory::valueOf).toList();
+        var categories = category.stream()
+                .map(Category::valueOf).toList();
 
         return databaseReader.getEvents(page,
                 pageSize,
@@ -133,9 +124,7 @@ public class EventService {
                 creationDate,
                 criticalities,
                 statuses,
-                operatorCategories,
-                alertCategories,
-                reportCategories,
+                categories,
                 entities,
                 families);
     }
@@ -164,7 +153,7 @@ public class EventService {
 
         if (databaseReader.isEventWithIdExists(eventDto.getId())) {
             Event eventToUpdate = databaseReader.getEventById(eventDto.getId());
-            previousEquipmentId = eventToUpdate.getEquipment().getId();
+            previousEquipmentId = eventToUpdate.getEquipment() != null ? eventToUpdate.getEquipment().getId() : null;
 
             if (!eventDto.getName().equals(eventToUpdate.getName())) {
                 checkIsNameAlreadyExists(eventDto.getName());
@@ -262,7 +251,7 @@ public class EventService {
 
     private void checkManifestationCategory(OperatorEventWriteDto e) {
         logger.debugf("Check if event %s has manifestation dates".formatted(e.getId()));
-        if (e.getCategory() == OperatorCategory.MANIFESTATION) {
+        if (e.getCategory() == Category.MANIFESTATION) {
             if (e.getStartDate() == null || e.getEndDate() == null) {
                 throw new IllegalArgumentException(
                         "Properties 'startDate' and 'endDate' are required for 'MANIFESTATION' category");

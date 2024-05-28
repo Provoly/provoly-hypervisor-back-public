@@ -10,9 +10,9 @@ import java.util.UUID;
 import jakarta.inject.Inject;
 
 import com.provoly.TestDataService;
+import com.provoly.event.Category;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventController;
-import com.provoly.event.ReportCategory;
 import com.provoly.event.dto.ReportEventWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -72,7 +72,7 @@ public class ProcedureControllerTest {
         // given
         UUID eventReportId = eventController
                 .getEvents(1, 1, null, null, null, List.of(Criticality.HIGH.name()), List.of(),
-                        List.of(ReportCategory.REPORT.name()),
+                        List.of(Category.REPORT.name()),
                         List.of(), List.of())
                 .stream()
                 .toList()
@@ -85,7 +85,7 @@ public class ProcedureControllerTest {
                 Criticality.HIGH,
                 "new address",
                 null,
-                ReportCategory.REPORT,
+                Category.REPORT,
                 "external_source",
                 null);
 

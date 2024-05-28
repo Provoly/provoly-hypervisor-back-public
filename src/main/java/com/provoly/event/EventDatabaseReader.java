@@ -32,9 +32,7 @@ public class EventDatabaseReader extends DatabaseReader {
             Instant creationDate,
             List<Criticality> criticalities,
             List<Status> status,
-            List<OperatorCategory> operatorCategories,
-            List<AlertCategory> alertCategories,
-            List<ReportCategory> reportCategories,
+            List<Category> categories,
             List<EquipmentEntity> entities,
             List<Family> families) {
         var builder = em.getCriteriaBuilder();
@@ -72,19 +70,12 @@ public class EventDatabaseReader extends DatabaseReader {
             predicates.add(equipment.get(Equipment_.family).in(families));
         }
 
-        var filters = builder.and(getPredicatesAsArray(predicates));
-
-        List<Predicate> categoryPredicates = buildCategoryPredicates(
-                operatorCategories,
-                alertCategories,
-                reportCategories,
-                builder,
-                root);
-
-        if (!categoryPredicates.isEmpty()) {
-            var categoryFilters = builder.or(getPredicatesAsArray(categoryPredicates));
-            filters = builder.and(filters, categoryFilters);
+        if (!categories.isEmpty()) {
+            logger.debugf("filter on categories %s", criticalities);
+            predicates.add(root.get(Event_.category).in(categories));
         }
+
+        var filters = builder.and(getPredicatesAsArray(predicates));
 
         List<Order> orders = buildEventOrders(sort, order, builder, root);
 
@@ -96,31 +87,6 @@ public class EventDatabaseReader extends DatabaseReader {
                 .setFirstResult((page - 1) * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList();
-    }
-
-    private List<Predicate> buildCategoryPredicates(List<OperatorCategory> operatorCategories,
-            List<AlertCategory> alertCategories, List<ReportCategory> reportCategories, CriteriaBuilder builder,
-            Root<Event> root) {
-        List<Predicate> categoryPredicates = new ArrayList<>();
-
-        if (!operatorCategories.isEmpty()) {
-            logger.debugf("filter on operator category %s", operatorCategories);
-            var eventJoin = builder.treat(root, EventOperator.class);
-            categoryPredicates.add(eventJoin.get(EventOperator_.CATEGORY).in(operatorCategories));
-        }
-
-        if (!alertCategories.isEmpty()) {
-            logger.debugf("filter on alert category %s", alertCategories);
-            var eventJoin = builder.treat(root, EventAlert.class);
-            categoryPredicates.add(eventJoin.get(EventAlert_.CATEGORY).in(alertCategories));
-        }
-
-        if (!reportCategories.isEmpty()) {
-            logger.debugf("filter on report category %s", reportCategories);
-            var eventJoin = builder.treat(root, EventReport.class);
-            categoryPredicates.add(eventJoin.get(EventReport_.CATEGORY).in(reportCategories));
-        }
-        return categoryPredicates;
     }
 
     private List<Order> buildEventOrders(Sort sort,

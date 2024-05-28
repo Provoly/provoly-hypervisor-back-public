@@ -29,4 +29,8 @@ public class Service extends Action {
     public Service(UUID id, Instant lastModificationDate, Status status, String name) {
         super(id, ActionType.SERVICE, lastModificationDate, status, name);
     }
+
+    public Equipment getEquipment() {
+        return equipment;
+    }
 }

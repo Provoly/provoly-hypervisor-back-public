@@ -1,10 +1,13 @@
 package com.provoly.event.dto;
 
+import java.util.Objects;
 import java.util.UUID;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import com.provoly.event.Category;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventType;
 
@@ -32,23 +35,34 @@ public abstract class EventWriteDto {
     @NotNull
     private Criticality criticality;
 
+    @NotNull
+    protected Category category;
+
     private String address;
 
     private UUID equipmentId;
+
     private EventType type;
 
     private String domain;
 
-    protected EventWriteDto(UUID id, String name, String description, Criticality criticality, String address, UUID equipmentId,
+    protected EventWriteDto(UUID id, String name, String description, Criticality criticality, Category category,
+            String address, UUID equipmentId,
             EventType type, String domain) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.criticality = criticality;
+        this.category = category;
         this.address = address;
         this.equipmentId = equipmentId;
         this.type = type;
         this.domain = domain;
+    }
+
+    @AssertTrue(message = "Category is invalid")
+    public boolean isValidCategory() {
+        return Objects.nonNull(category) && category.getEventType() == type;
     }
 
     public UUID getId() {
@@ -65,6 +79,10 @@ public abstract class EventWriteDto {
 
     public Criticality getCriticality() {
         return criticality;
+    }
+
+    public Category getCategory() {
+        return category;
     }
 
     public String getAddress() {

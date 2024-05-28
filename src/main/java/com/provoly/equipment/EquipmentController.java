@@ -33,7 +33,7 @@ public class EquipmentController {
 
     @GET
     @Authenticated
-    public Collection<EquipmentReadDto> getEquipments(@RestQuery String entity) {
+    public Collection<EquipmentReadDto> getEquipments(@RestQuery List<String> entity) {
         var equipments = equipmentService.getEquipments(entity);
         return equipmentMapper.mapToEquipmentReadDto(equipments);
 

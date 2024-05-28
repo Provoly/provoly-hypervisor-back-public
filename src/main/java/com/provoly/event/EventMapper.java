@@ -35,6 +35,7 @@ public class EventMapper {
                 event.getAddress(),
                 event.getDescription(),
                 event.getCriticality(),
+                event.getCategory(),
                 event.getStatus(),
                 event.getType(),
                 event.getLastModificationDate(),
@@ -47,9 +48,9 @@ public class EventMapper {
                 mapToString(event.getDomain()));
 
         return switch (event) {
-            case EventOperator e -> new OperatorEventReadDto(eventDto, e.getCategory(), e.getStartDate(), e.getEndDate());
-            case EventAlert e -> new AlertEventReadDto(eventDto, e.getExternalSourceRef(), e.getCategory());
-            case EventReport e -> new ReportEventReadDto(eventDto, e.getExternalSourceRef(), e.getCategory());
+            case EventOperator e -> new OperatorEventReadDto(eventDto, e.getStartDate(), e.getEndDate());
+            case EventAlert e -> new AlertEventReadDto(eventDto, e.getExternalSourceRef());
+            case EventReport e -> new ReportEventReadDto(eventDto, e.getExternalSourceRef());
             default -> throw new IllegalStateException("Unexpected value: " + event);
         };
 
@@ -124,7 +125,7 @@ public class EventMapper {
     private Map<String, Instant> getManifestationDate(Event event) {
         if (event.getType() == EventType.OPERATOR) {
             EventOperator eventOp = (EventOperator) event;
-            if (eventOp.getCategory() == OperatorCategory.MANIFESTATION) {
+            if (eventOp.getCategory() == Category.MANIFESTATION) {
                 return Map.of("startDate", eventOp.getStartDate(), "endDate", eventOp.getEndDate());
             }
         }

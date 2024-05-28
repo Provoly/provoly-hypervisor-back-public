@@ -43,16 +43,16 @@ public class EquipmentDatabaseReader extends DatabaseReader {
                 .orElseThrow(() -> new NoSuchElementException("Equipment with name %s not found".formatted(name)));
     }
 
-    public Collection<Equipment> getEquipmentsByEntity(EquipmentEntity entity) {
+    public Collection<Equipment> getEquipmentsByEntities(List<EquipmentEntity> entities) {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<Equipment> criteriaQuery = builder.createQuery(Equipment.class);
         Root<Equipment> root = criteriaQuery.from(Equipment.class);
 
         List<Predicate> predicates = new ArrayList<>();
 
-        if (entity != null) {
-            logger.debugf("filter on equipment entity %s", entity);
-            predicates.add(builder.equal(root.get(Equipment_.entity), entity));
+        if (!entities.isEmpty()) {
+            logger.debugf("filter on equipment entities %s", entities);
+            predicates.add(root.get(Equipment_.entity).in(entities));
         }
 
         var query = criteriaQuery.select(root)

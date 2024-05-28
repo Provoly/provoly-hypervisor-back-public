@@ -67,6 +67,7 @@ create table event
     name                   varchar(50) unique not null,
     type                   varchar(20)        not null,
     criticality            varchar(50)        not null,
+    category               varchar(50)        not null,
     status                 varchar(20) default 'NEW',
     description            varchar(256)       not null,
     address                varchar(256)       not null,
@@ -81,7 +82,6 @@ create table event
 create table event_operator
 (
     id         uuid primary key references event,
-    category   varchar(20) not null check (category in ('MANIFESTATION', 'OPERATOR_EVENT')),
     start_date timestamptz,
     end_date   timestamptz
 );
@@ -89,21 +89,11 @@ create table event_operator
 create table event_report
 (
     id                  uuid primary key references event,
-    category            varchar(50) not null check (category in ('REPORT')),
-    external_source_ref varchar     not null
+    external_source_ref varchar not null
 );
 
 create table event_alert
 (
     id                  uuid primary key references event,
-    category            varchar(50) not null check (category in ('ALERT_LIMIT', 'ALERT_MALFUNCTION')),
-    external_source_ref varchar     not null
+    external_source_ref varchar not null
 );
-
-
-create or replace view all_event as
-select event.*, coalesce(event_alert.category, event_report.category, event_operator.category) category
-from event
- left outer join event_alert on event.id = event_alert.id
- left outer join event_operator on event.id = event_operator.id
- left outer join event_report on event.id = event_report.id;

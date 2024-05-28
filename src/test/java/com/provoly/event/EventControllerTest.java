@@ -177,7 +177,7 @@ public class EventControllerTest {
                 List.of());
         //then
         assertThat(events).extracting("status").containsOnly(Status.IN_PROGRESS);
-        assertThat(events).extracting("category").containsOnly(OperatorCategory.MANIFESTATION, ReportCategory.REPORT);
+        assertThat(events).extracting("category").containsOnly(Category.MANIFESTATION, Category.REPORT);
     }
 
     @Test
@@ -302,10 +302,10 @@ public class EventControllerTest {
                 List.of(),
                 List.of());
         //then
-        assertThat(events).extracting("status").containsExactly(Status.NEW, Status.NEW, Status.NEW, Status.IN_PROGRESS,
+        assertThat(events).extracting("status").containsExactly(Status.NEW, Status.NEW, Status.NEW, Status.NEW,
                 Status.IN_PROGRESS);
         assertThat(events).extracting("criticality").containsExactly(Criticality.LOW, Criticality.LOW, Criticality.LOW,
-                Criticality.HIGH, Criticality.MEDIUM);
+                Criticality.LOW, Criticality.HIGH);
     }
 
     @Test
@@ -371,7 +371,7 @@ public class EventControllerTest {
         assertThat(result.get(Status.DONE).events())
                 .extracting("serviceTitle").isNotEmpty();
         assertThat(result.get(Status.DONE).events())
-                .extracting("serviceCount").containsExactly(1L);
+                .extracting("serviceCount").containsExactly(3L);
 
         assertThat(result.get(Status.NEW).events())
                 .extracting("manifestation").containsOnlyNulls();
@@ -448,7 +448,19 @@ public class EventControllerTest {
     void should_throw_if_name_blank_when_create_event() {
         // given
         var event = new OperatorEventWriteDto(UUID.randomUUID(), "", "desc", Criticality.MEDIUM, "adress", null,
-                OperatorCategory.OPERATOR_EVENT, null, null, null);
+                Category.OPERATOR_EVENT, null, null, null);
+
+        // then
+        assertThatThrownBy(() -> eventController.saveEventOperator(event))
+                .isInstanceOf(ConstraintViolationException.class);
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_throw_if_category_invalid_when_create_event() {
+        // given
+        var event = new OperatorEventWriteDto(UUID.randomUUID(), "event operator", "desc", Criticality.MEDIUM, "adress", null,
+                Category.REPORT, null, null, null);
 
         // then
         assertThatThrownBy(() -> eventController.saveEventOperator(event))

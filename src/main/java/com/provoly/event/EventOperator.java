@@ -5,14 +5,10 @@ import java.util.UUID;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 
 @Entity
 @DiscriminatorValue("OPERATOR")
 public class EventOperator extends Event {
-    @Enumerated(EnumType.STRING)
-    private OperatorCategory category;
     private Instant startDate;
     private Instant endDate;
 
@@ -22,14 +18,6 @@ public class EventOperator extends Event {
 
     public EventOperator(UUID id) {
         super(id, EventType.OPERATOR);
-    }
-
-    public OperatorCategory getCategory() {
-        return category;
-    }
-
-    public void setCategory(OperatorCategory category) {
-        this.category = category;
     }
 
     public Instant getStartDate() {

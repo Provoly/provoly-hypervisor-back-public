@@ -72,7 +72,7 @@ public class EquipmentServiceTest {
     @Test
     void should_get_equipments_with_good_entity() {
         // when
-        var result = equipmentService.getEquipments("FAGNIERES_COMMUN");
+        var result = equipmentService.getEquipments(List.of("FAGNIERES_COMMUN"));
 
         // then
         assertThat(result).extracting("entity").extracting("name").containsExactly("FAGNIERES_COMMUN");
@@ -81,7 +81,7 @@ public class EquipmentServiceTest {
     @Test
     void should_throw_exception_when_get_equipment_entity_not_exists() {
         // when
-        assertThatThrownBy(() -> equipmentService.getEquipments("invalid_entity"))
+        assertThatThrownBy(() -> equipmentService.getEquipments(List.of("invalid_entity")))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("entity invalid");
     }
@@ -106,13 +106,13 @@ public class EquipmentServiceTest {
         var equipment2 = new EquipmentWriteDto("new_technical_id1", 0, "name1", "code1", "invalid domain", "Armoire",
                 "FAGNIERES_COMMUN", null, null);
 
-        var actualEquipmentSize = equipmentService.getEquipments(null).size();
+        var actualEquipmentSize = equipmentService.getEquipments(List.of()).size();
 
         // when
         assertThatThrownBy(() -> equipmentService.saveOrUpdateEquipments(List.of(equipment1, equipment2)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("domain");
-        var sameEquipmentSize = equipmentService.getEquipments(null).size();
+        var sameEquipmentSize = equipmentService.getEquipments(List.of()).size();
 
         // then
         assertThat(actualEquipmentSize).isEqualTo(sameEquipmentSize);

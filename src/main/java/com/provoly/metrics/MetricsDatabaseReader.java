@@ -1,63 +1,74 @@
 package com.provoly.metrics;
 
-import java.util.EnumMap;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.*;
 
 import com.provoly.DatabaseReader;
-import com.provoly.action.Service;
-import com.provoly.action.Service_;
+import com.provoly.action.Action;
 import com.provoly.equipment.*;
-import com.provoly.event.Domain;
-import com.provoly.event.Domain_;
-import com.provoly.event.Status;
+import com.provoly.event.*;
 
 @ApplicationScoped
 public class MetricsDatabaseReader extends DatabaseReader {
     public static final String UNMANAGED = "unmanaged";
     public static final String MANAGED = "managed";
 
-    public MetricsDatabaseReader(EntityManager em) {
+    private final EquipmentService equipmentService;
+
+    public MetricsDatabaseReader(EntityManager em, EquipmentService equipmentService) {
         super(em);
+        this.equipmentService = equipmentService;
     }
 
     private record QueryResult(String code, boolean managed, long count) {
     }
 
-    private record ServiceWithEquipments(String code, Status status, Boolean managed, long count) {
-    }
+    public List<Equipment> getEquipmentsWithUnDoneEvents(List<String> entities,
+            List<String> criticalities,
+            List<String> categories) {
 
-    public Map<String, Long> getEquipmentsWithUnDoneEvent() {
-        List<Tuple> result = em.createNativeQuery("""
-                select family.code as code, (attributes->>'managed')::::boolean as managed, count(distinct family.code) as count
-                from {h-schema}equipment eqt
-                join {h-schema}event on event.equipment_id = eqt.id
-                join {h-schema}family on eqt.family_id = family.id
-                where eqt.domain_id = 1 -- domain "EP"
-                and exists (
-                    select 1 from {h-schema}all_event evt
-                    where eqt.id = evt.equipment_id
-                    and evt.status != 'DONE'
-                    and evt.category != 'MANIFESTATION')
-                group by family.code, managed;
-                """, Tuple.class)
-                .getResultList();
-
-        var queryResults = result
+        var eventCriticalities = criticalities.stream().map(Criticality::fromString).toList();
+        var eventCategories = categories.stream().map(Category::fromString).toList();
+        return equipmentService
+                .getEquipments(entities)
                 .stream()
-                .map(t -> new QueryResult(t.get("code").toString(), (boolean) t.get(MANAGED), (long) t.get("count")))
+                .filter(equipment -> equipment.getDomain().getName().equals("EP"))
+                .filter(equipment -> matchEvents(equipment.getEvents(), eventCriticalities, eventCategories))
                 .toList();
-        return gatherUnmanagedEquipments(queryResults);
+
     }
 
-    public Map<String, Long> getEquipmentGroupedByFamilyAndManaged() {
+    private boolean matchEvents(List<Event> events, List<Criticality> criticalities, List<Category> categories) {
+        return events
+                .stream()
+                .anyMatch(event -> isUnDone()
+                        .and(isNotManifestation())
+                        .and(isOneOfCategory(categories))
+                        .and(isOneOfCriticality(criticalities)).test(event));
+    }
+
+    public Map<String, Long> equipmentsCountGroupedByManaged(List<Equipment> equipments) {
+        var groupedByManagedAndCode = equipments
+                .stream()
+                .collect(Collectors.groupingBy(equipment -> equipment.getAttributes().get(MANAGED),
+                        Collectors.groupingBy(equipment -> equipment.getFamily().getCode(), Collectors.counting())));
+
+        var result = groupedByManagedAndCode.getOrDefault(true, new HashMap<>());
+        long mergedUnmanagedEquipments = groupedByManagedAndCode.getOrDefault(false, Map.of()).values().stream()
+                .mapToLong(v -> v).sum();
+        result.put(UNMANAGED, mergedUnmanagedEquipments);
+        return result;
+    }
+
+    public Map<String, Long> getTotalEquipmentGroupedByFamilyAndManaged() {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<QueryResult> criteriaQuery = builder.createQuery(QueryResult.class);
         Root<Equipment> equipment = criteriaQuery.from(Equipment.class);
@@ -80,54 +91,24 @@ public class MetricsDatabaseReader extends DatabaseReader {
         return gatherUnmanagedEquipments(result);
     }
 
-    public Map<String, Map<Status, Long>> getEquipmentServicesByStatus() {
-        var builder = em.getCriteriaBuilder();
-        CriteriaQuery<ServiceWithEquipments> criteriaQuery = builder.createQuery(ServiceWithEquipments.class);
-        Root<Service> service = criteriaQuery.from(Service.class);
-        var equipment = service.join(Service_.equipment, JoinType.LEFT);
-        var family = equipment.join(Equipment_.family, JoinType.LEFT);
-        var domain = equipment.join(Equipment_.domain, JoinType.LEFT);
+    public Map<String, Map<Status, Long>> getEquipmentServicesByStatus(List<Equipment> equipments) {
+        var equipmentServices = equipments.stream()
+                .map(Equipment::getServices)
+                .flatMap(Collection::stream)
+                .filter(service -> service.getStatus() != Status.DONE)
+                .collect(Collectors.groupingBy(service -> service.getEquipment().getAttributes().get(MANAGED),
+                        Collectors.groupingBy(service -> service.getEquipment().getFamily().getCode(),
+                                Collectors.groupingBy(Action::getStatus, Collectors.counting()))));
 
-        Expression<Boolean> managed = getManagedPath(builder, equipment.get(Equipment_.attributes));
+        var result = equipmentServices.getOrDefault(true, new HashMap<>());
 
-        var query = criteriaQuery
-                .multiselect(
-                        family.get(Family_.code),
-                        service.get(Service_.status),
-                        managed,
-                        builder.count(service))
-                .where(builder.and(
-                        builder.equal(domain.get(Domain_.name), "EP"),
-                        service.get(Service_.status).in(List.of(Status.NEW, Status.IN_PROGRESS))))
-                .groupBy(family.get(Family_.code), service.get(Service_.status), managed);
+        var mergedUnmanagedEquipments = equipmentServices.getOrDefault(false, Map.of()).values()
+                .stream()
+                .flatMap(m -> m.entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingLong(Map.Entry::getValue)));
 
-        var result = em.createQuery(query)
-                .getResultList();
-
-        var linkedServicesByStatus = getServiceCountByManagedEquipAndStatus(result);
-
-        linkedServicesByStatus.put(UNMANAGED,
-                result.stream()
-                        .filter(r -> !r.managed())
-                        .collect(Collectors.groupingBy(ServiceWithEquipments::status,
-                                Collectors.summingLong(ServiceWithEquipments::count))));
-
-        return linkedServicesByStatus;
-    }
-
-    private Map<String, Map<Status, Long>> getServiceCountByManagedEquipAndStatus(List<ServiceWithEquipments> result) {
-        Map<String, Map<Status, Long>> linkedServicesByStatus = new HashMap<>();
-
-        result.stream()
-                .filter(ServiceWithEquipments::managed)
-                .forEach(s -> {
-                    if (linkedServicesByStatus.containsKey(s.code())) {
-                        linkedServicesByStatus.get(s.code()).put(s.status, s.count());
-                    } else {
-                        linkedServicesByStatus.put(s.code(), new EnumMap<>(Map.of(s.status(), s.count())));
-                    }
-                });
-        return linkedServicesByStatus;
+        result.put(UNMANAGED, mergedUnmanagedEquipments);
+        return result;
     }
 
     public Map<String, Long> getEquipmentsGroupByEntityAndManaged(Family family, Domain domain) {
@@ -169,5 +150,21 @@ public class MetricsDatabaseReader extends DatabaseReader {
     private Expression<Boolean> getManagedPath(CriteriaBuilder builder, Path<Map<String, Object>> attributes) {
         return builder.function("jsonb_extract_path_text", Boolean.class,
                 attributes, builder.literal(MANAGED));
+    }
+
+    private Predicate<Event> isUnDone() {
+        return event -> event.getStatus() != Status.DONE;
+    }
+
+    private Predicate<Event> isNotManifestation() {
+        return event -> event.getCategory() != Category.MANIFESTATION;
+    }
+
+    private Predicate<Event> isOneOfCriticality(List<Criticality> criticalities) {
+        return event -> (criticalities.isEmpty()) || (criticalities.contains(event.getCriticality()));
+    }
+
+    private Predicate<Event> isOneOfCategory(List<Category> categories) {
+        return event -> (categories.isEmpty()) || (categories.contains(event.getCategory()));
     }
 }

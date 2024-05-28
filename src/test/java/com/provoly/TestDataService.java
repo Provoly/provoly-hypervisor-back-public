@@ -64,14 +64,14 @@ public class TestDataService {
         procedure2 = initProcedure("procedure2", List.of(service3, service4, service5));
         procedure3 = initProcedure("procedure3", List.of(service6));
 
-        initOperatorEvent("operator1", OperatorCategory.OPERATOR_EVENT, Criticality.LOW, Status.NEW, null, equip1);
-        initOperatorEvent("manfestation1", OperatorCategory.MANIFESTATION, Criticality.MEDIUM, Status.IN_PROGRESS, procedure1,
+        initOperatorEvent("operator1", Category.OPERATOR_EVENT, Criticality.LOW, Status.NEW, null, equip1);
+        initOperatorEvent("manfestation1", Category.MANIFESTATION, Criticality.MEDIUM, Status.IN_PROGRESS, procedure1,
                 equip2);
         initReportEvent("report1", Criticality.LOW, Status.NEW, null, equip6);
         initReportEvent("report2", Criticality.HIGH, Status.IN_PROGRESS, procedure3, equip3);
         initReportEvent("report3", Criticality.MEDIUM, Status.DONE, procedure2, equip5);
-        initAlertEvent("malfunction1", AlertCategory.ALERT_MALFUNCTION, Criticality.LOW, Status.DONE, procedure3, equip4);
-        initAlertEvent("limint1", AlertCategory.ALERT_LIMIT, Criticality.LOW, Status.NEW, null, equip7);
+        initAlertEvent("malfunction1", Category.ALERT_MALFUNCTION, Criticality.LOW, Status.NEW, procedure3, equip4);
+        initAlertEvent("limint1", Category.ALERT_LIMIT, Criticality.LOW, Status.NEW, null, equip7);
 
     }
 
@@ -100,7 +100,7 @@ public class TestDataService {
         return procedure;
     }
 
-    private void initOperatorEvent(String name, OperatorCategory category, Criticality criticality, Status status,
+    private void initOperatorEvent(String name, Category category, Criticality criticality, Status status,
             Procedure procedure,
             Equipment equipment) {
         var event = new EventOperator(UUID.randomUUID());
@@ -110,7 +110,7 @@ public class TestDataService {
         event.setCategory(category);
         event.setCriticality(criticality);
         event.setStatus(status);
-        if (event.getCategory() == OperatorCategory.MANIFESTATION) {
+        if (event.getCategory() == Category.MANIFESTATION) {
             event.setStartDate(Instant.now());
             event.setEndDate(Instant.now());
         }
@@ -133,7 +133,7 @@ public class TestDataService {
         event.setName(name);
         event.setAddress("report event address");
         event.setDescription("description");
-        event.setCategory(ReportCategory.REPORT);
+        event.setCategory(Category.REPORT);
         event.setCriticality(criticality);
         event.setStatus(status);
         event.setExternalSourceRef("external_source");
@@ -150,7 +150,7 @@ public class TestDataService {
         em.persist(event);
     }
 
-    private void initAlertEvent(String name, AlertCategory category, Criticality criticality, Status status,
+    private void initAlertEvent(String name, Category category, Criticality criticality, Status status,
             Procedure procedure,
             Equipment equipment) {
         var event = new EventAlert(UUID.randomUUID());

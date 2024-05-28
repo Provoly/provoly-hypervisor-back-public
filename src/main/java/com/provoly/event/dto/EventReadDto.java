@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import com.provoly.equipment.EquipmentReadDto;
+import com.provoly.event.Category;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventType;
 import com.provoly.event.Status;
@@ -14,6 +15,7 @@ public class EventReadDto {
     private String address;
     private String description;
     private Criticality criticality;
+    private Category category;
     private Status status;
     private EventType type;
     private Instant lastModificationDate;
@@ -29,7 +31,7 @@ public class EventReadDto {
             String name,
             String address,
             String description,
-            Criticality criticality,
+            Criticality criticality, Category category,
             Status status,
             EventType type,
             Instant lastModificationDate,
@@ -45,6 +47,7 @@ public class EventReadDto {
         this.address = address;
         this.description = description;
         this.criticality = criticality;
+        this.category = category;
         this.status = status;
         this.type = type;
         this.lastModificationDate = lastModificationDate;
@@ -73,6 +76,7 @@ public class EventReadDto {
         this.linkedEvents = dto.getLinkedEvents();
         this.procedureProgress = dto.getProcedureProgress();
         this.domain = dto.getDomain();
+        this.category = dto.getCategory();
     }
 
     public UUID getId() {
@@ -93,6 +97,10 @@ public class EventReadDto {
 
     public Criticality getCriticality() {
         return criticality;
+    }
+
+    public Category getCategory() {
+        return category;
     }
 
     public Status getStatus() {

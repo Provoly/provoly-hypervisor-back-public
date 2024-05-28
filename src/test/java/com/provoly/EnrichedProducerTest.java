@@ -10,9 +10,9 @@ import jakarta.inject.Inject;
 
 import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.EquipmentWriteDto;
+import com.provoly.event.Category;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventService;
-import com.provoly.event.ReportCategory;
 import com.provoly.event.dto.ReportEventWriteDto;
 
 import io.quarkus.kafka.client.serialization.ObjectMapperSerde;
@@ -72,14 +72,14 @@ public class EnrichedProducerTest {
                 null);
         equipmentService.saveOrUpdateEquipments(List.of(equipment, equipment2)); // 2 messages
 
-        var equipId = equipmentService.getEquipments("CHALONS_COMMUN").stream().findFirst().get().getId();
+        var equipId = equipmentService.getEquipments(List.of("CHALONS_COMMUN")).stream().findFirst().get().getId();
         var event = new ReportEventWriteDto(eventReportId, "toto",
-                "desc", Criticality.HIGH, "address", equipId, ReportCategory.REPORT, "ref", "EP");
+                "desc", Criticality.HIGH, "address", equipId, Category.REPORT, "ref", "EP");
         eventService.saveOrUpdateEvent(event); // 1 message
 
-        var equipId2 = equipmentService.getEquipments("AGGLO_COMMUN").stream().findFirst().get().getId();
+        var equipId2 = equipmentService.getEquipments(List.of("AGGLO_COMMUN")).stream().findFirst().get().getId();
         var eventUpdated = new ReportEventWriteDto(eventReportId, "toto",
-                "desc", Criticality.HIGH, "address", equipId2, ReportCategory.REPORT, "ref", "EP");
+                "desc", Criticality.HIGH, "address", equipId2, Category.REPORT, "ref", "EP");
         eventService.saveOrUpdateEvent(eventUpdated); // 2 messages : one for updated event and one for previous equipment
 
         // when
@@ -102,9 +102,9 @@ public class EnrichedProducerTest {
                 null);
         equipmentService.saveOrUpdateEquipments(List.of(equipment, equipment2)); // 2 messages
 
-        var equipId = equipmentService.getEquipments("CHALONS_COMMUN").stream().findFirst().get().getId();
+        var equipId = equipmentService.getEquipments(List.of("CHALONS_COMMUN")).stream().findFirst().get().getId();
         var event = new ReportEventWriteDto(eventReportId, "tutu",
-                "desc", Criticality.HIGH, "address", equipId, ReportCategory.REPORT, "ref", "EP");
+                "desc", Criticality.HIGH, "address", equipId, Category.REPORT, "ref", "EP");
         eventService.saveOrUpdateEvent(event); // 1 messages
 
         // when

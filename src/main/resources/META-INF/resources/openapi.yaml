@@ -779,6 +779,10 @@ paths:
       parameters:
         - name: entity
           in: query
+          schema:
+            type: array
+            items:
+             type: string
           description: must match one of `EquipmentEntity` name
           example: 'FAGNIERES_COMMUN'
       responses:
@@ -941,6 +945,27 @@ paths:
         at least one event that has not been closed, the number of services requested for this equipment, 
         and the number of services in progress.
       operationId: com.provoly.metrics.MetricsController_getEquipmentWithEvent
+      parameters:
+        - name: entity
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: criticality
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Criticality'
+        - name: category
+          in: query
+          schema:
+            items:
+              anyOf:
+                - $ref: '#/components/schemas/AlertCategory'
+                - $ref: '#/components/schemas/OperatorCategory'
+                - $ref: '#/components/schemas/ReportCategory'
       responses:
         "401":
           description: Not Authorized
@@ -977,7 +1002,7 @@ paths:
       description: |
         Returns the number of equipments for `EP` domain in a given family grouped by entity. 
         The number of managed equipments is separated from the number of unmanaged equipments.
-      operationId: com.provoly.metrics.MetricsController_getEquipmentByEntity
+      operationId: com.provoly.metrics.MetricsController_getTotalEquipmentsByEntity
       parameters:
         - name: family
           in: path
@@ -1116,7 +1141,7 @@ components:
           type: string
           required: true
           description: Value must match one of `Equipment Entity` name
-        EREQ_LEVEL:
+        level:
           type: integer
           required: true
           description: Corresponds to the level to determine whether it will have a parent or not. If the value is 1, then it can be referenced in children equipments and will not itself have a parent equipment.

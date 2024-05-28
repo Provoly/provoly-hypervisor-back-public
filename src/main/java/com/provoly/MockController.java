@@ -35,7 +35,7 @@ public class MockController {
     @POST
     @Authenticated
     @Transactional
-    public void mock(@DefaultValue("70") @Positive @RestQuery int eventNumber,
+    public void mock(@DefaultValue("30") @Positive @RestQuery int eventNumber,
             @DefaultValue("10") @Positive @RestQuery int procedureNumber) {
 
         var procedures = new ArrayList<Procedure>();
@@ -62,16 +62,16 @@ public class MockController {
                 var event = new EventOperator(id);
                 event.setName(getName("Evenement operateur", id, i));
                 event.setAddress(getAddress(i));
-                event.setDescription("description");
+                event.setDescription("description of %s".formatted(event.getName()));
                 event.setCategory(randomOpertaorCategory());
                 event.setCriticality(randomCriticality());
-                event.setStatus(randomStatus());
-                if (event.getCategory() == OperatorCategory.MANIFESTATION) {
+                if (event.getCategory() == Category.MANIFESTATION) {
                     event.setStartDate(Instant.now());
                     event.setEndDate(Instant.now());
                 }
                 setDomain(event, domains);
                 setProcedure(eventNumber, procedures, event);
+                event.setStatus(randomStatus());
                 setCloseDate(event);
                 entityManager.persist(event);
             }
@@ -80,13 +80,13 @@ public class MockController {
                 var event = new EventAlert(id);
                 event.setName(getName("Alerte", id, i));
                 event.setAddress(getAddress(i));
-                event.setDescription("description");
+                event.setDescription("description of %s".formatted(event.getName()));
                 event.setCategory(randomAlertCategory());
                 event.setCriticality(randomCriticality());
-                event.setStatus(randomStatus());
                 event.setExternalSourceRef("citylinx_%s".formatted(i));
                 setDomain(event, domains);
                 setProcedure(eventNumber, procedures, event);
+                event.setStatus(randomStatus());
                 setCloseDate(event);
                 entityManager.persist(event);
             }
@@ -95,13 +95,13 @@ public class MockController {
                 var event = new EventReport(id);
                 event.setName(getName("Signalement", id, i));
                 event.setAddress(getAddress(i));
-                event.setDescription("description");
-                event.setCategory(ReportCategory.REPORT);
+                event.setDescription("description of %s".formatted(event.getName()));
+                event.setCategory(Category.REPORT);
                 event.setCriticality(randomCriticality());
-                event.setStatus(randomStatus());
                 event.setExternalSourceRef("grc_%s".formatted(i));
                 setDomain(event, domains);
                 setProcedure(eventNumber, procedures, event);
+                event.setStatus(randomStatus());
                 setCloseDate(event);
                 entityManager.persist(event);
             }
@@ -145,22 +145,22 @@ public class MockController {
     }
 
     private Status randomStatus() {
-        var values = Collections.unmodifiableList(Arrays.asList(Status.values()));
+        var values = Arrays.stream(Status.values()).toList();
         return values.get(rand.nextInt(values.size()));
     }
 
     private Criticality randomCriticality() {
-        var values = Collections.unmodifiableList(Arrays.asList(Criticality.values()));
+        var values = Arrays.stream(Criticality.values()).toList();
         return values.get(rand.nextInt(values.size()));
     }
 
-    private OperatorCategory randomOpertaorCategory() {
-        var values = Collections.unmodifiableList(Arrays.asList(OperatorCategory.values()));
+    private Category randomOpertaorCategory() {
+        var values = Arrays.stream(Category.values()).toList();
         return values.get(rand.nextInt(values.size()));
     }
 
-    private AlertCategory randomAlertCategory() {
-        var values = Collections.unmodifiableList(Arrays.asList(AlertCategory.values()));
+    private Category randomAlertCategory() {
+        var values = Arrays.stream(Category.values()).filter(category -> category.getEventType() == EventType.ALERT).toList();
         return values.get(rand.nextInt(values.size()));
     }
 }
