@@ -45,13 +45,13 @@ public class TestDataService {
         var fagnieres = equipmentDatabaseReader.getEquipmentEntityByName("FAGNIERES_COMMUN").get();
         var stm = equipmentDatabaseReader.getEquipmentEntityByName("SAINT_MARTIN_COMMUN").get();
 
-        var equip1 = initEquipment("P-1000", foyerLumineux, fagnieres, false);
-        var equip2 = initEquipment("A-230", armoire, stm, true);
-        var equip3 = initEquipment("A-4901", armoire, agglo, false);
-        var equip4 = initEquipment("C-1034", foyerLumineux, agglo, true);
-        var equip5 = initEquipment("C-7614", ouvrage, chalons, false);
-        var equip6 = initEquipment("C-762", ouvrage, agglo, true);
-        var equip7 = initEquipment("C-763", ouvrage, agglo, false);
+        var equip1 = initEquipment("P-1000", foyerLumineux, fagnieres, 0);
+        var equip2 = initEquipment("A-230", armoire, stm, 1);
+        var equip3 = initEquipment("A-4901", armoire, agglo, 0);
+        var equip4 = initEquipment("C-1034", foyerLumineux, agglo, 1);
+        var equip5 = initEquipment("C-7614", ouvrage, chalons, 0);
+        var equip6 = initEquipment("C-762", ouvrage, agglo, 1);
+        var equip7 = initEquipment("C-763", ouvrage, agglo, 0);
 
         var service1 = new Service(UUID.randomUUID(), Instant.now(), Status.IN_PROGRESS, "service 1", null);
         var service2 = new Service(UUID.randomUUID(), Instant.now(), Status.NEW, "service 2", null);
@@ -180,7 +180,7 @@ public class TestDataService {
         em.persist(service);
     }
 
-    private Equipment initEquipment(String name, Family family, EquipmentEntity entity, boolean managed) {
+    private Equipment initEquipment(String name, Family family, EquipmentEntity entity, int managed) {
         var equipment = new Equipment(UUID.randomUUID());
         equipment.setExternalId(name);
         equipment.setName(name);

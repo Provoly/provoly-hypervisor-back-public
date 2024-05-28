@@ -20,6 +20,7 @@ import com.provoly.event.*;
 public class MetricsDatabaseReader extends DatabaseReader {
     public static final String UNMANAGED = "unmanaged";
     public static final String MANAGED = "managed";
+    private static final long EP_ID = 1L;
 
     private final EquipmentService equipmentService;
 
@@ -28,7 +29,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
         this.equipmentService = equipmentService;
     }
 
-    private record QueryResult(String code, boolean managed, long count) {
+    private record QueryResult(String code, int managed, long count) {
     }
 
     public List<Equipment> getEquipmentsWithUnDoneEvents(List<String> entities,
@@ -40,7 +41,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
         return equipmentService
                 .getEquipments(entities)
                 .stream()
-                .filter(equipment -> equipment.getDomain().getName().equals("EP"))
+                .filter(equipment -> equipment.getDomain().getId().equals(EP_ID))
                 .filter(equipment -> matchEvents(equipment.getEvents(), eventCriticalities, eventCategories))
                 .toList();
 
@@ -61,8 +62,8 @@ public class MetricsDatabaseReader extends DatabaseReader {
                 .collect(Collectors.groupingBy(equipment -> equipment.getAttributes().get(MANAGED),
                         Collectors.groupingBy(equipment -> equipment.getFamily().getCode(), Collectors.counting())));
 
-        var result = groupedByManagedAndCode.getOrDefault(true, new HashMap<>());
-        long mergedUnmanagedEquipments = groupedByManagedAndCode.getOrDefault(false, Map.of()).values().stream()
+        var result = groupedByManagedAndCode.getOrDefault(1, new HashMap<>());
+        long mergedUnmanagedEquipments = groupedByManagedAndCode.getOrDefault(0, Map.of()).values().stream()
                 .mapToLong(v -> v).sum();
         result.put(UNMANAGED, mergedUnmanagedEquipments);
         return result;
@@ -74,15 +75,14 @@ public class MetricsDatabaseReader extends DatabaseReader {
         Root<Equipment> equipment = criteriaQuery.from(Equipment.class);
         var family = equipment.join(Equipment_.family, JoinType.LEFT);
         var domain = equipment.join(Equipment_.domain, JoinType.LEFT);
-
-        final Expression<Boolean> managed = getManagedPath(builder, equipment.get(Equipment_.attributes));
+        var managed = getManagedPath(builder, equipment.get(Equipment_.attributes));
 
         var query = criteriaQuery
                 .multiselect(
                         family.get(Family_.code),
                         managed,
                         builder.count(equipment))
-                .where(builder.equal(domain.get(Domain_.name), "EP"))
+                .where(builder.equal(domain.get(Domain_.id), EP_ID))
                 .groupBy(family.get(Family_.code), managed);
 
         var result = em.createQuery(query)
@@ -100,9 +100,9 @@ public class MetricsDatabaseReader extends DatabaseReader {
                         Collectors.groupingBy(service -> service.getEquipment().getFamily().getCode(),
                                 Collectors.groupingBy(Action::getStatus, Collectors.counting()))));
 
-        var result = equipmentServices.getOrDefault(true, new HashMap<>());
+        var result = equipmentServices.getOrDefault(1, new HashMap<>());
 
-        var mergedUnmanagedEquipments = equipmentServices.getOrDefault(false, Map.of()).values()
+        var mergedUnmanagedEquipments = equipmentServices.getOrDefault(0, Map.of()).values()
                 .stream()
                 .flatMap(m -> m.entrySet().stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingLong(Map.Entry::getValue)));
@@ -116,7 +116,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
         CriteriaQuery<QueryResult> criteriaQuery = builder.createQuery(QueryResult.class);
         Root<Equipment> equipment = criteriaQuery.from(Equipment.class);
         var entity = equipment.join(Equipment_.entity, JoinType.LEFT);
-        Expression<Boolean> managed = getManagedPath(builder, equipment.get(Equipment_.attributes));
+        var managed = getManagedPath(builder, equipment.get(Equipment_.attributes));
 
         var query = criteriaQuery.multiselect(
                 entity.get(EquipmentEntity_.name),
@@ -130,25 +130,25 @@ public class MetricsDatabaseReader extends DatabaseReader {
         return em.createQuery(query)
                 .getResultStream()
                 .collect(Collectors.toMap(
-                        r -> "%s_%s".formatted(r.code(), r.managed() ? MANAGED : UNMANAGED),
+                        r -> "%s_%s".formatted(r.code(), r.managed() == 1 ? MANAGED : UNMANAGED),
                         QueryResult::count));
 
     }
 
     private Map<String, Long> gatherUnmanagedEquipments(List<QueryResult> result) {
         var equipmentWithEventsTotal = result.stream()
-                .filter(QueryResult::managed)
+                .filter(queryResult -> queryResult.managed == 1)
                 .collect(Collectors.toMap(QueryResult::code, QueryResult::count));
 
         equipmentWithEventsTotal.put(UNMANAGED, result.stream()
-                .filter(r -> !r.managed())
+                .filter(queryResult -> queryResult.managed == 0)
                 .mapToLong(QueryResult::count)
                 .sum());
         return equipmentWithEventsTotal;
     }
 
-    private Expression<Boolean> getManagedPath(CriteriaBuilder builder, Path<Map<String, Object>> attributes) {
-        return builder.function("jsonb_extract_path_text", Boolean.class,
+    private Expression<Integer> getManagedPath(CriteriaBuilder builder, Path<Map<String, Object>> attributes) {
+        return builder.function("jsonb_extract_path_text", Integer.class,
                 attributes, builder.literal(MANAGED));
     }
 
