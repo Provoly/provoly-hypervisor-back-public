@@ -3,30 +3,11 @@ package com.provoly.equipment;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+
+import com.provoly.EnumEntity;
 
 @Entity
-public class EquipmentEntity {
-
-    @Id
-    private Long id;
-    private String name;
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
+public class EquipmentEntity extends EnumEntity {
 
     @Override
     public boolean equals(Object o) {

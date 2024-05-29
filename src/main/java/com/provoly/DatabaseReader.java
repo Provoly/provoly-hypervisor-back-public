@@ -39,6 +39,19 @@ public class DatabaseReader {
                 .findFirst();
     }
 
+    public Optional<Domain> getDomainByCode(String code) {
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<Domain> criteriaQuery = builder.createQuery(Domain.class);
+        Root<Domain> root = criteriaQuery.from(Domain.class);
+
+        var query = criteriaQuery.select(root)
+                .where(builder.equal(root.get(Domain_.code), code));
+
+        return em.createQuery(query)
+                .getResultStream()
+                .findFirst();
+    }
+
     public Collection<Domain> getDomains() {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<Domain> criteriaQuery = builder.createQuery(Domain.class);

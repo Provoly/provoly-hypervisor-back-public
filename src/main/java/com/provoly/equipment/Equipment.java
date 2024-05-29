@@ -4,9 +4,9 @@ import java.util.*;
 
 import jakarta.persistence.*;
 
-import com.provoly.action.Service;
 import com.provoly.event.Domain;
 import com.provoly.event.Event;
+import com.provoly.service.Service;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -151,10 +151,13 @@ public class Equipment {
     }
 
     public void addEvent(Event event) {
-        if (events.contains(event)) {
-            events.remove(event);
-        }
+        events.remove(event);
         events.add(event);
+    }
+
+    public void addService(Service service) {
+        services.remove(service);
+        services.add(service);
     }
 
     public void setEvents(List<Event> events) {

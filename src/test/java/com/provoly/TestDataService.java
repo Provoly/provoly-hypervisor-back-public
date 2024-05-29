@@ -1,5 +1,8 @@
 package com.provoly;
 
+import static com.provoly.service.ServiceStatus.ASKED;
+import static com.provoly.service.ServiceStatus.IN_PROGRESS;
+
 import java.time.Instant;
 import java.time.Period;
 import java.util.List;
@@ -11,30 +14,38 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
-import com.provoly.action.Service;
+import com.provoly.action.AskedService;
 import com.provoly.equipment.Equipment;
 import com.provoly.equipment.EquipmentDatabaseReader;
 import com.provoly.equipment.EquipmentEntity;
 import com.provoly.equipment.Family;
 import com.provoly.event.*;
 import com.provoly.procedure.Procedure;
+import com.provoly.service.Service;
+import com.provoly.service.ServiceDatabaseReader;
 
 @ApplicationScoped
 public class TestDataService {
     private EntityManager em;
     private EquipmentDatabaseReader equipmentDatabaseReader;
+    private ServiceDatabaseReader serviceDatabaseReader;
     private Random rand = new Random();
     public Procedure procedure1, procedure2, procedure3;
     private Domain domain;
 
-    public TestDataService(EntityManager em, EquipmentDatabaseReader equipmentDatabaseReader) {
+    public TestDataService(EntityManager em, EquipmentDatabaseReader equipmentDatabaseReader,
+            ServiceDatabaseReader serviceDatabaseReader) {
         this.em = em;
         this.equipmentDatabaseReader = equipmentDatabaseReader;
+        this.serviceDatabaseReader = serviceDatabaseReader;
     }
 
     @Transactional
     public void init() {
-        domain = equipmentDatabaseReader.getDomainByName("EP").get();
+        domain = equipmentDatabaseReader.getDomainByCode("EP").get();
+
+        var prev = serviceDatabaseReader.getServiceCategoryByCode("PREV").get();
+        var cur = serviceDatabaseReader.getServiceCategoryByCode("CURA").get();
 
         var armoire = equipmentDatabaseReader.getFamilyByCode("EP_ARMOIRE").get();
         var foyerLumineux = equipmentDatabaseReader.getFamilyByCode("EP_FOYER_LUMINEUX").get();
@@ -53,16 +64,25 @@ public class TestDataService {
         var equip6 = initEquipment("C-762", ouvrage, agglo, 1);
         var equip7 = initEquipment("C-763", ouvrage, agglo, 0);
 
-        var service1 = new Service(UUID.randomUUID(), Instant.now(), Status.IN_PROGRESS, "service 1", null);
-        var service2 = new Service(UUID.randomUUID(), Instant.now(), Status.NEW, "service 2", null);
-        var service3 = new Service(UUID.randomUUID(), Instant.now(), Status.DONE, "service 3", null);
-        var service4 = new Service(UUID.randomUUID(), Instant.now(), Status.IN_PROGRESS, "service 4", null);
-        var service5 = new Service(UUID.randomUUID(), Instant.now(), Status.NEW, "service 5", null);
-        var service6 = new Service(UUID.randomUUID(), Instant.now(), Status.DONE, "service 6", null);
+        var service1 = new Service(UUID.randomUUID(), "DI1234", Instant.now(), Instant.now(), Instant.now(), Instant.now(),
+                Instant.now(), equip3, domain, ASKED, prev);
+        em.persist(service1);
 
-        procedure1 = initProcedure("procedure1", List.of(service1, service2));
-        procedure2 = initProcedure("procedure2", List.of(service3, service4, service5));
-        procedure3 = initProcedure("procedure3", List.of(service6));
+        var service2 = new Service(UUID.randomUUID(), "DI5678@1223", Instant.now(), Instant.now(), Instant.now(), Instant.now(),
+                Instant.now(), equip5, domain, IN_PROGRESS, cur);
+
+        em.persist(service2);
+
+        var asked1 = new AskedService(UUID.randomUUID(), Instant.now(), Status.IN_PROGRESS, "service 1");
+        var asked2 = new AskedService(UUID.randomUUID(), Instant.now(), Status.NEW, "service 2");
+        var asked3 = new AskedService(UUID.randomUUID(), Instant.now(), Status.DONE, "service 3");
+        var asked4 = new AskedService(UUID.randomUUID(), Instant.now(), Status.IN_PROGRESS, "service 4");
+        var asked5 = new AskedService(UUID.randomUUID(), Instant.now(), Status.NEW, "service 5");
+        var asked6 = new AskedService(UUID.randomUUID(), Instant.now(), Status.DONE, "service 6");
+
+        procedure1 = initProcedure("procedure1", List.of(asked1, asked2));
+        procedure2 = initProcedure("procedure2", List.of(asked3, asked4, asked5));
+        procedure3 = initProcedure("procedure3", List.of(asked6));
 
         initOperatorEvent("operator1", Category.OPERATOR_EVENT, Criticality.LOW, Status.NEW, null, equip1);
         initOperatorEvent("manfestation1", Category.MANIFESTATION, Criticality.MEDIUM, Status.IN_PROGRESS, procedure1,
@@ -72,7 +92,6 @@ public class TestDataService {
         initReportEvent("report3", Criticality.MEDIUM, Status.DONE, procedure2, equip5);
         initAlertEvent("malfunction1", Category.ALERT_MALFUNCTION, Criticality.LOW, Status.NEW, procedure3, equip4);
         initAlertEvent("limint1", Category.ALERT_LIMIT, Criticality.LOW, Status.NEW, null, equip7);
-
     }
 
     @Transactional
@@ -91,7 +110,7 @@ public class TestDataService {
         return procedure3.getId();
     }
 
-    private Procedure initProcedure(String name, List<Service> services) {
+    private Procedure initProcedure(String name, List<AskedService> services) {
         var procedure = new Procedure(UUID.randomUUID(), name, Instant.now());
         for (var service : services) {
             procedure.addAction(service);

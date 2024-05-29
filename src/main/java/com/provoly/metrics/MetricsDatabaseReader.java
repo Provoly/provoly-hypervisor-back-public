@@ -1,5 +1,7 @@
 package com.provoly.metrics;
 
+import static java.util.stream.Collectors.groupingBy;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -12,15 +14,16 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
 
 import com.provoly.DatabaseReader;
-import com.provoly.action.Action;
 import com.provoly.equipment.*;
 import com.provoly.event.*;
+import com.provoly.service.Service;
+import com.provoly.service.ServiceStatus;
 
 @ApplicationScoped
 public class MetricsDatabaseReader extends DatabaseReader {
     public static final String UNMANAGED = "unmanaged";
     public static final String MANAGED = "managed";
-    private static final long EP_ID = 1L;
+    private static final long EP_ID = 1;
 
     private final EquipmentService equipmentService;
 
@@ -41,7 +44,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
         return equipmentService
                 .getEquipments(entities)
                 .stream()
-                .filter(equipment -> equipment.getDomain().getId().equals(EP_ID))
+                .filter(equipment -> equipment.getDomain().getId() == EP_ID)
                 .filter(equipment -> matchEvents(equipment.getEvents(), eventCriticalities, eventCategories))
                 .toList();
 
@@ -59,8 +62,8 @@ public class MetricsDatabaseReader extends DatabaseReader {
     public Map<String, Long> equipmentsCountGroupedByManaged(List<Equipment> equipments) {
         var groupedByManagedAndCode = equipments
                 .stream()
-                .collect(Collectors.groupingBy(equipment -> equipment.getAttributes().get(MANAGED),
-                        Collectors.groupingBy(equipment -> equipment.getFamily().getCode(), Collectors.counting())));
+                .collect(groupingBy(equipment -> equipment.getAttributes().get(MANAGED),
+                        groupingBy(equipment -> equipment.getFamily().getCode(), Collectors.counting())));
 
         var result = groupedByManagedAndCode.getOrDefault(1, new HashMap<>());
         long mergedUnmanagedEquipments = groupedByManagedAndCode.getOrDefault(0, Map.of()).values().stream()
@@ -91,21 +94,22 @@ public class MetricsDatabaseReader extends DatabaseReader {
         return gatherUnmanagedEquipments(result);
     }
 
-    public Map<String, Map<Status, Long>> getEquipmentServicesByStatus(List<Equipment> equipments) {
+    public Map<String, Map<ServiceStatus, Long>> getEquipmentServicesByStatus(List<Equipment> equipments) {
         var equipmentServices = equipments.stream()
                 .map(Equipment::getServices)
                 .flatMap(Collection::stream)
-                .filter(service -> service.getStatus() != Status.DONE)
-                .collect(Collectors.groupingBy(service -> service.getEquipment().getAttributes().get(MANAGED),
-                        Collectors.groupingBy(service -> service.getEquipment().getFamily().getCode(),
-                                Collectors.groupingBy(Action::getStatus, Collectors.counting()))));
+                .filter(service -> service.getStatus() == ServiceStatus.ASKED
+                        || service.getStatus() == ServiceStatus.IN_PROGRESS)
+                .collect(groupingBy(service -> service.getEquipment().getAttributes().get(MANAGED),
+                        groupingBy(service -> service.getEquipment().getFamily().getCode(),
+                                groupingBy(Service::getStatus, Collectors.counting()))));
 
         var result = equipmentServices.getOrDefault(1, new HashMap<>());
 
         var mergedUnmanagedEquipments = equipmentServices.getOrDefault(0, Map.of()).values()
                 .stream()
                 .flatMap(m -> m.entrySet().stream())
-                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingLong(Map.Entry::getValue)));
+                .collect(groupingBy(Map.Entry::getKey, Collectors.summingLong(Map.Entry::getValue)));
 
         result.put(UNMANAGED, mergedUnmanagedEquipments);
         return result;

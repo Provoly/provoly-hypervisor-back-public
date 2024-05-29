@@ -1,0 +1,69 @@
+package com.provoly.service;
+
+import java.util.Collection;
+
+import jakarta.enterprise.context.ApplicationScoped;
+
+import com.provoly.equipment.EquipmentService;
+import com.provoly.equipment.ShortEquipmentMapper;
+
+@ApplicationScoped
+public class ServiceMapper {
+
+    private final ShortEquipmentMapper shortEquipmentMapper;
+    private final EquipmentService equipmentService;
+    private final ServiceDatabaseReader databaseReader;
+
+    public ServiceMapper(ShortEquipmentMapper shortEquipmentMapper, EquipmentService equipmentService,
+            ServiceDatabaseReader databaseReader) {
+        this.shortEquipmentMapper = shortEquipmentMapper;
+        this.equipmentService = equipmentService;
+        this.databaseReader = databaseReader;
+    }
+
+    public ServiceReadDto mapToServiceReadDto(Service service) {
+        if (service == null) {
+            return null;
+        }
+        return new ServiceReadDto(
+                service.getId(),
+                service.getExternalId(),
+                service.getDescription(),
+                shortEquipmentMapper.mapToEquipmentShortDto(service.getEquipment()),
+                service.getCreationDate(),
+                service.getLastModificationDate(),
+                service.getStartDate(),
+                service.getEndDate(),
+                service.getDomain().getCode(),
+                service.getStatus(),
+                service.getCategory().getName());
+    }
+
+    public Collection<ServiceReadDto> mapToServiceReadDtos(Collection<Service> services) {
+        return services.stream().map(this::mapToServiceReadDto).toList();
+    }
+
+    public void updateService(ServiceWriteDto dto, Service entity) {
+        entity.setExternalId(dto.id());
+        entity.setDescription(dto.description());
+        entity.setEquipment(equipmentService.getEquipmentByName(dto.equipment()));
+        entity.setCreationDate(dto.creationDate());
+        entity.setLastModificationDate(dto.lastModificationDate());
+        entity.setStartDate(dto.startDate());
+        entity.setEndDate(dto.endDate());
+        entity.setCloseDate(dto.closeDate());
+        entity.setStatus(dto.status());
+
+        var domain = databaseReader
+                .getDomainByCode(dto.domain())
+                .orElseThrow(() -> new IllegalArgumentException("Domain name %s not found".formatted(dto.domain())));
+
+        entity.setDomain(domain);
+
+        var category = databaseReader.getServiceCategoryByCode(dto.category())
+                .orElseThrow(() -> new IllegalArgumentException("Service category %s not found".formatted(dto.category())));
+
+        entity.setCategory(category);
+
+    }
+}

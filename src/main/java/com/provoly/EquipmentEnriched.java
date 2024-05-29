@@ -1,14 +1,14 @@
 package com.provoly;
 
+import static com.provoly.service.ServiceStatus.ASKED;
+import static com.provoly.service.ServiceStatus.IN_PROGRESS;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import com.provoly.equipment.Equipment;
 import com.provoly.event.Event;
-import com.provoly.event.EventAlert;
-import com.provoly.event.EventOperator;
-import com.provoly.event.EventReport;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 
@@ -23,15 +23,15 @@ public class EquipmentEnriched {
     private final Map<String, Object> attributes;
     private final EquipmentEnriched parent;
     private final List<CondensedEvent> events;
-    private final List<CondensedService> services;
+    private final long nbServicesAskedInProgress;
 
     public EquipmentEnriched(Equipment equipment) { // TODO: add equipment location
         this.id = equipment.getId();
         this.externalId = equipment.getExternalId();
         this.name = equipment.getName();
         this.code = equipment.getCode();
-        this.domain = equipment.getDomain().getName();
-        this.entity = equipment.getEntity().getName();
+        this.domain = equipment.getDomain().getCode();
+        this.entity = equipment.getEntity().getCode();
         this.family = equipment.getFamily().getCode();
         this.attributes = equipment.getAttributes();
         this.parent = equipment.getParent() == null ? null : new EquipmentEnriched(equipment.getParent());
@@ -40,15 +40,14 @@ public class EquipmentEnriched {
                 .stream()
                 .map(this::condensedEvent)
                 .toList();
-        this.services = equipment.getServices()
-                .stream()
-                .map(s -> new CondensedService(s.getId(), s.getStatus(), s.getLastModificationDate()))
-                .toList();
+        this.nbServicesAskedInProgress = equipment.getServices().stream()
+                .filter(service -> List.of(ASKED, IN_PROGRESS).contains(service.getStatus()))
+                .count();
     }
 
     public EquipmentEnriched(UUID id, String externalId, String name, String code, String domain, String entity, String family,
             Map<String, Object> attributes, EquipmentEnriched parent, List<CondensedEvent> events,
-            List<CondensedService> services) {
+            long nbServicesAskedInProgress) {
         this.id = id;
         this.externalId = externalId;
         this.name = name;
@@ -59,7 +58,7 @@ public class EquipmentEnriched {
         this.attributes = attributes;
         this.parent = parent;
         this.events = events;
-        this.services = services;
+        this.nbServicesAskedInProgress = nbServicesAskedInProgress;
     }
 
     public UUID getId() {
@@ -103,18 +102,13 @@ public class EquipmentEnriched {
         return events;
     }
 
-    public List<CondensedService> getServices() {
-        return services;
+    public long getNbServicesAskedInProgress() {
+        return nbServicesAskedInProgress;
     }
 
     private CondensedEvent condensedEvent(Event event) {
         return new CondensedEvent(
-                switch (event) {
-                    case EventOperator e -> e.getCategory().name();
-                    case EventAlert e -> e.getCategory().name();
-                    case EventReport e -> e.getCategory().name();
-                    default -> throw new IllegalStateException("Unexpected value: " + event);
-                },
+                event.getCategory().name(),
                 event.getCriticality());
     }
 

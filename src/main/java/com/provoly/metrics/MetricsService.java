@@ -1,6 +1,8 @@
 package com.provoly.metrics;
 
 import static com.provoly.metrics.MetricsDatabaseReader.UNMANAGED;
+import static com.provoly.service.ServiceStatus.ASKED;
+import static com.provoly.service.ServiceStatus.IN_PROGRESS;
 
 import java.util.List;
 import java.util.Map;
@@ -11,6 +13,7 @@ import jakarta.transaction.Transactional;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.Family;
 import com.provoly.event.*;
+import com.provoly.service.ServiceStatus;
 
 import org.jboss.logging.Logger;
 
@@ -55,25 +58,25 @@ public class MetricsService {
         return new EquipmentWithEventsDto(
                 equipments.getOrDefault(ARMOIRE_CODE, 0L),
                 totalEquipmentWithEvent.getOrDefault(ARMOIRE_CODE, 0L),
-                getServicesForEquipmentAndStatus(servicesByEquipments, ARMOIRE_CODE, Status.NEW),
-                getServicesForEquipmentAndStatus(servicesByEquipments, ARMOIRE_CODE, Status.IN_PROGRESS),
+                getServicesForEquipmentAndStatus(servicesByEquipments, ARMOIRE_CODE, ASKED),
+                getServicesForEquipmentAndStatus(servicesByEquipments, ARMOIRE_CODE, IN_PROGRESS),
 
                 equipments.getOrDefault(FOYER_LUMINEUX_CODE, 0L),
                 totalEquipmentWithEvent.getOrDefault(FOYER_LUMINEUX_CODE, 0L),
-                getServicesForEquipmentAndStatus(servicesByEquipments, FOYER_LUMINEUX_CODE, Status.NEW),
-                getServicesForEquipmentAndStatus(servicesByEquipments, FOYER_LUMINEUX_CODE, Status.IN_PROGRESS),
+                getServicesForEquipmentAndStatus(servicesByEquipments, FOYER_LUMINEUX_CODE, ASKED),
+                getServicesForEquipmentAndStatus(servicesByEquipments, FOYER_LUMINEUX_CODE, IN_PROGRESS),
 
                 equipments.getOrDefault(UNMANAGED, 0L),
                 totalEquipmentWithEvent.getOrDefault(UNMANAGED, 0L),
-                getServicesForEquipmentAndStatus(servicesByEquipments, UNMANAGED, Status.NEW),
-                getServicesForEquipmentAndStatus(servicesByEquipments, UNMANAGED, Status.IN_PROGRESS));
+                getServicesForEquipmentAndStatus(servicesByEquipments, UNMANAGED, ASKED),
+                getServicesForEquipmentAndStatus(servicesByEquipments, UNMANAGED, IN_PROGRESS));
     }
 
     @Transactional
     public EquipmentByEntityDto getTotalEquipmentsByEntity(String code) {
         logger.infof("Get all equipment by entity for EP domain and family", code);
         Family family = equipmentService.getFamilyByCode(code);
-        Domain domain = metricsDatabaseReader.getDomainByName("EP").get();
+        Domain domain = metricsDatabaseReader.getDomainByCode("EP").get();
 
         var result = metricsDatabaseReader.getEquipmentsGroupByEntityAndManaged(family, domain);
         return new EquipmentByEntityDto(
@@ -88,8 +91,8 @@ public class MetricsService {
 
     }
 
-    private Long getServicesForEquipmentAndStatus(Map<String, Map<Status, Long>> servicesByEquipments, String code,
-            Status status) {
+    private Long getServicesForEquipmentAndStatus(Map<String, Map<ServiceStatus, Long>> servicesByEquipments, String code,
+            ServiceStatus status) {
         return servicesByEquipments.getOrDefault(code, Map.of(status, 0L)).getOrDefault(status, 0L);
     }
 }

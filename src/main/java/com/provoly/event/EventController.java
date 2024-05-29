@@ -38,7 +38,7 @@ public class EventController {
     @POST
     @Path("/report")
     @Authenticated
-    public Response saveEventOperator(@Valid ReportEventWriteDto eventDto) {
+    public Response saveEventReport(@Valid ReportEventWriteDto eventDto) {
         var response = eventService.saveOrUpdateEvent(eventDto);
         return Response.ok().status(response == ResponseCode.UPDATED ? 204 : 201).build();
     }

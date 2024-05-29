@@ -7,25 +7,25 @@ import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
-import com.provoly.equipment.EquipmentMapper;
 import com.provoly.equipment.EquipmentService;
+import com.provoly.equipment.ShortEquipmentMapper;
 import com.provoly.event.dto.*;
 import com.provoly.procedure.Procedure;
 import com.provoly.procedure.ProcedureService;
 
 @ApplicationScoped
 public class EventMapper {
-    private EquipmentMapper equipmentMapper;
-    private ProcedureService procedureService;
-    private EquipmentService equipmentService;
-    private EventDatabaseReader databaseReader;
+    private final ProcedureService procedureService;
+    private final EquipmentService equipmentService;
+    private final EventDatabaseReader databaseReader;
+    private final ShortEquipmentMapper shortEquipmentMapper;
 
-    public EventMapper(EquipmentService equipmentService, EquipmentMapper equipmentMapper,
-            ProcedureService procedureService, EventDatabaseReader databaseReader) {
+    public EventMapper(EquipmentService equipmentService,
+            ProcedureService procedureService, EventDatabaseReader databaseReader, ShortEquipmentMapper shortEquipmentMapper) {
         this.equipmentService = equipmentService;
-        this.equipmentMapper = equipmentMapper;
         this.procedureService = procedureService;
         this.databaseReader = databaseReader;
+        this.shortEquipmentMapper = shortEquipmentMapper;
     }
 
     public EventReadDto mapToEventReadDto(Event event) {
@@ -41,7 +41,7 @@ public class EventMapper {
                 event.getLastModificationDate(),
                 event.getCreationDate(),
                 event.getCloseDate(),
-                equipmentMapper.mapToEquipmentReadDto(event.getEquipment()),
+                shortEquipmentMapper.mapToEquipmentShortDto(event.getEquipment()),
                 getProcedureId(event),
                 procedureService.getLinkedEventCountByProcedure(event.getProcedure()),
                 getProgressActions(event.getProcedure()),
@@ -72,20 +72,17 @@ public class EventMapper {
 
     public void updateOperatorEvent(OperatorEventWriteDto dto, EventOperator entity) {
         setCommonEventProperties(dto, entity);
-        entity.setCategory(dto.getCategory());
         entity.setStartDate(dto.getStartDate());
         entity.setEndDate(dto.getEndDate());
     }
 
     public void saveAlertEvent(AlertEventWriteDto dto, EventAlert entity) {
         setCommonEventProperties(dto, entity);
-        entity.setCategory(dto.getCategory());
         entity.setExternalSourceRef(dto.getExternalSourceRef());
     }
 
     public void updateReportEvent(ReportEventWriteDto dto, EventReport entity) {
         setCommonEventProperties(dto, entity);
-        entity.setCategory(dto.getCategory());
         entity.setExternalSourceRef(dto.getExternalSourceRef());
     }
 
@@ -98,6 +95,7 @@ public class EventMapper {
         entity.setAddress(dto.getAddress());
         entity.setDescription(dto.getDescription());
         entity.setCriticality(dto.getCriticality());
+        entity.setCategory(dto.getCategory());
         entity.setEquipment(equipmentService.getEquipmentByIdOrNull(dto.getEquipmentId()));
         entity.setDomain(mapToDomain(dto.getDomain()));
     }
@@ -110,8 +108,8 @@ public class EventMapper {
         if (domain == null) {
             return null;
         }
-        return databaseReader.getDomainByName(domain)
-                .orElseThrow(() -> new IllegalArgumentException("Domain with name %s invalid".formatted(domain)));
+        return databaseReader.getDomainByCode(domain)
+                .orElseThrow(() -> new IllegalArgumentException("Domain with code %s invalid".formatted(domain)));
     }
 
     private float getProgressActions(Procedure procedure) {

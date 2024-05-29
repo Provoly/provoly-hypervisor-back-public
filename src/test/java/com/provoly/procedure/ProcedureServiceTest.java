@@ -8,7 +8,7 @@ import java.util.UUID;
 import jakarta.inject.Inject;
 
 import com.provoly.TestDataService;
-import com.provoly.action.Service;
+import com.provoly.action.AskedService;
 import com.provoly.action.TodoAction;
 import com.provoly.event.Status;
 
@@ -41,7 +41,7 @@ public class ProcedureServiceTest {
     @Test
     void procedure_progress_action_should_return_half_terminated() {
         // given
-        var intervention = new Service(UUID.randomUUID(), Instant.now(), Status.NEW, "my_intervention");
+        var intervention = new AskedService(UUID.randomUUID(), Instant.now(), Status.NEW, "my_intervention");
         var todo = new TodoAction(UUID.randomUUID(), Instant.now(), Status.DONE, "my_todo");
 
         Procedure procedure = new Procedure(UUID.randomUUID(), "my_procedure", Instant.now());
@@ -58,8 +58,8 @@ public class ProcedureServiceTest {
     @Test
     void procedure_progress_action_should_return_parsed_long() {
         // given
-        var intervention = new Service(UUID.randomUUID(), Instant.now(), Status.NEW, "my_intervention");
-        var intervention2 = new Service(UUID.randomUUID(), Instant.now(), Status.NEW, "my_intervention2");
+        var intervention = new AskedService(UUID.randomUUID(), Instant.now(), Status.NEW, "my_intervention");
+        var intervention2 = new AskedService(UUID.randomUUID(), Instant.now(), Status.NEW, "my_intervention2");
         var todo = new TodoAction(UUID.randomUUID(), Instant.now(), Status.DONE, "my_todo");
 
         Procedure procedure = new Procedure(UUID.randomUUID(), "my_procedure", Instant.now());
@@ -89,7 +89,7 @@ public class ProcedureServiceTest {
     @Test
     void procedure_progress_action_should_return_none_when_only_no_done_actions() {
         // given
-        var intervention = new Service(UUID.randomUUID(), Instant.now(), Status.IN_PROGRESS,
+        var intervention = new AskedService(UUID.randomUUID(), Instant.now(), Status.IN_PROGRESS,
                 "my_intervention");
         var todo = new TodoAction(UUID.randomUUID(), Instant.now(), Status.NEW, "my_todo");
 

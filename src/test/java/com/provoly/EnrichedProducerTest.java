@@ -1,8 +1,10 @@
 package com.provoly;
 
+import static com.provoly.service.ServiceStatus.ASKED;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,6 +16,8 @@ import com.provoly.event.Category;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventService;
 import com.provoly.event.dto.ReportEventWriteDto;
+import com.provoly.service.ServiceService;
+import com.provoly.service.ServiceWriteDto;
 
 import io.quarkus.kafka.client.serialization.ObjectMapperSerde;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -37,6 +41,9 @@ public class EnrichedProducerTest {
 
     @Inject
     EventService eventService;
+
+    @Inject
+    ServiceService serviceService;
 
     @AfterEach
     public void cleanTopic() {
@@ -113,5 +120,25 @@ public class EnrichedProducerTest {
                 .fromTopics("equipment").awaitRecords(3, Duration.ofSeconds(5));
 
         assertThat(result.getLastRecord().value().getEvents()).hasSize(1);
+    }
+
+    @Test
+    public void should_consume_enriched_equipment_when_create_service() {
+        // given
+        companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
+        var equipment = new EquipmentWriteDto("technical_id", 0, "306", "306", "EP", "Armoire", "CHALONS_COMMUN", null,
+                null);
+        equipmentService.saveOrUpdateEquipments(List.of(equipment)); // 1 messages
+
+        var service = new ServiceWriteDto("technical_id1", "",
+                "306", Instant.now(), Instant.now(), Instant.now(), Instant.now(), null, "EP", ASKED, "CURA");
+        serviceService.saveOrUpdateServices(List.of(service)); // 1 message
+
+        // when
+        var result = companion.consume(EquipmentEnriched.class)
+                .withOffsetReset(OffsetResetStrategy.EARLIEST)
+                .fromTopics("equipment").awaitRecords(2, Duration.ofSeconds(5));
+
+        assertThat(result.getFirstRecord().value().getNbServicesAskedInProgress()).isEqualTo(1);
     }
 }

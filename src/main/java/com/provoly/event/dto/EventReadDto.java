@@ -3,7 +3,7 @@ package com.provoly.event.dto;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.provoly.equipment.EquipmentReadDto;
+import com.provoly.equipment.EquipmentShortDto;
 import com.provoly.event.Category;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventType;
@@ -21,7 +21,7 @@ public class EventReadDto {
     private Instant lastModificationDate;
     private Instant creationDate;
     private Instant closeDate;
-    private EquipmentReadDto equipment;
+    private EquipmentShortDto equipment;
     private UUID procedureId;
     private long linkedEvents;
     private float procedureProgress;
@@ -37,7 +37,7 @@ public class EventReadDto {
             Instant lastModificationDate,
             Instant creationDate,
             Instant closeDate,
-            EquipmentReadDto equipment,
+            EquipmentShortDto equipment,
             UUID procedureId,
             long linkedEvents,
             float procedureProgress,
@@ -123,7 +123,7 @@ public class EventReadDto {
         return closeDate;
     }
 
-    public EquipmentReadDto getEquipment() {
+    public EquipmentShortDto getEquipment() {
         return equipment;
     }
 

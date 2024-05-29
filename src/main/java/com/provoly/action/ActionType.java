@@ -1,6 +1,6 @@
 package com.provoly.action;
 
 public enum ActionType {
-    SERVICE,
+    ASKED_SERVICE,
     TODO
 }

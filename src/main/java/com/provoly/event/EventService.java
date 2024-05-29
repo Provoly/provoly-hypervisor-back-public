@@ -1,5 +1,8 @@
 package com.provoly.event;
 
+import static com.provoly.service.ServiceStatus.ASKED;
+import static com.provoly.service.ServiceStatus.IN_PROGRESS;
+
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -8,12 +11,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
 import com.provoly.EquipmentEnrichedProducer;
-import com.provoly.action.Action;
-import com.provoly.action.ActionType;
-import com.provoly.action.Service;
 import com.provoly.equipment.Equipment;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.event.dto.*;
+import com.provoly.service.Service;
 
 import org.jboss.logging.Logger;
 
@@ -68,7 +69,7 @@ public class EventService {
                 .map(event -> {
                     var allServices = getServicesFromProcedureAndEquipment(event);
                     return eventMapper.mapToEventSummaryDto(event, allServices.size(),
-                            getLastInProgressOrNewService(allServices));
+                            getLastInProgressOrAskedService(allServices));
                 })
                 .toList();
     }
@@ -268,42 +269,35 @@ public class EventService {
         }
     }
 
-    private List<Service> getServicesFromProcedureAndEquipment(Event event) {
-        var procedureServices = getProcedureServices(event);
-
-        procedureServices.addAll(event.getEquipment() == null
-                ? List.of()
-                : event.getEquipment().getServices());
-
-        return procedureServices.stream()
-                .distinct()
-                .toList();
+    private Collection<Service> getServicesFromProcedureAndEquipment(Event event) {
+        //var procedureServices = getProcedureServices(event); // TODO: only possible if AskedServiceReference a Service
+        return event.getEquipment() == null ? List.of() : event.getEquipment().getServices();
     }
 
-    private String getLastInProgressOrNewService(List<Service> services) {
+    private String getLastInProgressOrAskedService(Collection<Service> services) {
         return services.stream()
-                .filter(service -> service.getStatus() == Status.IN_PROGRESS || service.getStatus() == Status.NEW)
+                .filter(service -> service.getStatus() == ASKED || service.getStatus() == IN_PROGRESS)
                 .min(compareByStatusThenLastDate())
-                .map(Service::getName)
+                .map(Service::getExternalId)
                 .orElse(null);
     }
 
-    private ArrayList<Service> getProcedureServices(Event event) {
-        return event.getProcedure() == null
-                ? new ArrayList<>()
-                : new ArrayList<>(event
-                        .getProcedure()
-                        .getActions()
-                        .stream()
-                        .filter(action -> action.getType() == ActionType.SERVICE)
-                        .map(Service.class::cast)
-                        .toList());
-    }
+    //    private ArrayList<Service> getProcedureServices(Event event) {
+    //        return event.getProcedure() == null
+    //                ? new ArrayList<>()
+    //                : new ArrayList<>(event
+    //                        .getProcedure()
+    //                        .getActions()
+    //                        .stream()
+    //                        .filter(action -> action.getType() == ActionType.ASKED_SERVICE)
+    //                        .map(action -> ((AskedService) action).getService()) ?
+    //                        .toList());
+    //    }
 
     private Comparator<Service> compareByStatusThenLastDate() {
         Comparator<Service> compareByStatusThenReversedDate = Comparator
                 .comparing(service -> service.getStatus().getPriority(), Comparator.reverseOrder());
-        compareByStatusThenReversedDate.thenComparing(Action::getLastModificationDate, Comparator.reverseOrder());
+        compareByStatusThenReversedDate.thenComparing(Service::getLastModificationDate, Comparator.reverseOrder());
         return compareByStatusThenReversedDate;
     }
 

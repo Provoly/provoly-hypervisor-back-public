@@ -1,16 +1,27 @@
 package com.provoly.equipment;
 
 import java.util.Collection;
+import java.util.Comparator;
 
 import jakarta.enterprise.context.ApplicationScoped;
+
+import com.provoly.event.Event;
+import com.provoly.event.EventMapper;
+import com.provoly.service.Service;
+import com.provoly.service.ServiceMapper;
 
 @ApplicationScoped
 public class EquipmentMapper {
 
-    private EquipmentDatabaseReader databaseReader;
+    public static final int MAX_SIZE = 5;
+    private final EventMapper eventMapper;
+    private final EquipmentDatabaseReader databaseReader;
+    private final ServiceMapper serviceMapper;
 
-    public EquipmentMapper(EquipmentDatabaseReader databaseReader) {
+    public EquipmentMapper(EventMapper eventMapper, EquipmentDatabaseReader databaseReader, ServiceMapper serviceMapper) {
+        this.eventMapper = eventMapper;
         this.databaseReader = databaseReader;
+        this.serviceMapper = serviceMapper;
     }
 
     public EquipmentReadDto mapToEquipmentReadDto(Equipment equipment) {
@@ -22,11 +33,15 @@ public class EquipmentMapper {
                 equipment.getExternalId(),
                 equipment.getName(),
                 equipment.getCode(),
-                equipment.getDomain().getName(),
+                equipment.getDomain().getCode(),
                 equipment.getFamily().getName(),
                 equipment.getEntity().getName(),
                 equipment.getAttributes(),
-                mapToEquipmentReadDto(equipment.getParent()));
+                mapToEquipmentReadDto(equipment.getParent()),
+                serviceMapper.mapToServiceReadDtos(equipment.getServices().stream()
+                        .sorted(Comparator.comparing(Service::getLastModificationDate)).limit(MAX_SIZE).toList()),
+                eventMapper.mapToEventReadDto(equipment.getEvents().stream()
+                        .sorted(Comparator.comparing(Event::getLastModificationDate)).limit(MAX_SIZE).toList()));
     }
 
     public Collection<EquipmentReadDto> mapToEquipmentReadDto(Collection<Equipment> equipments) {
@@ -41,7 +56,7 @@ public class EquipmentMapper {
         entity.setFamily(mapToFamily(dto.family()));
 
         var domain = databaseReader
-                .getDomainByName(dto.domain())
+                .getDomainByCode(dto.domain())
                 .orElseThrow(() -> new IllegalArgumentException("Domain name %s not found".formatted(dto.domain())));
 
         entity.setDomain(domain);

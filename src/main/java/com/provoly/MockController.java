@@ -6,10 +6,11 @@ import java.util.*;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
-import com.provoly.action.Service;
+import com.provoly.action.AskedService;
 import com.provoly.action.TodoAction;
 import com.provoly.event.*;
 import com.provoly.procedure.Procedure;
@@ -36,7 +37,7 @@ public class MockController {
     @Authenticated
     @Transactional
     public void mock(@DefaultValue("30") @Positive @RestQuery int eventNumber,
-            @DefaultValue("10") @Positive @RestQuery int procedureNumber) {
+            @DefaultValue("10") @PositiveOrZero @RestQuery int procedureNumber) {
 
         var procedures = new ArrayList<Procedure>();
         var domains = databaseReader.getDomains().stream().toList();
@@ -45,7 +46,7 @@ public class MockController {
             var id = UUID.randomUUID();
             var action = new TodoAction(UUID.randomUUID(), randomInstant(), randomStatus(), "todo no%s.0".formatted(i));
             var action2 = new TodoAction(UUID.randomUUID(), randomInstant(), randomStatus(), "todo no%s.1".formatted(i));
-            var action3 = new Service(UUID.randomUUID(), randomInstant(), randomStatus(),
+            var action3 = new AskedService(UUID.randomUUID(), randomInstant(), randomStatus(),
                     "demande d'intervention n°%s".formatted(i));
             var procedure = new Procedure(id, "procédure_%s no%s".formatted(suffix(id), i), Instant.now());
             procedure.addAction(action);
@@ -138,7 +139,7 @@ public class MockController {
     }
 
     private void setProcedure(int eventNumber, ArrayList<Procedure> procedures, Event event) {
-        if (eventNumber % 5 == 0) {
+        if (eventNumber % 5 == 0 && !procedures.isEmpty()) {
             var proc = procedures.get(rand.nextInt(procedures.size()));
             event.setProcedure(proc);
         }

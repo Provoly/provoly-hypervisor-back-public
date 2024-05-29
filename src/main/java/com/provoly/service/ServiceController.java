@@ -1,0 +1,36 @@
+package com.provoly.service;
+
+import java.util.Collection;
+
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+
+import io.quarkus.security.Authenticated;
+
+@Path("/services")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class ServiceController {
+
+    private final ServiceService serviceService;
+    private final ServiceMapper serviceMapper;
+
+    public ServiceController(ServiceService serviceService, ServiceMapper serviceMapper) {
+        this.serviceService = serviceService;
+        this.serviceMapper = serviceMapper;
+    }
+
+    @POST
+    @Authenticated
+    public void saveOrUpdateServices(@Valid Collection<ServiceWriteDto> services) {
+        serviceService.saveOrUpdateServices(services);
+    }
+
+    @GET
+    @Authenticated
+    public Collection<ServiceReadDto> getServices() {
+        var equipments = serviceService.getServices();
+        return serviceMapper.mapToServiceReadDtos(equipments);
+    }
+}

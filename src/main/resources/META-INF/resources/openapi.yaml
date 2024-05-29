@@ -791,7 +791,7 @@ paths:
         "403":
           description: Forbidden if page not specified
         "200":
-          description: Returns equipment Details by id
+          description: Returns equipments details
           content:
             application/json:
               schema:
@@ -932,6 +932,116 @@ paths:
                 items:
                   type: string
                 example: [ "FAGNIERES_COMMUN", "CHALONS_AGGLOS" ]
+      security:
+        - oidc:
+            - authenticated
+  /services:
+    post:
+      tags:
+        - Services Controller
+      summary: Save or update services
+      description: |
+       `startDate` and `endDate` are required is `status` at least `ASKED` and
+       `closeDate` is required if `status` is `DONE`
+      operationId: com.provoly.equipment.ServiceController_saveOrUpdateServices
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/ServiceWriteDto'
+            examples:
+              default:
+                summary: Create services
+                value: |
+                  [
+                    {
+                      "id": "DI00001935",
+                      "equipment": "C-306",
+                      "creationDate": "2024-05-27T08:10:37.675958Z",
+                      "lastModificationDate": "2024-05-27T08:10:37.675958Z",
+                      "startDate": "2024-06-27T08:10:37.675958Z",
+                      "endDate": "2024-06-28T08:10:37.675958Z",
+                      "domain": "EP",
+                      "status": "ASKED",
+                      "category": "PREV"
+                    },
+                    {
+                      "id": "DI00001935@1234567890",
+                      "equipment": "FL-222",
+                      "creationDate": "2024-04-27T08:10:37.675958Z",
+                      "lastModificationDate": "2024-04-28T08:10:37.675958Z",
+                      "startDate": "2024-05-02T08:10:37.675958Z",
+                      "endDate": "2024-05-04T08:10:37.675958Z",
+                      "domain": "EP",
+                      "status": "DONE",
+                      "category": "CURA"
+                    }
+                  ]
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                invalidEquipment:
+                  description: Occurs when equipment not exist
+                  value: |
+                    {
+                        "code": 400,
+                        "message": "Equipment with code 'C-306' not exists"
+                    }
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden if missing a required property
+      security:
+        - oidc:
+            - authenticated
+    get:
+      tags:
+        - Service Controller
+      summary: Retrieve all services
+      operationId: com.provoly.equipment.ServiceController_getServices
+      responses:
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden if page not specified
+        "200":
+          description: Returns services details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceReadDto'
+              examples:
+                default:
+                  value: |
+                    [
+                      {
+                        "id": "c538a660-6450-4281-9fa9-c925f340eb54",
+                        "externalId": "technical_unique_id",
+                        "name": "C306",
+                        "code": "C306",
+                        "family": "Armoire",
+                        "entity": "FAGNIERES_COMMUN",
+                        "parent": {
+                          "id": "c6cfac35-0939-4bb0-860e-fb00c6ff0ed7",
+                          "externalId": "technical_unique_id2",
+                          "name": "C307",
+                          "code": "C307",
+                          "family": "Armoire",
+                          "domain": "EP",
+                          "entity": "FAGNIERES_COMMUN",
+                          "parent": null,
+                          "activeEnergy": 70
+                        },
+                        "activeEnergy": 30
+                      }
+                    ]
       security:
         - oidc:
             - authenticated
@@ -1116,6 +1226,63 @@ components:
           $ref: '#/components/schemas/UUID'
         name:
           type: string
+    ServiceWriteDto:
+      type: object
+      properties:
+        id:
+          type: string
+          required: true
+        description:
+          type: string
+        equipment:
+          type: string
+          required: true
+        creationDate:
+          type: date
+          required: true
+        lastModificationDate:
+          type: date
+          required: true
+        startDate:
+          type: date
+        endDate:
+          type: date
+        closeDate:
+          type: date
+        domain:
+          type: string
+          required: true
+        status:
+          type: string
+          required: true
+        category:
+          type: string
+          required: true
+    ServiceReadDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        technical_id:
+          type: string
+        description:
+          type: string
+        equipment:
+          $ref: '#/components/schemas/EquipmentShortDto'
+        creationDate:
+          type: date
+        lastModificationDate:
+          type: date
+        startDate:
+          type: date
+        endDate:
+          type: date
+        domain:
+          type: string
+        status:
+          type: string
+        category:
+          type: string
     EquipmentWriteDto:
       type: object
       additionalProperties: true
@@ -1170,6 +1337,20 @@ components:
           description: Value match one of `Equipment Entity` name
         parent:
           $ref: '#/components/schemas/EquipmentReadDto'
+    EquipmentShortDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        code:
+          type: string
+        family:
+          type: string
+          description: Value match one of `Family` name
+        entity:
+          type: string
+          description: Value match one of `Equipment Entity` name
+
     ActionReadDto:
       type: object
       properties:
@@ -1284,7 +1465,7 @@ components:
         criticality:
           $ref: '#/components/schemas/Criticality'
         equipment:
-          $ref: '#/components/schemas/EquipmentReadDto'
+          $ref: '#/components/schemas/EquipmentShortDto'
         status:
           $ref: '#/components/schemas/Status'
         category:
@@ -1321,7 +1502,7 @@ components:
         criticality:
           $ref: '#/components/schemas/Criticality'
         equipment:
-          $ref: '#/components/schemas/EquipmentReadDto'
+          $ref: '#/components/schemas/EquipmentShortDto'
         status:
           $ref: '#/components/schemas/Status'
         category:
@@ -1358,7 +1539,7 @@ components:
         criticality:
           $ref: '#/components/schemas/Criticality'
         equipment:
-          $ref: '#/components/schemas/EquipmentReadDto'
+          $ref: '#/components/schemas/EquipmentShortDto'
         status:
           $ref: '#/components/schemas/Status'
         category:

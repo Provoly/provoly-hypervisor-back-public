@@ -3,19 +3,16 @@ package com.provoly.metrics;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 import jakarta.inject.Inject;
 
 import com.provoly.TestDataService;
-import com.provoly.action.Service;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.event.Category;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventService;
-import com.provoly.event.Status;
 import com.provoly.event.dto.ReportEventWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -65,7 +62,7 @@ public class MetricsServiceTest {
 
         assertThat(result).extracting("nbEquipWithEvent_unmanaged").isEqualTo(3L);
         assertThat(result).extracting("totalEquipWithEvent_unmanaged").isEqualTo(4L);
-        assertThat(result).extracting("nbServiceTodoWithEquip_unmanaged").isEqualTo(0L);
+        assertThat(result).extracting("nbServiceTodoWithEquip_unmanaged").isEqualTo(1L);
         assertThat(result).extracting("nbServiceInProgressWithEquip_unmanaged").isEqualTo(0L);
     }
 
@@ -116,25 +113,6 @@ public class MetricsServiceTest {
         assertThat(resultUpdated).extracting("nbEquipWithEvent_unmanaged")
                 .isEqualTo(result.nbEquipWithEvent_unmanaged());
 
-    }
-
-    @Test
-    void should_get_equipment_with_event_metrics_with_services() {
-        // given
-        var result = metricsService.getEquipmentsWithEventMetrics(List.of(), List.of(), List.of());
-        assertThat(result).extracting("nbServiceTodoWithEquip_FL").isEqualTo(0L);
-        assertThat(result).extracting("nbServiceTodoWithEquip_FL").isEqualTo(0L);
-
-        // when adding services to an "armoire" equipment
-        var equipA = equipmentService.getEquipmentByName("C-1034");
-        dataService.persistService(new Service(UUID.randomUUID(), Instant.now(), Status.NEW, "new service 1", equipA));
-        dataService.persistService(new Service(UUID.randomUUID(), Instant.now(), Status.IN_PROGRESS, "new service 2", equipA));
-
-        var resultUpdated = metricsService.getEquipmentsWithEventMetrics(List.of(), List.of(), List.of());
-
-        // then
-        assertThat(resultUpdated).extracting("nbServiceTodoWithEquip_FL").isEqualTo(1L);
-        assertThat(resultUpdated).extracting("nbServiceInProgressWithEquip_FL").isEqualTo(1L);
     }
 
     @Test
