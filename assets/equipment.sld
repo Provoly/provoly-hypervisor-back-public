@@ -85,7 +85,7 @@
                     <PointSymbolizer>
                         <Graphic>
                             <ExternalGraphic>
-                                <OnlineResource xlink:type="simple" xlink:href="icons/${famille}.svg"/>
+                                <OnlineResource xlink:type="simple" xlink:href="icons/${family}.svg"/>
                                 <Format>image/svg</Format>
                             </ExternalGraphic>
                             <Size>48</Size>
