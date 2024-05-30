@@ -18,40 +18,42 @@ image::geoserver-workspace.png[]
 
 Créer un store de type Provoly dans le workspace "chalons"
 
-  * Nom de la source de données : Provoly
-  * uri_ref: http://data-ref:8080/
-  * uri_virt: http://data-virt:8080/
-  * sso_uri: https://sso.chalons-dev.provoly.net/auth/realms/provoly
-  * client_id: provoly
-  * client_secret: dummy
-  * user: iamsuperadmin
-  * password: password
-  * chunkSize: 5000
-  * maxItems: 5000
-  * timeout: 60
+* Nom de la source de données : Provoly
+* uri_ref: http://data-ref:8080/
+* uri_virt: http://data-virt:8080/
+* sso_uri: https://sso.chalons-dev.provoly.net/auth/realms/provoly
+* client_id: provoly
+* client_secret: dummy
+* user: iamsuperadmin
+* password: password
+* chunkSize: 5000
+* maxItems: 5000
+* timeout: 60
 
 image::geoserver-store.png[]
 
 ==== Publier les couches
 
-Copier les icones dans le Geoserver
+Les objets de configuration geoserver son stockées dans le https://github.com/connecte-chalons/chalons-hyperviseur[répertoire frontend]
+
+Copier les icônes dans le Geoserver
 
 ----
 # A lancer depuis le répertoire du projet
-kubectl -n chalons-dev -c geoserver cp assets/icons geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
+kubectl -n chalons-dev -c geoserver cp geoserver/icons geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
 ----
 
-Créer un style "equipment" en utilisant le fichier `assets/equipment.sld`
+Créer un style "equipment" en utilisant le fichier `geoserver/equipment.sld`
 
 Publier la couche "xxxxxx_equipement-enrichi-mesure"
 Dans l'onglet "Publication" de la couche, choisir le style "equipment" par défaut
 
 La mise à jour du style de la couche peut se faire avec la commande suivante :
 ----
-kubectl -n chalons-dev -c geoserver cp assets/equipment.sld geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
+kubectl -n chalons-dev -c geoserver cp geoserver/equipment.sld geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
 ----
 
-Faire de même avec le style `assets/equipment-getfeature.sld`. Pas besoin d'attacher le style à la couche, mais il doit être présent.
+Faire de même avec le style `geoserver/equipment-getfeature.sld`. Pas besoin d'attacher le style à la couche, mais il doit être présent pour permettre de requêter correctement (utile pour les tooltips).
 
 
 == Reset d'un environnement
