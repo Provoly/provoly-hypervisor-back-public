@@ -12,8 +12,8 @@ public class ShortEquipmentMapper {
         return new EquipmentShortDto(
                 equipment.getId(),
                 equipment.getCode(),
-                equipment.getEntity().getName(),
-                equipment.getFamily().getName());
+                equipment.getEntity().getCode(),
+                equipment.getFamily().getCode());
     }
 
 }

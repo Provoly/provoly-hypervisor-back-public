@@ -34,7 +34,7 @@ public class EquipmentMapper {
                 equipment.getName(),
                 equipment.getCode(),
                 equipment.getDomain().getCode(),
-                equipment.getFamily().getName(),
+                equipment.getFamily().getCode(),
                 equipment.getEntity().getName(),
                 equipment.getAttributes(),
                 mapToEquipmentReadDto(equipment.getParent()),
