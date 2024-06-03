@@ -3,6 +3,7 @@ package com.provoly.metrics;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +18,9 @@ import com.provoly.event.dto.ReportEventWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 @QuarkusTest
 public class MetricsServiceTest {
@@ -200,6 +203,55 @@ public class MetricsServiceTest {
         assertThatThrownBy(() -> metricsService.getTotalEquipmentsByEntity(null))
                 .hasMessageContaining("Code null invalid");
 
+    }
+
+    @Test
+    void should_get_done_services_for_last_2_months() {
+        // given
+        var equip = equipmentService.getEquipmentByName("P-1000");
+
+        dataService.persistDoneService("DI5678", Instant.parse("2024-01-15T00:00:00.00Z"), equip);
+        dataService.persistDoneService("DI5778", Instant.parse("2024-02-15T00:00:00.00Z"), equip);
+        dataService.persistDoneService("DI5779", Instant.parse("2024-02-15T00:00:00.00Z"), equip);
+        dataService.persistDoneService("DI5870", Instant.parse("2024-03-15T00:00:00.00Z"), equip);
+        dataService.persistDoneService("DI5871", Instant.parse("2024-04-15T00:00:00.00Z"), equip);
+        dataService.persistDoneService("DI5872", Instant.parse("2024-04-30T00:00:00.00Z"), equip);
+
+        // when
+        var result = metricsService.aggregateDoneServices(DateInterval.month, Instant.parse("2024-04-20T00:00:00.00Z"), 2,
+                List.of(), List.of());
+
+        //then
+        assertThat(result).hasSize(3);
+        assertThat(result).extracting("start").containsExactly(
+                Instant.parse("2024-02-01T00:00:00Z"),
+                Instant.parse("2024-03-01T00:00:00Z"),
+                Instant.parse("2024-04-01T00:00:00Z"));
+        assertThat(result).extracting("count").containsExactly(2L, 1L, 1L);
+    }
+
+    @Test
+    void should_get_done_services_for_last_2_months_filter_on_armoire() {
+        // given
+        var equip = equipmentService.getEquipmentByName("P-1000");
+        var equipArmoire = equipmentService.getEquipmentByName("A-230");
+
+        dataService.persistDoneService("DI5678", Instant.parse("2024-01-15T00:00:00.00Z"), equip);
+        dataService.persistDoneService("DI5778", Instant.parse("2024-02-15T00:00:00.00Z"), equipArmoire);
+        dataService.persistDoneService("DI5779", Instant.parse("2024-02-15T00:00:00.00Z"), equip);
+        dataService.persistDoneService("DI5870", Instant.parse("2024-03-15T00:00:00.00Z"), equipArmoire);
+        dataService.persistDoneService("DI5871", Instant.parse("2024-04-15T00:00:00.00Z"), equip);
+
+        // when
+        var result = metricsService.aggregateDoneServices(DateInterval.month, Instant.parse("2024-04-20T00:00:00.00Z"), 2,
+                List.of("EP_ARMOIRE"), List.of());
+        //then
+
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting("start").containsExactly(
+                Instant.parse("2024-02-01T00:00:00Z"),
+                Instant.parse("2024-03-01T00:00:00Z"));
+        assertThat(result).extracting("count").containsExactly(1L, 1L);
     }
 
 }

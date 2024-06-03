@@ -67,7 +67,7 @@ public class EquipmentService {
     }
 
     @Transactional
-    public Collection<Equipment> getEquipments(List<String> entities) {
+    public Collection<Equipment> getEquipments(Collection<String> entities) {
         logger.debugf("Get all equipments with entities %s", entities);
         var equipmentEntities = entities.stream().map(this::getEquipmentEntity).toList();
         return databaseReader.getEquipmentsByEntities(equipmentEntities);
@@ -80,12 +80,24 @@ public class EquipmentService {
     }
 
     @Transactional
-    public List<String> getEquipmentEntitiesName() {
-        logger.debugf("Get all equipments entities");
+    public Collection<String> getEquipmentEntitiesName() {
+        logger.debugf("Get all equipments entities names");
         return databaseReader.getEquipmentEntities()
                 .stream()
                 .map(EquipmentEntity::getName)
                 .toList();
+    }
+
+    @Transactional
+    public Collection<EquipmentEntity> getEquipmentEntities() {
+        logger.debugf("Get all equipments entities");
+        return databaseReader.getEquipmentEntities();
+    }
+
+    @Transactional
+    public Collection<Family> getFamilies() {
+        logger.debugf("Get all equipments families");
+        return databaseReader.getFamilies();
     }
 
     @Transactional

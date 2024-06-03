@@ -232,7 +232,8 @@ public class EventControllerTest {
                 List.of(),
                 List.of("EP_ARMOIRE"));
         //then
-        assertThat(events).extracting("equipment").extracting("family").contains("EP_ARMOIRE", "EP_ARMOIRE", "EP_ARMOIRE", "EP_ARMOIRE");
+        assertThat(events).extracting("equipment").extracting("family").contains("EP_ARMOIRE", "EP_ARMOIRE", "EP_ARMOIRE",
+                "EP_ARMOIRE");
     }
 
     @Test

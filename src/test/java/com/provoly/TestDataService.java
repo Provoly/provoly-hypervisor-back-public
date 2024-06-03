@@ -1,6 +1,7 @@
 package com.provoly;
 
 import static com.provoly.service.ServiceStatus.ASKED;
+import static com.provoly.service.ServiceStatus.DONE;
 import static com.provoly.service.ServiceStatus.IN_PROGRESS;
 
 import java.time.Instant;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
+import com.provoly.service.ServiceCategory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -32,6 +34,8 @@ public class TestDataService {
     private Random rand = new Random();
     public Procedure procedure1, procedure2, procedure3;
     private Domain domain;
+    private ServiceCategory prev;
+    private ServiceCategory cura;
 
     public TestDataService(EntityManager em, EquipmentDatabaseReader equipmentDatabaseReader,
             ServiceDatabaseReader serviceDatabaseReader) {
@@ -43,9 +47,8 @@ public class TestDataService {
     @Transactional
     public void init() {
         domain = equipmentDatabaseReader.getDomainByCode("EP").get();
-
-        var prev = serviceDatabaseReader.getServiceCategoryByCode("PREV").get();
-        var cur = serviceDatabaseReader.getServiceCategoryByCode("CURA").get();
+        prev = serviceDatabaseReader.getServiceCategoryByCode("PREV").get();
+        cura = serviceDatabaseReader.getServiceCategoryByCode("CURA").get();
 
         var armoire = equipmentDatabaseReader.getFamilyByCode("EP_ARMOIRE").get();
         var foyerLumineux = equipmentDatabaseReader.getFamilyByCode("EP_FOYER_LUMINEUX").get();
@@ -69,7 +72,7 @@ public class TestDataService {
         em.persist(service1);
 
         var service2 = new Service(UUID.randomUUID(), "DI5678@1223", Instant.now(), Instant.now(), Instant.now(), Instant.now(),
-                Instant.now(), equip5, domain, IN_PROGRESS, cur);
+                Instant.now(), equip5, domain, IN_PROGRESS, cura);
 
         em.persist(service2);
 
@@ -195,7 +198,9 @@ public class TestDataService {
     }
 
     @Transactional
-    public void persistService(Service service) {
+    public void persistDoneService(String externalId, Instant closeDate, Equipment equip) {
+        var service = new Service(UUID.randomUUID(), externalId, Instant.now(), Instant.now(), Instant.now(), Instant.now(),
+                closeDate, equip, domain, DONE, prev);
         em.persist(service);
     }
 

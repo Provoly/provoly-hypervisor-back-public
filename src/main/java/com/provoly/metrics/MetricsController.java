@@ -1,7 +1,10 @@
 package com.provoly.metrics;
 
+import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 
+import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
@@ -34,5 +37,16 @@ public class MetricsController {
     @Authenticated
     public EquipmentByEntityDto getTotalEquipmentsByEntity(@RestQuery String family) {
         return metricsService.getTotalEquipmentsByEntity(family);
+    }
+
+    @Path("/services/closed/{interval}")
+    @GET
+    @Authenticated
+    public Collection<AggregateServiceDto> aggregateDoneServices(DateInterval interval,
+            @RestQuery Instant date,
+            @RestQuery @Positive @DefaultValue("24") int buckets,
+            @RestQuery List<String> family,
+            @RestQuery List<String> entity) {
+        return metricsService.aggregateDoneServices(interval, date, buckets, family, entity);
     }
 }

@@ -4,15 +4,20 @@ import static com.provoly.metrics.MetricsDatabaseReader.UNMANAGED;
 import static com.provoly.service.ServiceStatus.ASKED;
 import static com.provoly.service.ServiceStatus.IN_PROGRESS;
 
+import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
+import com.provoly.EnumEntity;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.Family;
-import com.provoly.event.*;
+import com.provoly.event.Category;
+import com.provoly.event.Criticality;
+import com.provoly.event.Domain;
 import com.provoly.service.ServiceStatus;
 
 import org.jboss.logging.Logger;
@@ -32,19 +37,23 @@ public class MetricsService {
     }
 
     @Transactional
-    public EquipmentWithEventsDto getEquipmentsWithEventMetrics(List<String> criticalities, List<String> categories,
-            List<String> entities) {
+    public EquipmentWithEventsDto getEquipmentsWithEventMetrics(Collection<String> criticalities, Collection<String> categories,
+            Collection<String> entities) {
 
         logger.infof("""
+                Get equipments with events
                 filter on
                 criticality : %s,
                 category : %s,
                 equipment entity : %s
                 """.formatted(criticalities, categories, entities));
 
+        var eventCriticalities = criticalities.stream().map(Criticality::fromString).toList();
+        var eventCategories = categories.stream().map(Category::fromString).toList();
+
         logger.debug("Get all equipment linked with at least one undone event which is not a Manifestation");
-        var equipmentWithUndoneEvents = metricsDatabaseReader.getEquipmentsWithUnDoneEvents(entities, criticalities,
-                categories);
+        var equipmentWithUndoneEvents = metricsDatabaseReader.getEquipmentsWithUnDoneEvents(entities, eventCriticalities,
+                eventCategories);
 
         logger.debugf("grouped by Managed/ unmanaged");
         var equipments = metricsDatabaseReader.equipmentsCountGroupedByManaged(equipmentWithUndoneEvents);
@@ -74,7 +83,7 @@ public class MetricsService {
 
     @Transactional
     public EquipmentByEntityDto getTotalEquipmentsByEntity(String code) {
-        logger.infof("Get all equipment by entity for EP domain and family", code);
+        logger.infof("Get all equipments by entity for EP domain and family %s", code);
         Family family = equipmentService.getFamilyByCode(code);
         Domain domain = metricsDatabaseReader.getDomainByCode("EP").get();
 
@@ -89,6 +98,34 @@ public class MetricsService {
                 result.getOrDefault("SAINT_MARTIN_COMMUN_managed", 0L),
                 result.getOrDefault("SAINT_MARTIN_COMMUN_unmanaged", 0L));
 
+    }
+
+    @Transactional
+    public List<AggregateServiceDto> aggregateDoneServices(DateInterval interval,
+            Instant date,
+            int nbBuckets,
+            Collection<String> family,
+            Collection<String> entity) {
+
+        date = date != null ? date : Instant.now();
+        logger.infof("""
+                Aggregate done services in the last %s %s from %s
+                filter on
+                family : %s,
+                equipment entity : %s
+                """.formatted(nbBuckets, interval, date, family, entity));
+
+        var families = family.isEmpty() ? equipmentService.getFamilies().stream().map(EnumEntity::getId).toList()
+                : family.stream().map(code -> equipmentService.getFamilyByCode(code).getId()).toList();
+        var entities = entity.isEmpty() ? equipmentService.getEquipmentEntities().stream().map(EnumEntity::getId).toList()
+                : entity.stream().map(code -> equipmentService.getEquipmentEntity(code).getId()).toList();
+
+        return metricsDatabaseReader.aggregateDoneServices(
+                interval,
+                nbBuckets,
+                date,
+                families,
+                entities);
     }
 
     private Long getServicesForEquipmentAndStatus(Map<String, Map<ServiceStatus, Long>> servicesByEquipments, String code,

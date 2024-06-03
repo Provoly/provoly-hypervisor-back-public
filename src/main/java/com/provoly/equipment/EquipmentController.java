@@ -60,7 +60,7 @@ public class EquipmentController {
     @GET
     @Authenticated
     @Path("/entities")
-    public List<String> getEquipmentEntitiesName() {
+    public Collection<String> getEquipmentEntitiesName() {
         return equipmentService.getEquipmentEntitiesName();
     }
 

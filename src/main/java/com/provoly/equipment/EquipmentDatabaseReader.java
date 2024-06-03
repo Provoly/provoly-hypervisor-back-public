@@ -110,6 +110,15 @@ public class EquipmentDatabaseReader extends DatabaseReader {
                 .findFirst();
     }
 
+    public Collection<Family> getFamilies() {
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<Family> criteriaQuery = builder.createQuery(Family.class);
+        Root<Family> root = criteriaQuery.from(Family.class);
+
+        return em.createQuery(criteriaQuery.select(root))
+                .getResultList();
+    }
+
     public Optional<Equipment> getEquipmentWithExternalId(String id) {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<Equipment> criteriaQuery = builder.createQuery(Equipment.class);
