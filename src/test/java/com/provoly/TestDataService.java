@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
-import com.provoly.service.ServiceCategory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -24,6 +23,7 @@ import com.provoly.equipment.Family;
 import com.provoly.event.*;
 import com.provoly.procedure.Procedure;
 import com.provoly.service.Service;
+import com.provoly.service.ServiceCategory;
 import com.provoly.service.ServiceDatabaseReader;
 
 @ApplicationScoped

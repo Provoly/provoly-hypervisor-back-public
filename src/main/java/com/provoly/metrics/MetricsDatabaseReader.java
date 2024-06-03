@@ -150,20 +150,23 @@ public class MetricsDatabaseReader extends DatabaseReader {
             Collection<Long> families,
             Collection<Long> entities) {
 
-        return em.createNativeQuery("""
-                select date_trunc(:interval, close_date, 'UTC') start, coalesce(count(*),0) from {h-schema}service
-                left join {h-schema}equipment on service.equipment_id = equipment.id
-                where status = 'DONE'
-                and close_date < cast (:reference_date as timestamptz)
-                and close_date > date_trunc(:interval, cast (:reference_date as timestamptz) - cast (:result as interval))
-                and equipment.family_id in :families_id
-                and equipment.equipment_entity_id in :entities_id
-                group by start
-                order by 1;
-                """, Tuple.class)
+        return em
+                .createNativeQuery(
+                        """
+                                select date_trunc(:interval, close_date, 'UTC') start, count(*) from {h-schema}service
+                                left join {h-schema}equipment on service.equipment_id = equipment.id
+                                where status = 'DONE'
+                                and close_date < cast (:reference_date as timestamptz)
+                                and close_date > date_trunc(:interval, cast (:reference_date as timestamptz) - cast (:interval_number as interval))
+                                and equipment.family_id in :families_id
+                                and equipment.equipment_entity_id in :entities_id
+                                group by start
+                                order by 1;
+                                """,
+                        Tuple.class)
                 .setParameter("interval", interval.name())
                 .setParameter("reference_date", date)
-                .setParameter("result", "%s %s".formatted(buckets, interval))
+                .setParameter("interval_number", "%s %s".formatted(buckets, interval))
                 .setParameter("families_id", families)
                 .setParameter("entities_id", entities)
                 .getResultStream()
