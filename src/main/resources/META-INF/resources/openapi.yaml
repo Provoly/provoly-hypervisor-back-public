@@ -714,7 +714,10 @@ paths:
                       "name":"C306",
                       "family": "Armoire",
                       "domain": "EP",
-                      "entity": "FAGNIERES_COMMUN",
+                      "entity": "CHALONS_COMMUN",
+                      "address":"1 rue Chalons",
+                      "city": "CH",
+                      "district": "CH_C",
                       "activeEnergy":30,
                       "EREQ_LEVEL": 2,
                       "parent": "C307"
@@ -725,7 +728,10 @@ paths:
                       "name":"C307",
                       "family": "Armoire",
                       "domain": "EP",
-                      "entity": "FAGNIERES_COMMUN",
+                      "entity": "CHALONS_COMMUN",
+                      "address":"132 avenue Chalons",
+                      "city": "CH",
+                      "district": "CH_CD",
                       "activeEnergy": 70,
                       "EREQ_LEVEL": 1,
                       "parent": null
@@ -737,6 +743,8 @@ paths:
                       "family": "Armoire",
                       "domain": "EP",
                       "entity": "FAGNIERES_COMMUN",
+                      "address":"97 impasse Fagniere",
+                      "city": "FAGN",
                       "activeEnergy":null,
                       "EREQ_LEVEL": 2,
                       "parent": "C307"
@@ -1076,7 +1084,16 @@ paths:
                 - $ref: '#/components/schemas/AlertCategory'
                 - $ref: '#/components/schemas/OperatorCategory'
                 - $ref: '#/components/schemas/ReportCategory'
+        - name: place
+          in: query
+          description: Must match city or district value from equipment
+          schema:
+            type: array
+            items:
+              type: string
       responses:
+        "400":
+          description: Entity/Criticality/Category Not found, Or place is not a valide City/District
         "401":
           description: Not Authorized
         "200":
@@ -1185,11 +1202,18 @@ paths:
             type: array
             items:
               type: string
+        - name: place
+          in: query
+          description: Must match city or district value from equipment
+          schema:
+            type: array
+            items:
+              type: string
       responses:
         "401":
           description: Not Authorized
         "400":
-          description: Invalid interval, entity or family code
+          description: Invalid interval, entity, family code, or city/district
         "200":
           content:
             application/json:
@@ -1215,7 +1239,7 @@ paths:
                         "start": "2024-05-01T00:00:00Z",
                         "count": 1
                       }
-                  ]
+                    ]
       security:
         - oidc:
             - authenticated
@@ -1383,6 +1407,16 @@ components:
           type: string
           required: true
           description: Value must match one of `Equipment Entity` name
+        city:
+          type: string
+          required: true
+          description: Value must match one of `City` name
+        district:
+          type: string
+          description: Value must match one of `District` name
+        adress:
+          type: string
+          required: true
         level:
           type: integer
           required: true
@@ -1410,8 +1444,23 @@ components:
         entity:
           type: string
           description: Value match one of `Equipment Entity` name
+        city:
+          type: string
+          description: Value must match one of `City` name
+        district:
+          type: string
+          description: Value must match one of `District` name
+        adress:
+          type: string
         parent:
           $ref: '#/components/schemas/EquipmentReadDto'
+        events:
+          type: array
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/AlertEventReadDto'
+              - $ref: '#/components/schemas/ReportEventReadDto'
+              - $ref: '#/components/schemas/OperatorEventReadDto'
     EquipmentShortDto:
       type: object
       properties:

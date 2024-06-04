@@ -119,6 +119,32 @@ public class EquipmentDatabaseReader extends DatabaseReader {
                 .getResultList();
     }
 
+    public Optional<City> getCityByCode(String code) {
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<City> criteriaQuery = builder.createQuery(City.class);
+        Root<City> root = criteriaQuery.from(City.class);
+
+        var query = criteriaQuery.select(root)
+                .where(builder.equal(root.get(City_.code), code));
+
+        return em.createQuery(query)
+                .getResultStream()
+                .findFirst();
+    }
+
+    public Optional<District> getDistrictByCode(String code) {
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<District> criteriaQuery = builder.createQuery(District.class);
+        Root<District> root = criteriaQuery.from(District.class);
+
+        var query = criteriaQuery.select(root)
+                .where(builder.equal(root.get(District_.code), code));
+
+        return em.createQuery(query)
+                .getResultStream()
+                .findFirst();
+    }
+
     public Optional<Equipment> getEquipmentWithExternalId(String id) {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<Equipment> criteriaQuery = builder.createQuery(Equipment.class);

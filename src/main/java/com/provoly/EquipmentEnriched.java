@@ -20,12 +20,13 @@ public class EquipmentEnriched {
     private final String domain;
     private final String entity;
     private final String family;
+    private final String place;
     private final Map<String, Object> attributes;
     private final EquipmentEnriched parent;
     private final List<CondensedEvent> events;
     private final long nbServicesAskedInProgress;
 
-    public EquipmentEnriched(Equipment equipment) { // TODO: add equipment location
+    public EquipmentEnriched(Equipment equipment) {
         this.id = equipment.getId();
         this.externalId = equipment.getExternalId();
         this.name = equipment.getName();
@@ -34,6 +35,9 @@ public class EquipmentEnriched {
         this.entity = equipment.getEntity().getCode();
         this.family = equipment.getFamily().getCode();
         this.attributes = equipment.getAttributes();
+        this.place = equipment.getDistrict() != null
+                ? "%s,%s".formatted(equipment.getCity().getCode(), equipment.getDistrict().getCode())
+                : equipment.getCity().getCode();
         this.parent = equipment.getParent() == null ? null : new EquipmentEnriched(equipment.getParent());
         this.events = equipment
                 .getEvents()
@@ -46,6 +50,7 @@ public class EquipmentEnriched {
     }
 
     public EquipmentEnriched(UUID id, String externalId, String name, String code, String domain, String entity, String family,
+            String place,
             Map<String, Object> attributes, EquipmentEnriched parent, List<CondensedEvent> events,
             long nbServicesAskedInProgress) {
         this.id = id;
@@ -55,6 +60,7 @@ public class EquipmentEnriched {
         this.domain = domain;
         this.entity = entity;
         this.family = family;
+        this.place = place;
         this.attributes = attributes;
         this.parent = parent;
         this.events = events;
@@ -87,6 +93,10 @@ public class EquipmentEnriched {
 
     public String getFamily() {
         return family;
+    }
+
+    public String getPlace() {
+        return place;
     }
 
     @JsonAnyGetter

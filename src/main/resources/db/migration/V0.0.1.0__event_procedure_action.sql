@@ -26,14 +26,31 @@ create table service_category
     code varchar(20) unique  not null
 );
 
+create table city
+(
+    id   bigint primary key,
+    name varchar(100) unique not null,
+    code varchar(20) unique  not null
+);
+
+create table district
+(
+    id   bigint primary key,
+    name varchar(100) unique not null,
+    code varchar(20) unique  not null
+);
+
 create table equipment
 (
     id                  uuid primary key,
     external_id         varchar(200) unique not null,
     name                varchar(200)        not null,
     code                varchar(200) unique not null,
+    address             varchar(200)        not null,
     domain_id           bigint              not null references domain,
     family_id           bigint              not null references family,
+    city_id             bigint              not null references city,
+    district_id         bigint references district,
     equipment_entity_id bigint              not null references equipment_entity,
     attributes          jsonb default '{}',
     parent_id           uuid,

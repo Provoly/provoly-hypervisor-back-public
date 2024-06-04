@@ -114,4 +114,16 @@ public class EquipmentService {
         return databaseReader.getFamilyByCode(code)
                 .orElseThrow(() -> new IllegalArgumentException("Code %s invalid".formatted(code)));
     }
+
+    @Transactional
+    public Optional<City> getCityByCode(String code) {
+        logger.debugf("Get city by code  %s", code);
+        return databaseReader.getCityByCode(code);
+    }
+
+    @Transactional
+    public Optional<District> getDistrictByCode(String code) {
+        logger.debugf("Get district by code  %s", code);
+        return databaseReader.getDistrictByCode(code);
+    }
 }

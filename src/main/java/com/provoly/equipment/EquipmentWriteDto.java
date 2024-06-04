@@ -15,6 +15,9 @@ public record EquipmentWriteDto(
         @NotNull String domain,
         @NotNull String family,
         @NotNull String entity,
+        @NotNull String city,
+        @NotNull String address,
+        String district,
         String parent,
         Map<String, Object> attributes) {
 

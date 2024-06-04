@@ -21,20 +21,16 @@ import com.provoly.event.*;
 import com.provoly.service.Service;
 import com.provoly.service.ServiceStatus;
 
-import org.jboss.logging.Logger;
-
 @ApplicationScoped
 public class MetricsDatabaseReader extends DatabaseReader {
     public static final String UNMANAGED = "unmanaged";
     public static final String MANAGED = "managed";
     private static final long EP_ID = 1;
 
-    private final Logger logger;
     private final EquipmentService equipmentService;
 
-    public MetricsDatabaseReader(EntityManager em, Logger logger, EquipmentService equipmentService) {
+    public MetricsDatabaseReader(EntityManager em, EquipmentService equipmentService) {
         super(em);
-        this.logger = logger;
         this.equipmentService = equipmentService;
     }
 
@@ -43,12 +39,15 @@ public class MetricsDatabaseReader extends DatabaseReader {
 
     public Collection<Equipment> getEquipmentsWithUnDoneEvents(Collection<String> entities,
             Collection<Criticality> criticalities,
-            Collection<Category> categories) {
+            Collection<Category> categories,
+            Collection<City> cities,
+            Collection<District> districts) {
 
         return equipmentService
                 .getEquipments(entities)
                 .stream()
                 .filter(equipment -> equipment.getDomain().getId() == EP_ID)
+                .filter(equipment -> isOneOfCityOrDistrict(cities, districts).test(equipment))
                 .filter(equipment -> matchEvents(equipment.getEvents(), criticalities, categories))
                 .toList();
 
@@ -148,7 +147,9 @@ public class MetricsDatabaseReader extends DatabaseReader {
             int buckets,
             Instant date,
             Collection<Long> families,
-            Collection<Long> entities) {
+            Collection<Long> entities,
+            Collection<Long> cities,
+            Collection<Long> districts) {
 
         return em
                 .createNativeQuery(
@@ -161,6 +162,8 @@ public class MetricsDatabaseReader extends DatabaseReader {
                                 and close_date > date_trunc(:interval, cast (:reference_date as timestamptz) - cast (:interval_number as interval))
                                 and equipment.family_id in :families_id
                                 and equipment.equipment_entity_id in :entities_id
+                                and (:cities is null or equipment.city_id in :cities )
+                                and (:districts is null or equipment.district_id in :districts )
                                 group by start
                                 order by 1;
                                 """,
@@ -171,6 +174,8 @@ public class MetricsDatabaseReader extends DatabaseReader {
                 .setParameter("interval_number", "%s %s".formatted(buckets, interval))
                 .setParameter("families_id", families)
                 .setParameter("entities_id", entities)
+                .setParameter("cities", cities)
+                .setParameter("districts", districts)
                 .getResultStream()
                 .map(res -> new AggregateServiceDto(
                         Instant.parse(((Tuple) res).get(0).toString()),
@@ -210,4 +215,10 @@ public class MetricsDatabaseReader extends DatabaseReader {
     private Predicate<Event> isOneOfCategory(Collection<Category> categories) {
         return event -> (categories.isEmpty()) || (categories.contains(event.getCategory()));
     }
+
+    private Predicate<Equipment> isOneOfCityOrDistrict(Collection<City> cities, Collection<District> districts) {
+        return equipment -> (cities.isEmpty() && districts.isEmpty())
+                || (cities.contains(equipment.getCity()) || districts.contains(equipment.getDistrict()));
+    }
+
 }

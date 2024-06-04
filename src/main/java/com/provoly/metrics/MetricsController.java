@@ -28,8 +28,10 @@ public class MetricsController {
     @Authenticated
     public EquipmentWithEventsDto getEquipmentWithEvent(@RestQuery List<String> criticality,
             @RestQuery List<String> category,
-            @RestQuery List<String> entity) {
-        return metricsService.getEquipmentsWithEventMetrics(criticality, category, entity);
+            @RestQuery List<String> entity,
+            @RestQuery List<String> place) {
+
+        return metricsService.getEquipmentsWithEventMetrics(criticality, category, entity, place);
     }
 
     @Path("/equipments-by-entity")
@@ -46,7 +48,8 @@ public class MetricsController {
             @RestQuery Instant date,
             @RestQuery @Positive @DefaultValue("24") int buckets,
             @RestQuery List<String> family,
-            @RestQuery List<String> entity) {
-        return metricsService.aggregateDoneServices(interval, date, buckets, family, entity);
+            @RestQuery List<String> entity,
+            @RestQuery List<String> place) {
+        return metricsService.aggregateDoneServices(interval, date, buckets, family, entity, place);
     }
 }

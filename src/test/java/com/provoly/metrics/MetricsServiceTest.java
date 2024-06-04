@@ -50,7 +50,7 @@ public class MetricsServiceTest {
     @Test
     void should_get_equipment_with_event_metrics() {
         // when
-        var result = metricsService.getEquipmentsWithEventMetrics(List.of(), List.of(), List.of());
+        var result = metricsService.getEquipmentsWithEventMetrics(List.of(), List.of(), List.of(), List.of());
 
         //then
         assertThat(result).extracting("nbEquipWithEvent_A").isEqualTo(0L);
@@ -70,10 +70,32 @@ public class MetricsServiceTest {
     }
 
     @Test
+    void should_get_equipment_with_event_metrics_filter_on_place() {
+        // when
+        var result = metricsService.getEquipmentsWithEventMetrics(List.of(), List.of(), List.of(), List.of("CH"));
+
+        //then
+        assertThat(result).extracting("nbEquipWithEvent_A").isEqualTo(0L);
+        assertThat(result).extracting("totalEquipWithEvent_A").isEqualTo(1L);
+        assertThat(result).extracting("nbServiceTodoWithEquip_A").isEqualTo(0L);
+        assertThat(result).extracting("nbServiceInProgressWithEquip_A").isEqualTo(0L);
+
+        assertThat(result).extracting("nbEquipWithEvent_FL").isEqualTo(1L);
+        assertThat(result).extracting("totalEquipWithEvent_FL").isEqualTo(1L);
+        assertThat(result).extracting("nbServiceTodoWithEquip_FL").isEqualTo(0L);
+        assertThat(result).extracting("nbServiceInProgressWithEquip_FL").isEqualTo(0L);
+
+        assertThat(result).extracting("nbEquipWithEvent_unmanaged").isEqualTo(1L);
+        assertThat(result).extracting("totalEquipWithEvent_unmanaged").isEqualTo(4L);
+        assertThat(result).extracting("nbServiceTodoWithEquip_unmanaged").isEqualTo(1L);
+        assertThat(result).extracting("nbServiceInProgressWithEquip_unmanaged").isEqualTo(0L);
+    }
+
+    @Test
     void should_get_equipment_from_agglo_with_event_metrics_with_criticality_low_medium_and_category_alert() {
         // when
         var result = metricsService.getEquipmentsWithEventMetrics(List.of("LOW", "MEDIUM"),
-                List.of("ALERT_LIMIT", "ALERT_MALFUNCTION"), List.of("AGGLO_COMMUN"));
+                List.of("ALERT_LIMIT", "ALERT_MALFUNCTION"), List.of("AGGLO_COMMUN"), List.of());
 
         //then
         assertThat(result).extracting("nbEquipWithEvent_A").isEqualTo(0L);
@@ -95,7 +117,7 @@ public class MetricsServiceTest {
     @Test
     void should_get_distinct_equipment_with_event_metrics_when_linked_to_many_events() {
         //given
-        var result = metricsService.getEquipmentsWithEventMetrics(List.of(), List.of(), List.of());
+        var result = metricsService.getEquipmentsWithEventMetrics(List.of(), List.of(), List.of(), List.of());
         assertThat(result).extracting("nbEquipWithEvent_unmanaged").isEqualTo(3L);
 
         // when adding a new event for an unmanaged equipment
@@ -110,7 +132,7 @@ public class MetricsServiceTest {
                 "ref",
                 "EP"));
 
-        var resultUpdated = metricsService.getEquipmentsWithEventMetrics(List.of(), List.of(), List.of());
+        var resultUpdated = metricsService.getEquipmentsWithEventMetrics(List.of(), List.of(), List.of(), List.of());
 
         //then
         assertThat(resultUpdated).extracting("nbEquipWithEvent_unmanaged")
@@ -124,7 +146,7 @@ public class MetricsServiceTest {
         dataService.clean();
 
         // when
-        var result = metricsService.getEquipmentsWithEventMetrics(List.of(), List.of(), List.of());
+        var result = metricsService.getEquipmentsWithEventMetrics(List.of(), List.of(), List.of(), List.of());
 
         //then
         assertThat(result).extracting("nbEquipWithEvent_A").isEqualTo(0L);
@@ -219,7 +241,7 @@ public class MetricsServiceTest {
 
         // when
         var result = metricsService.aggregateDoneServices(DateInterval.month, Instant.parse("2024-04-20T00:00:00.00Z"), 2,
-                List.of(), List.of());
+                List.of(), List.of(), List.of());
 
         //then
         assertThat(result).hasSize(3);
@@ -244,7 +266,7 @@ public class MetricsServiceTest {
 
         // when
         var result = metricsService.aggregateDoneServices(DateInterval.month, Instant.parse("2024-04-20T00:00:00.00Z"), 2,
-                List.of("EP_ARMOIRE"), List.of());
+                List.of("EP_ARMOIRE"), List.of(), List.of());
         //then
 
         assertThat(result).hasSize(2);
@@ -267,7 +289,7 @@ public class MetricsServiceTest {
 
         // when
         var result = metricsService.aggregateDoneServices(DateInterval.month, Instant.parse("2024-04-20T00:00:00.00Z"), 2,
-                List.of(), List.of());
+                List.of(), List.of(), List.of());
         //then
 
         assertThat(result).hasSize(2);
@@ -275,6 +297,32 @@ public class MetricsServiceTest {
                 Instant.parse("2024-02-01T00:00:00Z"),
                 Instant.parse("2024-04-01T00:00:00Z"));
         assertThat(result).extracting("count").containsExactly(1L, 1L);
+    }
+
+    @Test
+    void should_get_done_services_for_last_2_months_filter_on_chalon_place() {
+        // given
+        var equipFagniere = equipmentService.getEquipmentByName("P-1000");
+        var equipChalons = equipmentService.getEquipmentByName("A-230");
+
+        dataService.persistDoneService("DI5678", Instant.parse("2024-01-15T00:00:00.00Z"), equipFagniere, true);
+        dataService.persistDoneService("DI5778", Instant.parse("2024-02-15T00:00:00.00Z"), equipChalons, true);
+        dataService.persistDoneService("DI5779", Instant.parse("2024-02-15T00:00:00.00Z"), equipFagniere, true);
+        dataService.persistDoneService("DI5870", Instant.parse("2024-03-15T00:00:00.00Z"), equipChalons, true);
+        dataService.persistDoneService("DI5871", Instant.parse("2024-04-15T00:00:00.00Z"), equipChalons, true);
+        dataService.persistDoneService("DI5872", Instant.parse("2024-04-30T00:00:00.00Z"), equipFagniere, true);
+
+        // when
+        var result = metricsService.aggregateDoneServices(DateInterval.month, Instant.parse("2024-05-20T00:00:00.00Z"), 3,
+                List.of(), List.of(), List.of("CH"));
+
+        //then
+        assertThat(result).hasSize(3);
+        assertThat(result).extracting("start").containsExactly(
+                Instant.parse("2024-02-01T00:00:00Z"),
+                Instant.parse("2024-03-01T00:00:00Z"),
+                Instant.parse("2024-04-01T00:00:00Z"));
+        assertThat(result).extracting("count").containsExactly(1L, 1L, 1L);
     }
 
 }

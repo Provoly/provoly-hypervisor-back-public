@@ -36,3 +36,28 @@ insert into equipment_entity (id,code,name) values (19,'GE_BYES_VP', 'GE_BYES_VP
 insert into equipment_entity (id,code,name) values (20,'GE_BYES_RT', 'GE_BYES_RT');
 insert into equipment_entity (id,code,name) values (21,'GE_BYES_COMMUN', 'GE_BYES_COMMUN');
 insert into equipment_entity (id,code,name) values (22,'GE_AXIMUM_SLT', 'GE_AXIMUM_SLT');
+
+
+insert into city (id,code,name) values (1,'CH', 'Châlons en Champagne');
+insert into city (id,code,name) values (2,'CHA', 'Châlons Agglo');
+insert into city (id,code,name) values (3,'CONDE', 'Condé sur Marne');
+insert into city (id,code,name) values (4,'DAMP', 'Dampierre au Temple');
+insert into city (id,code,name) values (5,'FAGN', 'Fagnières');
+insert into city (id,code,name) values (6,'HAUSS', 'Haussimont');
+insert into city (id,code,name) values (7,'JAL', 'Jâlons');
+insert into city (id,code,name) values (8,'MAT', 'Matougues');
+insert into city (id,code,name) values (9,'MOUR', 'Mourmelon le Grand');
+insert into city (id,code,name) values (10,'SMP', 'Saint Martin-sur-le-Pré');
+insert into city (id,code,name) values (11,'SMS', 'Sommesous');
+insert into city (id,code,name) values (12,'VRA', 'Vraux');
+
+insert into district (id,code,name) values (1,'CH_C', 'Centre');
+insert into district (id,code,name) values (2,'CH_CD', 'Croix Dampierre');
+insert into district (id,code,name) values (3,'CH_FSA', 'Faubourg Saint-Antoine - Madagascar');
+insert into district (id,code,name) values (4,'CH_LA', 'Langevin - Laforest');
+insert into district (id,code,name) values (5,'CH_MH', 'Mont Héry');
+insert into district (id,code,name) values (6,'CH_MSM', 'Mont Saint-Michel - Bidée');
+insert into district (id,code,name) values (7,'CH_OFG', 'Oradour - Frison - Gare');
+insert into district (id,code,name) values (8,'CH_S', 'Schmit');
+insert into district (id,code,name) values (9,'CH_VSP', 'Vallée Saint-Pierre');
+insert into district (id,code,name) values (10,'CH_VER', 'Verbeau');

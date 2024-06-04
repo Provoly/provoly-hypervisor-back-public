@@ -22,6 +22,7 @@ public class Equipment {
     private String name;
 
     private String code;
+    private String address;
 
     @ManyToOne
     private Domain domain;
@@ -33,6 +34,12 @@ public class Equipment {
     @ManyToOne
     @JoinColumn(name = "family_id")
     private Family family;
+
+    @ManyToOne
+    private City city;
+
+    @ManyToOne
+    private District district;
 
     @OneToMany(mappedBy = "equipment", fetch = FetchType.EAGER)
     Collection<Service> services = new ArrayList<>();
@@ -55,15 +62,20 @@ public class Equipment {
         this.id = id;
     }
 
-    public Equipment(UUID id, String externalId, String name, String code, Domain domain, EquipmentEntity entity, Family family,
+    public Equipment(UUID id, String externalId, String name, String code, String address, Domain domain,
+            EquipmentEntity entity, Family family,
+            City city, District district,
             Collection<Service> services, Map<String, Object> attributes, Equipment parent) {
         this.id = id;
         this.externalId = externalId;
         this.name = name;
         this.code = code;
+        this.address = address;
         this.domain = domain;
         this.entity = entity;
         this.family = family;
+        this.city = city;
+        this.district = district;
         this.services = services;
         this.attributes = attributes;
         this.parent = parent;
@@ -97,6 +109,14 @@ public class Equipment {
         this.code = code;
     }
 
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public Domain getDomain() {
         return domain;
     }
@@ -119,6 +139,22 @@ public class Equipment {
 
     public void setFamily(Family family) {
         this.family = family;
+    }
+
+    public City getCity() {
+        return city;
+    }
+
+    public void setCity(City city) {
+        this.city = city;
+    }
+
+    public District getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(District district) {
+        this.district = district;
     }
 
     public Collection<Service> getServices() {

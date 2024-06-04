@@ -5,6 +5,7 @@ import java.util.Comparator;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
+import com.provoly.event.Domain;
 import com.provoly.event.Event;
 import com.provoly.event.EventMapper;
 import com.provoly.service.Service;
@@ -35,7 +36,10 @@ public class EquipmentMapper {
                 equipment.getCode(),
                 equipment.getDomain().getCode(),
                 equipment.getFamily().getCode(),
-                equipment.getEntity().getName(),
+                equipment.getEntity().getCode(),
+                equipment.getCity().getCode(),
+                equipment.getAddress(),
+                equipment.getDistrict() != null ? equipment.getDistrict().getName() : null,
                 equipment.getAttributes(),
                 mapToEquipmentReadDto(equipment.getParent()),
                 serviceMapper.mapToServiceReadDtos(equipment.getServices().stream()
@@ -52,14 +56,12 @@ public class EquipmentMapper {
         entity.setExternalId(dto.id());
         entity.setName(dto.name());
         entity.setCode(dto.code());
+        entity.setAddress(dto.address());
         entity.setEntity(mapToEntity(dto.entity()));
         entity.setFamily(mapToFamily(dto.family()));
-
-        var domain = databaseReader
-                .getDomainByCode(dto.domain())
-                .orElseThrow(() -> new IllegalArgumentException("Domain name %s not found".formatted(dto.domain())));
-
-        entity.setDomain(domain);
+        entity.setDomain(mapToDomain(dto.domain()));
+        entity.setCity(mapToCity(dto.city()));
+        entity.setDistrict(mapToDistrict(dto.district()));
 
         if (dto.parent() != null) {
             var equipmentParent = databaseReader
@@ -72,6 +74,27 @@ public class EquipmentMapper {
         for (var attr : dto.attributes().entrySet()) {
             entity.getAttributes().put(attr.getKey(), attr.getValue());
         }
+    }
+
+    private Domain mapToDomain(String domain) {
+        return databaseReader
+                .getDomainByCode(domain)
+                .orElseThrow(() -> new IllegalArgumentException("Domain name %s not found".formatted(domain)));
+    }
+
+    private City mapToCity(String city) {
+        return databaseReader
+                .getCityByCode(city)
+                .orElseThrow(() -> new IllegalArgumentException("City %s not found".formatted(city)));
+    }
+
+    private District mapToDistrict(String district) {
+        if (district == null) {
+            return null;
+        }
+        return databaseReader
+                .getDistrictByCode(district)
+                .orElseThrow(() -> new IllegalArgumentException("District %s not found".formatted(district)));
     }
 
     public EquipmentEntity mapToEntity(String name) {

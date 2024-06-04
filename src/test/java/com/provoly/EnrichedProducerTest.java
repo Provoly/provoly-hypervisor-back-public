@@ -55,8 +55,8 @@ public class EnrichedProducerTest {
         // given
         companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
 
-        var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS_COMMUN", null,
-                null);
+        var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS_COMMUN", "CH",
+                "address", "CH_C", null, null);
         equipmentService.saveOrUpdateEquipments(List.of(equipment));
 
         // when
@@ -65,6 +65,7 @@ public class EnrichedProducerTest {
                 .fromTopics("equipment").awaitRecords(1, Duration.ofSeconds(5)).getFirstRecord();
 
         assertThat(result.value()).extracting("externalId").isEqualTo(equipment.id());
+        assertThat(result.value()).extracting("place").isEqualTo("%s,%s".formatted(equipment.city(), equipment.district()));
     }
 
     @Test
@@ -73,9 +74,13 @@ public class EnrichedProducerTest {
         UUID eventReportId = UUID.randomUUID();
 
         companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
-        var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS_COMMUN", null,
+        var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS_COMMUN", "CH",
+                "address",
+                null, null,
                 null);
-        var equipment2 = new EquipmentWriteDto("technical_id2", 0, "equipment2", "307", "EP", "Armoire", "AGGLO_COMMUN", null,
+        var equipment2 = new EquipmentWriteDto("technical_id2", 0, "equipment2", "307", "EP", "Armoire", "AGGLO_COMMUN", "CH",
+                "address",
+                null, null,
                 null);
         equipmentService.saveOrUpdateEquipments(List.of(equipment, equipment2)); // 2 messages
 
@@ -103,9 +108,13 @@ public class EnrichedProducerTest {
         UUID eventReportId = UUID.randomUUID();
 
         companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
-        var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS_COMMUN", null,
+        var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS_COMMUN", "CH",
+                "address",
+                null, null,
                 null);
-        var equipment2 = new EquipmentWriteDto("technical_id2", 0, "equipment2", "307", "EP", "Armoire", "AGGLO_COMMUN", null,
+        var equipment2 = new EquipmentWriteDto("technical_id2", 0, "equipment2", "307", "EP", "Armoire", "AGGLO_COMMUN", "CH",
+                "address",
+                null, null,
                 null);
         equipmentService.saveOrUpdateEquipments(List.of(equipment, equipment2)); // 2 messages
 
@@ -126,7 +135,9 @@ public class EnrichedProducerTest {
     public void should_consume_enriched_equipment_when_create_service() {
         // given
         companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
-        var equipment = new EquipmentWriteDto("technical_id", 0, "306", "306", "EP", "Armoire", "CHALONS_COMMUN", null,
+        var equipment = new EquipmentWriteDto("technical_id", 0, "306", "306", "EP", "Armoire", "CHALONS_COMMUN", "CH",
+                "address", null,
+                null,
                 null);
         equipmentService.saveOrUpdateEquipments(List.of(equipment)); // 1 messages
 

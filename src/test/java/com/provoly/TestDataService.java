@@ -16,10 +16,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 import com.provoly.action.AskedService;
-import com.provoly.equipment.Equipment;
-import com.provoly.equipment.EquipmentDatabaseReader;
-import com.provoly.equipment.EquipmentEntity;
-import com.provoly.equipment.Family;
+import com.provoly.equipment.*;
 import com.provoly.event.*;
 import com.provoly.procedure.Procedure;
 import com.provoly.service.Service;
@@ -49,6 +46,8 @@ public class TestDataService {
         domain = equipmentDatabaseReader.getDomainByCode("EP").get();
         prev = serviceDatabaseReader.getServiceCategoryByCode("PREV").get();
         cura = serviceDatabaseReader.getServiceCategoryByCode("CURA").get();
+        var chalonsCity = equipmentDatabaseReader.getCityByCode("CH").get();
+        var fagniereCity = equipmentDatabaseReader.getCityByCode("FAGN").get();
 
         var armoire = equipmentDatabaseReader.getFamilyByCode("EP_ARMOIRE").get();
         var foyerLumineux = equipmentDatabaseReader.getFamilyByCode("EP_FOYER_LUMINEUX").get();
@@ -59,13 +58,13 @@ public class TestDataService {
         var fagnieres = equipmentDatabaseReader.getEquipmentEntityByName("FAGNIERES_COMMUN").get();
         var stm = equipmentDatabaseReader.getEquipmentEntityByName("SAINT_MARTIN_COMMUN").get();
 
-        var equip1 = initEquipment("P-1000", foyerLumineux, fagnieres, 0);
-        var equip2 = initEquipment("A-230", armoire, stm, 1);
-        var equip3 = initEquipment("A-4901", armoire, agglo, 0);
-        var equip4 = initEquipment("C-1034", foyerLumineux, agglo, 1);
-        var equip5 = initEquipment("C-7614", ouvrage, chalons, 0);
-        var equip6 = initEquipment("C-762", ouvrage, agglo, 1);
-        var equip7 = initEquipment("C-763", ouvrage, agglo, 0);
+        var equip1 = initEquipment("P-1000", foyerLumineux, fagnieres, fagniereCity, 0);
+        var equip2 = initEquipment("A-230", armoire, stm, chalonsCity, 1);
+        var equip3 = initEquipment("A-4901", armoire, agglo, chalonsCity, 0);
+        var equip4 = initEquipment("C-1034", foyerLumineux, agglo, chalonsCity, 1);
+        var equip5 = initEquipment("C-7614", ouvrage, chalons, chalonsCity, 0);
+        var equip6 = initEquipment("C-762", ouvrage, agglo, fagniereCity, 1);
+        var equip7 = initEquipment("C-763", ouvrage, agglo, fagniereCity, 0);
 
         var service1 = new Service(UUID.randomUUID(), "DI1234", Instant.now(), Instant.now(), Instant.now(), Instant.now(),
                 Instant.now(), equip3, domain, ASKED, prev);
@@ -204,14 +203,16 @@ public class TestDataService {
         em.persist(service);
     }
 
-    private Equipment initEquipment(String name, Family family, EquipmentEntity entity, int managed) {
+    private Equipment initEquipment(String name, Family family, EquipmentEntity entity, City city, int managed) {
         var equipment = new Equipment(UUID.randomUUID());
         equipment.setExternalId(name);
         equipment.setName(name);
         equipment.setCode(name);
+        equipment.setAddress("address");
         equipment.setFamily(family);
         equipment.setEntity(entity);
         equipment.setDomain(domain);
+        equipment.setCity(city);
         equipment.setAttributes(Map.of("managed", managed));
         em.persist(equipment);
         return equipment;
