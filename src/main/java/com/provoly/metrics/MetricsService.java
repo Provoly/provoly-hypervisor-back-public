@@ -111,6 +111,7 @@ public class MetricsService {
         logger.infof("""
                 Aggregate done services in the last %s %s from %s
                 filter on
+                category : curative
                 family : %s,
                 equipment entity : %s
                 """.formatted(nbBuckets, interval, date, family, entity));

@@ -198,9 +198,9 @@ public class TestDataService {
     }
 
     @Transactional
-    public void persistDoneService(String externalId, Instant closeDate, Equipment equip) {
+    public void persistDoneService(String externalId, Instant closeDate, Equipment equip, boolean isCura) {
         var service = new Service(UUID.randomUUID(), externalId, Instant.now(), Instant.now(), Instant.now(), Instant.now(),
-                closeDate, equip, domain, DONE, prev);
+                closeDate, equip, domain, DONE, isCura ? cura : prev);
         em.persist(service);
     }
 

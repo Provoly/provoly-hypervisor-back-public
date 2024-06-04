@@ -156,6 +156,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
                                 select date_trunc(:interval, close_date, 'UTC') start, count(*) from {h-schema}service
                                 left join {h-schema}equipment on service.equipment_id = equipment.id
                                 where status = 'DONE'
+                                and category_id = :category
                                 and close_date < cast (:reference_date as timestamptz)
                                 and close_date > date_trunc(:interval, cast (:reference_date as timestamptz) - cast (:interval_number as interval))
                                 and equipment.family_id in :families_id
@@ -164,6 +165,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
                                 order by 1;
                                 """,
                         Tuple.class)
+                .setParameter("category", 2) // Curative cateogory
                 .setParameter("interval", interval.name())
                 .setParameter("reference_date", date)
                 .setParameter("interval_number", "%s %s".formatted(buckets, interval))
