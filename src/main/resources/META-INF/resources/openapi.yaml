@@ -117,7 +117,7 @@ paths:
                         "linkedEvents": 2,
                         "procedureProgress": 100,
                         "externalSourceRef": "citylinx_1",
-                        "category": "ALERT_MALFUNCTION"
+                        "category": "MALFUNCTION"
                       },
                       {
                         "id": "eb8e2f6b-f33e-408c-bb6c-e042f204d687",
@@ -184,7 +184,7 @@ paths:
                     "description": "desc",
                     "address": "1 rue simone veil",
                     "criticality": "HIGH",
-                    "category":"ALERT_LIMIT",
+                    "category":"LIMIT",
                     "equipmentId":"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd"
                   }
       responses:
@@ -305,7 +305,7 @@ paths:
                       "type": "ALERT",
                       "lastModificationDate": "2024-02-23T12:56:00.802501Z",
                       "creationDate": "2024-02-23T12:56:00.802501Z",
-                      "category": "ALERT_MALFUNCTION",
+                      "category": "MALFUNCTION",
                       "equipment": {
                         "id": "12a64ae7-70ca-4d12-bcd9-9f1c75f23915",
                         "name": "C-1034",
@@ -485,7 +485,7 @@ paths:
                     "description": "desc",
                     "address": "1 rue nina simone",
                     "criticality": "LOW",
-                    "category":"OPERATOR_EVENT",
+                    "category":"OPERATOR",
                     "equipmentId":"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd"
                   }
       responses:
@@ -632,7 +632,7 @@ paths:
                           "type": "ALERT",
                           "lastModificationDate": "2024-02-23T12:56:00.802501Z",
                           "creationDate": "2024-02-23T12:56:00.802501Z",
-                          "category": "ALERT_MALFUNCTION",
+                          "category": "MALFUNCTION",
                           "equipment": {
                             "id": "12a64ae7-70ca-4d12-bcd9-9f1c75f23915",
                             "name": "C-1034",
@@ -1286,13 +1286,13 @@ components:
       required: true
       enum:
         - MANIFESTATION,
-        - OPERATOR_EVENT
+        - OPERATOR
     AlertCategory:
       type: string
       required: true
       enum:
-        - ALERT_LIMIT,
-        - ALERT_MALFUNCTION
+        - LIMIT,
+        - MALFUNCTION
     ReportCategory:
       enum:
         - REPORT

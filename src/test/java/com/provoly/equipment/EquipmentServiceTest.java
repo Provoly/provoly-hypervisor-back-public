@@ -93,9 +93,7 @@ public class EquipmentServiceTest {
     void should_throw_exception_when_save_equipments_parent_not_exists() {
         // given
         var equipment = new EquipmentWriteDto("id", 0, "name", "code", "EP", "Armoire", "FAGNIERES_COMMUN", "CH", "address",
-                null,
-                "invalid_code",
-                null);
+                "CH_C", "invalid_code", null);
 
         // when
         assertThatThrownBy(() -> equipmentService.saveOrUpdateEquipments(List.of(equipment)))
@@ -107,11 +105,9 @@ public class EquipmentServiceTest {
     void should_throw_exception_and_abort_save_equipments_when_at_least_one_error() {
         // given
         var equipment1 = new EquipmentWriteDto("new_technical_id", 0, "name", "code", "EP", "Armoire", "FAGNIERES_COMMUN", "CH",
-                "address",
-                null, null,
-                null);
+                "address", "CH_C", null, null);
         var equipment2 = new EquipmentWriteDto("new_technical_id1", 0, "name1", "code1", "invalid domain", "Armoire",
-                "FAGNIERES_COMMUN", "CH", "address", null, null, null);
+                "FAGNIERES_COMMUN", "CH", "address", "CH_C", null, null);
 
         var actualEquipmentSize = equipmentService.getEquipments(List.of()).size();
 
@@ -129,7 +125,7 @@ public class EquipmentServiceTest {
     void should_update_equipment_by_adding_attributes() {
         // given
         var equipment1 = new EquipmentWriteDto("P-1000", 0, "P-1000", "P-1000", "EP", "Foyer Lumineux", "FAGNIERES_COMMUN",
-                "CH", "address", null, null,
+                "CH", "address", "CH_C", null,
                 Map.of("activeEnergy", 30));
 
         // when
@@ -144,8 +140,7 @@ public class EquipmentServiceTest {
     void should_update_equipment_attributes_with_null_value() {
         // given
         var equipment = new EquipmentWriteDto("P-1000", 0, "P-1000", "P-1000", "EP", "Foyer Lumineux", "FAGNIERES_COMMUN", "CH",
-                "address",
-                null, null,
+                "address", "CH_C", null,
                 new HashMap<>(Map.of("activeEnergy", 30)));
         equipmentService.saveOrUpdateEquipments(List.of(equipment));
 
@@ -162,8 +157,7 @@ public class EquipmentServiceTest {
     void should_update_equipment_only_filled_in_attributes() {
         // given
         var equipment = new EquipmentWriteDto("P-1000", 0, "P-1000", "P-1000", "EP", "Foyer Lumineux", "FAGNIERES_COMMUN", "CH",
-                "address",
-                null, null,
+                "address", "CH_C", null,
                 new HashMap<>(Map.of("activeEnergy", 30)));
         equipmentService.saveOrUpdateEquipments(List.of(equipment));
 

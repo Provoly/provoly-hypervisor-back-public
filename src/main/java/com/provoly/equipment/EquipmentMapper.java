@@ -39,7 +39,7 @@ public class EquipmentMapper {
                 equipment.getEntity().getCode(),
                 equipment.getCity().getCode(),
                 equipment.getAddress(),
-                equipment.getDistrict() != null ? equipment.getDistrict().getName() : null,
+                equipment.getDistrict() != null ? equipment.getDistrict().getCode() : null,
                 equipment.getAttributes(),
                 mapToEquipmentReadDto(equipment.getParent()),
                 serviceMapper.mapToServiceReadDtos(equipment.getServices().stream()

@@ -72,7 +72,7 @@ public class MetricsServiceTest {
     @Test
     void should_get_equipment_with_event_metrics_filter_on_place() {
         // when
-        var result = metricsService.getEquipmentsWithEventMetrics(List.of(), List.of(), List.of(), List.of("CH"));
+        var result = metricsService.getEquipmentsWithEventMetrics(List.of(), List.of(), List.of(), List.of("CH_C"));
 
         //then
         assertThat(result).extracting("nbEquipWithEvent_A").isEqualTo(0L);
@@ -94,8 +94,8 @@ public class MetricsServiceTest {
     @Test
     void should_get_equipment_from_agglo_with_event_metrics_with_criticality_low_medium_and_category_alert() {
         // when
-        var result = metricsService.getEquipmentsWithEventMetrics(List.of("LOW", "MEDIUM"),
-                List.of("ALERT_LIMIT", "ALERT_MALFUNCTION"), List.of("AGGLO_COMMUN"), List.of());
+        var result = metricsService.getEquipmentsWithEventMetrics(List.of(Criticality.LOW.name(), Criticality.MEDIUM.name()),
+                List.of(Category.LIMIT.name(), Category.MALFUNCTION.name()), List.of("AGGLO_COMMUN"), List.of());
 
         //then
         assertThat(result).extracting("nbEquipWithEvent_A").isEqualTo(0L);
@@ -314,7 +314,7 @@ public class MetricsServiceTest {
 
         // when
         var result = metricsService.aggregateDoneServices(DateInterval.month, Instant.parse("2024-05-20T00:00:00.00Z"), 3,
-                List.of(), List.of(), List.of("CH"));
+                List.of(), List.of(), List.of("CH_C"));
 
         //then
         assertThat(result).hasSize(3);

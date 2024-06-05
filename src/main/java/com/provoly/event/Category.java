@@ -2,10 +2,10 @@ package com.provoly.event;
 
 public enum Category {
     MANIFESTATION(EventType.OPERATOR),
-    OPERATOR_EVENT(EventType.OPERATOR),
+    OPERATOR(EventType.OPERATOR),
     REPORT(EventType.REPORT),
-    ALERT_LIMIT(EventType.ALERT),
-    ALERT_MALFUNCTION(EventType.ALERT);
+    LIMIT(EventType.ALERT),
+    MALFUNCTION(EventType.ALERT);
 
     private final EventType eventType;
 

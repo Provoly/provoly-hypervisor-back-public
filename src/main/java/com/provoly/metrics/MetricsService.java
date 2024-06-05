@@ -10,9 +10,6 @@ import java.util.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
-import com.provoly.EnumEntity;
-import com.provoly.equipment.City;
-import com.provoly.equipment.District;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.Family;
 import com.provoly.event.Category;
@@ -51,14 +48,11 @@ public class MetricsService {
 
         var eventCriticalities = criticalities.stream().map(Criticality::fromString).toList();
         var eventCategories = categories.stream().map(Category::fromString).toList();
-        var cities = new ArrayList<City>();
-        var districts = new ArrayList<District>();
-
-        extractCitiesAndDistrictsFromPlaces(places, cities, districts);
+        var districts = places.stream().map(code -> equipmentService.getDistrictByCode(code)).toList();
 
         logger.debug("Get all equipment linked with at least one undone event which is not a Manifestation");
         var equipmentWithUndoneEvents = metricsDatabaseReader.getEquipmentsWithUnDoneEvents(entities, eventCriticalities,
-                eventCategories, cities, districts);
+                eventCategories, districts);
 
         logger.debugf("grouped by Managed/ unmanaged");
         var equipments = metricsDatabaseReader.equipmentsCountGroupedByManaged(equipmentWithUndoneEvents);
@@ -123,15 +117,9 @@ public class MetricsService {
                 place: %s
                 """.formatted(nbBuckets, interval, date, family, entity, place));
 
-        var families = family.isEmpty() ? equipmentService.getFamilies().stream().map(EnumEntity::getId).toList()
-                : family.stream().map(code -> equipmentService.getFamilyByCode(code).getId()).toList();
-        var entities = entity.isEmpty() ? equipmentService.getEquipmentEntities().stream().map(EnumEntity::getId).toList()
-                : entity.stream().map(code -> equipmentService.getEquipmentEntity(code).getId()).toList();
-
-        var cities = new ArrayList<City>();
-        var districts = new ArrayList<District>();
-
-        extractCitiesAndDistrictsFromPlaces(place, cities, districts);
+        var families = family.stream().map(code -> equipmentService.getFamilyByCode(code).getId()).toList();
+        var entities = entity.stream().map(code -> equipmentService.getEquipmentEntity(code).getId()).toList();
+        var districts = place.stream().map(code -> equipmentService.getDistrictByCode(code).getId()).toList();
 
         return metricsDatabaseReader.aggregateDoneServices(
                 interval,
@@ -139,22 +127,11 @@ public class MetricsService {
                 date,
                 families,
                 entities,
-                cities.stream().map(EnumEntity::getId).toList(),
-                districts.stream().map(EnumEntity::getId).toList());
+                districts);
     }
 
     private Long getServicesForEquipmentAndStatus(Map<String, Map<ServiceStatus, Long>> servicesByEquipments, String code,
             ServiceStatus status) {
         return servicesByEquipments.getOrDefault(code, Map.of(status, 0L)).getOrDefault(status, 0L);
-    }
-
-    private void extractCitiesAndDistrictsFromPlaces(Collection<String> places, List<City> cities, List<District> districts) {
-        places.forEach(place -> equipmentService.getCityByCode(place).ifPresentOrElse(
-                cities::add,
-                () -> equipmentService.getDistrictByCode(place).ifPresentOrElse(
-                        districts::add,
-                        () -> {
-                            throw new NoSuchElementException("Unknown district or city %s".formatted(place));
-                        })));
     }
 }

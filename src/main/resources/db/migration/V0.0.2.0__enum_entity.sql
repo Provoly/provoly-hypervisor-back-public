@@ -61,3 +61,5 @@ insert into district (id,code,name) values (7,'CH_OFG', 'Oradour - Frison - Gare
 insert into district (id,code,name) values (8,'CH_S', 'Schmit');
 insert into district (id,code,name) values (9,'CH_VSP', 'Vallée Saint-Pierre');
 insert into district (id,code,name) values (10,'CH_VER', 'Verbeau');
+insert into district (id,code,name) values (11,'FAGN', 'Fagnières');
+insert into district (id,code,name) values (12,'SMP', 'Saint Martin-sur-le-Pré');

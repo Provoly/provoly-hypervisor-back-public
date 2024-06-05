@@ -172,7 +172,7 @@ public class EventControllerTest {
                 null,
                 List.of(),
                 List.of(Status.IN_PROGRESS.name()),
-                List.of("MANIFESTATION", "ALERT_LIMIT", "REPORT"),
+                List.of(Category.MANIFESTATION.name(), Category.LIMIT.name(), Category.REPORT.name()),
                 List.of(),
                 List.of());
         //then
@@ -449,7 +449,7 @@ public class EventControllerTest {
     void should_throw_if_name_blank_when_create_event() {
         // given
         var event = new OperatorEventWriteDto(UUID.randomUUID(), "", "desc", Criticality.MEDIUM, "adress", null,
-                Category.OPERATOR_EVENT, null, null, null);
+                Category.OPERATOR, null, null, null);
 
         // then
         assertThatThrownBy(() -> eventController.saveEventOperator(event))

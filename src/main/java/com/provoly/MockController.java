@@ -1,6 +1,7 @@
 package com.provoly;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import jakarta.persistence.EntityManager;
@@ -40,17 +41,16 @@ public class MockController {
             @DefaultValue("10") @PositiveOrZero @RestQuery int procedureNumber) {
 
         var procedures = new ArrayList<Procedure>();
-        var domains = databaseReader.getDomains().stream().toList();
+        var epDomain = databaseReader.getDomainByCode("EP").get();
 
         for (int i = 0; i < procedureNumber; i++) {
             var id = UUID.randomUUID();
-            var action = new TodoAction(UUID.randomUUID(), randomInstant(), randomStatus(), "todo no%s.0".formatted(i));
-            var action2 = new TodoAction(UUID.randomUUID(), randomInstant(), randomStatus(), "todo no%s.1".formatted(i));
-            var action3 = new AskedService(UUID.randomUUID(), randomInstant(), randomStatus(),
+            var action = new TodoAction(UUID.randomUUID(), randomInstant(), randomStatusDoneInProgress(),
+                    "todo no%s.0".formatted(i));
+            var action3 = new AskedService(UUID.randomUUID(), randomInstant(), randomStatusDoneInProgress(),
                     "demande d'intervention n°%s".formatted(i));
             var procedure = new Procedure(id, "procédure_%s no%s".formatted(suffix(id), i), Instant.now());
             procedure.addAction(action);
-            procedure.addAction(action2);
             procedure.addAction(action3);
             procedures.add(procedure);
             entityManager.persist(procedure);
@@ -59,22 +59,22 @@ public class MockController {
         for (int i = 0; i <= eventNumber; i++) {
             if (i % 3 == 0) {
                 var id = UUID.randomUUID();
-
                 var event = new EventOperator(id);
                 event.setName(getName("Evenement operateur", id, i));
                 event.setAddress(getAddress(i));
                 event.setDescription("description of %s".formatted(event.getName()));
-                event.setCategory(randomOpertaorCategory());
+                event.setCategory(randomCategory(EventType.OPERATOR));
                 event.setCriticality(randomCriticality());
+                event.setDomain(epDomain);
                 if (event.getCategory() == Category.MANIFESTATION) {
                     event.setStartDate(Instant.now());
-                    event.setEndDate(Instant.now());
+                    event.setEndDate(Instant.now().plus(rand.nextInt(1, 10), ChronoUnit.DAYS));
                 }
-                setDomain(event, domains);
-                setProcedure(eventNumber, procedures, event);
-                event.setStatus(randomStatus());
-                setCloseDate(event);
+
                 entityManager.persist(event);
+                setProcedure(eventNumber, procedures, event);
+                setStatus(event);
+                setCloseDate(event);
             }
             if (i % 3 == 1) {
                 var id = UUID.randomUUID();
@@ -82,14 +82,15 @@ public class MockController {
                 event.setName(getName("Alerte", id, i));
                 event.setAddress(getAddress(i));
                 event.setDescription("description of %s".formatted(event.getName()));
-                event.setCategory(randomAlertCategory());
+                event.setCategory(randomCategory(EventType.ALERT));
                 event.setCriticality(randomCriticality());
                 event.setExternalSourceRef("citylinx_%s".formatted(i));
-                setDomain(event, domains);
-                setProcedure(eventNumber, procedures, event);
-                event.setStatus(randomStatus());
-                setCloseDate(event);
+                event.setDomain(epDomain);
+
                 entityManager.persist(event);
+                setProcedure(eventNumber, procedures, event);
+                setStatus(event);
+                setCloseDate(event);
             }
             if (i % 3 == 2) {
                 var id = UUID.randomUUID();
@@ -100,13 +101,22 @@ public class MockController {
                 event.setCategory(Category.REPORT);
                 event.setCriticality(randomCriticality());
                 event.setExternalSourceRef("grc_%s".formatted(i));
-                setDomain(event, domains);
-                setProcedure(eventNumber, procedures, event);
-                event.setStatus(randomStatus());
-                setCloseDate(event);
+                event.setDomain(epDomain);
+
                 entityManager.persist(event);
+                setProcedure(eventNumber, procedures, event);
+                setStatus(event);
+                setCloseDate(event);
             }
 
+        }
+    }
+
+    private void setStatus(Event event) {
+        if (event.getProcedure() != null) {
+            event.setStatus(randomStatusDoneInProgress());
+        } else {
+            event.setStatus(randomStatusNewDone());
         }
     }
 
@@ -120,10 +130,6 @@ public class MockController {
         long date1 = 1704118449; // 1/1/24
         long date2 = 1735654449; //31/12/24
         return Instant.ofEpochSecond(rand.nextLong(date2 - date1) + date1);
-    }
-
-    private void setDomain(Event event, List<Domain> domains) {
-        event.setDomain(domains.get(rand.nextInt(domains.size())));
     }
 
     private String getName(String prefix, UUID id, int i) {
@@ -145,8 +151,13 @@ public class MockController {
         }
     }
 
-    private Status randomStatus() {
-        var values = Arrays.stream(Status.values()).toList();
+    private Status randomStatusDoneInProgress() {
+        var values = List.of(Status.IN_PROGRESS, Status.DONE);
+        return values.get(rand.nextInt(values.size()));
+    }
+
+    private Status randomStatusNewDone() {
+        var values = List.of(Status.NEW, Status.DONE);
         return values.get(rand.nextInt(values.size()));
     }
 
@@ -155,13 +166,9 @@ public class MockController {
         return values.get(rand.nextInt(values.size()));
     }
 
-    private Category randomOpertaorCategory() {
-        var values = Arrays.stream(Category.values()).toList();
+    private Category randomCategory(EventType type) {
+        var values = Arrays.stream(Category.values()).filter(category -> category.getEventType() == type).toList();
         return values.get(rand.nextInt(values.size()));
     }
 
-    private Category randomAlertCategory() {
-        var values = Arrays.stream(Category.values()).filter(category -> category.getEventType() == EventType.ALERT).toList();
-        return values.get(rand.nextInt(values.size()));
-    }
 }

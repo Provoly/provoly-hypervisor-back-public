@@ -122,8 +122,9 @@ public class EquipmentService {
     }
 
     @Transactional
-    public Optional<District> getDistrictByCode(String code) {
+    public District getDistrictByCode(String code) {
         logger.debugf("Get district by code  %s", code);
-        return databaseReader.getDistrictByCode(code);
+        return databaseReader.getDistrictByCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Code %s invalid".formatted(code)));
     }
 }

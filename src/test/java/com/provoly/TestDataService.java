@@ -46,8 +46,12 @@ public class TestDataService {
         domain = equipmentDatabaseReader.getDomainByCode("EP").get();
         prev = serviceDatabaseReader.getServiceCategoryByCode("PREV").get();
         cura = serviceDatabaseReader.getServiceCategoryByCode("CURA").get();
+
         var chalonsCity = equipmentDatabaseReader.getCityByCode("CH").get();
+        var chalonsDistrict = equipmentDatabaseReader.getDistrictByCode("CH_C").get();
+
         var fagniereCity = equipmentDatabaseReader.getCityByCode("FAGN").get();
+        var fagniereDistrict = equipmentDatabaseReader.getDistrictByCode("FAGN").get();
 
         var armoire = equipmentDatabaseReader.getFamilyByCode("EP_ARMOIRE").get();
         var foyerLumineux = equipmentDatabaseReader.getFamilyByCode("EP_FOYER_LUMINEUX").get();
@@ -58,13 +62,13 @@ public class TestDataService {
         var fagnieres = equipmentDatabaseReader.getEquipmentEntityByName("FAGNIERES_COMMUN").get();
         var stm = equipmentDatabaseReader.getEquipmentEntityByName("SAINT_MARTIN_COMMUN").get();
 
-        var equip1 = initEquipment("P-1000", foyerLumineux, fagnieres, fagniereCity, 0);
-        var equip2 = initEquipment("A-230", armoire, stm, chalonsCity, 1);
-        var equip3 = initEquipment("A-4901", armoire, agglo, chalonsCity, 0);
-        var equip4 = initEquipment("C-1034", foyerLumineux, agglo, chalonsCity, 1);
-        var equip5 = initEquipment("C-7614", ouvrage, chalons, chalonsCity, 0);
-        var equip6 = initEquipment("C-762", ouvrage, agglo, fagniereCity, 1);
-        var equip7 = initEquipment("C-763", ouvrage, agglo, fagniereCity, 0);
+        var equip1 = initEquipment("P-1000", foyerLumineux, fagnieres, fagniereCity, fagniereDistrict, 0);
+        var equip2 = initEquipment("A-230", armoire, stm, chalonsCity, chalonsDistrict, 1);
+        var equip3 = initEquipment("A-4901", armoire, agglo, chalonsCity, chalonsDistrict, 0);
+        var equip4 = initEquipment("C-1034", foyerLumineux, agglo, chalonsCity, chalonsDistrict, 1);
+        var equip5 = initEquipment("C-7614", ouvrage, chalons, chalonsCity, chalonsDistrict, 0);
+        var equip6 = initEquipment("C-762", ouvrage, agglo, fagniereCity, fagniereDistrict, 1);
+        var equip7 = initEquipment("C-763", ouvrage, agglo, fagniereCity, fagniereDistrict, 0);
 
         var service1 = new Service(UUID.randomUUID(), "DI1234", Instant.now(), Instant.now(), Instant.now(), Instant.now(),
                 Instant.now(), equip3, domain, ASKED, prev);
@@ -86,14 +90,14 @@ public class TestDataService {
         procedure2 = initProcedure("procedure2", List.of(asked3, asked4, asked5));
         procedure3 = initProcedure("procedure3", List.of(asked6));
 
-        initOperatorEvent("operator1", Category.OPERATOR_EVENT, Criticality.LOW, Status.NEW, null, equip1);
+        initOperatorEvent("operator1", Category.OPERATOR, Criticality.LOW, Status.NEW, null, equip1);
         initOperatorEvent("manfestation1", Category.MANIFESTATION, Criticality.MEDIUM, Status.IN_PROGRESS, procedure1,
                 equip2);
         initReportEvent("report1", Criticality.LOW, Status.NEW, null, equip6);
         initReportEvent("report2", Criticality.HIGH, Status.IN_PROGRESS, procedure3, equip3);
         initReportEvent("report3", Criticality.MEDIUM, Status.DONE, procedure2, equip5);
-        initAlertEvent("malfunction1", Category.ALERT_MALFUNCTION, Criticality.LOW, Status.NEW, procedure3, equip4);
-        initAlertEvent("limint1", Category.ALERT_LIMIT, Criticality.LOW, Status.NEW, null, equip7);
+        initAlertEvent("malfunction1", Category.MALFUNCTION, Criticality.LOW, Status.NEW, procedure3, equip4);
+        initAlertEvent("limit1", Category.LIMIT, Criticality.LOW, Status.NEW, null, equip7);
     }
 
     @Transactional
@@ -203,7 +207,8 @@ public class TestDataService {
         em.persist(service);
     }
 
-    private Equipment initEquipment(String name, Family family, EquipmentEntity entity, City city, int managed) {
+    private Equipment initEquipment(String name, Family family, EquipmentEntity entity, City city, District district,
+            int managed) {
         var equipment = new Equipment(UUID.randomUUID());
         equipment.setExternalId(name);
         equipment.setName(name);
@@ -213,6 +218,7 @@ public class TestDataService {
         equipment.setEntity(entity);
         equipment.setDomain(domain);
         equipment.setCity(city);
+        equipment.setDistrict(district);
         equipment.setAttributes(Map.of("managed", managed));
         em.persist(equipment);
         return equipment;

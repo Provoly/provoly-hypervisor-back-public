@@ -65,7 +65,7 @@ public class EnrichedProducerTest {
                 .fromTopics("equipment").awaitRecords(1, Duration.ofSeconds(5)).getFirstRecord();
 
         assertThat(result.value()).extracting("externalId").isEqualTo(equipment.id());
-        assertThat(result.value()).extracting("place").isEqualTo("%s,%s".formatted(equipment.city(), equipment.district()));
+        assertThat(result.value()).extracting("place").isEqualTo(equipment.district());
     }
 
     @Test
@@ -75,13 +75,9 @@ public class EnrichedProducerTest {
 
         companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
         var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS_COMMUN", "CH",
-                "address",
-                null, null,
-                null);
+                "address", "CH_C", null, null);
         var equipment2 = new EquipmentWriteDto("technical_id2", 0, "equipment2", "307", "EP", "Armoire", "AGGLO_COMMUN", "CH",
-                "address",
-                null, null,
-                null);
+                "address", "CH_C", null, null);
         equipmentService.saveOrUpdateEquipments(List.of(equipment, equipment2)); // 2 messages
 
         var equipId = equipmentService.getEquipments(List.of("CHALONS_COMMUN")).stream().findFirst().get().getId();
@@ -109,13 +105,9 @@ public class EnrichedProducerTest {
 
         companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
         var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS_COMMUN", "CH",
-                "address",
-                null, null,
-                null);
+                "address", "CH_C", null, null);
         var equipment2 = new EquipmentWriteDto("technical_id2", 0, "equipment2", "307", "EP", "Armoire", "AGGLO_COMMUN", "CH",
-                "address",
-                null, null,
-                null);
+                "address", "CH_C", null, null);
         equipmentService.saveOrUpdateEquipments(List.of(equipment, equipment2)); // 2 messages
 
         var equipId = equipmentService.getEquipments(List.of("CHALONS_COMMUN")).stream().findFirst().get().getId();
@@ -136,9 +128,7 @@ public class EnrichedProducerTest {
         // given
         companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
         var equipment = new EquipmentWriteDto("technical_id", 0, "306", "306", "EP", "Armoire", "CHALONS_COMMUN", "CH",
-                "address", null,
-                null,
-                null);
+                "address", "CH_C", null, null);
         equipmentService.saveOrUpdateEquipments(List.of(equipment)); // 1 messages
 
         var service = new ServiceWriteDto("technical_id1", "",

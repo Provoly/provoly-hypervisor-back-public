@@ -40,14 +40,13 @@ public class MetricsDatabaseReader extends DatabaseReader {
     public Collection<Equipment> getEquipmentsWithUnDoneEvents(Collection<String> entities,
             Collection<Criticality> criticalities,
             Collection<Category> categories,
-            Collection<City> cities,
             Collection<District> districts) {
 
         return equipmentService
                 .getEquipments(entities)
                 .stream()
                 .filter(equipment -> equipment.getDomain().getId() == EP_ID)
-                .filter(equipment -> isOneOfCityOrDistrict(cities, districts).test(equipment))
+                .filter(equipment -> districts.isEmpty() || districts.contains(equipment.getDistrict()))
                 .filter(equipment -> matchEvents(equipment.getEvents(), criticalities, categories))
                 .toList();
 
@@ -148,7 +147,6 @@ public class MetricsDatabaseReader extends DatabaseReader {
             Instant date,
             Collection<Long> families,
             Collection<Long> entities,
-            Collection<Long> cities,
             Collection<Long> districts) {
 
         return em
@@ -160,10 +158,9 @@ public class MetricsDatabaseReader extends DatabaseReader {
                                 and category_id = :category
                                 and close_date < cast (:reference_date as timestamptz)
                                 and close_date > date_trunc(:interval, cast (:reference_date as timestamptz) - cast (:interval_number as interval))
-                                and equipment.family_id in :families_id
-                                and equipment.equipment_entity_id in :entities_id
-                                and (:cities is null or equipment.city_id in :cities )
-                                and (:districts is null or equipment.district_id in :districts )
+                                and (:families_id is null or equipment.family_id in :families_id)
+                                and (:entities_id is null or equipment.equipment_entity_id in :entities_id)
+                                and (:districts_id is null or equipment.district_id in :districts_id )
                                 group by start
                                 order by 1;
                                 """,
@@ -174,8 +171,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
                 .setParameter("interval_number", "%s %s".formatted(buckets, interval))
                 .setParameter("families_id", families)
                 .setParameter("entities_id", entities)
-                .setParameter("cities", cities)
-                .setParameter("districts", districts)
+                .setParameter("districts_id", districts)
                 .getResultStream()
                 .map(res -> new AggregateServiceDto(
                         Instant.parse(((Tuple) res).get(0).toString()),
@@ -214,11 +210,6 @@ public class MetricsDatabaseReader extends DatabaseReader {
 
     private Predicate<Event> isOneOfCategory(Collection<Category> categories) {
         return event -> (categories.isEmpty()) || (categories.contains(event.getCategory()));
-    }
-
-    private Predicate<Equipment> isOneOfCityOrDistrict(Collection<City> cities, Collection<District> districts) {
-        return equipment -> (cities.isEmpty() && districts.isEmpty())
-                || (cities.contains(equipment.getCity()) || districts.contains(equipment.getDistrict()));
     }
 
 }

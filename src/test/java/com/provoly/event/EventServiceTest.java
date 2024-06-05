@@ -45,7 +45,7 @@ public class EventServiceTest {
     void should_throw_exception_create_event_name_with_already_exists() {
         // given
         var event = new OperatorEventWriteDto(UUID.randomUUID(), "operator1", "desc", Criticality.HIGH,
-                null, null, Category.OPERATOR_EVENT, null, null, null);
+                null, null, Category.OPERATOR, null, null, null);
 
         // then
         assertThatThrownBy(() -> eventService.saveOrUpdateEvent(event))
@@ -93,7 +93,7 @@ public class EventServiceTest {
     void should_throw_exception_update_alert_event() {
         // given
         var eventAlertId = eventService
-                .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of(Category.ALERT_LIMIT.name()), List.of(),
+                .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of(Category.LIMIT.name()), List.of(),
                         List.of())
                 .stream()
                 .toList()
@@ -133,7 +133,7 @@ public class EventServiceTest {
     void should_throw_exception_create_event_with_invalid_domain() {
         // given
         var event = new OperatorEventWriteDto(UUID.randomUUID(), "new event", "desc", Criticality.HIGH,
-                null, null, Category.OPERATOR_EVENT, null, null, "invalid_domain");
+                null, null, Category.OPERATOR, null, null, "invalid_domain");
 
         // then
         assertThatThrownBy(() -> eventService.saveOrUpdateEvent(event))

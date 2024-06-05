@@ -35,9 +35,7 @@ public class EquipmentEnriched {
         this.entity = equipment.getEntity().getCode();
         this.family = equipment.getFamily().getCode();
         this.attributes = equipment.getAttributes();
-        this.place = equipment.getDistrict() != null
-                ? "%s,%s".formatted(equipment.getCity().getCode(), equipment.getDistrict().getCode())
-                : equipment.getCity().getCode();
+        this.place = equipment.getDistrict().getCode();
         this.parent = equipment.getParent() == null ? null : new EquipmentEnriched(equipment.getParent());
         this.events = equipment
                 .getEvents()

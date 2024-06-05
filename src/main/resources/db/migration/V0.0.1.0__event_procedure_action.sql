@@ -50,7 +50,7 @@ create table equipment
     domain_id           bigint              not null references domain,
     family_id           bigint              not null references family,
     city_id             bigint              not null references city,
-    district_id         bigint references district,
+    district_id         bigint              not null references district,
     equipment_entity_id bigint              not null references equipment_entity,
     attributes          jsonb default '{}',
     parent_id           uuid,
