@@ -101,7 +101,7 @@ public class EventMapper {
     }
 
     private String mapToString(Domain domain) {
-        return domain != null ? domain.getName() : null;
+        return domain != null ? domain.getCode() : null;
     }
 
     private Domain mapToDomain(String domain) {
