@@ -2,13 +2,47 @@
 
 == Déploiement
 
+
+=== Générer des équipements dans l'hyperviseur
+Pour associer et enrichir des équipements, il faut les générer à l'aide de la requête `create/update equipments` dans le dossier `provoly/hypervisor` de Postman.
+
+=== Configurer et insérer les données dans Kuzzle
+Il existe deux possibilités :
+
+==== NodeRed
+Le NodeRed déployé est configuré pour récupérer les mesures directement de Citylinks et les envoyer à Kuzzle.
+Pour cela, il faut lancer les différents flux à l'adresse https://nodered.chalons-dev.provoly.net :
+
+* `creation tenant`
+* `integration armoire`
+* `integration point lumineux`
+
+
+==== Postman
+Pour des données de tests, il est possible d'utiliser les requêtes dans le dossier `Kuzzle` de Postman:
+
+* `Init`
+* `Create asset/device`
+* `Mesures`
+
+NB: il faut s'assurer que le nom du tenant présent dans toutes les urls correspond bien à celui configuré dans provoly.
+Pour l'environnement "chalons-dev", il faut que le tenant se nomme `connect-chalons`.
+
+
+
 === Créer les classes et les jeux de données
 
 Lancer l'ensemble des requêtes présentes dans le dossier Postman :
 
 - provoly/[chalons] init env/create
 
+_Attention à choisir la bonne requête de paramétrage de la metadata geoKey car le slug des datasets et différents suivant les environnements._
+
 === Configuration du GeoServer
+
+==== Se connecter avec les credentials de démarrage
+Se connecter au cluster de l'environnement correspondant pour récupérer les identifiants de connexion
+
 
 ==== Créer un workspace "chalons"
 
@@ -21,7 +55,7 @@ Créer un store de type Provoly dans le workspace "chalons"
 * Nom de la source de données : Provoly
 * uri_ref: http://data-ref:8080/
 * uri_virt: http://data-virt:8080/
-* sso_uri: https://sso.chalons-dev.provoly.net/auth/realms/provoly
+* sso_uri: https://sso.chalons-{environnment}.provoly.net/auth/realms/provoly
 * client_id: provoly
 * client_secret: dummy
 * user: iamsuperadmin
@@ -43,9 +77,14 @@ Copier les icônes dans le Geoserver
 kubectl -n chalons-dev -c geoserver cp geoserver/icons geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
 ----
 
-Créer un style "equipment" en utilisant le fichier `geoserver/equipment.sld`
+Créer un style `equipment` en utilisant le fichier `geoserver/equipment.sld`
+
+Note: il faut sélectionner le fichier, cliquer sur "Charger" (en face) et re-sélectionner le fichier. Ensuite cliquer sur "Valider".
 
 Publier la couche "xxxxxx_equipement-enrichi-mesure"
+
+Cocher la case "Personnaliser les attributs" en attendant la correction du bug https://github.com/Provoly/provoly-geoserver-datastore/issues/46
+
 Dans l'onglet "Publication" de la couche, choisir le style "equipment" par défaut
 
 La mise à jour du style de la couche peut se faire avec la commande suivante :
@@ -72,7 +111,6 @@ kubectl -n $CHALONS_ENV port-forward service/provoly-postgresql-rw 5435:5432
 ----
 
 ----
-
 
 
 

@@ -33,6 +33,10 @@ class Service {
 
 }
 
+class AskedService {
+
+}
+
 class TodoAction {
 }
 
@@ -63,8 +67,9 @@ Procedure "1" -- "0..n" Action: Contains
 Equipment "1" -- "0..n" Service: Contains
 Equipment "1" -- "1" EquipmentEntity: has
 Equipment "1" -- "1" Family: has
+Equipment "1" -- "1" Domain: has
 
-Action <|-- Service
+Action <|-- AskedService
 Action <|-- TodoAction
 
 
