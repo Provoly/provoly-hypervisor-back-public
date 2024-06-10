@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import com.provoly.equipment.Equipment;
 import com.provoly.event.Event;
+import com.provoly.service.Service;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 
@@ -25,6 +26,7 @@ public class EquipmentEnriched {
     private final EquipmentEnriched parent;
     private final List<CondensedEvent> events;
     private final long nbServicesAskedInProgress;
+    private final List<CondensedService> services;
 
     public EquipmentEnriched(Equipment equipment) {
         this.id = equipment.getId();
@@ -42,15 +44,21 @@ public class EquipmentEnriched {
                 .stream()
                 .map(this::condensedEvent)
                 .toList();
-        this.nbServicesAskedInProgress = equipment.getServices().stream()
+        this.nbServicesAskedInProgress = equipment
+                .getServices()
+                .stream()
                 .filter(service -> List.of(ASKED, IN_PROGRESS).contains(service.getStatus()))
                 .count();
+        this.services = equipment
+                .getServices()
+                .stream()
+                .map(this::condensedService)
+                .toList();
     }
 
     public EquipmentEnriched(UUID id, String externalId, String name, String code, String domain, String entity, String family,
-            String place,
-            Map<String, Object> attributes, EquipmentEnriched parent, List<CondensedEvent> events,
-            long nbServicesAskedInProgress) {
+            String place, Map<String, Object> attributes, EquipmentEnriched parent, List<CondensedEvent> events,
+            long nbServicesAskedInProgress, List<CondensedService> services) {
         this.id = id;
         this.externalId = externalId;
         this.name = name;
@@ -63,6 +71,7 @@ public class EquipmentEnriched {
         this.parent = parent;
         this.events = events;
         this.nbServicesAskedInProgress = nbServicesAskedInProgress;
+        this.services = services;
     }
 
     public UUID getId() {
@@ -114,10 +123,18 @@ public class EquipmentEnriched {
         return nbServicesAskedInProgress;
     }
 
+    public List<CondensedService> getServices() {
+        return services;
+    }
+
     private CondensedEvent condensedEvent(Event event) {
         return new CondensedEvent(
                 event.getCategory().name(),
                 event.getCriticality());
+    }
+
+    private CondensedService condensedService(Service service) {
+        return new CondensedService(service.getCategory().getCode());
     }
 
 }

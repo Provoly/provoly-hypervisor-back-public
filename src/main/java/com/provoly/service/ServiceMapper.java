@@ -36,7 +36,7 @@ public class ServiceMapper {
                 service.getEndDate(),
                 service.getDomain().getCode(),
                 service.getStatus(),
-                service.getCategory().getName());
+                service.getCategory().getCode());
     }
 
     public Collection<ServiceReadDto> mapToServiceReadDtos(Collection<Service> services) {

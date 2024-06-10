@@ -141,5 +141,6 @@ public class EnrichedProducerTest {
                 .fromTopics("equipment").awaitRecords(2, Duration.ofSeconds(5));
 
         assertThat(result.getFirstRecord().value().getNbServicesAskedInProgress()).isEqualTo(1);
+        assertThat(result.getFirstRecord().value().getServices()).extracting("category").containsExactly("CURA");
     }
 }
