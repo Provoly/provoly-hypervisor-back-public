@@ -1,6 +1,7 @@
 package com.provoly.service;
 
 import java.util.Collection;
+import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -39,8 +40,8 @@ public class ServiceMapper {
                 service.getCategory().getCode());
     }
 
-    public Collection<ServiceReadDto> mapToServiceReadDtos(Collection<Service> services) {
-        return services.stream().map(this::mapToServiceReadDto).toList();
+    public Collection<ServiceReadDto> mapToServiceReadDtos(Stream<Service> services) {
+        return services.map(this::mapToServiceReadDto).toList();
     }
 
     public void updateService(ServiceWriteDto dto, Service entity) {

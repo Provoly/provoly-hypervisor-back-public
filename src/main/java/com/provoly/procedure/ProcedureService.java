@@ -6,19 +6,19 @@ import java.util.UUID;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
-import com.provoly.event.Event;
-import com.provoly.event.EventDatabaseReader;
 import com.provoly.event.EventService;
+import com.provoly.event.dto.AlertEventWriteDto;
 
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class ProcedureService {
-    private EventDatabaseReader databaseReader;
+    private ProcedureDatabaseReader databaseReader;
     private EventService eventService;
     private Logger logger;
 
-    public ProcedureService(EventDatabaseReader databaseReader, EventService eventService, Logger logger) {
+    public ProcedureService(ProcedureDatabaseReader databaseReader, EventService eventService,
+            Logger logger) {
         this.databaseReader = databaseReader;
         this.eventService = eventService;
         this.logger = logger;
@@ -33,14 +33,8 @@ public class ProcedureService {
     @Transactional
     public void closeAllProcedureEvents(UUID id) {
         logger.debugf("Close all procedure events with id %s", id);
-        var events = databaseReader.getEventsByProcedureId(id);
+        var events = getProcedureDetails(id).getEvents();
         events.forEach(event -> eventService.closeEvent(event));
-    }
-
-    @Transactional
-    public Collection<Event> getEventsByProcedureId(UUID id) {
-        logger.debugf("Get events linked to procedure with id %s", id);
-        return databaseReader.getEventsByProcedureId(id);
     }
 
     @Transactional
@@ -49,7 +43,7 @@ public class ProcedureService {
             logger.debug("Procedure is null, count is 0");
             return 0;
         }
-        return databaseReader.getLinkedEventCountByProcedure(procedure.getId());
+        return databaseReader.getLinkedEventCountForProcedure(procedure.getId());
     }
 
     @Transactional
@@ -57,7 +51,23 @@ public class ProcedureService {
         logger.debugf("Update procedure %s and its %s events", dto.id(), dto.events().size());
 
         for (var event : dto.events()) {
+            if (event instanceof AlertEventWriteDto) {
+                logger.debugf("Can't update alert event with id %s", dto.id());
+                continue;
+            }
             eventService.saveOrUpdateEvent(event);
+        }
+    }
+
+    @Transactional
+    public void saveProcedure(UUID procedureId, Collection<UUID> eventIds) {
+        logger.debugf("Save procedure %s and its %s events", procedureId, eventIds.size());
+        Procedure procedure = new Procedure(procedureId, "procedure %s".formatted(procedureId));
+        databaseReader.saveProcedure(procedure);
+
+        for (var id : eventIds) {
+            var eventEntity = eventService.getEventDetails(id);
+            procedure.addEvent(eventEntity);
         }
     }
 

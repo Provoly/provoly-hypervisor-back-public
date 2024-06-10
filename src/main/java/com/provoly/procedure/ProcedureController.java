@@ -25,8 +25,7 @@ public class ProcedureController {
     @Authenticated
     public ProcedureReadDto getProcedureDetail(UUID id) {
         var procedure = procedureService.getProcedureDetails(id);
-        var events = procedureService.getEventsByProcedureId(id);
-        return procedureMapper.mapToProcedureReadDetailsDto(procedure, events);
+        return procedureMapper.mapToProcedureReadDetailsDto(procedure);
     }
 
     @Path("/id/{id}/close")

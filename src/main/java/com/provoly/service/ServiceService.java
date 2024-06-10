@@ -2,6 +2,7 @@ package com.provoly.service;
 
 import java.util.Collection;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -78,7 +79,7 @@ public class ServiceService {
     }
 
     @Transactional
-    public Collection<Service> getServices() {
+    public Stream<Service> getServices() {
         return databaseReader.getAllServices();
     }
 }

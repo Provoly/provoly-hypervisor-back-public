@@ -3,12 +3,16 @@ package com.provoly.procedure;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.persistence.*;
 
 import com.provoly.action.Action;
+import com.provoly.event.Event;
 import com.provoly.event.Status;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 public class Procedure {
@@ -17,9 +21,13 @@ public class Procedure {
 
     private String name;
 
+    @CreationTimestamp
     private Instant creationDate;
 
     private float procedureProgress;
+
+    @OneToMany(mappedBy = "procedure", fetch = FetchType.EAGER)
+    private List<Event> events = new ArrayList<>();
 
     @OneToMany(mappedBy = "procedure", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Collection<Action> actions = new ArrayList<>();
@@ -28,10 +36,13 @@ public class Procedure {
         // Only for JPA
     }
 
-    public Procedure(UUID id, String name, Instant creationDate) {
+    public Procedure(UUID id) {
+        this.id = id;
+    }
+
+    public Procedure(UUID id, String name) {
         this.id = id;
         this.name = name;
-        this.creationDate = creationDate;
         this.procedureProgress = 0;
     }
 
@@ -41,13 +52,14 @@ public class Procedure {
         setProcedureProgress(calculateProgressActions());
     }
 
+    public void addEvent(Event event) {
+        events.add(event);
+        event.setProcedure(this);
+    }
+
     public void deleteAction(Action action) {
         actions.remove(action);
         setProcedureProgress(calculateProgressActions());
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 
     public UUID getId() {
@@ -58,8 +70,16 @@ public class Procedure {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public Instant getCreationDate() {
         return creationDate;
+    }
+
+    public List<Event> getEvents() {
+        return events;
     }
 
     public Collection<Action> getActions() {

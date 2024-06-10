@@ -1,7 +1,7 @@
 package com.provoly.service;
 
-import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -47,9 +47,9 @@ public class ServiceDatabaseReader extends DatabaseReader {
                 .findFirst();
     }
 
-    public Collection<Service> getAllServices() {
+    public Stream<Service> getAllServices() {
         var q = em.getCriteriaBuilder().createQuery(Service.class);
         q.select(q.from(Service.class));
-        return em.createQuery(q).getResultList();
+        return em.createQuery(q).getResultStream();
     }
 }

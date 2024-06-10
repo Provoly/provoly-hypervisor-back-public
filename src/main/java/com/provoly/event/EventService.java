@@ -147,52 +147,25 @@ public class EventService {
 
     @Transactional
     public ResponseCode saveOrUpdateEvent(EventWriteDto eventDto) {
-        boolean isNewEvent = true;
-
-        UUID previousEquipmentId = null;
         logger.infof("Update %s event with id %s", eventDto.getType(), eventDto.getId());
 
         if (databaseReader.isEventWithIdExists(eventDto.getId())) {
-            Event eventToUpdate = databaseReader.getEventById(eventDto.getId());
-            previousEquipmentId = eventToUpdate.getEquipment() != null ? eventToUpdate.getEquipment().getId() : null;
-
-            if (!eventDto.getName().equals(eventToUpdate.getName())) {
-                checkIsNameAlreadyExists(eventDto.getName());
-            }
-
-            switch (eventDto) {
-                case OperatorEventWriteDto dto -> updateOperatorEvent(dto);
-                case ReportEventWriteDto dto -> updateReportEvent(dto);
-                case AlertEventWriteDto dto -> {
-                    logger.errorf("It's not possible to update event %s of type Alert.".formatted(dto.getId()));
-                    throw new IllegalArgumentException(
-                            "It's not possible to update event %s of type Alert.".formatted(dto.getId()));
-                }
-                default -> throw new IllegalStateException("Unexpected value: " + eventDto);
-            }
-            isNewEvent = false;
-
-        } else {
-            logger.infof("Event %s of type %s not exists, create it".formatted(eventDto.getId(), eventDto.getType()));
-            checkIsNameAlreadyExists(eventDto.getName());
-            switch (eventDto) {
-                case OperatorEventWriteDto dto -> saveOperatorEvent(dto);
-                case ReportEventWriteDto dto -> saveReportEvent(dto);
-                case AlertEventWriteDto dto -> saveAlertEvent(dto);
-                default -> throw new IllegalStateException("Unexpected value: " + eventDto);
-            }
+            updateEvent(eventDto);
+            return ResponseCode.UPDATED;
         }
 
-        Event createdOrUpdatedEvent = databaseReader.getEventById(eventDto.getId());
-        equipmentEnrichedProducer.updateFor(createdOrUpdatedEvent);
-
-        if (previousEquipmentId != null && eventDto.getEquipmentId() != null &&
-                !eventDto.getEquipmentId().equals(previousEquipmentId)) {
-            Equipment equipment = equipmentService.getEquipmentById(previousEquipmentId);
-            equipmentEnrichedProducer.updateFor(equipment);
+        logger.infof("Event %s of type %s not exists, create it".formatted(eventDto.getId(), eventDto.getType()));
+        checkIsNameAlreadyExists(eventDto.getName());
+        switch (eventDto) {
+            case OperatorEventWriteDto dto -> saveOperatorEvent(dto);
+            case ReportEventWriteDto dto -> saveReportEvent(dto);
+            case AlertEventWriteDto dto -> saveAlertEvent(dto);
+            default -> throw new IllegalStateException("Unexpected value: " + eventDto);
         }
 
-        return isNewEvent ? ResponseCode.CREATED : ResponseCode.UPDATED;
+        enrichEquipmentFromUpdatedEvent(eventDto, null);
+
+        return ResponseCode.CREATED;
     }
 
     @Transactional
@@ -206,6 +179,38 @@ public class EventService {
         if (event.getStatus() != Status.DONE) {
             event.setStatus(Status.DONE);
             event.setCloseDate(Instant.now());
+        }
+    }
+
+    private void updateEvent(EventWriteDto eventDto) {
+        Event eventToUpdate = databaseReader.getEventById(eventDto.getId());
+        var previousEquipmentId = eventToUpdate.getEquipment() != null ? eventToUpdate.getEquipment().getId() : null;
+
+        if (!eventDto.getName().equals(eventToUpdate.getName())) {
+            checkIsNameAlreadyExists(eventDto.getName());
+        }
+
+        switch (eventDto) {
+            case OperatorEventWriteDto dto -> updateOperatorEvent(dto);
+            case ReportEventWriteDto dto -> updateReportEvent(dto);
+            case AlertEventWriteDto dto -> {
+                logger.errorf("It's not possible to update event %s of type Alert.".formatted(dto.getId()));
+                throw new IllegalArgumentException(
+                        "It's not possible to update event %s of type Alert.".formatted(dto.getId()));
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + eventDto);
+        }
+        enrichEquipmentFromUpdatedEvent(eventDto, previousEquipmentId);
+    }
+
+    private void enrichEquipmentFromUpdatedEvent(EventWriteDto eventDto, UUID previousEquipmentId) {
+        Event createdOrUpdatedEvent = databaseReader.getEventById(eventDto.getId());
+        equipmentEnrichedProducer.updateFor(createdOrUpdatedEvent);
+
+        if (previousEquipmentId != null && eventDto.getEquipmentId() != null &&
+                !eventDto.getEquipmentId().equals(previousEquipmentId)) {
+            Equipment equipment = equipmentService.getEquipmentById(previousEquipmentId);
+            equipmentEnrichedProducer.updateFor(equipment);
         }
     }
 

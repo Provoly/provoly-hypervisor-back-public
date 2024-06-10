@@ -43,9 +43,9 @@ public class EquipmentMapper {
                 equipment.getAttributes(),
                 mapToEquipmentReadDto(equipment.getParent()),
                 serviceMapper.mapToServiceReadDtos(equipment.getServices().stream()
-                        .sorted(Comparator.comparing(Service::getLastModificationDate)).limit(MAX_SIZE).toList()),
+                        .sorted(Comparator.comparing(Service::getLastModificationDate)).limit(MAX_SIZE)),
                 eventMapper.mapToEventReadDto(equipment.getEvents().stream()
-                        .sorted(Comparator.comparing(Event::getLastModificationDate)).limit(MAX_SIZE).toList()));
+                        .sorted(Comparator.comparing(Event::getLastModificationDate)).limit(MAX_SIZE)));
     }
 
     public Collection<EquipmentReadDto> mapToEquipmentReadDto(Collection<Equipment> equipments) {

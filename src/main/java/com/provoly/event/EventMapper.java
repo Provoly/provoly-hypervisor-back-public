@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -86,8 +87,8 @@ public class EventMapper {
         entity.setExternalSourceRef(dto.getExternalSourceRef());
     }
 
-    public Collection<EventReadDto> mapToEventReadDto(Collection<Event> events) {
-        return events.stream().map(this::mapToEventReadDto).toList();
+    public Collection<EventReadDto> mapToEventReadDto(Stream<Event> events) {
+        return events.map(this::mapToEventReadDto).toList();
     }
 
     private void setCommonEventProperties(EventWriteDto dto, Event entity) {

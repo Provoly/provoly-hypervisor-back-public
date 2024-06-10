@@ -49,7 +49,7 @@ public class MockController {
                     "todo no%s.0".formatted(i));
             var action3 = new AskedService(UUID.randomUUID(), randomInstant(), randomStatusDoneInProgress(),
                     "demande d'intervention n°%s".formatted(i));
-            var procedure = new Procedure(id, "procédure_%s no%s".formatted(suffix(id), i), Instant.now());
+            var procedure = new Procedure(id, "procédure_%s no%s".formatted(suffix(id), i));
             procedure.addAction(action);
             procedure.addAction(action3);
             procedures.add(procedure);

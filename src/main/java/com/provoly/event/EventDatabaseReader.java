@@ -11,7 +11,6 @@ import jakarta.persistence.criteria.*;
 
 import com.provoly.DatabaseReader;
 import com.provoly.equipment.*;
-import com.provoly.procedure.Procedure;
 import com.provoly.procedure.Procedure_;
 
 import org.jboss.logging.Logger;
@@ -178,40 +177,6 @@ public class EventDatabaseReader extends DatabaseReader {
             throw new NoSuchElementException("Event with id %s not found".formatted(id));
         }
         return event;
-    }
-
-    public Collection<Event> getEventsByProcedureId(UUID id) {
-        var builder = em.getCriteriaBuilder();
-        CriteriaQuery<Event> criteriaQuery = builder.createQuery(Event.class);
-        var root = criteriaQuery.from(Event.class);
-        var procedure = root.join(Event_.procedure);
-        var query = criteriaQuery
-                .where(builder.equal(procedure.get(Procedure_.id), id))
-                .orderBy(builder.desc(root.get(Event_.creationDate)));
-
-        return em.createQuery(query)
-                .getResultList();
-    }
-
-    public Procedure getProcedureById(UUID id) {
-        var procedure = em.find(Procedure.class, id);
-        if (procedure == null) {
-            throw new NoSuchElementException("Procedure with id %s not found".formatted(id));
-        }
-        return procedure;
-    }
-
-    public long getLinkedEventCountByProcedure(UUID id) {
-        var builder = em.getCriteriaBuilder();
-        CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
-        var root = criteriaQuery.from(Event.class);
-        var procedure = root.join(Event_.procedure);
-
-        var query = criteriaQuery.select(builder.count(root))
-                .where(builder.equal(procedure.get(Procedure_.id), id))
-                .groupBy(procedure.get(Procedure_.id));
-
-        return em.createQuery(query).getSingleResult();
     }
 
     public void saveEvent(Event event) {

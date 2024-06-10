@@ -116,8 +116,8 @@ public class TestDataService {
         return procedure3.getId();
     }
 
-    private Procedure initProcedure(String name, List<AskedService> services) {
-        var procedure = new Procedure(UUID.randomUUID(), name, Instant.now());
+    public Procedure initProcedure(String name, List<AskedService> services) {
+        var procedure = new Procedure(UUID.randomUUID(), name);
         for (var service : services) {
             procedure.addAction(service);
         }
@@ -152,7 +152,7 @@ public class TestDataService {
         em.persist(event);
     }
 
-    private void initReportEvent(String name, Criticality criticality, Status status, Procedure procedure,
+    public void initReportEvent(String name, Criticality criticality, Status status, Procedure procedure,
             Equipment equipment) {
         var event = new EventReport(UUID.randomUUID());
         event.setName(name);
@@ -175,7 +175,7 @@ public class TestDataService {
         em.persist(event);
     }
 
-    private void initAlertEvent(String name, Category category, Criticality criticality, Status status,
+    public void initAlertEvent(String name, Category category, Criticality criticality, Status status,
             Procedure procedure,
             Equipment equipment) {
         var event = new EventAlert(UUID.randomUUID());
