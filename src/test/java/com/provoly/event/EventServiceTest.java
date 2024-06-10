@@ -180,4 +180,20 @@ public class EventServiceTest {
         var event = eventService.getEventDetails(eventIdDone);
         assertThat(event.getCloseDate()).isEqualTo(oldEvent.getCloseDate());
     }
+
+    @Test
+    void should_return_empty_summary_event_and_count_0_when_no_event(){
+        // given
+        clean();
+
+        // when
+        var result = eventService.getEventSummariesGroupByStatus(10,null);
+
+        // then
+        assertThat(result.get(Status.NEW)).extracting("count").isEqualTo(0L);
+        assertThat(result.get(Status.IN_PROGRESS)).extracting("count").isEqualTo(0L);
+        assertThat(result.get(Status.DONE)).extracting("count").isEqualTo(0L);
+
+        init();
+    }
 }
