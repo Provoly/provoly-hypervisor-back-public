@@ -19,6 +19,8 @@ jobs:
     runs-on: provoly-runner
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Cache local Maven repository
         uses: actions/cache@v4
@@ -40,6 +42,6 @@ jobs:
             verify org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1.2184:sonar \
             -Dsonar.host.url=${{ env.SONAR_URL }}\
             -Dsonar.token=${{ env.SONAR_ADMIN_TOKEN }}\
-            -Dsonar.dependencyCheck.jsonReportPath==${{ github.workspace }}/target/dependency-check-report.json\
-            -Dsonar.dependencyCheck.htmlReportPath==${{ github.workspace }}/target/dependency-check-report.html\
-            -Dsonar.coverage.jacoco.xmlReportPaths==${{ github.workspace }}/target/jacoco-report/jacoco.xml
+            -Dsonar.dependencyCheck.jsonReportPath=${{ github.workspace }}/target/dependency-check-report.json\
+            -Dsonar.dependencyCheck.htmlReportPath=${{ github.workspace }}/target/dependency-check-report.html\
+            -Dsonar.coverage.jacoco.xmlReportPaths=${{ github.workspace }}/target/jacoco-report/jacoco.xml

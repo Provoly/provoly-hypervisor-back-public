@@ -5,23 +5,7 @@ on:
   push:
     branches:
       - "main"
-    paths-ignore:
-      - '.gitignore'
-      - 'LICENSE'
-      - '*.adoc'
-      - '*.txt'
-      - 'docs'
-      - 'ide-config'
-      - '.github/**'
   pull_request:
-    paths-ignore:
-      - '.gitignore'
-      - 'LICENSE'
-      - '*.adoc'
-      - 'docs'
-      - 'ide-config'
-      - '*.txt'
-      - '.github/**'
 
 env:
   JAVA_VERSION: 21
@@ -33,6 +17,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  pre_job:
+    name: Preparing path-ignores
+    runs-on: provoly-runner
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          paths_ignore: '[".gitignore","LICENSE","*.adoc","*.txt","docs/**", "ide-config", ".github/**"]'
+          do_not_skip: '["workflow_dispatch"]'
+          skip_after_successful_duplicate: false
   build:
     name: Build
     runs-on: provoly-runner
