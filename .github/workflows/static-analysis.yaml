@@ -42,4 +42,4 @@ jobs:
             -Dsonar.token=${{ env.SONAR_ADMIN_TOKEN }}\
             -Dsonar.dependencyCheck.jsonReportPath==${{ github.workspace }}/target/dependency-check-report.json\
             -Dsonar.dependencyCheck.htmlReportPath==${{ github.workspace }}/target/dependency-check-report.html\
-            -Dsonar.coverage.jacoco.xmlReportPaths==${{ github.workspace }}/target/*/coverage/jacoco.xml
+            -Dsonar.coverage.jacoco.xmlReportPaths==${{ github.workspace }}/target/jacoco-report/jacoco.xml
