@@ -52,12 +52,14 @@ public class EventService {
 
         return Map.of(
                 Status.DONE,
-                new EventsSummariesByStatusDto(counts.getOrDefault(Status.DONE,0L), eventSummaries.getOrDefault(Status.DONE, List.of())),
+                new EventsSummariesByStatusDto(counts.getOrDefault(Status.DONE, 0L),
+                        eventSummaries.getOrDefault(Status.DONE, List.of())),
                 Status.IN_PROGRESS,
-                new EventsSummariesByStatusDto(counts.getOrDefault(Status.IN_PROGRESS,0L),
+                new EventsSummariesByStatusDto(counts.getOrDefault(Status.IN_PROGRESS, 0L),
                         eventSummaries.getOrDefault(Status.IN_PROGRESS, List.of())),
                 Status.NEW,
-                new EventsSummariesByStatusDto(counts.getOrDefault(Status.NEW,0L), eventSummaries.getOrDefault(Status.NEW, List.of())));
+                new EventsSummariesByStatusDto(counts.getOrDefault(Status.NEW, 0L),
+                        eventSummaries.getOrDefault(Status.NEW, List.of())));
     }
 
     private List<EventSummaryDto> getEventSummariesGroupByStatus(int limit, Criticality criticality) {

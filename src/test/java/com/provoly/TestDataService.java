@@ -95,7 +95,7 @@ public class TestDataService {
                 equip2);
         initReportEvent("report1", Criticality.LOW, Status.NEW, null, equip6);
         initReportEvent("report2", Criticality.HIGH, Status.IN_PROGRESS, procedure3, equip3);
-        initReportEvent("report3", Criticality.MEDIUM, Status.DONE, procedure2, equip5);
+        initReportEvent("report3", Criticality.MEDIUM, Status.DONE, procedure2, equip6);
         initAlertEvent("malfunction1", Category.MALFUNCTION, Criticality.LOW, Status.NEW, procedure3, equip4);
         initAlertEvent("limit1", Category.LIMIT, Criticality.LOW, Status.NEW, null, equip7);
     }

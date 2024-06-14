@@ -372,7 +372,7 @@ public class EventControllerTest {
         assertThat(result.get(Status.DONE).events())
                 .extracting("serviceTitle").isNotEmpty();
         assertThat(result.get(Status.DONE).events())
-                .extracting("serviceCount").containsExactly(1L);
+                .extracting("serviceCount").containsExactly(0L);
 
         assertThat(result.get(Status.NEW).events())
                 .extracting("manifestation").containsOnlyNulls();

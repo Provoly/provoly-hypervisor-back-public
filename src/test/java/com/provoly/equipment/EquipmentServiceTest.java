@@ -171,4 +171,13 @@ public class EquipmentServiceTest {
         assertThat(updatedEquipment.getAttributes()).containsEntry("activePower", "20");
     }
 
+    @Test
+    void should_get_equipment_with_sorted_events() {
+        // when
+        var equipment = equipmentService.getEquipmentByName("C-762");
+
+        // then
+        assertThat(equipment.getEvents()).extracting("name").containsExactly("report1", "report3");
+    }
+
 }

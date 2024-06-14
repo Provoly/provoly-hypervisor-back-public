@@ -182,12 +182,12 @@ public class EventServiceTest {
     }
 
     @Test
-    void should_return_empty_summary_event_and_count_0_when_no_event(){
+    void should_return_empty_summary_event_and_count_0_when_no_event() {
         // given
         clean();
 
         // when
-        var result = eventService.getEventSummariesGroupByStatus(10,null);
+        var result = eventService.getEventSummariesGroupByStatus(10, null);
 
         // then
         assertThat(result.get(Status.NEW)).extracting("count").isEqualTo(0L);
