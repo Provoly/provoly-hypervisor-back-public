@@ -3,7 +3,6 @@ package com.provoly.event;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -97,8 +96,8 @@ public class EventMapper {
         entity.setDescription(dto.getDescription());
         entity.setCriticality(dto.getCriticality());
         entity.setCategory(dto.getCategory());
-        entity.setEquipment(equipmentService.getEquipmentByIdOrNull(dto.getEquipmentId()));
         entity.setDomain(mapToDomain(dto.getDomain()));
+        entity.setEquipment(equipmentService.getEquipmentByIdOrNull(dto.getEquipmentId()));
     }
 
     private String mapToString(Domain domain) {
@@ -117,7 +116,7 @@ public class EventMapper {
         return procedure == null ? 0 : procedure.getProcedureProgress();
     }
 
-    private UUID getProcedureId(Event event) {
+    private Integer getProcedureId(Event event) {
         return event.getProcedure() != null ? event.getProcedure().getId() : null;
     }
 

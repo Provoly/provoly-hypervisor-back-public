@@ -14,7 +14,7 @@ public class ReportEventWriteDto extends EventWriteDto {
     @NotBlank
     private String externalSourceRef;
 
-    public ReportEventWriteDto(UUID id, String name, String description, Criticality criticality, String address,
+    public ReportEventWriteDto(Integer id, String name, String description, Criticality criticality, String address,
             UUID equipmentId, Category category, String externalSourceRef, String domain) {
         super(id, name, description, criticality, category, address, equipmentId, EventType.REPORT, domain);
         this.externalSourceRef = externalSourceRef;

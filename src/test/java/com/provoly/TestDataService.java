@@ -86,18 +86,18 @@ public class TestDataService {
         var asked5 = new AskedService(UUID.randomUUID(), Instant.now(), Status.NEW, "service 5");
         var asked6 = new AskedService(UUID.randomUUID(), Instant.now(), Status.DONE, "service 6");
 
-        procedure1 = initProcedure("procedure1", List.of(asked1, asked2));
-        procedure2 = initProcedure("procedure2", List.of(asked3, asked4, asked5));
-        procedure3 = initProcedure("procedure3", List.of(asked6));
-
-        initOperatorEvent("operator1", Category.OPERATOR, Criticality.LOW, Status.NEW, null, equip1);
-        initOperatorEvent("manfestation1", Category.MANIFESTATION, Criticality.MEDIUM, Status.IN_PROGRESS, procedure1,
+        initOperatorEvent("operator1", Category.OPERATOR, Criticality.LOW, Status.NEW, equip1);
+        var event2 = initOperatorEvent("manfestation1", Category.MANIFESTATION, Criticality.MEDIUM, Status.IN_PROGRESS,
                 equip2);
-        initReportEvent("report1", Criticality.LOW, Status.NEW, null, equip6);
-        initReportEvent("report2", Criticality.HIGH, Status.IN_PROGRESS, procedure3, equip3);
-        initReportEvent("report3", Criticality.MEDIUM, Status.DONE, procedure2, equip6);
-        initAlertEvent("malfunction1", Category.MALFUNCTION, Criticality.LOW, Status.NEW, procedure3, equip4);
-        initAlertEvent("limit1", Category.LIMIT, Criticality.LOW, Status.NEW, null, equip7);
+        initReportEvent("report1", Criticality.LOW, Status.NEW, equip6);
+        var event4 = initReportEvent("report2", Criticality.HIGH, Status.IN_PROGRESS, equip3);
+        var event5 = initReportEvent("report3", Criticality.MEDIUM, Status.DONE, equip6);
+        var event6 = initAlertEvent("malfunction1", Category.MALFUNCTION, Criticality.LOW, Status.NEW, equip4);
+        initAlertEvent("limit1", Category.LIMIT, Criticality.LOW, Status.NEW, equip7);
+
+        procedure1 = initProcedure("procedure1", List.of(asked1, asked2), List.of(event2));
+        procedure2 = initProcedure("procedure2", List.of(asked3, asked4, asked5), List.of(event5));
+        procedure3 = initProcedure("procedure3", List.of(asked6), List.of(event4, event6));
     }
 
     @Transactional
@@ -108,96 +108,12 @@ public class TestDataService {
         removeEntities(Procedure.class);
     }
 
-    public UUID getProcedureId1() {
+    public Integer getProcedureId1() {
         return procedure1.getId();
     }
 
-    public UUID getProcedureId3() {
+    public Integer getProcedureId3() {
         return procedure3.getId();
-    }
-
-    public Procedure initProcedure(String name, List<AskedService> services) {
-        var procedure = new Procedure(UUID.randomUUID(), name);
-        for (var service : services) {
-            procedure.addAction(service);
-        }
-        em.persist(procedure);
-        return procedure;
-    }
-
-    private void initOperatorEvent(String name, Category category, Criticality criticality, Status status,
-            Procedure procedure,
-            Equipment equipment) {
-        var event = new EventOperator(UUID.randomUUID());
-        event.setName(name);
-        event.setAddress("event operator address");
-        event.setDescription("description");
-        event.setCategory(category);
-        event.setCriticality(criticality);
-        event.setStatus(status);
-        if (event.getCategory() == Category.MANIFESTATION) {
-            event.setStartDate(Instant.now());
-            event.setEndDate(Instant.now());
-        }
-        if (status == Status.DONE) {
-            event.setCloseDate(randomInstantBetweenNowAndAMonthLater());
-        }
-        if (procedure != null) {
-            event.setProcedure(procedure);
-        }
-        if (equipment != null) {
-            event.setEquipment(equipment);
-        }
-        event.setDomain(domain);
-        em.persist(event);
-    }
-
-    public void initReportEvent(String name, Criticality criticality, Status status, Procedure procedure,
-            Equipment equipment) {
-        var event = new EventReport(UUID.randomUUID());
-        event.setName(name);
-        event.setAddress("report event address");
-        event.setDescription("description");
-        event.setCategory(Category.REPORT);
-        event.setCriticality(criticality);
-        event.setStatus(status);
-        event.setExternalSourceRef("external_source");
-        event.setDomain(domain);
-        if (procedure != null) {
-            event.setProcedure(procedure);
-        }
-        if (status == Status.DONE) {
-            event.setCloseDate(randomInstantBetweenNowAndAMonthLater());
-        }
-        if (equipment != null) {
-            event.setEquipment(equipment);
-        }
-        em.persist(event);
-    }
-
-    public void initAlertEvent(String name, Category category, Criticality criticality, Status status,
-            Procedure procedure,
-            Equipment equipment) {
-        var event = new EventAlert(UUID.randomUUID());
-        event.setName(name);
-        event.setAddress("report event address");
-        event.setDescription("description");
-        event.setCategory(category);
-        event.setCriticality(criticality);
-        event.setStatus(status);
-        event.setExternalSourceRef("external_source");
-        event.setDomain(domain);
-        if (procedure != null) {
-            event.setProcedure(procedure);
-        }
-        if (status == Status.DONE) {
-            event.setCloseDate(randomInstantBetweenNowAndAMonthLater());
-        }
-
-        if (equipment != null) {
-            event.setEquipment(equipment);
-        }
-        em.persist(event);
     }
 
     @Transactional
@@ -205,6 +121,71 @@ public class TestDataService {
         var service = new Service(UUID.randomUUID(), externalId, Instant.now(), Instant.now(), Instant.now(), Instant.now(),
                 closeDate, equip, domain, DONE, isCura ? cura : prev);
         em.persist(service);
+    }
+
+    private Event initOperatorEvent(String name, Category category, Criticality criticality, Status status,
+            Equipment equipment) {
+        var event = (EventOperator) initEvent(EventType.OPERATOR, name, category, criticality, status, equipment);
+        if (event.getCategory() == Category.MANIFESTATION) {
+            event.setStartDate(Instant.now());
+            event.setEndDate(Instant.now());
+        }
+        em.persist(event);
+        return event;
+    }
+
+    private Event initAlertEvent(String name, Category category, Criticality criticality, Status status,
+            Equipment equipment) {
+        var event = (EventAlert) initEvent(EventType.ALERT, name, category, criticality, status, equipment);
+        event.setExternalSourceRef("external_source_ref");
+        em.persist(event);
+        return event;
+    }
+
+    private Event initReportEvent(String name, Criticality criticality, Status status,
+            Equipment equipment) {
+        var event = (EventReport) initEvent(EventType.REPORT, name, Category.REPORT, criticality, status, equipment);
+        event.setExternalSourceRef("external_source_ref");
+        em.persist(event);
+        return event;
+    }
+
+    private Event initEvent(EventType type, String name, Category category, Criticality criticality, Status status,
+            Equipment equipment) {
+        var event = switch (type) {
+            case ALERT -> new EventAlert();
+            case REPORT -> new EventReport();
+            case OPERATOR -> new EventOperator();
+        };
+
+        event.setName(name);
+        event.setAddress("event address");
+        event.setDescription("description");
+        event.setCategory(category);
+        event.setCriticality(criticality);
+        event.setStatus(status);
+        event.setDomain(domain);
+        if (status == Status.DONE) {
+            event.setCloseDate(randomInstantBetweenNowAndAMonthLater());
+        }
+
+        if (equipment != null) {
+            event.setEquipment(equipment);
+        }
+        return event;
+    }
+
+    @Transactional
+    public Procedure initProcedure(String name, List<AskedService> services, List<Event> events) {
+        var procedure = new Procedure(name);
+        for (var service : services) {
+            procedure.addAction(service);
+        }
+        for (var event : events) {
+            procedure.addEvent(event);
+        }
+        em.persist(procedure);
+        return procedure;
     }
 
     private Equipment initEquipment(String name, Family family, EquipmentEntity entity, City city, District district,

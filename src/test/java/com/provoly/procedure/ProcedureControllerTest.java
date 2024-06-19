@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.UUID;
 
 import jakarta.inject.Inject;
 
@@ -49,7 +48,7 @@ public class ProcedureControllerTest {
     @TestSecurity(user = "reader")
     void should_return_procedure_by_id() {
         // given
-        UUID id = dataService.getProcedureId1();
+        var id = dataService.getProcedureId1();
         // when
         var procedure = procedureController.getProcedureDetail(id);
 
@@ -61,7 +60,7 @@ public class ProcedureControllerTest {
     @Test
     @TestSecurity(user = "reader")
     void should_throw_procedure_not_found() {
-        assertThatThrownBy(() -> procedureController.getProcedureDetail(UUID.randomUUID()))
+        assertThatThrownBy(() -> procedureController.getProcedureDetail(666))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessageContaining("not found");
     }
@@ -70,7 +69,7 @@ public class ProcedureControllerTest {
     @TestSecurity(user = "reader")
     void should_update_report_event_in_procedure() {
         // given
-        UUID eventReportId = eventController
+        var eventReportId = eventController
                 .getEvents(1, 1, null, null, null, List.of(Criticality.HIGH.name()), List.of(),
                         List.of(Category.REPORT.name()),
                         List.of(), List.of())
@@ -86,17 +85,17 @@ public class ProcedureControllerTest {
                 "new address",
                 null,
                 Category.REPORT,
-                "external_source",
+                "external_source_ref",
                 null);
 
-        UUID procedureId = dataService.getProcedureId3();
+        Integer procedureId = dataService.getProcedureId3();
         ProcedureWriteDto dto = new ProcedureWriteDto(
                 procedureId,
                 "procedure maintenance",
                 List.of(reportDto));
 
         // when
-        procedureController.updateProcedure(dto);
+        procedureController.updateProcedure(procedureId, dto);
         var updatedEvent = eventController.getEventDetails(eventReportId);
 
         // then

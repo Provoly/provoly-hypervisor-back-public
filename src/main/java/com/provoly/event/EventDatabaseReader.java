@@ -171,7 +171,7 @@ public class EventDatabaseReader extends DatabaseReader {
 
     }
 
-    public Event getEventById(UUID id) {
+    public Event getEventById(Integer id) {
         var event = em.find(Event.class, id);
         if (event == null) {
             throw new NoSuchElementException("Event with id %s not found".formatted(id));
@@ -183,7 +183,7 @@ public class EventDatabaseReader extends DatabaseReader {
         em.persist(event);
     }
 
-    public boolean isEventWithIdExists(UUID id) {
+    public boolean isEventWithIdExists(Integer id) {
         return em.find(Event.class, id) != null;
     }
 

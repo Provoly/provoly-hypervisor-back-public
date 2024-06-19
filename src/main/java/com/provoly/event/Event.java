@@ -2,7 +2,6 @@ package com.provoly.event;
 
 import java.time.Instant;
 import java.util.Objects;
-import java.util.UUID;
 
 import jakarta.persistence.*;
 
@@ -16,7 +15,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Event {
     @Id
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
     private String name;
     private String address;
     private String description;
@@ -57,13 +57,12 @@ public abstract class Event {
         // Only for JPA
     }
 
-    protected Event(UUID id, EventType type) {
-        this.id = id;
+    protected Event(EventType type) {
         this.type = type;
         this.status = Status.NEW;
     }
 
-    public UUID getId() {
+    public Integer getId() {
         return id;
     }
 

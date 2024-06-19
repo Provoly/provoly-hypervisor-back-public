@@ -1,7 +1,6 @@
 package com.provoly.event.dto;
 
 import java.time.Instant;
-import java.util.UUID;
 
 import com.provoly.equipment.EquipmentShortDto;
 import com.provoly.event.Category;
@@ -10,7 +9,7 @@ import com.provoly.event.EventType;
 import com.provoly.event.Status;
 
 public class EventReadDto {
-    private UUID id;
+    private Integer id;
     private String name;
     private String address;
     private String description;
@@ -22,12 +21,12 @@ public class EventReadDto {
     private Instant creationDate;
     private Instant closeDate;
     private EquipmentShortDto equipment;
-    private UUID procedureId;
+    private Integer procedureId;
     private long linkedEvents;
     private float procedureProgress;
     private String domain;
 
-    public EventReadDto(UUID id,
+    public EventReadDto(Integer id,
             String name,
             String address,
             String description,
@@ -38,7 +37,7 @@ public class EventReadDto {
             Instant creationDate,
             Instant closeDate,
             EquipmentShortDto equipment,
-            UUID procedureId,
+            Integer procedureId,
             long linkedEvents,
             float procedureProgress,
             String domain) {
@@ -79,7 +78,7 @@ public class EventReadDto {
         this.category = dto.getCategory();
     }
 
-    public UUID getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -127,7 +126,7 @@ public class EventReadDto {
         return equipment;
     }
 
-    public UUID getProcedureId() {
+    public Integer getProcedureId() {
         return procedureId;
     }
 

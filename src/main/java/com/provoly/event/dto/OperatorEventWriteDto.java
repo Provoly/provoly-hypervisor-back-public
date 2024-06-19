@@ -11,7 +11,7 @@ public class OperatorEventWriteDto extends EventWriteDto {
     private Instant startDate;
     private Instant endDate;
 
-    public OperatorEventWriteDto(UUID id, String name, String description, Criticality criticality, String address,
+    public OperatorEventWriteDto(Integer id, String name, String description, Criticality criticality, String address,
             UUID equipmentId, Category category, Instant startDate, Instant endDate, String domain) {
         super(id, name, description, criticality, category, address, equipmentId, EventType.OPERATOR, domain);
         this.startDate = startDate;

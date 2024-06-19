@@ -1,15 +1,18 @@
 package com.provoly.event;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 
-import com.provoly.event.dto.*;
+import com.provoly.event.dto.EventReadDto;
+import com.provoly.event.dto.EventWriteDto;
+import com.provoly.event.dto.EventsSummariesByStatusDto;
 
 import io.quarkus.security.Authenticated;
 
@@ -28,27 +31,16 @@ public class EventController {
     }
 
     @POST
-    @Path("/operator")
     @Authenticated
-    public Response saveEventOperator(@Valid OperatorEventWriteDto eventDto) {
-        var response = eventService.saveOrUpdateEvent(eventDto);
-        return Response.ok().status(response == ResponseCode.UPDATED ? 204 : 201).build();
+    public EventReadDto saveEvent(@Valid EventWriteDto eventDto) {
+        return eventService.saveEvent(eventDto);
     }
 
-    @POST
-    @Path("/report")
+    @PUT
+    @Path("/id/{id}")
     @Authenticated
-    public Response saveEventReport(@Valid ReportEventWriteDto eventDto) {
-        var response = eventService.saveOrUpdateEvent(eventDto);
-        return Response.ok().status(response == ResponseCode.UPDATED ? 204 : 201).build();
-    }
-
-    @POST
-    @Path("/alert")
-    @Authenticated
-    public Response saveEventAlert(@Valid AlertEventWriteDto eventDto) {
-        eventService.saveOrUpdateEvent(eventDto);
-        return Response.ok().status(Response.Status.CREATED).build();
+    public void saveEvent(Integer id, @Valid EventWriteDto eventDto) {
+        eventService.updateEvent(id, eventDto);
     }
 
     @GET
@@ -74,7 +66,7 @@ public class EventController {
     @Path("/id/{id}")
     @GET
     @Authenticated
-    public EventReadDto getEventDetails(UUID id) {
+    public EventReadDto getEventDetails(Integer id) {
         var event = eventService.getEventDetails(id);
         return eventMapper.mapToEventReadDto(event);
     }
@@ -82,7 +74,7 @@ public class EventController {
     @Path("/id/{id}/close")
     @PUT
     @Authenticated
-    public void closeEvent(UUID id) {
+    public void closeEvent(Integer id) {
         eventService.closeEventById(id);
     }
 

@@ -5,7 +5,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 import jakarta.inject.Inject;
 
@@ -44,11 +43,11 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_create_event_name_with_already_exists() {
         // given
-        var event = new OperatorEventWriteDto(UUID.randomUUID(), "operator1", "desc", Criticality.HIGH,
+        var event = new OperatorEventWriteDto(null, "operator1", "desc", Criticality.HIGH,
                 null, null, Category.OPERATOR, null, null, null);
 
         // then
-        assertThatThrownBy(() -> eventService.saveOrUpdateEvent(event))
+        assertThatThrownBy(() -> eventService.saveEvent(event))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("already exists");
     }
@@ -56,11 +55,11 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_create_operator_event_with_missing_dates() {
         // given
-        var event = new OperatorEventWriteDto(UUID.randomUUID(), "tutu", "desc", Criticality.HIGH, null, null,
+        var event = new OperatorEventWriteDto(null, "tutu", "desc", Criticality.HIGH, null, null,
                 Category.MANIFESTATION, null, null, null);
 
         // then
-        assertThatThrownBy(() -> eventService.saveOrUpdateEvent(event))
+        assertThatThrownBy(() -> eventService.saveEvent(event))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Properties 'startDate' and 'endDate' are required for 'MANIFESTATION' category");
     }
@@ -68,11 +67,11 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_create_operator_event_with_invalid_dates() {
         // given
-        var event = new OperatorEventWriteDto(UUID.randomUUID(), "tutu", "desc", Criticality.HIGH, null, null,
+        var event = new OperatorEventWriteDto(null, "tutu", "desc", Criticality.HIGH, null, null,
                 Category.MANIFESTATION, Instant.now(), Instant.now().minusMillis(1000), null);
 
         // then
-        assertThatThrownBy(() -> eventService.saveOrUpdateEvent(event))
+        assertThatThrownBy(() -> eventService.saveEvent(event))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("End date is invalid: it must be after start date");
     }
@@ -80,11 +79,11 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_create_alert_event_missing_equipment_id() {
         // given
-        var event = new AlertEventWriteDto(UUID.randomUUID(), "tata", "desc", Criticality.HIGH, null, null,
+        var event = new AlertEventWriteDto(null, "tata", "desc", Criticality.HIGH, null, null,
                 null, "ref", null);
 
         // then
-        assertThatThrownBy(() -> eventService.saveOrUpdateEvent(event))
+        assertThatThrownBy(() -> eventService.saveEvent(event))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Alert event must reference an equipment");
     }
@@ -104,7 +103,7 @@ public class EventServiceTest {
                 "desc", Criticality.HIGH, null, null, null, "ref", null);
 
         // then
-        assertThatThrownBy(() -> eventService.saveOrUpdateEvent(event))
+        assertThatThrownBy(() -> eventService.updateEvent(eventAlertId, event))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("It's not possible to update event");
     }
@@ -124,7 +123,7 @@ public class EventServiceTest {
                 "desc", Criticality.HIGH, null, null, null, "ref", null);
 
         // then
-        assertThatThrownBy(() -> eventService.saveOrUpdateEvent(event))
+        assertThatThrownBy(() -> eventService.updateEvent(eventReportId, event))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("It's not possible to update externalSourceRef value");
     }
@@ -132,11 +131,11 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_create_event_with_invalid_domain() {
         // given
-        var event = new OperatorEventWriteDto(UUID.randomUUID(), "new event", "desc", Criticality.HIGH,
+        var event = new OperatorEventWriteDto(null, "new event", "desc", Criticality.HIGH,
                 null, null, Category.OPERATOR, null, null, "invalid_domain");
 
         // then
-        assertThatThrownBy(() -> eventService.saveOrUpdateEvent(event))
+        assertThatThrownBy(() -> eventService.saveEvent(event))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("invalid");
     }

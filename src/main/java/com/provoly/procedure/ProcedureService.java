@@ -1,8 +1,5 @@
 package com.provoly.procedure;
 
-import java.util.Collection;
-import java.util.UUID;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -25,13 +22,13 @@ public class ProcedureService {
     }
 
     @Transactional
-    public Procedure getProcedureDetails(UUID id) {
+    public Procedure getProcedureDetails(Integer id) {
         logger.debugf("Get procedure detail with id %s", id);
         return databaseReader.getProcedureById(id);
     }
 
     @Transactional
-    public void closeAllProcedureEvents(UUID id) {
+    public void closeAllProcedureEvents(Integer id) {
         logger.debugf("Close all procedure events with id %s", id);
         var events = getProcedureDetails(id).getEvents();
         events.forEach(event -> eventService.closeEvent(event));
@@ -47,28 +44,15 @@ public class ProcedureService {
     }
 
     @Transactional
-    public void updateProcedure(ProcedureWriteDto dto) {
-        logger.debugf("Update procedure %s and its %s events", dto.id(), dto.events().size());
+    public void updateProcedure(Integer id, ProcedureWriteDto dto) {
+        logger.debugf("Update procedure %s and its %s events", String.valueOf(id), dto.events().size());
 
         for (var event : dto.events()) {
             if (event instanceof AlertEventWriteDto) {
                 logger.debugf("Can't update alert event with id %s", dto.id());
                 continue;
             }
-            eventService.saveOrUpdateEvent(event);
+            eventService.updateEvent(event.getId(), event);
         }
     }
-
-    @Transactional
-    public void saveProcedure(UUID procedureId, Collection<UUID> eventIds) {
-        logger.debugf("Save procedure %s and its %s events", procedureId, eventIds.size());
-        Procedure procedure = new Procedure(procedureId, "procedure %s".formatted(procedureId));
-        databaseReader.saveProcedure(procedure);
-
-        for (var id : eventIds) {
-            var eventEntity = eventService.getEventDetails(id);
-            procedure.addEvent(eventEntity);
-        }
-    }
-
 }

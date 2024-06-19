@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 import jakarta.persistence.*;
 
@@ -17,7 +16,8 @@ import org.hibernate.annotations.CreationTimestamp;
 @Entity
 public class Procedure {
     @Id
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     private String name;
 
@@ -36,12 +36,7 @@ public class Procedure {
         // Only for JPA
     }
 
-    public Procedure(UUID id) {
-        this.id = id;
-    }
-
-    public Procedure(UUID id, String name) {
-        this.id = id;
+    public Procedure(String name) {
         this.name = name;
         this.procedureProgress = 0;
     }
@@ -62,7 +57,7 @@ public class Procedure {
         setProcedureProgress(calculateProgressActions());
     }
 
-    public UUID getId() {
+    public Integer getId() {
         return id;
     }
 

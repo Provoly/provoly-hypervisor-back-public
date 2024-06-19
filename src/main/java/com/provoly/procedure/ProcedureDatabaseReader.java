@@ -1,7 +1,6 @@
 package com.provoly.procedure;
 
 import java.util.NoSuchElementException;
-import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -18,7 +17,7 @@ public class ProcedureDatabaseReader extends DatabaseReader {
         super(em);
     }
 
-    public Procedure getProcedureById(UUID id) {
+    public Procedure getProcedureById(Integer id) {
         var procedure = em.find(Procedure.class, id);
         if (procedure == null) {
             throw new NoSuchElementException("Procedure with id %s not found".formatted(id));
@@ -30,7 +29,7 @@ public class ProcedureDatabaseReader extends DatabaseReader {
         em.persist(procedure);
     }
 
-    public long getLinkedEventCountForProcedure(UUID id) {
+    public long getLinkedEventCountForProcedure(Integer id) {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
         var root = criteriaQuery.from(Event.class);

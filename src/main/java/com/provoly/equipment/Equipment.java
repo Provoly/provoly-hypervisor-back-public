@@ -187,13 +187,15 @@ public class Equipment {
     }
 
     public void addEvent(Event event) {
-        events.remove(event);
-        events.add(event);
+        if (event.getId() == null || !events.contains(event)) { // When an event is created, it only has an id when it's persisted
+            events.add(event);
+        }
     }
 
     public void addService(Service service) {
-        services.remove(service);
-        services.add(service);
+        if (!services.contains(service)) {
+            services.add(service);
+        }
     }
 
     public void setEvents(List<Event> events) {

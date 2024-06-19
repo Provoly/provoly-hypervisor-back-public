@@ -52,10 +52,10 @@ insert into city (id,code,name) values (11,'SMS', 'Sommesous');
 insert into city (id,code,name) values (12,'VRA', 'Vraux');
 
 insert into district (id,code,name) values (1,'CH_C', 'Centre');
-insert into district (id,code,name) values (2,'CH_CD', 'Croix Dampierre');
+insert into district (id,code,name) values (2,'CH_CD', 'Croix Dampierre'); -- TODO: remove
 insert into district (id,code,name) values (3,'CH_FSA', 'Faubourg Saint-Antoine - Madagascar');
-insert into district (id,code,name) values (4,'CH_LA', 'Langevin - Laforest');
-insert into district (id,code,name) values (5,'CH_MH', 'Mont Héry');
+insert into district (id,code,name) values (4,'CH_LA', 'Langevin - Laforest');-- TODO: remove
+insert into district (id,code,name) values (5,'CH_MH', 'Mont Héry');-- TODO: remove
 insert into district (id,code,name) values (6,'CH_MSM', 'Mont Saint-Michel - Bidée');
 insert into district (id,code,name) values (7,'CH_OFG', 'Oradour - Frison - Gare');
 insert into district (id,code,name) values (8,'CH_S', 'Schmit');
@@ -63,3 +63,4 @@ insert into district (id,code,name) values (9,'CH_VSP', 'Vallée Saint-Pierre');
 insert into district (id,code,name) values (10,'CH_VER', 'Verbeau');
 insert into district (id,code,name) values (11,'FAGN', 'Fagnières');
 insert into district (id,code,name) values (12,'SMP', 'Saint Martin-sur-le-Pré');
+-- TODO: insert new Districts and remove unused city and distrcits

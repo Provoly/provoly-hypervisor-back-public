@@ -1,6 +1,7 @@
 package com.provoly.service;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
 import jakarta.persistence.*;
@@ -156,5 +157,20 @@ public class Service {
 
     public void setCategory(ServiceCategory category) {
         this.category = category;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Service entityId = (Service) o;
+        return id.equals(entityId.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

@@ -21,8 +21,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = OperatorEventWriteDto.class, name = "OPERATOR"),
 })
 public abstract class EventWriteDto {
-    @NotNull
-    private UUID id;
+    private Integer id;
 
     @NotNull
     @NotBlank
@@ -46,7 +45,7 @@ public abstract class EventWriteDto {
 
     private String domain;
 
-    protected EventWriteDto(UUID id, String name, String description, Criticality criticality, Category category,
+    protected EventWriteDto(Integer id, String name, String description, Criticality criticality, Category category,
             String address, UUID equipmentId,
             EventType type, String domain) {
         this.id = id;
@@ -65,7 +64,7 @@ public abstract class EventWriteDto {
         return Objects.nonNull(category) && category.getEventType() == type;
     }
 
-    public UUID getId() {
+    public Integer getId() {
         return id;
     }
 

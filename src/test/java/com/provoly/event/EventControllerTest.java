@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.UUID;
 
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
@@ -428,7 +427,7 @@ public class EventControllerTest {
     @Test
     @TestSecurity(user = "reader")
     void should_throw_not_found_when_invalid_event_id() {
-        assertThatThrownBy(() -> eventController.getEventDetails(UUID.randomUUID()))
+        assertThatThrownBy(() -> eventController.getEventDetails(666))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessageContaining("not found");
     }
@@ -437,10 +436,10 @@ public class EventControllerTest {
     @TestSecurity(user = "reader")
     void should_throw_create_event_missing_required_property() {
         // given
-        var event = new OperatorEventWriteDto(UUID.randomUUID(), null, "desc", null, null, null, null, null, null, null);
+        var event = new OperatorEventWriteDto(null, null, "desc", null, null, null, null, null, null, null);
 
         // then
-        assertThatThrownBy(() -> eventController.saveEventOperator(event))
+        assertThatThrownBy(() -> eventController.saveEvent(event))
                 .isInstanceOf(ConstraintViolationException.class);
     }
 
@@ -448,11 +447,11 @@ public class EventControllerTest {
     @TestSecurity(user = "reader")
     void should_throw_if_name_blank_when_create_event() {
         // given
-        var event = new OperatorEventWriteDto(UUID.randomUUID(), "", "desc", Criticality.MEDIUM, "adress", null,
+        var event = new OperatorEventWriteDto(null, "", "desc", Criticality.MEDIUM, "adress", null,
                 Category.OPERATOR, null, null, null);
 
         // then
-        assertThatThrownBy(() -> eventController.saveEventOperator(event))
+        assertThatThrownBy(() -> eventController.saveEvent(event))
                 .isInstanceOf(ConstraintViolationException.class);
     }
 
@@ -460,11 +459,11 @@ public class EventControllerTest {
     @TestSecurity(user = "reader")
     void should_throw_if_category_invalid_when_create_event() {
         // given
-        var event = new OperatorEventWriteDto(UUID.randomUUID(), "event operator", "desc", Criticality.MEDIUM, "adress", null,
+        var event = new OperatorEventWriteDto(null, "event operator", "desc", Criticality.MEDIUM, "adress", null,
                 Category.REPORT, null, null, null);
 
         // then
-        assertThatThrownBy(() -> eventController.saveEventOperator(event))
+        assertThatThrownBy(() -> eventController.saveEvent(event))
                 .isInstanceOf(ConstraintViolationException.class);
     }
 }

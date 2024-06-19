@@ -75,7 +75,7 @@ create table service
 
 create table procedure
 (
-    id                 uuid primary key,
+    id                 serial primary key,
     name               varchar(200) unique not null,
     creation_date      timestamptz                  default current_timestamp,
     procedure_progress float               not null default 0
@@ -84,7 +84,7 @@ create table procedure
 create table action
 (
     id                     uuid primary key,
-    procedure_id           uuid references procedure,
+    procedure_id           serial references procedure,
     type                   varchar(100) not null,
     status                 varchar(100) not null,
     name                   varchar(100) not null,
@@ -105,7 +105,7 @@ create table todo_action
 
 create table event
 (
-    id                     uuid primary key,
+    id                     serial primary key,
     name                   varchar(50) unique not null,
     type                   varchar(20)        not null,
     criticality            varchar(50)        not null,
@@ -117,25 +117,25 @@ create table event
     last_modification_date timestamptz default current_timestamp,
     close_date             timestamptz,
     equipment_id           uuid references equipment,
-    procedure_id           uuid references procedure,
+    procedure_id           int references procedure,
     domain_id              bigint references domain
 );
 
 create table event_operator
 (
-    id         uuid primary key references event,
+    id         serial primary key references event,
     start_date timestamptz,
     end_date   timestamptz
 );
 
 create table event_report
 (
-    id                  uuid primary key references event,
+    id                  serial primary key references event,
     external_source_ref varchar not null
 );
 
 create table event_alert
 (
-    id                  uuid primary key references event,
+    id                  serial primary key references event,
     external_source_ref varchar not null
 );

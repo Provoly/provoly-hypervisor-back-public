@@ -1,7 +1,5 @@
 package com.provoly.event;
 
-import java.util.UUID;
-
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 
@@ -12,11 +10,7 @@ public class EventReport extends Event {
     private String externalSourceRef;
 
     public EventReport() {
-        super();
-    }
-
-    public EventReport(UUID id) {
-        super(id, EventType.REPORT);
+        super(EventType.REPORT);
     }
 
     public String getExternalSourceRef() {

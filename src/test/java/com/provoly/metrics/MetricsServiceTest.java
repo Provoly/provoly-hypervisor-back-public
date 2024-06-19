@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 import jakarta.inject.Inject;
 
@@ -122,7 +121,7 @@ public class MetricsServiceTest {
 
         // when adding a new event for an unmanaged equipment
         var equipUnmanaged = equipmentService.getEquipmentByName("P-1000");
-        eventService.saveOrUpdateEvent(new ReportEventWriteDto(UUID.randomUUID(),
+        eventService.saveEvent(new ReportEventWriteDto(null,
                 "new report event",
                 "description",
                 Criticality.LOW,

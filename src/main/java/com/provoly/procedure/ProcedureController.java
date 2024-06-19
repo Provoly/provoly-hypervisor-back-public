@@ -1,7 +1,5 @@
 package com.provoly.procedure;
 
-import java.util.UUID;
-
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
@@ -23,7 +21,7 @@ public class ProcedureController {
     @Path("/id/{id}")
     @GET
     @Authenticated
-    public ProcedureReadDto getProcedureDetail(UUID id) {
+    public ProcedureReadDto getProcedureDetail(Integer id) {
         var procedure = procedureService.getProcedureDetails(id);
         return procedureMapper.mapToProcedureReadDetailsDto(procedure);
     }
@@ -31,14 +29,15 @@ public class ProcedureController {
     @Path("/id/{id}/close")
     @PUT
     @Authenticated
-    public void closeAllProcedureEvents(UUID id) {
+    public void closeAllProcedureEvents(Integer id) {
         procedureService.closeAllProcedureEvents(id);
     }
 
-    @POST
+    @Path("/id/{id}")
+    @PUT
     @Authenticated
-    public void updateProcedure(ProcedureWriteDto dto) {
-        procedureService.updateProcedure(dto);
+    public void updateProcedure(Integer id, ProcedureWriteDto dto) {
+        procedureService.updateProcedure(id, dto);
     }
 
 }

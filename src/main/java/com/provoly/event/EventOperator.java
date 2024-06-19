@@ -1,7 +1,6 @@
 package com.provoly.event;
 
 import java.time.Instant;
-import java.util.UUID;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -13,11 +12,7 @@ public class EventOperator extends Event {
     private Instant endDate;
 
     public EventOperator() {
-        super();
-    }
-
-    public EventOperator(UUID id) {
-        super(id, EventType.OPERATOR);
+        super(EventType.OPERATOR);
     }
 
     public Instant getStartDate() {
