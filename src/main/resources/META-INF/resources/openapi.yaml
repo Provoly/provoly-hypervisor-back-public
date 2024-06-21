@@ -76,7 +76,7 @@ paths:
         - name: sort
           in: query
           schema:
-            $ref: '#/components/schemas/Sort'
+            $ref: '#/components/schemas/EventSort'
         - name: order
           in: query
           schema:
@@ -98,7 +98,7 @@ paths:
                   value: |
                     [
                       {
-                        "id": "01ffde9d-30d2-4273-b61f-c6addd8747c8",
+                        "id": 1,
                         "name": "Defaillance lampe",
                         "address": "112 Av. de Paris, 51000 Châlons-en-Champagne",
                         "description": "description",
@@ -113,14 +113,14 @@ paths:
                           "type": "Ouvrage",
                           "entity": "AGGLO_COMMUN"
                         },
-                        "procedureId": "5c925baf-7164-4bfe-af37-f0860aacc570",
+                        "procedureId": 4,
                         "linkedEvents": 2,
                         "procedureProgress": 100,
                         "externalSourceRef": "citylinx_1",
                         "category": "MALFUNCTION"
                       },
                       {
-                        "id": "eb8e2f6b-f33e-408c-bb6c-e042f204d687",
+                        "id": 2,
                         "name": "Maintenance ouvrage2",
                         "address": "63 Rue de Fagnières, 51000 Châlons-en-Champagne",
                         "description": "description",
@@ -130,14 +130,14 @@ paths:
                         "lastModificationDate": "2024-02-22T11:12:39.375184Z",
                         "creationDate": "2024-01-23T11:12:39.375184Z",
                         "equipment": null,
-                        "procedureId": "5c925baf-7164-4bfe-af37-f0860aacc570",
+                        "procedureId": "4",
                         "linkedEvents": 2,
                         "procedureProgress": 100,
                         "externalSourceRef": "external_source3",
                         "category": "REPORT"
                       },
                       {
-                        "id": "b0d1a93c-ec57-401c-9a74-2cc364bbab9f",
+                        "id": 3,
                         "name": "Festival Chalons",
                         "address": "28 E Rue du Général Fery, 51000 Châlons-en-Champagne",
                         "description": "description",
@@ -147,7 +147,7 @@ paths:
                         "lastModificationDate": "2024-02-20T11:12:39.375184Z",
                         "creationDate": "2024-01-20T11:12:39.375184Z",
                         "equipment": null,
-                        "procedureId": "585d17af-e7d5-42e1-9052-fabadd23ff42",
+                        "procedureId": "3",
                         "linkedEvents": 1,
                         "procedureProgress": 0,
                         "category": "MANIFESTATION",
@@ -163,33 +163,42 @@ paths:
       security:
         - oidc:
             - authenticated
-  /events/alert:
     post:
       tags:
         - Event Controller
-      summary: Save an Alert event
-      operationId: com.provoly.event.EventController_saveAlertEvent
+      summary: Save an Event
+      operationId: com.provoly.event.EventController_saveEvent
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AlertEventWriteDto'
+              oneOf:
+                - $ref: '#/components/schemas/AlertEventWriteDto'
+                - $ref: '#/components/schemas/OperatorEventWriteDto'
+                - $ref: '#/components/schemas/ReportEventWriteDto'
             examples:
               default:
                 summary: Create "alert" event
                 value: |
                   {
-                    "id":"d1b44da2-d8ad-4bfb-93f5-4e80c9126111",
                     "name":"event alert",
                     "description": "desc",
                     "address": "1 rue simone veil",
                     "criticality": "HIGH",
                     "category":"LIMIT",
-                    "equipmentId":"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd"
+                    "equipmentId":"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd",
+                    "externalSourceRef": "source"
                   }
       responses:
         "201":
           description: Created
+          content:
+            application/json:
+              schema:
+                  oneOf:
+                    - $ref: '#/components/schemas/AlertEventReadDto'
+                    - $ref: '#/components/schemas/ReportEventReadDto'
+                    - $ref: '#/components/schemas/OperatorCategory'
         "400":
           description: Bad Request
           content:
@@ -216,59 +225,6 @@ paths:
       security:
         - oidc:
             - authenticated
-  /events/report:
-    post:
-      tags:
-        - Event Controller
-      summary: Save a Report event
-      operationId: com.provoly.event.EventController_saveReportEvent
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReportEventWriteDto'
-            examples:
-              default:
-                summary: Create "alert" event
-                value: |
-                  {
-                    "id":"d1b44da2-d8ad-4bfb-93f5-4e80c9126111",
-                    "name":"event reporty",
-                    "description": "desc",
-                    "address": "1 rue virginia woolf",
-                    "criticality": "MEDIUM",
-                    "category":"REPORT",
-                    "equipmentId":"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd"
-                  }
-      responses:
-        "201":
-          description: Created
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              examples:
-                invalidName:
-                  description: Occurs when name already exists
-                  value: |
-                    {
-                        "code": 400,
-                        "message": "Event with name 'event report' already exists"
-                    }
-                invalidEquipment:
-                  description: Occurs when equipmentId not exist
-                  value: |
-                    {
-                        "code": 400,
-                        "message": "Equipment with id '0c728960-d5fd-49ea-8fe8-f72cb9cfcccd' not exists"
-                    }
-        "401":
-          description: Not Authorized
-        "403":
-          description: Forbidden if missing a required property
-      security:
-        - oidc:
-            - authenticated
   /events/id/{id}:
     get:
       tags:
@@ -279,8 +235,8 @@ paths:
         - name: id
           in: path
           schema:
-            $ref: '#/components/schemas/UUID'
-          example: 01ffde9d-30d2-4273-b61f-c6addd8747c8
+            type: integer
+          example: 21
           required: true
       responses:
         "200":
@@ -296,7 +252,7 @@ paths:
                 default:
                   value: |
                     {
-                      "id": "01ffde9d-30d2-4273-b61f-c6addd8747c8",
+                      "id": 21,
                       "name": "Defaillance lampe",
                       "address": null,
                       "description": null,
@@ -323,6 +279,73 @@ paths:
       security:
         - oidc:
             - authenticated
+    put:
+      tags:
+        - Event Controller
+      summary: Update an Event
+      description: |
+        Update an event which is not an Alert event.
+        Also, it's not possible to update external source reference of Report events.
+      operationId: com.provoly.event.EventController_updateEvent
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          example: 1
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/OperatorEventWriteDto'
+                - $ref: '#/components/schemas/ReportEventWriteDto'
+            examples:
+              default:
+                summary: Update "report" event
+                value: |
+                  {
+                    "id": 1,
+                    "name":"event report updated",
+                    "description": "desc",
+                    "address": "2 rue virgina woolf",
+                    "criticality": "HIGH",
+                    "category":"LIMIT",
+                    "equipmentId":"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd",
+                    "externalSourceRef": "source"
+                  }
+      responses:
+        "204":
+          description: Updated
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                invalidName:
+                  description: Occurs when name already exists
+                  value: |
+                    {
+                        "code": 400,
+                        "message": "Event with name 'event report updated' already exists"
+                    }
+                invalidEquipment:
+                  description: Occurs when equipmentId not exist
+                  value: |
+                    {
+                        "code": 400,
+                        "message": "Equipment with id '0c728960-d5fd-49ea-8fe8-f72cb9cfcccd' not exists"
+                    }
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden if missing a required property
+        "404":
+          description: Event not Found
+      security:
+        - oidc:
+            - authenticated
   /events/id/{id}/close:
     put:
       tags:
@@ -334,8 +357,8 @@ paths:
         - name: id
           in: path
           schema:
-            $ref: '#/components/schemas/UUID'
-          example: 01ffde9d-30d2-4273-b61f-c6addd8747c8
+            type: integer
+          example: 22
           required: true
       responses:
         "204":
@@ -390,7 +413,7 @@ paths:
                         "count": 2,
                         "events": [
                           {
-                            "id": "b0d1a93c-ec57-401c-9a74-2cc364bbab9f",
+                            "id": 34,
                             "name": "Festival Chalons",
                             "criticality": "MEDIUM",
                             "status": "IN_PROGRESS",
@@ -414,7 +437,7 @@ paths:
                         "count": 3,
                         "events": [
                           {
-                            "id": "eb8e2f6b-f33e-408c-bb6c-e042f204d687",
+                            "id": 22,
                             "name": "Maintenance ouvrage2",
                             "criticality": "MEDIUM",
                             "status": "NEW",
@@ -464,53 +487,144 @@ paths:
       security:
         - oidc:
             - authenticated
-  /events/operator:
+  /procedures/model:
+    get:
+      tags:
+        - Procedure Model Controller
+      summary: Retrieve all procedures model with pagination
+      description: |
+        Default sort on `useCount` (reversed) and  `name`. It's possible to override it by sorting on other attributes.
+        If order is no provided when sort, the default is asc.
+        It's possible to filter on one or more domains, or search by name, creator or id by using `search` filter
+      operationId: com.provoly.event.ProcedureModelController_getProceduresModel
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+          example: 1
+          required: true
+          description: Page number requested, triggers an error if not specified or if 0.
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+          example: 20
+          description: Page size, returns an empty list if not specified.
+        - name: search
+          in: query
+          description: Returns all procedures whose value is contained in the `name`, `creator` or `id` property
+          schema:
+            type: string
+            example: proc
+        - name: domain
+          in: query
+          description: The domain code. It must be known to the system.
+          schema:
+            type: array
+            items:
+              type: string
+            example: [ 'EP' ]
+
+        - name: sort
+          in: query
+          schema:
+            $ref: '#/components/schemas/ProcedureModelSort'
+        - name: order
+          in: query
+          schema:
+            $ref: '#/components/schemas/SortOrder'
+      responses:
+        "200":
+          description: Return 2 procedures models with `domain` is `EP` and `name`, `creator` or `id``contains "laura"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProcedureModelReadDto'
+              examples:
+                default:
+                  value: |
+                    [
+                      {
+                        "id": 1,
+                        "name": "laura's procedure",
+                        "description": "description",
+                        "creationDate": "2024-06-20T07:39:35.555495Z",
+                        "lastModificationDate": "2024-06-20T07:44:06.853084Z",
+                        "creator": "eliott",
+                        "domain": "EP",
+                        "useCount": 4,
+                        "actions": []
+                      },
+                      {
+                        "id": 1,
+                        "name": "procedure model 4",
+                        "description": "description",
+                        "creationDate": "2024-06-20T07:39:35.555495Z",
+                        "lastModificationDate": "2024-06-20T07:44:06.853084Z",
+                        "creator": "laura",
+                        "domain": "EP",
+                        "useCount": 0,
+                        "actions": [ ]
+                      }
+                    ]
+
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden if page not specified
+      security:
+        - oidc:
+            - authenticated
     post:
       tags:
         - Event Controller
-      summary: Save or update an Operator event
-      operationId: com.provoly.event.EventController_saveEventOperator
+      summary: Save an Event
+      operationId: com.provoly.event.EventController_saveEvent
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OperatorEventWriteDto'
+              oneOf:
+                - $ref: '#/components/schemas/AlertEventWriteDto'
+                - $ref: '#/components/schemas/OperatorEventWriteDto'
+                - $ref: '#/components/schemas/ReportEventWriteDto'
             examples:
               default:
-                summary: Create "operator" event linked to an equipment
+                summary: Create "alert" event
                 value: |
                   {
-                    "id":"d1b44da2-d8ad-4bfb-93f5-4e80c9126111",
-                    "name":"event operator",
+                    "name":"event alert",
                     "description": "desc",
-                    "address": "1 rue nina simone",
-                    "criticality": "LOW",
-                    "category":"OPERATOR",
-                    "equipmentId":"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd"
+                    "address": "1 rue simone veil",
+                    "criticality": "HIGH",
+                    "category":"LIMIT",
+                    "equipmentId":"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd",
+                    "externalSourceRef": "source"
                   }
       responses:
         "201":
           description: Created
-        "204":
-          description: Updated
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/AlertEventReadDto'
+                  - $ref: '#/components/schemas/ReportEventReadDto'
+                  - $ref: '#/components/schemas/OperatorCategory'
         "400":
           description: Bad Request
           content:
             application/json:
               examples:
-                missingDates:
-                  description: Occurs when category is MANIFESTATION without start and end dates
-                  value: |
-                    {
-                        "code": 400,
-                        "message": "Properties 'startDate' and 'endDate' are required for 'MANIFESTATION' category"
-                    }
                 invalidName:
                   description: Occurs when name already exists
                   value: |
                     {
                         "code": 400,
-                        "message": "Event with name 'event operator' already exists"
+                        "message": "Event with name 'event alert' already exists"
                     }
                 invalidEquipment:
                   description: Occurs when equipmentId not exist
@@ -526,43 +640,80 @@ paths:
       security:
         - oidc:
             - authenticated
-  /procedures:
-    post:
+  /procedures/model/id/{id}:
+    get:
       tags:
-        - Procedure Controller
-      summary: Update events procedure
-      operationId: com.provoly.procedure.ProcedureController_updateProcedure
+        - Procedure Model Controller
+      summary: Retrieve procedure model by id
+      operationId: com.provoly.procedure.ProcedureModelController_getProcedureDetails
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          example: 29
+          required: true
+      responses:
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden if page not specified
+        "404":
+          description: Procedure Model Not found
+        "200":
+          description: Returns procedure model Details by id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcedureModelReadDto'
+              examples:
+                default:
+                  value: |
+                    {
+                      "id": 29,
+                      "name": "procedure model 4",
+                      "description": "description",
+                      "creationDate": "2024-06-20T07:39:35.555495Z",
+                      "lastModificationDate": "2024-06-20T07:44:06.853084Z",
+                      "creator": "Jean Dupont",
+                      "domain": "VP",
+                      "useCount": 0,
+                      "actions": []
+                    }
+      security:
+        - oidc:
+            - authenticate
+    put:
+      tags:
+        - Procedure Model Controller
+      summary: Update procedure model
+      operationId: com.provoly.procedure.ProcedureModelController_updateProcedureModel
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          example: 3
+          required: true
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProcedureWriteDto'
+              $ref: '#/components/schemas/ProcedureModelWriteDto'
             examples:
               default:
-                summary: Update Report event from procedure
+                summary: Update Procedure model
                 value: |
                   {
-                    "id": "f7b37e0e-a3d1-4159-a2c1-f6b7fd1f7a82",
-                    "name": "procedure_1",
-                    "events": [
-                      {
-                        "id": "ebbfbbd1-b8de-467c-8a9b-88443a49f807",
-                        "name": "Accident voiture UPDATE",
-                        "address": "10 Rue du Camp d'Attila, 51000 Châlons-en-Champagne",
-                        "description": "description",
-                        "criticality": "HIGH",
-                        "type": "REPORT",
-                        "equipmentId": "4ead3c85-f120-4144-8ca2-29ac9882ff5f",
-                        "externalSourceRef": "external_source2",
-                        "category": "REPORT"
-                      }
-                    ]
+                    "id": 3,
+                    "name": "procedure model updated",
+                    "description": "description"
+                    "creator": "toto",
+                    "domain": "VP",
+                    "useCount": 0,
+                    "actions": []
                   }
-      
-
       responses:
-        "201":
-          description: Procedure Created
         "204":
           description: Updated
         "400":
@@ -582,8 +733,8 @@ paths:
         - name: id
           in: path
           schema:
-            $ref: '#/components/schemas/UUID'
-          example: 01ffde9d-30d2-4273-b61f-c6addd8747c8
+            type: integer
+          example: 45
           required: true
       responses:
         "401":
@@ -602,7 +753,7 @@ paths:
                 default:
                   value: |
                     {
-                      "id": "5c925baf-7164-4bfe-af37-f0860aacc570",
+                      "id": 45,
                       "name": "procedure maintenance",
                       "creationDate": "2024-02-23T12:56:00.802501Z",
                       "actions": [
@@ -623,7 +774,7 @@ paths:
                       ],
                       "events": [
                         {
-                          "id": "01ffde9d-30d2-4273-b61f-c6addd8747c8",
+                          "id": 66,
                           "name": "Defaillance lampe",
                           "address": null,
                           "description": null,
@@ -642,7 +793,7 @@ paths:
                           "externalSourceRef": "citylinx_1"
                         },
                         {
-                          "id": "eb8e2f6b-f33e-408c-bb6c-e042f204d687",
+                          "id": 37,
                           "name": "Maintenance ouvrage2",
                           "address": null,
                           "description": null,
@@ -665,6 +816,54 @@ paths:
                     }
       security:
         - oidc:
+            - authenticate
+    put:
+      tags:
+        - Procedure Controller
+      summary: Update events procedure
+      operationId: com.provoly.procedure.ProcedureController_updateProcedure
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          example: 3
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcedureWriteDto'
+            examples:
+              default:
+                summary: Update Report event from procedure
+                value: |
+                  {
+                    "id": 3,
+                    "name": "procedure_1",
+                    "events": [
+                      {
+                        "id": 2,
+                        "name": "Accident voiture UPDATE",
+                        "address": "10 Rue du Camp d'Attila, 51000 Châlons-en-Champagne",
+                        "description": "description",
+                        "criticality": "HIGH",
+                        "type": "REPORT",
+                        "equipmentId": "4ead3c85-f120-4144-8ca2-29ac9882ff5f",
+                        "externalSourceRef": "external_source2",
+                        "category": "REPORT"
+                      }
+                    ]
+                  }
+      responses:
+        "204":
+          description: Updated
+        "400":
+          description: Bad Request
+        "401":
+          description: Not Authorized
+      security:
+        - oidc:
             - authenticated
   /procedures/id/{id}/close:
     put:
@@ -677,8 +876,8 @@ paths:
         - name: id
           in: path
           schema:
-            $ref: '#/components/schemas/UUID'
-          example: 01ffde9d-30d2-4273-b61f-c6addd8747c8
+            type: integer
+          example: 50
           required: true
       responses:
         "204":
@@ -1296,13 +1495,23 @@ components:
     ReportCategory:
       enum:
         - REPORT
-    Sort:
+    EventSort:
       type: string
       enum:
         - creationDate
         - lastModificationDate
         - status
         - procedureProgress
+    ProcedureModelSort:
+      type : string
+      enum:
+        - id
+        - useCount
+        - name
+        - creator
+        - creationDate
+        - lastModificationDate
+        - domain
     SortOrder:
       type: string
       enum:
@@ -1474,7 +1683,21 @@ components:
         entity:
           type: string
           description: Value match one of `Equipment Entity` name
-
+    ActionWriteDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+          required: true
+        name:
+          type: string
+          required: true
+        type:
+          type: string
+          required: true
+        status:
+          $ref: '#/components/schemas/Status'
+          required: true
     ActionReadDto:
       type: object
       properties:
@@ -1492,7 +1715,7 @@ components:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/UUID'
+          type: integer
         name:
           type: string
           required: true
@@ -1521,7 +1744,7 @@ components:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/UUID'
+          type: integer
         name:
           type: string
           required: true
@@ -1549,7 +1772,7 @@ components:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/UUID'
+          type: integer
         name:
           type: string
           required: true
@@ -1577,7 +1800,7 @@ components:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/UUID'
+          type: integer
         name:
           type: string
         address:
@@ -1614,7 +1837,7 @@ components:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/UUID'
+          type: integer
         name:
           type: string
         address:
@@ -1651,7 +1874,7 @@ components:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/UUID'
+          type: integer
         name:
           type: string
         address:
@@ -1692,7 +1915,7 @@ components:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/UUID'
+          type: integer
         name:
           type: string
         lastModificationDate:
@@ -1716,7 +1939,7 @@ components:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/UUID'
+          type: integer
         name:
           type: string
         events:
@@ -1730,11 +1953,55 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ActionReadDto'
+    ProcedureModelWriteDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          required: true
+        description:
+          type: string
+          required: true
+        domain:
+          type: string
+          required: true
+        creator:
+          type: string
+          required: true
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionWriteDto'
+    ProcedureModelReadDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        useCount:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        domain:
+          type: string
+        creator:
+          type: string
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+        creationDate:
+          $ref: '#/components/schemas/DateTime'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionReadDto'
     EventSummaryDto:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/UUID'
+          type: integer
         proocedureId:
           $ref: '#/components/schemas/UUID'
         name:

@@ -21,7 +21,7 @@ public class ProcedureController {
     @Path("/id/{id}")
     @GET
     @Authenticated
-    public ProcedureReadDto getProcedureDetail(Integer id) {
+    public ProcedureReadDto getProcedureDetails(Integer id) {
         var procedure = procedureService.getProcedureDetails(id);
         return procedureMapper.mapToProcedureReadDetailsDto(procedure);
     }

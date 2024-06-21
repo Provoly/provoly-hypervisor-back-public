@@ -217,7 +217,7 @@ public class EventControllerTest {
 
     @Test
     @TestSecurity(user = "reader")
-    void should_return_event_with_corresponding_familiy() {
+    void should_return_event_with_corresponding_family() {
         // when
         var events = eventController.getEvents(
                 1,
@@ -237,7 +237,7 @@ public class EventControllerTest {
 
     @Test
     @TestSecurity(user = "reader")
-    void should_throw_invalid_familiy() {
+    void should_throw_invalid_family() {
         assertThatThrownBy(() -> eventController.getEvents(
                 1,
                 20,
@@ -315,7 +315,7 @@ public class EventControllerTest {
         var events = eventController.getEvents(
                 1,
                 3,
-                Sort.PROCEDURE_PROGRESS.getName(),
+                EventSort.PROCEDURE_PROGRESS.getName(),
                 SortOrder.DESC.name(),
                 null,
                 List.of(),

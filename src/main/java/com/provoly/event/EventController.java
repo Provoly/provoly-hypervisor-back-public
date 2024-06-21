@@ -55,9 +55,9 @@ public class EventController {
             @RestQuery List<String> status,
             @RestQuery List<String> category,
             @RestQuery List<String> entity,
-            @RestQuery List<String> familiy) {
+            @RestQuery List<String> family) {
         var events = eventService.getEvents(page, pageSize, sort, order, creationDate, criticality, status, category, entity,
-                familiy);
+                family);
         return events.stream()
                 .map(event -> eventMapper.mapToEventReadDto(event))
                 .toList();

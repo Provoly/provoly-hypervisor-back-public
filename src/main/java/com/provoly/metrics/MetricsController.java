@@ -17,7 +17,7 @@ import org.jboss.resteasy.reactive.RestQuery;
 @Consumes(MediaType.APPLICATION_JSON)
 public class MetricsController {
 
-    private MetricsService metricsService;
+    private final MetricsService metricsService;
 
     public MetricsController(MetricsService metricsService) {
         this.metricsService = metricsService;

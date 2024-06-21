@@ -20,4 +20,8 @@ public class ActionMapper {
         return actions.stream().map(this::mapToActionReadDto).toList();
     }
 
+    public void updateAction(Action action, ActionWriteDto dto) {
+        action.setName(dto.name());
+        action.setStatus(dto.status());
+    }
 }

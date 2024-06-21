@@ -18,6 +18,7 @@ import jakarta.transaction.Transactional;
 import com.provoly.action.AskedService;
 import com.provoly.equipment.*;
 import com.provoly.event.*;
+import com.provoly.model.ProcedureModel;
 import com.provoly.procedure.Procedure;
 import com.provoly.service.Service;
 import com.provoly.service.ServiceCategory;
@@ -30,7 +31,7 @@ public class TestDataService {
     private ServiceDatabaseReader serviceDatabaseReader;
     private Random rand = new Random();
     public Procedure procedure1, procedure2, procedure3;
-    private Domain domain;
+    private Domain domainEP;
     private ServiceCategory prev;
     private ServiceCategory cura;
 
@@ -43,7 +44,8 @@ public class TestDataService {
 
     @Transactional
     public void init() {
-        domain = equipmentDatabaseReader.getDomainByCode("EP").get();
+        domainEP = equipmentDatabaseReader.getDomainByCode("EP").get();
+        var domainVP = equipmentDatabaseReader.getDomainByCode("VP").get();
         prev = serviceDatabaseReader.getServiceCategoryByCode("PREV").get();
         cura = serviceDatabaseReader.getServiceCategoryByCode("CURA").get();
 
@@ -71,11 +73,11 @@ public class TestDataService {
         var equip7 = initEquipment("C-763", ouvrage, agglo, fagniereCity, fagniereDistrict, 0);
 
         var service1 = new Service(UUID.randomUUID(), "DI1234", Instant.now(), Instant.now(), Instant.now(), Instant.now(),
-                Instant.now(), equip3, domain, ASKED, prev);
+                Instant.now(), equip3, domainEP, ASKED, prev);
         em.persist(service1);
 
         var service2 = new Service(UUID.randomUUID(), "DI5678@1223", Instant.now(), Instant.now(), Instant.now(), Instant.now(),
-                Instant.now(), equip5, domain, IN_PROGRESS, cura);
+                Instant.now(), equip5, domainEP, IN_PROGRESS, cura);
 
         em.persist(service2);
 
@@ -98,6 +100,20 @@ public class TestDataService {
         procedure1 = initProcedure("procedure1", List.of(asked1, asked2), List.of(event2));
         procedure2 = initProcedure("procedure2", List.of(asked3, asked4, asked5), List.of(event5));
         procedure3 = initProcedure("procedure3", List.of(asked6), List.of(event4, event6));
+
+        var procedureModel1 = new ProcedureModel("model", "flora", "desc", domainEP, List.of());
+        var procedureModel2 = new ProcedureModel("model1", "flora", "desc", domainVP, List.of());
+        var procedureModel3 = new ProcedureModel("flora model2", "stella", "desc", domainEP, List.of());
+
+        em.persist(procedureModel1);
+        em.persist(procedureModel2);
+        em.persist(procedureModel3);
+
+        procedureModel3.incrementUseCount();
+        procedureModel3.incrementUseCount();
+        procedureModel1.incrementUseCount();
+        procedureModel1.incrementUseCount();
+        procedureModel2.incrementUseCount();
     }
 
     @Transactional
@@ -106,6 +122,7 @@ public class TestDataService {
         removeEntities(Service.class);
         removeEntities(Equipment.class);
         removeEntities(Procedure.class);
+        removeEntities(ProcedureModel.class);
     }
 
     public Integer getProcedureId1() {
@@ -119,7 +136,7 @@ public class TestDataService {
     @Transactional
     public void persistDoneService(String externalId, Instant closeDate, Equipment equip, boolean isCura) {
         var service = new Service(UUID.randomUUID(), externalId, Instant.now(), Instant.now(), Instant.now(), Instant.now(),
-                closeDate, equip, domain, DONE, isCura ? cura : prev);
+                closeDate, equip, domainEP, DONE, isCura ? cura : prev);
         em.persist(service);
     }
 
@@ -164,7 +181,7 @@ public class TestDataService {
         event.setCategory(category);
         event.setCriticality(criticality);
         event.setStatus(status);
-        event.setDomain(domain);
+        event.setDomain(domainEP);
         if (status == Status.DONE) {
             event.setCloseDate(randomInstantBetweenNowAndAMonthLater());
         }
@@ -197,7 +214,7 @@ public class TestDataService {
         equipment.setAddress("address");
         equipment.setFamily(family);
         equipment.setEntity(entity);
-        equipment.setDomain(domain);
+        equipment.setDomain(domainEP);
         equipment.setCity(city);
         equipment.setDistrict(district);
         equipment.setAttributes(Map.of("managed", managed));

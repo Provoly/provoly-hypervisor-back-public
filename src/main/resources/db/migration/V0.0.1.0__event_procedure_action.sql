@@ -81,14 +81,28 @@ create table procedure
     procedure_progress float               not null default 0
 );
 
+create table procedure_model
+(
+    id                     serial primary key,
+    name                   varchar(200) unique not null,
+    description            varchar(200)        not null,
+    creator                varchar(200)        not null,
+    creation_date          timestamptz                  default current_timestamp,
+    last_modification_date timestamptz                  default current_timestamp,
+    use_count              int                 not null default 0,
+    domain_id              bigint references domain
+);
+
 create table action
 (
     id                     uuid primary key,
-    procedure_id           serial references procedure,
+    procedure_id           int references procedure,
+    procedure_model_id     int references procedure_model,
     type                   varchar(100) not null,
     status                 varchar(100) not null,
     name                   varchar(100) not null,
     last_modification_date timestamptz default current_timestamp
+    check(procedure_id is not null or procedure_model_id is not null)
 );
 
 

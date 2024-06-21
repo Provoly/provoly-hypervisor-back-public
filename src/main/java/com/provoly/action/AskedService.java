@@ -16,6 +16,10 @@ public class AskedService extends Action {
         super();
     }
 
+    public AskedService(UUID id) {
+        super(id);
+    }
+
     public AskedService(UUID id, Instant lastModificationDate, Status status, String name) {
         super(id, ActionType.ASKED_SERVICE, lastModificationDate, status, name);
     }

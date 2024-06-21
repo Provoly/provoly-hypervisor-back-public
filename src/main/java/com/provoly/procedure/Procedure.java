@@ -29,7 +29,7 @@ public class Procedure {
     @OneToMany(mappedBy = "procedure", fetch = FetchType.EAGER)
     private List<Event> events = new ArrayList<>();
 
-    @OneToMany(mappedBy = "procedure", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "procedure", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Collection<Action> actions = new ArrayList<>();
 
     public Procedure() {

@@ -122,7 +122,7 @@ public class EventService {
 
         return databaseReader.getEvents(page,
                 pageSize,
-                Sort.fromName(sort),
+                EventSort.fromName(sort),
                 SortOrder.fromString(order),
                 creationDate,
                 criticalities,

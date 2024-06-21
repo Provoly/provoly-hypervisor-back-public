@@ -50,7 +50,7 @@ public class ProcedureControllerTest {
         // given
         var id = dataService.getProcedureId1();
         // when
-        var procedure = procedureController.getProcedureDetail(id);
+        var procedure = procedureController.getProcedureDetails(id);
 
         //then
         assertThat(procedure).extracting("id").isEqualTo(id);
@@ -60,7 +60,7 @@ public class ProcedureControllerTest {
     @Test
     @TestSecurity(user = "reader")
     void should_throw_procedure_not_found() {
-        assertThatThrownBy(() -> procedureController.getProcedureDetail(666))
+        assertThatThrownBy(() -> procedureController.getProcedureDetails(666))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessageContaining("not found");
     }

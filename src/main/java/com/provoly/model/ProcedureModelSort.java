@@ -1,16 +1,19 @@
-package com.provoly.event;
+package com.provoly.model;
 
 import java.util.Arrays;
 
-public enum Sort {
+public enum ProcedureModelSort {
+    ID("id"),
+    USE_COUNT("useCount"),
+    NAME("name"),
+    CREATOR("creator"),
+    DOMAIN("domain"),
     CREATION_DATE("creationDate"),
-    LAST_MODIFICATION_DATE("lastModificationDate"),
-    STATUS("status"),
-    PROCEDURE_PROGRESS("procedureProgress");
+    LAST_MODIFICATION_DATE("lastModificationDate");
 
     private final String name;
 
-    Sort(String name) {
+    ProcedureModelSort(String name) {
         this.name = name;
     }
 
@@ -18,7 +21,7 @@ public enum Sort {
         return name;
     }
 
-    public static Sort fromName(String name) {
+    public static ProcedureModelSort fromName(String name) {
         return name == null ? null
                 : Arrays.stream(values())
                         .filter(sort -> sort.getName().equals(name))

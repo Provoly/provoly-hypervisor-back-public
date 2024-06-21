@@ -26,7 +26,7 @@ public class EventDatabaseReader extends DatabaseReader {
 
     public Collection<Event> getEvents(int page,
             int pageSize,
-            Sort sort,
+            EventSort sort,
             SortOrder order,
             Instant creationDate,
             List<Criticality> criticalities,
@@ -74,7 +74,7 @@ public class EventDatabaseReader extends DatabaseReader {
             predicates.add(root.get(Event_.category).in(categories));
         }
 
-        var filters = builder.and(getPredicatesAsArray(predicates));
+        var filters = getPredicatesAsArray(predicates);
 
         List<Order> orders = buildEventOrders(sort, order, builder, root);
 
@@ -88,7 +88,7 @@ public class EventDatabaseReader extends DatabaseReader {
                 .getResultList();
     }
 
-    private List<Order> buildEventOrders(Sort sort,
+    private List<Order> buildEventOrders(EventSort sort,
             SortOrder order,
             CriteriaBuilder builder,
             Root<Event> root) {
@@ -108,8 +108,8 @@ public class EventDatabaseReader extends DatabaseReader {
         return orders;
     }
 
-    private Expression<?> getSortProperty(Sort sort, CriteriaBuilder builder, Root<Event> root) {
-        return switch (sort) {
+    private Expression<?> getSortProperty(EventSort event, CriteriaBuilder builder, Root<Event> root) {
+        return switch (event) {
             case CREATION_DATE -> root.get(Event_.creationDate);
             case LAST_MODIFICATION_DATE -> root.get(Event_.lastModificationDate);
             case STATUS -> getStatusOrder(builder, root);
@@ -181,10 +181,6 @@ public class EventDatabaseReader extends DatabaseReader {
 
     public void saveEvent(Event event) {
         em.persist(event);
-    }
-
-    public boolean isEventWithIdExists(Integer id) {
-        return em.find(Event.class, id) != null;
     }
 
     public boolean isEventWithNameExists(String name) {

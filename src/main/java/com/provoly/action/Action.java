@@ -6,6 +6,7 @@ import java.util.UUID;
 import jakarta.persistence.*;
 
 import com.provoly.event.Status;
+import com.provoly.model.ProcedureModel;
 import com.provoly.procedure.Procedure;
 
 import org.hibernate.annotations.Immutable;
@@ -32,8 +33,16 @@ public abstract class Action {
     @Immutable
     private Procedure procedure;
 
-    protected Action() {
+    @ManyToOne
+    @Immutable
+    private ProcedureModel procedureModel;
+
+    public Action() {
         // Only for JPA
+    }
+
+    public Action(UUID id) {
+        this.id = id;
     }
 
     protected Action(UUID id, ActionType type, Instant lastModificationDate, Status status, String name) {
@@ -68,11 +77,27 @@ public abstract class Action {
         return name;
     }
 
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public Procedure getProcedure() {
         return procedure;
     }
 
     public void setProcedure(Procedure procedure) {
         this.procedure = procedure;
+    }
+
+    public ProcedureModel getProcedureModel() {
+        return procedureModel;
+    }
+
+    public void setProcedureModel(ProcedureModel procedureModel) {
+        this.procedureModel = procedureModel;
     }
 }
