@@ -7,6 +7,9 @@ import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
+import com.provoly.procedure.ProcedureMapper;
+import com.provoly.procedure.ProcedureReadDto;
+
 import io.quarkus.security.Authenticated;
 
 import org.jboss.resteasy.reactive.RestQuery;
@@ -18,10 +21,13 @@ public class ProcedureModelController {
 
     private final ProcedureModelService procedureModelService;
     private final ProcedureModelMapper procedureModelMapper;
+    private final ProcedureMapper procedureMapper;
 
-    public ProcedureModelController(ProcedureModelService procedureModelService, ProcedureModelMapper procedureModelMapper) {
+    public ProcedureModelController(ProcedureModelService procedureModelService, ProcedureModelMapper procedureModelMapper,
+            ProcedureMapper procedureMapper) {
         this.procedureModelService = procedureModelService;
         this.procedureModelMapper = procedureModelMapper;
+        this.procedureMapper = procedureMapper;
     }
 
     @GET
@@ -42,14 +48,16 @@ public class ProcedureModelController {
     @POST
     @Authenticated
     public ProcedureModelReadDto saveProcedureModel(ProcedureModelWriteDto dto) {
-        return procedureModelMapper.mapToProcedureReadDetailsDto(procedureModelService.saveProcedureModel(dto));
+        var model = procedureModelService.saveProcedureModel(dto);
+        return procedureModelMapper.mapToProcedureReadDetailsDto(model);
     }
 
     @Path("/id/{id}")
     @GET
     @Authenticated
     public ProcedureModelReadDto getProcedureModelDetails(Integer id) {
-        return procedureModelMapper.mapToProcedureReadDetailsDto(procedureModelService.getProcedureModelDetails(id));
+        var model = procedureModelService.getProcedureModelDetails(id);
+        return procedureModelMapper.mapToProcedureReadDetailsDto(model);
     }
 
     @Path("/id/{id}")
@@ -57,6 +65,14 @@ public class ProcedureModelController {
     @Authenticated
     public void updateProcedureModel(Integer id, ProcedureModelWriteDto dto) {
         procedureModelService.updateProcedureModel(id, dto);
+    }
+
+    @Path("/id/{id}/associate")
+    @PUT
+    @Authenticated
+    public ProcedureReadDto associateProcedureModelToEvents(Integer id, List<Integer> eventIds) {
+        var procedure = procedureModelService.associateProcedureModelToEvents(id, eventIds);
+        return procedureMapper.mapToProcedureReadDetailsDto(procedure);
     }
 
 }

@@ -48,7 +48,7 @@ public class ProcedureControllerTest {
     @TestSecurity(user = "reader")
     void should_return_procedure_by_id() {
         // given
-        var id = dataService.getProcedureId1();
+        var id = dataService.getProcedure1().getId();
         // when
         var procedure = procedureController.getProcedureDetails(id);
 
@@ -88,10 +88,11 @@ public class ProcedureControllerTest {
                 "external_source_ref",
                 null);
 
-        Integer procedureId = dataService.getProcedureId3();
+        Integer procedureId = dataService.getProcedure3().getId();
         ProcedureWriteDto dto = new ProcedureWriteDto(
                 procedureId,
                 "procedure maintenance",
+                "desc",
                 List.of(reportDto));
 
         // when

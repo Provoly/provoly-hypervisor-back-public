@@ -77,6 +77,7 @@ create table procedure
 (
     id                 serial primary key,
     name               varchar(200) unique not null,
+    description        varchar(200)        not null,
     creation_date      timestamptz                  default current_timestamp,
     procedure_progress float               not null default 0
 );
@@ -102,7 +103,7 @@ create table action
     status                 varchar(100) not null,
     name                   varchar(100) not null,
     last_modification_date timestamptz default current_timestamp
-    check(procedure_id is not null or procedure_model_id is not null)
+    check (procedure_id is not null or procedure_model_id is not null)
 );
 
 

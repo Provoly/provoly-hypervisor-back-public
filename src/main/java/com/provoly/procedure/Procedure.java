@@ -20,6 +20,7 @@ public class Procedure {
     private Integer id;
 
     private String name;
+    private String description;
 
     @CreationTimestamp
     private Instant creationDate;
@@ -36,8 +37,9 @@ public class Procedure {
         // Only for JPA
     }
 
-    public Procedure(String name) {
+    public Procedure(String name, String description) {
         this.name = name;
+        this.description = description;
         this.procedureProgress = 0;
     }
 
@@ -50,6 +52,7 @@ public class Procedure {
     public void addEvent(Event event) {
         events.add(event);
         event.setProcedure(this);
+        event.setStatus(Status.IN_PROGRESS);
     }
 
     public void deleteAction(Action action) {
@@ -67,6 +70,14 @@ public class Procedure {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Instant getCreationDate() {

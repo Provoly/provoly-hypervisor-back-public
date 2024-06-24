@@ -580,29 +580,23 @@ paths:
             - authenticated
     post:
       tags:
-        - Event Controller
-      summary: Save an Event
-      operationId: com.provoly.event.EventController_saveEvent
+        - Procedure Model Controller
+      summary: Save a procedure model
+      operationId: com.provoly.event.ProcedureModelController_saveProcedureModel
       requestBody:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/AlertEventWriteDto'
-                - $ref: '#/components/schemas/OperatorEventWriteDto'
-                - $ref: '#/components/schemas/ReportEventWriteDto'
+              $ref: '#/components/schemas/ProcedureModelWriteDto'
             examples:
               default:
-                summary: Create "alert" event
+                summary: Save procedure model
                 value: |
                   {
-                    "name":"event alert",
-                    "description": "desc",
-                    "address": "1 rue simone veil",
-                    "criticality": "HIGH",
-                    "category":"LIMIT",
-                    "equipmentId":"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd",
-                    "externalSourceRef": "source"
+                    "name": "model de procedure test",
+                    "description": "description",
+                    "creator": "billie",
+                    "domain": "EP"
                   }
       responses:
         "201":
@@ -610,10 +604,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/AlertEventReadDto'
-                  - $ref: '#/components/schemas/ReportEventReadDto'
-                  - $ref: '#/components/schemas/OperatorCategory'
+                $ref: '#/components/schemas/ProcedureModelWriteDto'
         "400":
           description: Bad Request
           content:
@@ -705,13 +696,10 @@ paths:
                 summary: Update Procedure model
                 value: |
                   {
-                    "id": 3,
-                    "name": "procedure model updated",
-                    "description": "description"
+                    "name": "model de procedure updated",
+                    "description": "description",
                     "creator": "toto",
-                    "domain": "VP",
-                    "useCount": 0,
-                    "actions": []
+                    "domain": "VP"
                   }
       responses:
         "204":
@@ -720,6 +708,53 @@ paths:
           description: Bad Request
         "401":
           description: Not Authorized
+      security:
+        - oidc:
+            - authenticated
+  /procedures/model/id/{id}/associate:
+    put:
+      tags:
+        - Procedure Model Controller
+      summary: Associate procedure model to one or more events
+      description: |
+        The procedure model association will generate a new Procedure instance. 
+        This procedure is linked to events whose ids are in request body.
+        These events will automatically be set to `IN_PROGRESS` status.
+      operationId: com.provoly.procedure.ProcedureModelController_associateProcedureModeltoEvents
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          example: 3
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+                description: events id
+            examples:
+              default:
+                summary: Associate Procedure model to events 1,2 and 3.
+                value: [1,2,3]
+      responses:
+        "201":
+          description: Procedure instance created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcedureReadDto'
+        "400":
+          description: At least one event id not exists
+        "401":
+          description: Not Authorized
+        "403":
+          description:  At least one event is already associated to a procedure, or closed.
+        "404":
+          description: Procedure model not found
       security:
         - oidc:
             - authenticated

@@ -3,8 +3,10 @@ package com.provoly.model;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import com.provoly.TestDataService;
 
@@ -95,5 +97,49 @@ public class ProcedureModelServiceTest {
         assertThatThrownBy(() -> procedureModelService.updateProcedureModel(id, procedureModelToUpdate))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("It's not possible to update Procedure model creator");
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_throw_associate_procedure_model_with_unkown_event() {
+        // given
+        var dto = new ProcedureModelWriteDto(null, "proc model unkwown event", "desc", "EP", "bloom",
+                List.of());
+        var id = procedureModelService.saveProcedureModel(dto).getId();
+
+        // when
+        assertThatThrownBy(() -> procedureModelService.associateProcedureModelToEvents(id, List.of(1234)))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessageContaining("not found");
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_throw_associate_procedure_model_with_done_event() {
+        // given
+        var dto = new ProcedureModelWriteDto(null, "proc model done event", "desc", "EP", "bloom",
+                List.of());
+        var id = procedureModelService.saveProcedureModel(dto).getId();
+        var closedEventId = dataService.getDoneEvent().getId();
+
+        // when
+        assertThatThrownBy(() -> procedureModelService.associateProcedureModelToEvents(id, List.of(closedEventId)))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("can't be done");
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_throw_associate_procedure_model_with_already_associated_event() {
+        // given
+        var dto = new ProcedureModelWriteDto(null, "proc model associated event", "desc", "EP", "bloom",
+                List.of());
+        var id = procedureModelService.saveProcedureModel(dto).getId();
+        var closedEventId = dataService.getAssociatedEvent().getId();
+
+        // when
+        assertThatThrownBy(() -> procedureModelService.associateProcedureModelToEvents(id, List.of(closedEventId)))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("already associated to a procedure");
     }
 }

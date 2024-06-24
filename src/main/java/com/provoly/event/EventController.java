@@ -22,8 +22,8 @@ import org.jboss.resteasy.reactive.RestQuery;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class EventController {
-    private EventService eventService;
-    private EventMapper eventMapper;
+    private final EventService eventService;
+    private final EventMapper eventMapper;
 
     public EventController(EventService eventService, EventMapper eventMapper) {
         this.eventService = eventService;
@@ -33,13 +33,14 @@ public class EventController {
     @POST
     @Authenticated
     public EventReadDto saveEvent(@Valid EventWriteDto eventDto) {
-        return eventService.saveEvent(eventDto);
+        var event = eventService.saveEvent(eventDto);
+        return eventMapper.mapToEventReadDto(event);
     }
 
     @PUT
     @Path("/id/{id}")
     @Authenticated
-    public void saveEvent(Integer id, @Valid EventWriteDto eventDto) {
+    public void updateEvent(Integer id, @Valid EventWriteDto eventDto) {
         eventService.updateEvent(id, eventDto);
     }
 
@@ -59,7 +60,7 @@ public class EventController {
         var events = eventService.getEvents(page, pageSize, sort, order, creationDate, criticality, status, category, entity,
                 family);
         return events.stream()
-                .map(event -> eventMapper.mapToEventReadDto(event))
+                .map(eventMapper::mapToEventReadDto)
                 .toList();
     }
 

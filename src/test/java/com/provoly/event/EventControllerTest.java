@@ -302,10 +302,10 @@ public class EventControllerTest {
                 List.of(),
                 List.of());
         //then
-        assertThat(events).extracting("status").containsExactly(Status.NEW, Status.NEW, Status.NEW, Status.NEW,
+        assertThat(events).extracting("status").containsExactly(Status.NEW, Status.NEW, Status.NEW, Status.IN_PROGRESS,
                 Status.IN_PROGRESS);
         assertThat(events).extracting("criticality").containsExactly(Criticality.LOW, Criticality.LOW, Criticality.LOW,
-                Criticality.LOW, Criticality.HIGH);
+                Criticality.HIGH, Criticality.MEDIUM);
     }
 
     @Test
@@ -324,7 +324,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of());
         //then
-        assertThat(events).extracting("procedureProgress").containsExactly(100f, 100f, 33f);
+        assertThat(events).extracting("procedureProgress").containsExactly(100f, 100f, 0.0f);
     }
 
     @Test

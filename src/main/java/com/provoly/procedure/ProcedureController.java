@@ -10,8 +10,8 @@ import io.quarkus.security.Authenticated;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ProcedureController {
 
-    private ProcedureService procedureService;
-    private ProcedureMapper procedureMapper;
+    private final ProcedureService procedureService;
+    private final ProcedureMapper procedureMapper;
 
     public ProcedureController(ProcedureService procedureService, ProcedureMapper procedureMapper) {
         this.procedureService = procedureService;

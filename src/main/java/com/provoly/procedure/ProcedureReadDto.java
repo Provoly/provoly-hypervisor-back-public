@@ -9,6 +9,7 @@ import com.provoly.event.dto.EventReadDto;
 public record ProcedureReadDto(
         Integer id,
         String name,
+        String description,
         Instant creationDate,
         Collection<ActionReadDto> actions,
         Collection<EventReadDto> events,

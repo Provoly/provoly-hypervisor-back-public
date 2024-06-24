@@ -23,6 +23,7 @@ public class ProcedureMapper {
         return new ProcedureReadDto(
                 procedure.getId(),
                 procedure.getName(),
+                procedure.getDescription(),
                 procedure.getCreationDate(),
                 actionMapper.mapToActionReadDto(procedure.getActions()),
                 eventMapper.mapToEventReadDto(procedure.getEvents()

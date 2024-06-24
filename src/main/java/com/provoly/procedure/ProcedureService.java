@@ -1,10 +1,14 @@
 package com.provoly.procedure;
 
+import java.util.stream.Stream;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
+import com.provoly.event.Event;
 import com.provoly.event.EventService;
 import com.provoly.event.dto.AlertEventWriteDto;
+import com.provoly.model.ProcedureModel;
 
 import org.jboss.logging.Logger;
 
@@ -54,5 +58,18 @@ public class ProcedureService {
             }
             eventService.updateEvent(event.getId(), event);
         }
+    }
+
+    public Procedure instantiateProcedureWithModelAndEvents(ProcedureModel model, Stream<Event> events) {
+        Procedure procedure = new Procedure(model.getName(), model.getDescription());
+        logger.debugf("Add events to procedure");
+        events.forEach(procedure::addEvent);
+
+        logger.debugf("Add actions to procedure");
+        model.getActions().forEach(procedure::addAction);
+
+        databaseReader.saveProcedure(procedure);
+        logger.debugf("Procedure %s is instantiated".formatted(procedure.getId()));
+        return procedure;
     }
 }

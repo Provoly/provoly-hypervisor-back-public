@@ -148,7 +148,7 @@ public class EventService {
     }
 
     @Transactional
-    public EventReadDto saveEvent(EventWriteDto eventDto) {
+    public Event saveEvent(EventWriteDto eventDto) {
         logger.infof("Create %s event with name %s".formatted(eventDto.getType(), eventDto.getName()));
         checkIsNameAlreadyExists(eventDto.getName());
         var event = switch (eventDto) {
@@ -159,7 +159,8 @@ public class EventService {
         };
         databaseReader.saveEvent(event);
         enrichEquipmentFromUpdatedEvent(event.getId(), eventDto.getEquipmentId(), null);
-        return eventMapper.mapToEventReadDto(event);
+        logger.debugf("Event %s is created".formatted(event.getId()));
+        return event;
     }
 
     @Transactional

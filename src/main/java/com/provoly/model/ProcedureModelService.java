@@ -1,12 +1,19 @@
 package com.provoly.model;
 
+import static com.provoly.event.Status.DONE;
+
 import java.util.Collection;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.ForbiddenException;
 
+import com.provoly.event.Event;
+import com.provoly.event.EventService;
 import com.provoly.event.SortOrder;
+import com.provoly.procedure.Procedure;
+import com.provoly.procedure.ProcedureService;
 
 import org.jboss.logging.Logger;
 
@@ -16,12 +23,16 @@ public class ProcedureModelService {
     private final Logger logger;
     private final ProcedureModelDatabaseReader databaseReader;
     private final ProcedureModelMapper procedureModelMapper;
+    private final ProcedureService procedureService;
+    private final EventService eventService;
 
     public ProcedureModelService(Logger logger, ProcedureModelDatabaseReader databaseReader,
-            ProcedureModelMapper procedureModelMapper) {
+            ProcedureModelMapper procedureModelMapper, ProcedureService procedureService, EventService eventService) {
         this.logger = logger;
         this.databaseReader = databaseReader;
         this.procedureModelMapper = procedureModelMapper;
+        this.procedureService = procedureService;
+        this.eventService = eventService;
     }
 
     @Transactional
@@ -39,6 +50,12 @@ public class ProcedureModelService {
                 search on procedures model that contains : %s
                 sort by %s
                 """.formatted(page, pageSize, domains, search, sort));
+
+        if (domains.stream().anyMatch(String::isEmpty)) {
+            logger.debugf(
+                    "Filter on empty domain will return empty procedure model list because domain is a required property");
+            return List.of();
+        }
 
         var domainEntities = domains.stream()
                 .map(code -> databaseReader.getDomainByCode(code)
@@ -61,6 +78,7 @@ public class ProcedureModelService {
         var model = new ProcedureModel(dto.creator());
         procedureModelMapper.updateProcedureModel(model, dto);
         databaseReader.saveProcedureModel(model);
+        logger.debugf("Procedure model %s is saved".formatted(model.getId()));
         return model;
     }
 
@@ -73,5 +91,33 @@ public class ProcedureModelService {
                     "It's not possible to update Procedure model creator for procedure %s".formatted(model.getId()));
         }
         procedureModelMapper.updateProcedureModel(model, dto);
+    }
+
+    @Transactional
+    public Procedure associateProcedureModelToEvents(Integer id, Collection<Integer> eventIds) {
+        logger.debugf("Associate procedure model %s to events %", String.valueOf(id), eventIds);
+        var model = databaseReader.getProcedureModelById(id);
+
+        logger.debugf("Retrieve events to associate them to procedure");
+        var events = eventIds
+                .stream()
+                .map(eventId -> {
+                    var event = eventService.getEventDetails(eventId);
+                    checkEventCanBeAssociated(event);
+                    return event;
+                });
+
+        var procedure = procedureService.instantiateProcedureWithModelAndEvents(model, events);
+        model.incrementUseCount();
+        return procedure;
+    }
+
+    private void checkEventCanBeAssociated(Event event) {
+        if (event.getProcedure() != null) {
+            throw new ForbiddenException("Event %s is already associated to a procedure".formatted(event.getId()));
+        }
+        if (event.getStatus() == DONE) {
+            throw new ForbiddenException("Event %s can't be done".formatted(event.getId()));
+        }
     }
 }

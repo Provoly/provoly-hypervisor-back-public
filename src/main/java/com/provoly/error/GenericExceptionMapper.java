@@ -4,6 +4,7 @@ import java.util.NoSuchElementException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
@@ -23,6 +24,9 @@ public class GenericExceptionMapper implements ExceptionMapper<Exception> {
         log.error("Error :", exception);
 
         return switch (exception) {
+            case ForbiddenException e -> Response
+                    .status(Response.Status.FORBIDDEN)
+                    .entity(new ErrorDto(Response.Status.FORBIDDEN.getStatusCode(), e.getMessage())).build();
             case NotFoundException e -> Response
                     .status(Response.Status.NOT_FOUND)
                     .entity(new ErrorDto(Response.Status.NOT_FOUND.getStatusCode(), e.getMessage())).build();

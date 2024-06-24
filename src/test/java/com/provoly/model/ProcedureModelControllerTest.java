@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import com.provoly.TestDataService;
 
@@ -126,4 +127,56 @@ public class ProcedureModelControllerTest {
         //then
         assertThat(udpatedProcedureModel).extracting("description").isEqualTo("desc updated");
     }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_throw_associate_procedure_model_invalid_id() {
+        assertThatThrownBy(() -> procedureModelController.associateProcedureModelToEvents(666, List.of(666)))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessageContaining("not found");
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_throw_associate_procedure_invalid_event_id() {
+        // given
+        var dto = new ProcedureModelWriteDto(null, "my model", "desc", "EP", "techna", List.of());
+        var id = procedureModelController.saveProcedureModel(dto).id();
+
+        assertThatThrownBy(() -> procedureModelController.associateProcedureModelToEvents(id, List.of(666)))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessageContaining("not found");
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_throw_associate_procedure_event_already_associated_to_procedure() {
+        // given
+        var dto = new ProcedureModelWriteDto(null, "my model 2", "desc", "EP", "tecna", List.of());
+        var aleardyAssociateEventId = dataService.getProcedure1().getEvents().getFirst().getId();
+
+        var id = procedureModelController.saveProcedureModel(dto).id();
+
+        assertThatThrownBy(() -> procedureModelController.associateProcedureModelToEvents(id, List.of(aleardyAssociateEventId)))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining(" is already associated to a procedure");
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_increment_model_useCount_when_associate_procedure_to_events() {
+        // given
+        var dto = new ProcedureModelWriteDto(null, "my model 3", "desc", "EP", "tecna", List.of());
+
+        var model = procedureModelController.saveProcedureModel(dto);
+        var event = dataService.getEvent1();
+
+        // when
+        var procedure = procedureModelController.associateProcedureModelToEvents(model.id(), List.of(event.getId()));
+        model = procedureModelController.getProcedureModelDetails(model.id());
+
+        // then
+        assertThat(model.useCount()).isEqualTo(1);
+    }
+
 }

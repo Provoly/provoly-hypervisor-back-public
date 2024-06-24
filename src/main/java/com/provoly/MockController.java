@@ -3,7 +3,10 @@ package com.provoly;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -12,10 +15,8 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
-import com.provoly.action.AskedService;
-import com.provoly.action.TodoAction;
 import com.provoly.event.*;
-import com.provoly.procedure.Procedure;
+import com.provoly.model.ProcedureModel;
 
 import io.quarkus.security.Authenticated;
 
@@ -41,19 +42,13 @@ public class MockController {
     public void mock(@DefaultValue("30") @Positive @RestQuery int eventNumber,
             @DefaultValue("10") @PositiveOrZero @RestQuery int procedureNumber) {
 
-        var procedures = new ArrayList<Procedure>();
         var epDomain = databaseReader.getDomainByCode("EP").get();
+        var vpDomain = databaseReader.getDomainByCode("VP").get();
 
         for (int i = 0; i < procedureNumber; i++) {
-            var action = new TodoAction(UUID.randomUUID(), randomInstant(), randomStatusDoneInProgress(),
-                    "todo no%s.0".formatted(i));
-            var action3 = new AskedService(UUID.randomUUID(), randomInstant(), randomStatusDoneInProgress(),
-                    "demande d'intervention n°%s".formatted(i));
-            var procedure = new Procedure("procédure n°%s".formatted(suffix(UUID.randomUUID())));
-            procedure.addAction(action);
-            procedure.addAction(action3);
-            procedures.add(procedure);
-            entityManager.persist(procedure);
+            var procedureModel = new ProcedureModel("modele de procédure n°%s".formatted(suffix(UUID.randomUUID())),
+                    "Agathe ThePower", "desc", randomDomain(List.of(epDomain, vpDomain)), List.of());
+            entityManager.persist(procedureModel);
         }
 
         for (int i = 0; i <= eventNumber; i++) {
@@ -84,21 +79,17 @@ public class MockController {
             event.setAddress(getAddress(i));
             event.setDescription("description of %s".formatted(event.getName()));
             event.setCriticality(randomCriticality());
-            event.setDomain(epDomain);
+            event.setDomain(randomDomain(List.of(epDomain, vpDomain)));
             entityManager.persist(event);
-
-            setProcedure(eventNumber, procedures, event);
             setStatus(event);
             setCloseDate(event);
         }
     }
 
     private void setStatus(Event event) {
-        if (event.getProcedure() != null) {
-            event.setStatus(randomStatusDoneInProgress());
-        } else {
-            event.setStatus(randomStatusNewDone());
-        }
+        var values = List.of(Status.NEW, Status.DONE);
+        var randomStatus = values.get(rand.nextInt(values.size()));
+        event.setStatus(randomStatus);
     }
 
     private void setCloseDate(Event event) {
@@ -113,10 +104,6 @@ public class MockController {
         return Instant.ofEpochSecond(rand.nextLong(date2 - date1) + date1);
     }
 
-    private String getName(String prefix, Integer id, int i) {
-        return "%s_%s no%s".formatted(prefix, id, i);
-    }
-
     private String getAddress(int i) {
         return "%s rue de Chalons".formatted(i);
     }
@@ -125,26 +112,13 @@ public class MockController {
         return id.toString().split("-")[0];
     }
 
-    private void setProcedure(int eventNumber, ArrayList<Procedure> procedures, Event event) {
-        if (eventNumber % 5 == 0 && !procedures.isEmpty()) {
-            var proc = procedures.get(rand.nextInt(procedures.size()));
-            event.setProcedure(proc);
-        }
-    }
-
-    private Status randomStatusDoneInProgress() {
-        var values = List.of(Status.IN_PROGRESS, Status.DONE);
-        return values.get(rand.nextInt(values.size()));
-    }
-
-    private Status randomStatusNewDone() {
-        var values = List.of(Status.NEW, Status.DONE);
-        return values.get(rand.nextInt(values.size()));
-    }
-
     private Criticality randomCriticality() {
         var values = Arrays.stream(Criticality.values()).toList();
         return values.get(rand.nextInt(values.size()));
+    }
+
+    private Domain randomDomain(List<Domain> domains) {
+        return domains.get(rand.nextInt(domains.size()));
     }
 
     private Category randomCategory(EventType type) {

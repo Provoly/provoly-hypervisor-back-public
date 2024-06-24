@@ -30,7 +30,8 @@ public class TestDataService {
     private EquipmentDatabaseReader equipmentDatabaseReader;
     private ServiceDatabaseReader serviceDatabaseReader;
     private Random rand = new Random();
-    public Procedure procedure1, procedure2, procedure3;
+    private Procedure procedure1, procedure2, procedure3;
+    private Event event1, doneEvent, associatedEvent;
     private Domain domainEP;
     private ServiceCategory prev;
     private ServiceCategory cura;
@@ -83,22 +84,18 @@ public class TestDataService {
 
         var asked1 = new AskedService(UUID.randomUUID(), Instant.now(), Status.IN_PROGRESS, "service 1");
         var asked2 = new AskedService(UUID.randomUUID(), Instant.now(), Status.NEW, "service 2");
-        var asked3 = new AskedService(UUID.randomUUID(), Instant.now(), Status.DONE, "service 3");
-        var asked4 = new AskedService(UUID.randomUUID(), Instant.now(), Status.IN_PROGRESS, "service 4");
-        var asked5 = new AskedService(UUID.randomUUID(), Instant.now(), Status.NEW, "service 5");
         var asked6 = new AskedService(UUID.randomUUID(), Instant.now(), Status.DONE, "service 6");
 
-        initOperatorEvent("operator1", Category.OPERATOR, Criticality.LOW, Status.NEW, equip1);
-        var event2 = initOperatorEvent("manfestation1", Category.MANIFESTATION, Criticality.MEDIUM, Status.IN_PROGRESS,
+        event1 = initOperatorEvent("operator1", Category.OPERATOR, Criticality.LOW, Status.NEW, equip1);
+        associatedEvent = initOperatorEvent("manfestation1", Category.MANIFESTATION, Criticality.MEDIUM, Status.IN_PROGRESS,
                 equip2);
         initReportEvent("report1", Criticality.LOW, Status.NEW, equip6);
         var event4 = initReportEvent("report2", Criticality.HIGH, Status.IN_PROGRESS, equip3);
-        var event5 = initReportEvent("report3", Criticality.MEDIUM, Status.DONE, equip6);
-        var event6 = initAlertEvent("malfunction1", Category.MALFUNCTION, Criticality.LOW, Status.NEW, equip4);
+        doneEvent = initReportEvent("report3", Criticality.MEDIUM, Status.DONE, equip6);
+        var event6 = initAlertEvent("malfunction1", Category.MALFUNCTION, Criticality.LOW, Status.IN_PROGRESS, equip4);
         initAlertEvent("limit1", Category.LIMIT, Criticality.LOW, Status.NEW, equip7);
 
-        procedure1 = initProcedure("procedure1", List.of(asked1, asked2), List.of(event2));
-        procedure2 = initProcedure("procedure2", List.of(asked3, asked4, asked5), List.of(event5));
+        procedure1 = initProcedure("procedure1", List.of(asked1, asked2), List.of(associatedEvent));
         procedure3 = initProcedure("procedure3", List.of(asked6), List.of(event4, event6));
 
         var procedureModel1 = new ProcedureModel("model", "flora", "desc", domainEP, List.of());
@@ -125,12 +122,24 @@ public class TestDataService {
         removeEntities(ProcedureModel.class);
     }
 
-    public Integer getProcedureId1() {
-        return procedure1.getId();
+    public Procedure getProcedure1() {
+        return procedure1;
     }
 
-    public Integer getProcedureId3() {
-        return procedure3.getId();
+    public Procedure getProcedure3() {
+        return procedure3;
+    }
+
+    public Event getEvent1() {
+        return event1;
+    }
+
+    public Event getDoneEvent() {
+        return doneEvent;
+    }
+
+    public Event getAssociatedEvent() {
+        return associatedEvent;
     }
 
     @Transactional
@@ -138,6 +147,19 @@ public class TestDataService {
         var service = new Service(UUID.randomUUID(), externalId, Instant.now(), Instant.now(), Instant.now(), Instant.now(),
                 closeDate, equip, domainEP, DONE, isCura ? cura : prev);
         em.persist(service);
+    }
+
+    @Transactional
+    public Procedure initProcedure(String name, List<AskedService> services, List<Event> events) {
+        var procedure = new Procedure(name, "desc");
+        for (var service : services) {
+            procedure.addAction(service);
+        }
+        for (var event : events) {
+            procedure.addEvent(event);
+        }
+        em.persist(procedure);
+        return procedure;
     }
 
     private Event initOperatorEvent(String name, Category category, Criticality criticality, Status status,
@@ -190,19 +212,6 @@ public class TestDataService {
             event.setEquipment(equipment);
         }
         return event;
-    }
-
-    @Transactional
-    public Procedure initProcedure(String name, List<AskedService> services, List<Event> events) {
-        var procedure = new Procedure(name);
-        for (var service : services) {
-            procedure.addAction(service);
-        }
-        for (var event : events) {
-            procedure.addEvent(event);
-        }
-        em.persist(procedure);
-        return procedure;
     }
 
     private Equipment initEquipment(String name, Family family, EquipmentEntity entity, City city, District district,
