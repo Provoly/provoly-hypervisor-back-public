@@ -9,7 +9,7 @@ create table family
 (
     id   bigint primary key,
     name varchar(50) unique not null,
-    code varchar(20) unique  not null
+    code varchar(20) unique not null
 );
 
 create table domain
@@ -23,35 +23,35 @@ create table service_category
 (
     id   bigint primary key,
     name varchar(50) unique not null,
-    code varchar(20) unique  not null
+    code varchar(20) unique not null
 );
 
 create table custom_action_type
 (
     id   bigint primary key,
     name varchar(50) unique not null,
-    code varchar(20) unique  not null
+    code varchar(20) unique not null
 );
 
 create table city
 (
     id   bigint primary key,
     name varchar(50) unique not null,
-    code varchar(20) unique  not null
+    code varchar(20) unique not null
 );
 
 create table district
 (
     id   bigint primary key,
     name varchar(50) unique not null,
-    code varchar(20) unique  not null
+    code varchar(20) unique not null
 );
 
 create table equipment
 (
     id                  uuid primary key,
-    external_id         varchar(50) unique not null,
-    name                varchar(50)        not null,
+    external_id         varchar(50) unique  not null,
+    name                varchar(50)         not null,
     code                varchar(200) unique not null,
     address             varchar(256)        not null,
     domain_id           bigint              not null references domain,
@@ -61,6 +61,7 @@ create table equipment
     equipment_entity_id bigint              not null references equipment_entity,
     attributes          jsonb default '{}',
     parent_id           uuid,
+    deleted             boolean default false,
     constraint fk_parent foreign key (parent_id) references equipment (id)
 );
 
@@ -83,7 +84,7 @@ create table service
 create table procedure
 (
     id                 serial primary key,
-    name               varchar(50) not null,
+    name               varchar(50)  not null,
     description        varchar(256) not null,
     creation_date      timestamptz           default current_timestamp,
     procedure_progress float        not null default 0
@@ -93,11 +94,11 @@ create table procedure_model
 (
     id                     serial primary key,
     name                   varchar(50) unique not null,
-    description            varchar(256)        not null,
-    creator                varchar(100)        not null,
-    creation_date          timestamptz                  default current_timestamp,
-    last_modification_date timestamptz                  default current_timestamp,
-    use_count              int                 not null default 0,
+    description            varchar(256)       not null,
+    creator                varchar(100)       not null,
+    creation_date          timestamptz                 default current_timestamp,
+    last_modification_date timestamptz                 default current_timestamp,
+    use_count              int                not null default 0,
     domain_id              bigint references domain
 );
 
@@ -129,7 +130,7 @@ create table other_action
 create table email_action
 (
     id    uuid primary key references action,
-    name  varchar(30) not null,
+    name  varchar(30)  not null,
     email varchar(100) not null
 );
 
@@ -138,7 +139,7 @@ create table phone_action
 (
     id     uuid primary key references action,
     name   varchar(30) not null,
-    number varchar(15)  not null
+    number varchar(15) not null
 );
 
 create table sms_action

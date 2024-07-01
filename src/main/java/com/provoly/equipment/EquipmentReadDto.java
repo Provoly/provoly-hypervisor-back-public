@@ -20,6 +20,7 @@ public record EquipmentReadDto(
         String city,
         String address,
         String district,
+        boolean deleted,
         Map<String, Object> attributes,
         EquipmentReadDto parent,
         Collection<ServiceReadDto> services,

@@ -49,6 +49,7 @@ public class EquipmentDatabaseReader extends DatabaseReader {
         Root<Equipment> root = criteriaQuery.from(Equipment.class);
 
         List<Predicate> predicates = new ArrayList<>();
+        predicates.add(builder.isFalse(root.get(Equipment_.deleted)));
 
         if (!entities.isEmpty()) {
             logger.debugf("filter on equipment entities %s", entities);

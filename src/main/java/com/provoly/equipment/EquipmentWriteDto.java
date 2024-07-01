@@ -19,6 +19,7 @@ public record EquipmentWriteDto(
         @NotNull String address,
         @NotNull String district,
         String parent,
+        boolean deleted,
         Map<String, Object> attributes) {
 
     public EquipmentWriteDto {

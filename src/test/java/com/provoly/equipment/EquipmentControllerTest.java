@@ -37,7 +37,7 @@ public class EquipmentControllerTest {
     @TestSecurity(user = "reader")
     void should_throw_forbidden_when_null_required_property() {
         // Given
-        var equipment = new EquipmentWriteDto(null, 0, null, null, null, null, null, "CH", "address", null, null, null);
+        var equipment = new EquipmentWriteDto(null, 0, null, null, null, null, null, "CH", "address", null, null, false, null);
 
         // When
         assertThatThrownBy(() -> equipmentController.saveOrUpdateEquipments(List.of(equipment)))

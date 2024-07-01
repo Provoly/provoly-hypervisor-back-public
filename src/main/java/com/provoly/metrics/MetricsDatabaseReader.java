@@ -130,6 +130,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
                 managed,
                 builder.count(equipment))
                 .where(builder.and(
+                        builder.isFalse(equipment.get(Equipment_.deleted)),
                         builder.equal(equipment.get(Equipment_.family), family),
                         builder.equal(equipment.get(Equipment_.domain), domain)))
                 .groupBy(entity.get(EquipmentEntity_.name), managed);

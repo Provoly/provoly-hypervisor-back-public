@@ -40,6 +40,7 @@ public class EquipmentMapper {
                 equipment.getCity().getCode(),
                 equipment.getAddress(),
                 equipment.getDistrict() != null ? equipment.getDistrict().getCode() : null,
+                equipment.isDeleted(),
                 equipment.getAttributes(),
                 mapToEquipmentReadDto(equipment.getParent()),
                 serviceMapper.mapToServiceReadDtos(equipment.getServices().stream()
@@ -62,6 +63,7 @@ public class EquipmentMapper {
         entity.setName(dto.name());
         entity.setCode(dto.code());
         entity.setAddress(dto.address());
+        entity.setDeleted(dto.deleted());
         entity.setEntity(mapToEntity(dto.entity()));
         entity.setFamily(mapToFamily(dto.family()));
         entity.setDomain(mapToDomain(dto.domain()));

@@ -22,7 +22,10 @@ public class Equipment {
     private String name;
 
     private String code;
+
     private String address;
+
+    private boolean deleted = false;
 
     @ManyToOne
     private Domain domain;
@@ -115,6 +118,14 @@ public class Equipment {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     public Domain getDomain() {
