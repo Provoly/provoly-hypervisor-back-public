@@ -1,6 +1,7 @@
 package com.provoly.action;
 
 import java.util.Collection;
+import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -45,6 +46,17 @@ public class ActionMapper {
                 yield new PhoneAction(action.getId(), action.getType(), action.getStatus(), dto.getName(), dto.getNumber());
             }
             default -> action;
+        };
+    }
+
+    public Action duplicateAction(Action action) {
+        return switch (action) {
+            case EmailAction a -> new EmailAction(a.getName(), a.getEmail());
+            case OtherAction a -> new OtherAction(a.getName());
+            case AskedService a -> new AskedService(a.getName(), a.getServiceExternalId());
+            case SmsAction a -> new SmsAction(UUID.randomUUID(), ActionType.SMS.name(), Status.NEW, a.getName(), a.getNumber());
+            case PhoneAction a -> new PhoneAction(a.getName(), a.getNumber());
+            default -> new Action(action.getType());
         };
     }
 }

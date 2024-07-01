@@ -2,6 +2,7 @@ package com.provoly.procedure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.inject.Inject;
@@ -9,7 +10,10 @@ import jakarta.inject.Inject;
 import com.provoly.TestDataService;
 import com.provoly.action.AskedService;
 import com.provoly.action.OtherAction;
+import com.provoly.action.dto.OtherActionWriteDto;
 import com.provoly.event.Status;
+import com.provoly.model.ProcedureModelService;
+import com.provoly.model.ProcedureModelWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
@@ -24,6 +28,9 @@ import org.junit.jupiter.api.TestInstance;
 public class ProcedureServiceTest {
     @Inject
     ProcedureService procedureService;
+
+    @Inject
+    ProcedureModelService procedureModelService;
 
     @Inject
     TestDataService dataService;
@@ -129,5 +136,25 @@ public class ProcedureServiceTest {
 
         //then
         assertThat(newEvent.getStatus()).isEqualTo(Status.IN_PROGRESS);
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_duplicate_action_when_associate_procedure_to_events() {
+        // given
+        var actionModelId = UUID.randomUUID();
+        var dto = new ProcedureModelWriteDto(null, "my model 6", "desc", "EP", "tecna",
+                List.of(new OtherActionWriteDto(actionModelId, "OTHER", Status.NEW, "other")));
+
+        var model = procedureModelService.saveProcedureModel(dto);
+        var event = dataService.getEvent1();
+        var procedureId = procedureModelService.associateProcedureModelToEvents(model.getId(), List.of(event.getId())).getId();
+
+        // when
+        var procedure = procedureService.getProcedureDetails(procedureId);
+
+        // then
+        assertThat(procedure.getActions()).hasSize(1);
+        assertThat(procedure.getActions().stream().toList().getFirst()).extracting("id").isNotEqualTo(actionModelId);
     }
 }

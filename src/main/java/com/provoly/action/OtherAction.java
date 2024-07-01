@@ -26,6 +26,11 @@ public class OtherAction extends Action {
         this.name = name;
     }
 
+    public OtherAction(String name) {
+        super(ActionType.OTHER.name());
+        this.name = name;
+    }
+
     public String getName() {
         return name;
     }

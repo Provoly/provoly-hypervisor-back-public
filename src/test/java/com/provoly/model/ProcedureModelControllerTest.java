@@ -114,7 +114,7 @@ public class ProcedureModelControllerTest {
 
     @Test
     @TestSecurity(user = "reader")
-    void should_udpate_procedure_model() {
+    void should_update_procedure_model() {
         // given
         var id = procedureModelController.getProceduresModel(1, 1, null, null, List.of(), "flora model2")
                 .stream()

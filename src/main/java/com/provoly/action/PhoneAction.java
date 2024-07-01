@@ -23,6 +23,12 @@ public class PhoneAction extends Action {
         this.number = number;
     }
 
+    public PhoneAction(String name, String number) {
+        super(ActionType.PHONE.name());
+        this.name = name;
+        this.number = number;
+    }
+
     public String getName() {
         return name;
     }

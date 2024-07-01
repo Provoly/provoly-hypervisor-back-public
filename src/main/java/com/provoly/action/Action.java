@@ -48,6 +48,13 @@ public class Action {
         this.status = status;
     }
 
+    protected Action(String type) {
+        this.id = UUID.randomUUID();
+        this.type = type;
+        this.status = Status.NEW;
+
+    }
+
     public void setId(UUID id) {
         this.id = id;
     }

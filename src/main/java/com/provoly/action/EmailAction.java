@@ -19,6 +19,12 @@ public class EmailAction extends Action {
         this.email = email;
     }
 
+    public EmailAction(String name, String email) {
+        super(ActionType.EMAIL.name());
+        this.name = name;
+        this.email = email;
+    }
+
     public String getName() {
         return name;
     }

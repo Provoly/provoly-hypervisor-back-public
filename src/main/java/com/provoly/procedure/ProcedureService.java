@@ -5,6 +5,7 @@ import java.util.stream.Stream;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
+import com.provoly.action.ActionMapper;
 import com.provoly.action.ActionService;
 import com.provoly.event.Event;
 import com.provoly.event.EventService;
@@ -18,13 +19,16 @@ public class ProcedureService {
     private final ProcedureDatabaseReader databaseReader;
     private final EventService eventService;
     private final ActionService actionService;
+    private final ActionMapper actionMapper;
     private final Logger logger;
 
     public ProcedureService(ProcedureDatabaseReader databaseReader, EventService eventService, ActionService actionService,
+            ActionMapper actionMapper,
             Logger logger) {
         this.databaseReader = databaseReader;
         this.eventService = eventService;
         this.actionService = actionService;
+        this.actionMapper = actionMapper;
         this.logger = logger;
     }
 
@@ -81,7 +85,7 @@ public class ProcedureService {
         events.forEach(procedure::addEvent);
 
         logger.debugf("Add actions to procedure");
-        model.getActions().forEach(procedure::addAction);
+        model.getActions().forEach(action -> procedure.addAction(actionMapper.duplicateAction(action)));
 
         databaseReader.saveProcedure(procedure);
         logger.debugf("Procedure %s is instantiated".formatted(procedure.getId()));

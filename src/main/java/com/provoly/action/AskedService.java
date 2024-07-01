@@ -29,6 +29,12 @@ public class AskedService extends Action {
         this.serviceExternalId = null;
     }
 
+    public AskedService(String name, String serviceExternalId) {
+        super(ActionType.ASKED_SERVICE.name());
+        this.name = name;
+        this.serviceExternalId = serviceExternalId;
+    }
+
     public String getName() {
         return name;
     }
