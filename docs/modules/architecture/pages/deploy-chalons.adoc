@@ -55,7 +55,7 @@ Créer un store de type Provoly dans le workspace "chalons"
 * Nom de la source de données : Provoly
 * uri_ref: http://data-ref:8080/
 * uri_virt: http://data-virt:8080/
-* sso_uri: https://sso.chalons-{environnment}.provoly.net/auth/realms/provoly
+* sso_uri: https://sso.chalons-\{environnment}.provoly.net/auth/realms/provoly
 * client_id: provoly
 * client_secret: dummy
 * user: iamsuperadmin

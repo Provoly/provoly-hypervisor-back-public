@@ -3,7 +3,7 @@ package com.provoly.procedure;
 import java.time.Instant;
 import java.util.Collection;
 
-import com.provoly.action.ActionReadDto;
+import com.provoly.action.dto.ActionReadDto;
 import com.provoly.event.dto.EventReadDto;
 
 public record ProcedureReadDto(

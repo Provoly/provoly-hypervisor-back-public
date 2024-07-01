@@ -3,6 +3,7 @@ package com.provoly.model;
 import java.util.Collection;
 import java.util.List;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -47,7 +48,7 @@ public class ProcedureModelController {
 
     @POST
     @Authenticated
-    public ProcedureModelReadDto saveProcedureModel(ProcedureModelWriteDto dto) {
+    public ProcedureModelReadDto saveProcedureModel(@Valid ProcedureModelWriteDto dto) {
         var model = procedureModelService.saveProcedureModel(dto);
         return procedureModelMapper.mapToProcedureReadDetailsDto(model);
     }
@@ -63,7 +64,7 @@ public class ProcedureModelController {
     @Path("/id/{id}")
     @PUT
     @Authenticated
-    public void updateProcedureModel(Integer id, ProcedureModelWriteDto dto) {
+    public void updateProcedureModel(Integer id, @Valid ProcedureModelWriteDto dto) {
         procedureModelService.updateProcedureModel(id, dto);
     }
 

@@ -3,10 +3,11 @@ package com.provoly.model;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-import com.provoly.action.ActionWriteDto;
+import com.provoly.action.dto.ActionWriteDto;
 
 public record ProcedureModelWriteDto(
         Integer id,
@@ -14,7 +15,7 @@ public record ProcedureModelWriteDto(
         @NotNull String description,
         @NotNull String domain,
         @NotNull String creator,
-        Collection<ActionWriteDto> actions) {
+        @Valid Collection<ActionWriteDto> actions) {
 
     public ProcedureModelWriteDto {
         if (actions == null) {

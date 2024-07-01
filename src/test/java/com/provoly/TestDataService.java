@@ -82,9 +82,9 @@ public class TestDataService {
 
         em.persist(service2);
 
-        var asked1 = new AskedService(UUID.randomUUID(), Instant.now(), Status.IN_PROGRESS, "service 1");
-        var asked2 = new AskedService(UUID.randomUUID(), Instant.now(), Status.NEW, "service 2");
-        var asked6 = new AskedService(UUID.randomUUID(), Instant.now(), Status.DONE, "service 6");
+        var asked1 = new AskedService(UUID.randomUUID(), Status.IN_PROGRESS, "service 1");
+        var asked2 = new AskedService(UUID.randomUUID(), Status.NEW, "service 2");
+        var asked6 = new AskedService(UUID.randomUUID(), Status.DONE, "service 6");
 
         event1 = initOperatorEvent("operator1", Category.OPERATOR, Criticality.LOW, Status.NEW, equip1);
         associatedEvent = initOperatorEvent("manfestation1", Category.MANIFESTATION, Criticality.MEDIUM, Status.IN_PROGRESS,

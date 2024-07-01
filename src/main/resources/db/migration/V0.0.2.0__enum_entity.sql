@@ -6,13 +6,15 @@ insert into domain (id,name,code) values (5, 'Patrimoine','PAT');
 insert into domain (id,name,code) values (6, 'Stationnement et mobilité','MOB');
 insert into domain (id,name,code) values (7, 'Cadre de vie','CDV');
 
-
-insert into family (id,name,code) values (1,'Armoire','EP_ARMOIRE'); -- TODO: rename code into ARMOIRE-EP
-insert into family (id,name,code) values (2,'Foyer Lumineux','EP_FOYER_LUMINEUX'); -- TODO: rename code into FOYER-LUMINEUX
-insert into family (id,name,code) values (3,'Ouvrage','EP_OUVRAGE'); -- TODO -- rename code into OUVRAGE-EP
+insert into family (id,name,code) values (1,'Armoire','EP_ARMOIRE');
+insert into family (id,name,code) values (2,'Foyer Lumineux','EP_FOYER_LUMINEUX');
+insert into family (id,name,code) values (3,'Ouvrage','EP_OUVRAGE');
 
 insert into service_category (id,name,code) values (1,'Préventive','PREV');
 insert into service_category (id,name,code) values (2,'Curative','CURA');
+
+insert into custom_action_type (id,name,code) values (1,'Appeler le CSU','CSU');
+insert into custom_action_type (id,name,code) values (2,'Levée de doute','DOUTE');
 
 insert into equipment_entity (id,code,name) values (1,'COMMUN', 'COMMUN');
 insert into equipment_entity (id,code,name) values (2,'CHALONS_COMMUN', 'CHALONS_COMMUN');
@@ -39,17 +41,17 @@ insert into equipment_entity (id,code,name) values (22,'GE_AXIMUM_SLT', 'GE_AXIM
 
 
 insert into city (id,code,name) values (1,'CH', 'Châlons en Champagne');
-insert into city (id,code,name) values (2,'CHA', 'Châlons Agglo');
-insert into city (id,code,name) values (3,'CONDE', 'Condé sur Marne');
-insert into city (id,code,name) values (4,'DAMP', 'Dampierre au Temple');
+insert into city (id,code,name) values (2,'CHA', 'Châlons Agglo'); -- TODO: remove
+insert into city (id,code,name) values (3,'CONDE', 'Condé sur Marne'); -- TODO: remove
+insert into city (id,code,name) values (4,'DAMP', 'Dampierre au Temple'); -- TODO: remove
 insert into city (id,code,name) values (5,'FAGN', 'Fagnières');
-insert into city (id,code,name) values (6,'HAUSS', 'Haussimont');
-insert into city (id,code,name) values (7,'JAL', 'Jâlons');
-insert into city (id,code,name) values (8,'MAT', 'Matougues');
+insert into city (id,code,name) values (6,'HAUSS', 'Haussimont'); -- TODO: remove
+insert into city (id,code,name) values (7,'JAL', 'Jâlons'); -- TODO: remove
+insert into city (id,code,name) values (8,'MAT', 'Matougues'); -- TODO: remove
 insert into city (id,code,name) values (9,'MOUR', 'Mourmelon le Grand');
 insert into city (id,code,name) values (10,'SMP', 'Saint Martin-sur-le-Pré');
-insert into city (id,code,name) values (11,'SMS', 'Sommesous');
-insert into city (id,code,name) values (12,'VRA', 'Vraux');
+insert into city (id,code,name) values (11,'SMS', 'Sommesous'); -- TODO: remove
+insert into city (id,code,name) values (12,'VRA', 'Vraux'); -- TODO: remove
 
 insert into district (id,code,name) values (1,'CH_C', 'Centre');
 insert into district (id,code,name) values (2,'CH_CD', 'Croix Dampierre'); -- TODO: remove
@@ -64,3 +66,11 @@ insert into district (id,code,name) values (10,'CH_VER', 'Verbeau');
 insert into district (id,code,name) values (11,'FAGN', 'Fagnières');
 insert into district (id,code,name) values (12,'SMP', 'Saint Martin-sur-le-Pré');
 -- TODO: insert new Districts and remove unused city and distrcits
+-- TODO: insert city and remove unused city :
+/*Baconnes BACONNES
+Les Grandes Loges GRD-LOGES
+Sarry SARRY
+Saint-Memmie STM
+Recy RECY
+Compertrix COMPERTRIX
+Coolus COOLUS*/

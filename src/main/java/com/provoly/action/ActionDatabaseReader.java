@@ -1,31 +1,43 @@
 package com.provoly.action;
 
-import java.util.*;
+import java.util.Optional;
+import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 import com.provoly.DatabaseReader;
 
-import org.jboss.logging.Logger;
-
 @ApplicationScoped
 public class ActionDatabaseReader extends DatabaseReader {
-    private final Logger logger;
 
-    protected ActionDatabaseReader(EntityManager em, Logger logger) {
+    protected ActionDatabaseReader(EntityManager em) {
         super(em);
-        this.logger = logger;
     }
 
     public Optional<Action> getActionById(UUID id) {
         var action = em.find(Action.class, id);
-        return Optional.of(action);
+        return Optional.ofNullable(action);
     }
 
-    public boolean isActionWithIdExists(UUID id) {
-        return em.find(Action.class, id) != null;
+    public void saveAction(Action action) {
+        em.persist(action);
+    }
+
+    public boolean isCustomActionType(String type) {
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<CustomActionType> criteriaQuery = builder.createQuery(CustomActionType.class);
+        Root<CustomActionType> root = criteriaQuery.from(CustomActionType.class);
+
+        var query = criteriaQuery.select(root)
+                .where(builder.equal(root.get(CustomActionType_.code), type));
+
+        return em.createQuery(query)
+                .getResultStream()
+                .findFirst()
+                .isPresent();
     }
 
 }

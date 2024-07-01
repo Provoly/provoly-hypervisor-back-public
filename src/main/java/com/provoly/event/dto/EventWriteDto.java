@@ -21,29 +21,29 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = OperatorEventWriteDto.class, name = "OPERATOR"),
 })
 public abstract class EventWriteDto {
-    private Integer id;
+    private final Integer id;
 
     @NotNull
     @NotBlank
-    private String name;
+    private final String name;
 
     @NotNull
     @NotBlank
-    private String description;
+    private final String description;
 
     @NotNull
-    private Criticality criticality;
+    private final Criticality criticality;
 
     @NotNull
     protected Category category;
 
-    private String address;
+    private final String address;
 
-    private UUID equipmentId;
+    private final UUID equipmentId;
 
-    private EventType type;
+    private final EventType type;
 
-    private String domain;
+    private final String domain;
 
     protected EventWriteDto(Integer id, String name, String description, Criticality criticality, Category category,
             String address, UUID equipmentId,

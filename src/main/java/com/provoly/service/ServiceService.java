@@ -31,7 +31,7 @@ public class ServiceService {
         logger.infof("Save or update %s services", dtos.size());
         dtos
                 .forEach(dto -> {
-                    checkStartAndCloseDatePresence(dto);
+                    checkStartAndEndDatePresence(dto);
                     checkCloseDatePresence(dto);
                     databaseReader.getServiceWithExternalId(dto.id())
                             .ifPresentOrElse(
@@ -63,7 +63,7 @@ public class ServiceService {
 
     }
 
-    private void checkStartAndCloseDatePresence(ServiceWriteDto dto) {
+    private void checkStartAndEndDatePresence(ServiceWriteDto dto) {
         if (dto.status().getPriority() > 1 && (dto.startDate() == null || dto.endDate() == null)) {
             throw new IllegalArgumentException(
                     "Cannot save or update service with status %s without startDate or endDate"
@@ -81,5 +81,11 @@ public class ServiceService {
     @Transactional
     public Stream<Service> getServices() {
         return databaseReader.getAllServices();
+    }
+
+    @Transactional
+    public Service getServiceByExternalId(String externalId) {
+        return databaseReader.getServiceWithExternalId(externalId)
+                .orElseThrow(() -> new IllegalArgumentException("Service with external id %s invalid".formatted(externalId)));
     }
 }

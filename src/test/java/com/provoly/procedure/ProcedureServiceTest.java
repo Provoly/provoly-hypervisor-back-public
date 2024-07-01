@@ -1,24 +1,19 @@
 package com.provoly.procedure;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
-import com.provoly.model.ProcedureModelWriteDto;
-import io.quarkus.test.security.TestSecurity;
 import jakarta.inject.Inject;
 
 import com.provoly.TestDataService;
 import com.provoly.action.AskedService;
-import com.provoly.action.TodoAction;
+import com.provoly.action.OtherAction;
 import com.provoly.event.Status;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 
-import jakarta.ws.rs.ForbiddenException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -46,8 +41,8 @@ public class ProcedureServiceTest {
     @Test
     void procedure_progress_action_should_return_half_terminated() {
         // given
-        var intervention = new AskedService(UUID.randomUUID(), Instant.now(), Status.NEW, "my_intervention");
-        var todo = new TodoAction(UUID.randomUUID(), Instant.now(), Status.DONE, "my_todo");
+        var intervention = new AskedService(UUID.randomUUID(), Status.NEW, "my_intervention");
+        var todo = new OtherAction(UUID.randomUUID(), Status.DONE, "other action");
 
         Procedure procedure = new Procedure("my_procedure", "desc");
         procedure.addAction(intervention);
@@ -63,9 +58,9 @@ public class ProcedureServiceTest {
     @Test
     void procedure_progress_action_should_return_parsed_long() {
         // given
-        var intervention = new AskedService(UUID.randomUUID(), Instant.now(), Status.NEW, "my_intervention");
-        var intervention2 = new AskedService(UUID.randomUUID(), Instant.now(), Status.NEW, "my_intervention2");
-        var todo = new TodoAction(UUID.randomUUID(), Instant.now(), Status.DONE, "my_todo");
+        var intervention = new AskedService(UUID.randomUUID(), Status.NEW, "my_intervention");
+        var intervention2 = new AskedService(UUID.randomUUID(), Status.NEW, "my_intervention2");
+        var todo = new OtherAction(UUID.randomUUID(), Status.DONE, "other action");
 
         Procedure procedure = new Procedure("my_procedure", "desc");
         procedure.addAction(intervention);
@@ -94,9 +89,9 @@ public class ProcedureServiceTest {
     @Test
     void procedure_progress_action_should_return_none_when_only_no_done_actions() {
         // given
-        var intervention = new AskedService(UUID.randomUUID(), Instant.now(), Status.IN_PROGRESS,
+        var intervention = new AskedService(UUID.randomUUID(), Status.IN_PROGRESS,
                 "my_intervention");
-        var todo = new TodoAction(UUID.randomUUID(), Instant.now(), Status.NEW, "my_todo");
+        var todo = new OtherAction(UUID.randomUUID(), Status.NEW, "other action");
 
         Procedure procedure = new Procedure("my_procedure", "desc");
         procedure.addAction(intervention);

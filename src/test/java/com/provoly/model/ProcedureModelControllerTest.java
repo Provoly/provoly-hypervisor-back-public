@@ -3,13 +3,16 @@ package com.provoly.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ForbiddenException;
 
 import com.provoly.TestDataService;
+import com.provoly.action.dto.ActionWriteDto;
+import com.provoly.action.dto.OtherActionWriteDto;
+import com.provoly.action.dto.PhoneActionWriteDto;
+import com.provoly.event.Status;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
@@ -177,6 +180,32 @@ public class ProcedureModelControllerTest {
 
         // then
         assertThat(model.useCount()).isEqualTo(1);
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_update_actions_order_in_procedure() {
+        // given
+        List<ActionWriteDto> actions = new ArrayList<>(List.of(
+                new OtherActionWriteDto(UUID.randomUUID(), "OTHER", Status.NEW, "other"),
+                new PhoneActionWriteDto(UUID.randomUUID(), "SMS", Status.NEW, "toto", "0102030405")));
+        ProcedureModelWriteDto dto = new ProcedureModelWriteDto(
+                null,
+                "new procedure maintenance",
+                "desc",
+                "EP",
+                "leila",
+                actions);
+        var procedureId = procedureModelController.saveProcedureModel(dto).id();
+
+        // when
+        Collections.reverse(actions);
+        procedureModelController.updateProcedureModel(procedureId, dto);
+        var updatedModel = procedureModelController.getProcedureModelDetails(procedureId);
+
+        // then
+        assertThat(updatedModel.actions()).extracting("type").containsExactly("SMS", "OTHER");
+
     }
 
 }

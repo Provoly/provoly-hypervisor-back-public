@@ -3,15 +3,20 @@ package com.provoly.procedure;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolationException;
 
 import com.provoly.TestDataService;
+import com.provoly.action.dto.ActionWriteDto;
+import com.provoly.action.dto.EmailActionWriteDto;
+import com.provoly.action.dto.OtherActionWriteDto;
+import com.provoly.action.dto.PhoneActionWriteDto;
 import com.provoly.event.Category;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventController;
+import com.provoly.event.Status;
 import com.provoly.event.dto.ReportEventWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -93,7 +98,8 @@ public class ProcedureControllerTest {
                 procedureId,
                 "procedure maintenance",
                 "desc",
-                List.of(reportDto));
+                List.of(reportDto),
+                List.of());
 
         // when
         procedureController.updateProcedure(procedureId, dto);
@@ -104,5 +110,77 @@ public class ProcedureControllerTest {
                 .extracting("name", "address")
                 .containsExactly("Maintenance ouvrage updated", "new address");
 
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_throw_action_invalid_email() {
+        // given
+        Integer procedureId = dataService.getProcedure3().getId();
+        ProcedureWriteDto dto = new ProcedureWriteDto(
+                procedureId,
+                "procedure maintenance",
+                "desc",
+                List.of(),
+                List.of(new EmailActionWriteDto(UUID.randomUUID(), "EMAIL", Status.NEW, "toto", "invalid@")));
+
+        // when
+        assertThatThrownBy(() -> procedureController.updateProcedure(procedureId, dto))
+                .isInstanceOf(ConstraintViolationException.class)
+                .hasMessageContaining("must be a well-formed email address");
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_throw_action_invalid_number() {
+        // given
+        Integer procedureId = dataService.getProcedure3().getId();
+        ProcedureWriteDto dto = new ProcedureWriteDto(
+                procedureId,
+                "procedure maintenance",
+                "desc",
+                List.of(),
+                List.of(new PhoneActionWriteDto(UUID.randomUUID(), "SMS", Status.NEW, "toto", "toto")));
+
+        // when
+        assertThatThrownBy(() -> procedureController.updateProcedure(procedureId, dto))
+                .isInstanceOf(ConstraintViolationException.class)
+                .hasMessageContaining("'number' must match ");
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_throw_action_invalid_type() {
+        // given
+        Integer procedureId = dataService.getProcedure3().getId();
+        ProcedureWriteDto dto = new ProcedureWriteDto(
+                procedureId,
+                "procedure maintenance",
+                "desc",
+                List.of(),
+                List.of(new ActionWriteDto(UUID.randomUUID(), "TOTO", Status.NEW)));
+
+        // when
+        assertThatThrownBy(() -> procedureController.updateProcedure(procedureId, dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Invalid action type");
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_throw_action_invalid_property() {
+        // given
+        Integer procedureId = dataService.getProcedure3().getId();
+        ProcedureWriteDto dto = new ProcedureWriteDto(
+                procedureId,
+                "procedure maintenance",
+                "desc",
+                List.of(),
+                List.of(new OtherActionWriteDto(UUID.randomUUID(), "OTHER", Status.NEW, null)));
+
+        // when
+        assertThatThrownBy(() -> procedureController.updateProcedure(procedureId, dto))
+                .isInstanceOf(ConstraintViolationException.class)
+                .hasMessageContaining("name: must not be null");
     }
 }

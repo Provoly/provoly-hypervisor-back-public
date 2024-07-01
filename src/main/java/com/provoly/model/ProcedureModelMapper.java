@@ -2,20 +2,19 @@ package com.provoly.model;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
-import com.provoly.action.ActionDatabaseReader;
 import com.provoly.action.ActionMapper;
-import com.provoly.action.AskedService;
 import com.provoly.event.Domain;
 
 @ApplicationScoped
 public class ProcedureModelMapper {
 
     private final ActionMapper actionMapper;
-    private final ActionDatabaseReader actionDatabaseReader;
+    private final ProcedureModelDatabaseReader databaseReader;
 
-    public ProcedureModelMapper(ActionMapper actionMapper, ActionDatabaseReader actionDatabaseReader) {
+    public ProcedureModelMapper(ActionMapper actionMapper,
+            ProcedureModelDatabaseReader databaseReader) {
         this.actionMapper = actionMapper;
-        this.actionDatabaseReader = actionDatabaseReader;
+        this.databaseReader = databaseReader;
     }
 
     public ProcedureModelReadDto mapToProcedureReadDetailsDto(ProcedureModel model) {
@@ -35,15 +34,11 @@ public class ProcedureModelMapper {
         entity.setName(dto.name());
         entity.setDescription(dto.description());
         entity.setDomain(mapToDomain(dto.domain()));
-        for (var dtoAction : dto.actions()) {
-            actionDatabaseReader.getActionById(dtoAction.id()).ifPresentOrElse(
-                    action -> actionMapper.updateAction(action, dtoAction),
-                    () -> actionMapper.updateAction(new AskedService(dtoAction.id()), dtoAction));
-        }
+
     }
 
     private Domain mapToDomain(String domain) {
-        return actionDatabaseReader
+        return databaseReader
                 .getDomainByCode(domain)
                 .orElseThrow(() -> new IllegalArgumentException("Domain name %s not found".formatted(domain)));
     }

@@ -556,10 +556,18 @@ paths:
                         "creator": "eliott",
                         "domain": "EP",
                         "useCount": 4,
-                        "actions": []
+                        "actions": [
+                          {
+                            "id": "e9f9246d-7fef-4339-92f4-50335c9ca097",
+                            "type": "OTHER",
+                            "status": "NEW",
+                            "lastModificationDate": "2024-06-28T06:16:36.421040Z",
+                            "name": "other"
+                          }
+                        ]
                       },
                       {
-                        "id": 1,
+                        "id": 2,
                         "name": "procedure model 4",
                         "description": "description",
                         "creationDate": "2024-06-20T07:39:35.555495Z",
@@ -567,7 +575,15 @@ paths:
                         "creator": "laura",
                         "domain": "EP",
                         "useCount": 0,
-                        "actions": [ ]
+                        "actions": [
+                          {
+                            "id": "e81eebe9-599c-41f9-bb70-bb4c34a3d744",
+                            "type": "OTHER",
+                            "status": "NEW",
+                            "lastModificationDate": "2024-06-28T06:16:36.426601Z",
+                            "name": "other2"
+                          }
+                        ]
                       }
                     ]
 
@@ -582,6 +598,9 @@ paths:
       tags:
         - Procedure Model Controller
       summary: Save a procedure model
+      description: |
+        Save a procedure model and it's actions. Default actions types are `EMAIL`, `PHONE`, `SMS`, `ASKED_SERVICE` and `OTHER`.
+        It's possible to insert custom action types that will not have specific properties.
       operationId: com.provoly.event.ProcedureModelController_saveProcedureModel
       requestBody:
         content:
@@ -596,7 +615,36 @@ paths:
                     "name": "model de procedure test",
                     "description": "description",
                     "creator": "billie",
-                    "domain": "EP"
+                    "domain": "EP",
+                    "actions": [
+                      {
+                        "id": "f3a43a98-1d86-4ba5-84a8-7c3462786f63",
+                        "type": "EMAIL",
+                        "name": "toto",
+                        "email": "toto"
+                      },
+                      {
+                        "id": "28c017db-cb9a-4cc1-a1a4-f9be0a88dc94",
+                        "type": "CSU"
+                      },
+                      {
+                        "id": "e9f9246d-7fef-4339-92f4-50335c9ca097",
+                        "type": "OTHER",
+                        "name": "other action"
+                      },
+                      {
+                        "id": "5977b943-7612-46a2-a983-ac32785e9a84",
+                        "type": "PHONE",
+                        "name": "tutu",
+                        "phone": "0102030405"
+                      },
+                      {
+                        "id": "31de7845-4cce-4d2a-b001-84f534efcace",
+                        "type": "SMS",
+                        "name": "titi",
+                        "phone": "0102030405"
+                      }
+                    ]
                   }
       responses:
         "201":
@@ -669,7 +717,24 @@ paths:
                       "creator": "Jean Dupont",
                       "domain": "VP",
                       "useCount": 0,
-                      "actions": []
+                      "actions": [
+                        {
+                          "id": "5977b943-7612-46a2-a983-ac32785e9a84",
+                          "type": "PHONE",
+                          "status": "DONE",
+                          "lastModificationDate": "2024-06-28T06:16:36.432234Z",
+                          "name": "tutu",
+                          "phone": "0102030405"
+                        },
+                        {
+                          "id": "31de7845-4cce-4d2a-b001-84f534efcace",
+                          "type": "SMS",
+                          "status": "NEW",
+                          "lastModificationDate": "2024-06-28T06:16:36.441100Z",
+                          "name": "titi",
+                          "phone": "0102030405"
+                        }
+                      ]
                     }
       security:
         - oidc:
@@ -678,6 +743,7 @@ paths:
       tags:
         - Procedure Model Controller
       summary: Update procedure model
+      description: It's possible to update every properties, even actions order. But `creator` must be the same.
       operationId: com.provoly.procedure.ProcedureModelController_updateProcedureModel
       parameters:
         - name: id
@@ -699,13 +765,30 @@ paths:
                     "name": "model de procedure updated",
                     "description": "description",
                     "creator": "toto",
-                    "domain": "VP"
+                    "domain": "VP",
+                    "actions": [
+                        {
+                          "id": "5977b943-7612-46a2-a983-ac32785e9a84",
+                          "type": "ASKED_SERVICE",
+                          "name": "my service"
+                        },
+                        {
+                          "id": "31de7845-4cce-4d2a-b001-84f534efcace",
+                          "type": "SMS",
+                          "name": "thierry",
+                          "phone": "0000000000"
+                        }
+                      ]
                   }
       responses:
         "204":
           description: Updated
         "400":
-          description: Bad Request
+          description: |
+            - Invalid domain/action type 
+            - Name already exists 
+            - Action id already exists 
+            - `creator` must be unchanged
         "401":
           description: Not Authorized
       security:
@@ -793,19 +876,22 @@ paths:
                       "creationDate": "2024-02-23T12:56:00.802501Z",
                       "actions": [
                         {
-                          "id": "6b5ca865-87e5-467b-a996-4c0629e8f94c",
-                          "name": "intervention procedure_2",
-                          "type": "INTERVENTION_REQUEST",
+                          "id": "f3a43a98-1d86-4ba5-84a8-7c3462786f63",
+                          "type": "EMAIL",
                           "status": "IN_PROGRESS",
-                          "lastModificationDate": "2024-02-23T12:56:00.802501Z"
+                          "lastModificationDate": "2024-06-28T06:16:36.404574Z",
+                          "name": "toto",
+                          "email": "toto"
                         },
                         {
-                          "id": "a08e2110-3a9c-4f77-bf65-31150201bbfa",
-                          "name": "intervention procedure_2 bis",
-                          "type": "INTERVENTION_REQUEST",
+                          "id": "f3a43a98-1d86-4ba5-84a8-7c3462786f64",
+                          "type": "PHONE",
                           "status": "DONE",
-                          "lastModificationDate": "2024-02-23T12:56:00.802501Z"
+                          "lastModificationDate": "2024-06-28T06:16:36.404574Z",
+                          "name": "tutu",
+                          "email": "1111111111"
                         }
+                      
                       ],
                       "events": [
                         {
@@ -855,7 +941,7 @@ paths:
     put:
       tags:
         - Procedure Controller
-      summary: Update events procedure
+      summary: Update events and actions procedure
       operationId: com.provoly.procedure.ProcedureController_updateProcedure
       parameters:
         - name: id
@@ -876,6 +962,19 @@ paths:
                   {
                     "id": 3,
                     "name": "procedure_1",
+                    "actions": [
+                      {
+                        "id": "5977b943-7612-46a2-a983-ac32785e9a84",
+                        "type": "ASKED_SERVICE",
+                        "name": "my service"
+                      },
+                      {
+                        "id": "31de7845-4cce-4d2a-b001-84f534efcace",
+                        "type": "SMS",
+                        "name": "thierry",
+                        "phone": "0000000000"
+                      }
+                    ],
                     "events": [
                       {
                         "id": 2,
@@ -1332,6 +1431,7 @@ paths:
           description: Not Authorized
         "200":
           content:
+            description: Returns Equipment wiht event
             application/json:
               schema:
                 $ref: '#/components/schemas/EquipmentWithEventDto'
@@ -1515,6 +1615,15 @@ components:
         - ALERT
         - OPERATOR
         - REPORT
+    ActionType:
+      type: string
+      required: true
+      enum:
+        - SMS
+        - PHONE
+        - EMAIL
+        - ASKED_SERVICE
+        - ORDER
     OperatorCategory:
       type: string
       required: true
@@ -1557,7 +1666,7 @@ components:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/UUID'
+          type: integer
         name:
           type: string
         code:
@@ -1566,7 +1675,14 @@ components:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/UUID'
+          type: integer
+        name:
+          type: string
+    CustomActionType:
+      type: object
+      properties:
+        id:
+          type: integer
         name:
           type: string
     ServiceWriteDto:
@@ -1724,8 +1840,17 @@ components:
         id:
           $ref: '#/components/schemas/UUID'
           required: true
-        name:
+        type:
           type: string
+          required: true
+        status:
+          $ref: '#/components/schemas/Status'
+          required: true
+    EmailActionWriteDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
           required: true
         type:
           type: string
@@ -1733,19 +1858,137 @@ components:
         status:
           $ref: '#/components/schemas/Status'
           required: true
+        name:
+          type: string
+          required: true
+        email:
+          type: string
+          required: true
+    PhoneActionWriteDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+          required: true
+        type:
+          type: string
+          required: true
+        status:
+          $ref: '#/components/schemas/Status'
+          required: true
+        name:
+          type: string
+          required: true
+        phone:
+          type: string
+          required: true
+    OtherActionWriteDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+          required: true
+        type:
+          type: string
+          required: true
+        status:
+          $ref: '#/components/schemas/Status'
+          required: true
+        name:
+          type: string
+          required: true
+    AskedServiceWriteDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+          required: true
+        type:
+          type: string
+          required: true
+        status:
+          $ref: '#/components/schemas/Status'
+          required: true
+        name:
+          type: string
+          required: true
+        externalServiceId:
+          type: string
     ActionReadDto:
       type: object
       properties:
         id:
           $ref: '#/components/schemas/UUID'
-        name:
-          type: string
         type:
           type: string
         status:
           $ref: '#/components/schemas/Status'
         lastModificationDate:
           $ref: '#/components/schemas/DateTime'
+    EmailActionReadDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        type:
+          type: string
+        status:
+          $ref: '#/components/schemas/Status'
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+        name:
+          type: string
+          required: true
+        email:
+          type: string
+          required: true
+    PhoneActionReadDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        type:
+          type: string
+        status:
+          $ref: '#/components/schemas/Status'
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+        name:
+          type: string
+          required: true
+        phone:
+          type: string
+          required: true
+    OtherActionReadDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        type:
+          type: string
+        status:
+          $ref: '#/components/schemas/Status'
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+        name:
+          type: string
+          required: true
+    AskedServiceReadDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        type:
+          type: string
+        status:
+          $ref: '#/components/schemas/Status'
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+        name:
+          type: string
+          required: true
+        externalServiceId:
+          type: string
     OperatorEventWriteDto:
       type: object
       properties:

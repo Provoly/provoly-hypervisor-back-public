@@ -11,10 +11,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
 import com.provoly.EquipmentEnrichedProducer;
+import com.provoly.action.ActionType;
+import com.provoly.action.AskedService;
 import com.provoly.equipment.Equipment;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.event.dto.*;
 import com.provoly.service.Service;
+import com.provoly.service.ServiceService;
 
 import org.jboss.logging.Logger;
 
@@ -24,15 +27,18 @@ public class EventService {
     private final EventDatabaseReader databaseReader;
     private final EventMapper eventMapper;
     private final EquipmentService equipmentService;
+    private final ServiceService serviceService;
     private final EquipmentEnrichedProducer equipmentEnrichedProducer;
     private final Logger logger;
 
     public EventService(EventDatabaseReader databaseReader, EventMapper eventMapper, EquipmentService equipmentService,
+            ServiceService serviceService,
             EquipmentEnrichedProducer equipmentEnrichedProducer,
             Logger logger) {
         this.databaseReader = databaseReader;
         this.eventMapper = eventMapper;
         this.equipmentService = equipmentService;
+        this.serviceService = serviceService;
         this.equipmentEnrichedProducer = equipmentEnrichedProducer;
         this.logger = logger;
     }
@@ -269,8 +275,15 @@ public class EventService {
     }
 
     private Collection<Service> getServicesFromProcedureAndEquipment(Event event) {
-        //var procedureServices = getProcedureServices(event); // TODO: only possible if AskedServiceReference a Service
-        return event.getEquipment() == null ? List.of() : event.getEquipment().getServices();
+        var procedureServices = getProcedureServices(event);
+
+        procedureServices.addAll(event.getEquipment() == null
+                ? List.of()
+                : event.getEquipment().getServices());
+
+        return procedureServices.stream()
+                .distinct()
+                .toList();
     }
 
     private String getLastInProgressOrAskedService(Collection<Service> services) {
@@ -281,17 +294,18 @@ public class EventService {
                 .orElse(null);
     }
 
-    //    private ArrayList<Service> getProcedureServices(Event event) {
-    //        return event.getProcedure() == null
-    //                ? new ArrayList<>()
-    //                : new ArrayList<>(event
-    //                        .getProcedure()
-    //                        .getActions()
-    //                        .stream()
-    //                        .filter(action -> action.getType() == ActionType.ASKED_SERVICE)
-    //                        .map(action -> ((AskedService) action).getService()) ?
-    //                        .toList());
-    //    }
+    private ArrayList<Service> getProcedureServices(Event event) {
+        return event.getProcedure() == null
+                ? new ArrayList<>()
+                : new ArrayList<>(event
+                        .getProcedure()
+                        .getActions()
+                        .stream()
+                        .filter(action -> action.getType().equals(ActionType.ASKED_SERVICE.name())
+                                && ((AskedService) action).getServiceExternalId() != null)
+                        .map(action -> serviceService.getServiceByExternalId(((AskedService) action).getServiceExternalId()))
+                        .toList());
+    }
 
     private Comparator<Service> compareByStatusThenLastDate() {
         Comparator<Service> compareByStatusThenReversedDate = Comparator

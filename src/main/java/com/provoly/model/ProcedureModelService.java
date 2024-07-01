@@ -9,6 +9,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.ForbiddenException;
 
+import com.provoly.action.ActionService;
+import com.provoly.action.dto.ActionWriteDto;
 import com.provoly.event.Event;
 import com.provoly.event.EventService;
 import com.provoly.event.SortOrder;
@@ -25,14 +27,17 @@ public class ProcedureModelService {
     private final ProcedureModelMapper procedureModelMapper;
     private final ProcedureService procedureService;
     private final EventService eventService;
+    private final ActionService actionService;
 
     public ProcedureModelService(Logger logger, ProcedureModelDatabaseReader databaseReader,
-            ProcedureModelMapper procedureModelMapper, ProcedureService procedureService, EventService eventService) {
+            ProcedureModelMapper procedureModelMapper, ProcedureService procedureService, EventService eventService,
+            ActionService actionService) {
         this.logger = logger;
         this.databaseReader = databaseReader;
         this.procedureModelMapper = procedureModelMapper;
         this.procedureService = procedureService;
         this.eventService = eventService;
+        this.actionService = actionService;
     }
 
     @Transactional
@@ -78,6 +83,9 @@ public class ProcedureModelService {
         var model = new ProcedureModel(dto.creator());
         procedureModelMapper.updateProcedureModel(model, dto);
         databaseReader.saveProcedureModel(model);
+
+        addActionsForModel(dto.actions(), model);
+
         logger.debugf("Procedure model %s is saved".formatted(model.getId()));
         return model;
     }
@@ -91,6 +99,10 @@ public class ProcedureModelService {
                     "It's not possible to update Procedure model creator for procedure %s".formatted(model.getId()));
         }
         procedureModelMapper.updateProcedureModel(model, dto);
+
+        logger.debugf("Remove %s actions", model.getActions().size());
+        model.removeAllActions();
+        addActionsForModel(dto.actions(), model);
     }
 
     @Transactional
@@ -118,6 +130,13 @@ public class ProcedureModelService {
         }
         if (event.getStatus() == DONE) {
             throw new ForbiddenException("Event %s can't be done".formatted(event.getId()));
+        }
+    }
+
+    private void addActionsForModel(Collection<ActionWriteDto> actions, ProcedureModel model) {
+        logger.debugf("Save or update %s actions", actions.size());
+        for (var dtoAction : actions) {
+            actionService.saveActionForModel(dtoAction, model);
         }
     }
 }

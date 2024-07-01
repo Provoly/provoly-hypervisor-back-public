@@ -30,7 +30,7 @@ public class Procedure {
     @OneToMany(mappedBy = "procedure", fetch = FetchType.EAGER)
     private List<Event> events = new ArrayList<>();
 
-    @OneToMany(mappedBy = "procedure", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "procedure", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Collection<Action> actions = new ArrayList<>();
 
     public Procedure() {
@@ -55,9 +55,8 @@ public class Procedure {
         event.setStatus(Status.IN_PROGRESS);
     }
 
-    public void deleteAction(Action action) {
-        actions.remove(action);
-        setProcedureProgress(calculateProgressActions());
+    public void removeAllActions() {
+        actions.clear();
     }
 
     public Integer getId() {

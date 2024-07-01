@@ -8,8 +8,8 @@ import com.provoly.event.Criticality;
 import com.provoly.event.EventType;
 
 public class OperatorEventWriteDto extends EventWriteDto {
-    private Instant startDate;
-    private Instant endDate;
+    private final Instant startDate;
+    private final Instant endDate;
 
     public OperatorEventWriteDto(Integer id, String name, String description, Criticality criticality, String address,
             UUID equipmentId, Category category, Instant startDate, Instant endDate, String domain) {

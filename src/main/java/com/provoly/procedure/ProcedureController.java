@@ -1,5 +1,6 @@
 package com.provoly.procedure;
 
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
@@ -36,7 +37,7 @@ public class ProcedureController {
     @Path("/id/{id}")
     @PUT
     @Authenticated
-    public void updateProcedure(Integer id, ProcedureWriteDto dto) {
+    public void updateProcedure(Integer id, @Valid ProcedureWriteDto dto) {
         procedureService.updateProcedure(id, dto);
     }
 

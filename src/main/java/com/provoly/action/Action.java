@@ -14,20 +14,17 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Action {
+public class Action {
     @Id
     private UUID id;
 
-    @Enumerated(EnumType.STRING)
-    private ActionType type;
+    private String type;
 
     @UpdateTimestamp
     private Instant lastModificationDate;
 
     @Enumerated(EnumType.STRING)
     private Status status;
-
-    private String name;
 
     @ManyToOne
     @Immutable
@@ -45,12 +42,10 @@ public abstract class Action {
         this.id = id;
     }
 
-    protected Action(UUID id, ActionType type, Instant lastModificationDate, Status status, String name) {
+    protected Action(UUID id, String type, Status status) {
         this.id = id;
         this.type = type;
-        this.lastModificationDate = lastModificationDate;
         this.status = status;
-        this.name = name;
     }
 
     public void setId(UUID id) {
@@ -61,7 +56,7 @@ public abstract class Action {
         return id;
     }
 
-    public ActionType getType() {
+    public String getType() {
         return type;
     }
 
@@ -73,28 +68,12 @@ public abstract class Action {
         return status;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public Procedure getProcedure() {
         return procedure;
     }
 
     public void setProcedure(Procedure procedure) {
         this.procedure = procedure;
-    }
-
-    public ProcedureModel getProcedureModel() {
-        return procedureModel;
     }
 
     public void setProcedureModel(ProcedureModel procedureModel) {

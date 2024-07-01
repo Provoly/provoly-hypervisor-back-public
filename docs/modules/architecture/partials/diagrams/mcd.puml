@@ -34,11 +34,17 @@ class Service {
 }
 
 class AskedService {
-
 }
 
-class TodoAction {
+class PhoneAction {
 }
+
+class EmailAction {
+}
+
+class OtherAction {
+}
+
 
 class EquipmentEntity {
 }
@@ -70,7 +76,9 @@ Equipment "1" -- "1" Family: has
 Equipment "1" -- "1" Domain: has
 
 Action <|-- AskedService
-Action <|-- TodoAction
+Action <|-- PhoneAction
+Action <|-- OtherAction
+Action <|-- EmailAction
 
 
 

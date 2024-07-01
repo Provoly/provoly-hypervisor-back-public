@@ -1,6 +1,5 @@
 package com.provoly.action;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import jakarta.persistence.DiscriminatorValue;
@@ -11,17 +10,31 @@ import com.provoly.event.Status;
 @Entity
 @DiscriminatorValue("ASKED_SERVICE")
 public class AskedService extends Action {
-    // TODO: add reference to service ?
+    private String name;
+    private String serviceExternalId;
+
     public AskedService() {
         super();
     }
 
-    public AskedService(UUID id) {
-        super(id);
+    public AskedService(Action action, String name, String serviceExternalId) {
+        super(action.getId(), ActionType.ASKED_SERVICE.name(), action.getStatus());
+        this.name = name;
+        this.serviceExternalId = serviceExternalId;
     }
 
-    public AskedService(UUID id, Instant lastModificationDate, Status status, String name) {
-        super(id, ActionType.ASKED_SERVICE, lastModificationDate, status, name);
+    public AskedService(UUID id, Status status, String name) {
+        super(id, ActionType.ASKED_SERVICE.name(), status);
+        this.name = name;
+        this.serviceExternalId = null;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getServiceExternalId() {
+        return serviceExternalId;
     }
 
 }
