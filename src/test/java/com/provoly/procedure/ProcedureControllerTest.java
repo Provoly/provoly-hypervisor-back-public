@@ -3,7 +3,9 @@ package com.provoly.procedure;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.util.*;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
@@ -13,10 +15,7 @@ import com.provoly.action.dto.ActionWriteDto;
 import com.provoly.action.dto.EmailActionWriteDto;
 import com.provoly.action.dto.OtherActionWriteDto;
 import com.provoly.action.dto.PhoneActionWriteDto;
-import com.provoly.event.Category;
-import com.provoly.event.Criticality;
-import com.provoly.event.EventController;
-import com.provoly.event.Status;
+import com.provoly.event.*;
 import com.provoly.event.dto.ReportEventWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -110,6 +109,23 @@ public class ProcedureControllerTest {
                 .extracting("name", "address")
                 .containsExactly("Maintenance ouvrage updated", "new address");
 
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_reset_event_status_when_delete_procedure() {
+        // given
+        var procedure = dataService.getProcedure3();
+        var eventsId = procedure.getEvents().stream().map(Event::getId).toList();
+
+        // when
+        procedureController.deleteProcedure(procedure.getId());
+        var resetEvents = eventsId.stream().map(eventId -> eventController.getEventDetails(eventId)).toList();
+
+        // then
+        assertThat(resetEvents)
+                .extracting("status")
+                .containsExactly(Status.NEW, Status.NEW);
     }
 
     @Test

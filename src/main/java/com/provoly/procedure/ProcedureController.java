@@ -27,6 +27,13 @@ public class ProcedureController {
         return procedureMapper.mapToProcedureReadDetailsDto(procedure);
     }
 
+    @Path("/id/{id}")
+    @DELETE
+    @Authenticated
+    public void deleteProcedure(Integer id) {
+        procedureService.deleteProcedure(id);
+    }
+
     @Path("/id/{id}/close")
     @PUT
     @Authenticated

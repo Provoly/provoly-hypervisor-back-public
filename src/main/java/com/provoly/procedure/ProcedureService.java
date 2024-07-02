@@ -70,7 +70,7 @@ public class ProcedureService {
         }
 
         logger.debugf("Remove %s actions", procedure.getActions().size());
-        procedure.removeAllActions();
+        procedure.removeActions();
 
         logger.debug("Update actions");
         for (var action : dto.actions()) {
@@ -79,6 +79,7 @@ public class ProcedureService {
 
     }
 
+    @Transactional
     public Procedure instantiateProcedureWithModelAndEvents(ProcedureModel model, Stream<Event> events) {
         Procedure procedure = new Procedure(model.getName(), model.getDescription());
         logger.debugf("Add events to procedure");
@@ -90,5 +91,12 @@ public class ProcedureService {
         databaseReader.saveProcedure(procedure);
         logger.debugf("Procedure %s is instantiated".formatted(procedure.getId()));
         return procedure;
+    }
+
+    @Transactional
+    public void deleteProcedure(Integer id) {
+        var procedure = databaseReader.getProcedureById(id);
+        procedure.dissociateEvents();
+        databaseReader.removeProcedure(procedure);
     }
 }

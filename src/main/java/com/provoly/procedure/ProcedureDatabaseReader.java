@@ -41,4 +41,8 @@ public class ProcedureDatabaseReader extends DatabaseReader {
 
         return em.createQuery(query).getSingleResult();
     }
+
+    public void removeProcedure(Procedure procedure) {
+        em.remove(procedure);
+    }
 }

@@ -55,7 +55,15 @@ public class Procedure {
         event.setStatus(Status.IN_PROGRESS);
     }
 
-    public void removeAllActions() {
+    public void dissociateEvents() {
+        events.forEach(event -> {
+            event.setProcedure(null);
+            event.setStatus(Status.NEW);
+        });
+        events.clear();
+    }
+
+    public void removeActions() {
         actions.clear();
     }
 

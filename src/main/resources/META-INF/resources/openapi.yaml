@@ -999,6 +999,32 @@ paths:
       security:
         - oidc:
             - authenticated
+    delete:
+      tags:
+        - Procedure Controller
+      summary: Delete procedure by id
+      description: |
+        Events can again be associated with a procedure model. Status events are reset to `NEW`.
+      operationId: com.provoly.procedure.ProcedureController_deleteProcedure
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          example: 45
+          required: true
+      responses:
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden if page not specified
+        "404":
+          description: Procedure Not found
+        "204":
+          description: Procedure deleted
+      security:
+        - oidc:
+            - authenticate
   /procedures/id/{id}/close:
     put:
       tags:
@@ -1774,9 +1800,13 @@ components:
         district:
           type: string
           description: Value must match one of `District` name
-        adress:
+        address:
           type: string
           required: true
+        deleted:
+          type: boolean
+          default: false
+          description: if true then the equipment will not be counted in the metrics and will not be returned
         level:
           type: integer
           required: true
@@ -1810,8 +1840,14 @@ components:
         district:
           type: string
           description: Value must match one of `District` name
-        adress:
+        address:
           type: string
+        deleted:
+          type: boolean
+          default: false
+          description: |
+            If true then the equipment will not be counted in the metrics and will not be returned. 
+            It can be reachable by getting by id.
         parent:
           $ref: '#/components/schemas/EquipmentReadDto'
         events:
