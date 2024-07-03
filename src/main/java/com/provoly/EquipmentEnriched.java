@@ -129,7 +129,7 @@ public class EquipmentEnriched {
 
     private CondensedEvent condensedEvent(Event event) {
         return new CondensedEvent(
-                event.getSubCategory() != null ? event.getSubCategory().getCode() : event.getCategory().getCode(),
+                event.getCategory().getCode(),
                 event.getCriticality());
     }
 
