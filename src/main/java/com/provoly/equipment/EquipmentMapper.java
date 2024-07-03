@@ -105,7 +105,7 @@ public class EquipmentMapper {
     }
 
     public EquipmentEntity mapToEntity(String name) {
-        return databaseReader.getEquipmentEntityByName(name)
+        return databaseReader.getEquipmentEntityByCode(name)
                 .orElseThrow(() -> new IllegalArgumentException("Equipment entity with name %s invalid".formatted(name)));
     }
 

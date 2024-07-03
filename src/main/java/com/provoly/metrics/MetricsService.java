@@ -93,14 +93,14 @@ public class MetricsService {
 
         var result = metricsDatabaseReader.getEquipmentsGroupByEntityAndManaged(family, domain);
         return new EquipmentByEntityDto(
-                result.getOrDefault("AGGLO_EP_managed", 0L) + result.getOrDefault("AGGLO_COMMUN_managed", 0L),
-                result.getOrDefault("AGGLO_EP_unmanaged", 0L) + result.getOrDefault("AGGLO_COMMUN_unmanaged", 0L),
-                result.getOrDefault("CHALONS_EP_managed", 0L) + result.getOrDefault("CHALONS_COMMUN_managed", 0L),
-                result.getOrDefault("CHALONS_EP_unmanaged", 0L) + result.getOrDefault("CHALONS_COMMUN_unmanaged", 0L),
-                result.getOrDefault("FAGNIERES_COMMUN_managed", 0L),
-                result.getOrDefault("FAGNIERES_COMMUN_unmanaged", 0L),
-                result.getOrDefault("SAINT_MARTIN_COMMUN_managed", 0L),
-                result.getOrDefault("SAINT_MARTIN_COMMUN_unmanaged", 0L));
+                result.getOrDefault("AGGLO-COMMUN_managed", 0L),
+                result.getOrDefault("AGGLO-COMMUN_unmanaged", 0L),
+                result.getOrDefault("CHALONS-COMMUN_managed", 0L),
+                result.getOrDefault("CHALONS-COMMUN_unmanaged", 0L),
+                result.getOrDefault("FAGNIERES-COMMUN_managed", 0L),
+                result.getOrDefault("FAGNIERES-COMMUN_unmanaged", 0L),
+                result.getOrDefault("SAINT-MARTIN-COMMUN_managed", 0L),
+                result.getOrDefault("SAINT-MARTIN-COMMUN_unmanaged", 0L));
 
     }
 

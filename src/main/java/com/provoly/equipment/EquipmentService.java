@@ -103,7 +103,7 @@ public class EquipmentService {
     @Transactional
     public EquipmentEntity getEquipmentEntity(String entity) {
         logger.debugf("Get equipment entity %s", entity);
-        return entity != null ? databaseReader.getEquipmentEntityByName(entity)
+        return entity != null ? databaseReader.getEquipmentEntityByCode(entity)
                 .orElseThrow(() -> new IllegalArgumentException("Entity %s invalid".formatted(entity)))
                 : null;
     }

@@ -192,10 +192,10 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of("AGGLO_COMMUN"),
+                List.of("AGGLO-COMMUN"),
                 List.of());
         //then
-        assertThat(events).extracting("equipment").extracting("entity").containsOnly("AGGLO_COMMUN");
+        assertThat(events).extracting("equipment").extracting("entity").containsOnly("AGGLO-COMMUN");
     }
 
     @Test
@@ -210,7 +210,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of("AGGLO_COMMUN", "invalid"),
+                List.of("AGGLO-COMMUN", "invalid"),
                 List.of()))
                 .isInstanceOf(IllegalArgumentException.class);
     }

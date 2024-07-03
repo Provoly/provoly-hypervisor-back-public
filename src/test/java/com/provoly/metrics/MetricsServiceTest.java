@@ -93,7 +93,7 @@ public class MetricsServiceTest {
     void should_get_equipment_from_agglo_with_event_metrics_with_criticality_low_medium_and_category_alert() {
         // when
         var result = metricsService.getEquipmentsWithEventMetrics(List.of(Criticality.LOW.name(), Criticality.MEDIUM.name()),
-                List.of("LIMIT", "OUTOFORDER"), List.of("AGGLO_COMMUN"), List.of());
+                List.of("LIMIT", "OUTOFORDER"), List.of("AGGLO-COMMUN"), List.of());
 
         //then
         assertThat(result).extracting("nbEquipWithEvent_A").isEqualTo(0L);
@@ -173,15 +173,15 @@ public class MetricsServiceTest {
         var result = metricsService.getTotalEquipmentsByEntity("EP_FOYER_LUMINEUX");
 
         //then
-        assertThat(result).extracting("CHA_managed").isEqualTo(1L);
-        assertThat(result).extracting("CHA_unmanaged").isEqualTo(0L);
-        assertThat(result).extracting("CH_managed").isEqualTo(0L);
-        assertThat(result).extracting("CH_unmanaged").isEqualTo(0L);
+        assertThat(result).extracting("aggloManaged").isEqualTo(1L);
+        assertThat(result).extracting("aggloUnmanaged").isEqualTo(0L);
+        assertThat(result).extracting("chManaged").isEqualTo(0L);
+        assertThat(result).extracting("chUnmanaged").isEqualTo(0L);
 
-        assertThat(result).extracting("FAGN_managed").isEqualTo(0L);
-        assertThat(result).extracting("FAGN_unmanaged").isEqualTo(1L);
-        assertThat(result).extracting("SMP_managed").isEqualTo(0L);
-        assertThat(result).extracting("SMP_unmanaged").isEqualTo(0L);
+        assertThat(result).extracting("fagnManaged").isEqualTo(0L);
+        assertThat(result).extracting("fagnUnmanaged").isEqualTo(1L);
+        assertThat(result).extracting("smpManaged").isEqualTo(0L);
+        assertThat(result).extracting("smpUnmanaged").isEqualTo(0L);
     }
 
     @Test
@@ -190,15 +190,15 @@ public class MetricsServiceTest {
         var result = metricsService.getTotalEquipmentsByEntity("EP_ARMOIRE");
 
         //then
-        assertThat(result).extracting("CHA_managed").isEqualTo(0L);
-        assertThat(result).extracting("CHA_unmanaged").isEqualTo(1L);
-        assertThat(result).extracting("CH_managed").isEqualTo(0L);
-        assertThat(result).extracting("CH_unmanaged").isEqualTo(0L);
+        assertThat(result).extracting("aggloManaged").isEqualTo(0L);
+        assertThat(result).extracting("aggloUnmanaged").isEqualTo(1L);
+        assertThat(result).extracting("chManaged").isEqualTo(0L);
+        assertThat(result).extracting("chUnmanaged").isEqualTo(0L);
 
-        assertThat(result).extracting("FAGN_managed").isEqualTo(0L);
-        assertThat(result).extracting("FAGN_unmanaged").isEqualTo(0L);
-        assertThat(result).extracting("SMP_managed").isEqualTo(1L);
-        assertThat(result).extracting("SMP_unmanaged").isEqualTo(0L);
+        assertThat(result).extracting("fagnManaged").isEqualTo(0L);
+        assertThat(result).extracting("fagnUnmanaged").isEqualTo(0L);
+        assertThat(result).extracting("smpManaged").isEqualTo(1L);
+        assertThat(result).extracting("smpUnmanaged").isEqualTo(0L);
     }
 
     @Test
@@ -210,15 +210,15 @@ public class MetricsServiceTest {
         var result = metricsService.getTotalEquipmentsByEntity("EP_ARMOIRE");
 
         //then
-        assertThat(result).extracting("CHA_managed").isEqualTo(0L);
-        assertThat(result).extracting("CHA_unmanaged").isEqualTo(0L);
-        assertThat(result).extracting("CH_managed").isEqualTo(0L);
-        assertThat(result).extracting("CH_unmanaged").isEqualTo(0L);
+        assertThat(result).extracting("aggloManaged").isEqualTo(0L);
+        assertThat(result).extracting("aggloUnmanaged").isEqualTo(0L);
+        assertThat(result).extracting("chManaged").isEqualTo(0L);
+        assertThat(result).extracting("chUnmanaged").isEqualTo(0L);
 
-        assertThat(result).extracting("FAGN_managed").isEqualTo(0L);
-        assertThat(result).extracting("FAGN_unmanaged").isEqualTo(0L);
-        assertThat(result).extracting("SMP_managed").isEqualTo(0L);
-        assertThat(result).extracting("SMP_unmanaged").isEqualTo(0L);
+        assertThat(result).extracting("fagnManaged").isEqualTo(0L);
+        assertThat(result).extracting("fagnUnmanaged").isEqualTo(0L);
+        assertThat(result).extracting("smpManaged").isEqualTo(0L);
+        assertThat(result).extracting("smpUnmanaged").isEqualTo(0L);
     }
 
     @Test

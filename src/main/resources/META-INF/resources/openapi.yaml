@@ -61,7 +61,7 @@ paths:
             type: array
             items:
               type: string
-            example: [ 'CHALONS_COMMUN' ]
+            example: [ 'CHALONS-COMMUN' ]
         - name: family
           in: query
           description: The equipment family code. It must be known to the system.
@@ -104,7 +104,7 @@ paths:
                           "id": "12a64ae7-70ca-4d12-bcd9-9f1c75f23915",
                           "name": "C-1034",
                           "type": "Ouvrage",
-                          "entity": "AGGLO_COMMUN"
+                          "entity": "AGGLO-COMMUN"
                         },
                         "procedureId": 4,
                         "linkedEvents": 2,
@@ -1047,7 +1047,7 @@ paths:
                       "name":"C306",
                       "family": "Armoire",
                       "domain": "EP",
-                      "entity": "CHALONS_COMMUN",
+                      "entity": "CHALONS-COMMUN",
                       "address":"1 rue Chalons",
                       "city": "CH",
                       "district": "CH_C",
@@ -1061,7 +1061,7 @@ paths:
                       "name":"C307",
                       "family": "Armoire",
                       "domain": "EP",
-                      "entity": "CHALONS_COMMUN",
+                      "entity": "CHALONS-COMMUN",
                       "address":"132 avenue Chalons",
                       "city": "CH",
                       "district": "CH_CD",
@@ -1075,7 +1075,7 @@ paths:
                       "name":"C308",
                       "family": "Armoire",
                       "domain": "EP",
-                      "entity": "FAGNIERES_COMMUN",
+                      "entity": "FAGNIERES-COMMUN",
                       "address":"97 impasse Fagniere",
                       "city": "FAGN",
                       "activeEnergy":null,
@@ -1125,7 +1125,7 @@ paths:
             items:
              type: string
           description: must match one of `EquipmentEntity` name
-          example: 'FAGNIERES_COMMUN'
+          example: 'FAGNIERES-COMMUN'
       responses:
         "401":
           description: Not Authorized
@@ -1147,7 +1147,7 @@ paths:
                         "name": "C306",
                         "code": "C306",
                         "family": "Armoire",
-                        "entity": "FAGNIERES_COMMUN",
+                        "entity": "FAGNIERES-COMMUN",
                         "parent": {
                           "id": "c6cfac35-0939-4bb0-860e-fb00c6ff0ed7",
                           "externalId": "technical_unique_id2",
@@ -1155,7 +1155,7 @@ paths:
                           "code": "C307",
                           "family": "Armoire",
                           "domain": "EP",
-                          "entity": "FAGNIERES_COMMUN",
+                          "entity": "FAGNIERES-COMMUN",
                           "parent": null,
                           "activeEnergy": 70
                         },
@@ -1201,7 +1201,7 @@ paths:
                       "code": "C306",
                       "family": "Armoire",
                       "domain": "EP",
-                      "entity": "FAGNIERES_COMMUN",
+                      "entity": "FAGNIERES-COMMUN",
                       "parent": {
                         "id": "c6cfac35-0939-4bb0-860e-fb00c6ff0ed7",
                         "externalId": "technical_unique_id2",
@@ -1209,7 +1209,7 @@ paths:
                         "code": "C307",
                         "family": "Armoire",
                         "domain": "EP",
-                        "entity": "FAGNIERES_COMMUN",
+                        "entity": "FAGNIERES-COMMUN",
                         "parent": null,
                         "activeEnergy": 70
                       },
@@ -1272,7 +1272,7 @@ paths:
                 type: array
                 items:
                   type: string
-                example: [ "FAGNIERES_COMMUN", "CHALONS_AGGLOS" ]
+                example: [ "FAGNIERES-COMMUN", "CHALONS_AGGLOS" ]
       security:
         - oidc:
             - authenticated
@@ -1368,7 +1368,7 @@ paths:
                         "name": "C306",
                         "code": "C306",
                         "family": "Armoire",
-                        "entity": "FAGNIERES_COMMUN",
+                        "entity": "FAGNIERES-COMMUN",
                         "parent": {
                           "id": "c6cfac35-0939-4bb0-860e-fb00c6ff0ed7",
                           "externalId": "technical_unique_id2",
@@ -1376,7 +1376,7 @@ paths:
                           "code": "C307",
                           "family": "Armoire",
                           "domain": "EP",
-                          "entity": "FAGNIERES_COMMUN",
+                          "entity": "FAGNIERES-COMMUN",
                           "parent": null,
                           "activeEnergy": 70
                         },
@@ -2209,28 +2209,28 @@ components:
       properties:
         CHA_managed:
           type: integer
-          description: Count of managed equipments where entity is `AGGLO_EP` or `AGGLO_COMMUN`
+          description: Count of managed equipments where entity is or `AGGLO-COMMUN`
         CHA_unmanaged:
           type: integer
-          description: Count of unmanaged equipments where entity is `AGGLO_EP` or `AGGLO_COMMUN`
+          description: Count of unmanaged equipments where entity is `AGGLO-COMMUN`
         CH_managed:
           type: integer
-          description: Count of managed equipments where entity is `CHALONS_EP` or `CHALONS_COMMUN`
+          description: Count of managed equipments where entity is  `CHALONS-COMMUN`
         CH_unmanaged:
           type: integer
-          description: Count of unmanaged equipments where entity is `CHALONS_EP` or `CHALONS_COMMUN`
+          description: Count of unmanaged equipments where entity is `CHALONS-COMMUN`
         FAGN_managed:
           type: integer
-          description: Count of managed equipments where entity is `FAGNIERES_COMMUN`
+          description: Count of managed equipments where entity is `FAGNIERES-COMMUN`
         FAGN_unmanaged:
           type: integer
-          description: Count of unmanaged equipments where entity is `FAGNIERES_COMMUN`
+          description: Count of unmanaged equipments where entity is `FAGNIERES-COMMUN`
         SMP_managed:
           type: integer
-          description: Count of managed equipments where entity is `SAINT_MARTIN_COMMUN`
+          description: Count of managed equipments where entity is `SAINT-MARTIN-COMMUN`
         SMP_unmanaged:
           type: integer
-          description: Count of unmanaged equipments where entity is `SAINT_MARTIN_COMMUN`
+          description: Count of unmanaged equipments where entity is `SAINT-MARTIN-COMMUN`
     AggregatedService:
       type: array
       items:

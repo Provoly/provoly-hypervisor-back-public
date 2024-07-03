@@ -53,7 +53,7 @@ public class EnrichedProducerTest {
         // given
         companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
 
-        var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS_COMMUN", "CH",
+        var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS-COMMUN", "CH",
                 "address", "CH_C", null, false, null);
         equipmentService.saveOrUpdateEquipments(List.of(equipment));
 
@@ -71,14 +71,14 @@ public class EnrichedProducerTest {
         // given
         // save equipments
         companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
-        var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS_COMMUN", "CH",
+        var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS-COMMUN", "CH",
                 "address", "CH_C", null, false, null);
-        var equipment2 = new EquipmentWriteDto("technical_id2", 0, "equipment2", "307", "EP", "Armoire", "AGGLO_COMMUN", "CH",
+        var equipment2 = new EquipmentWriteDto("technical_id2", 0, "equipment2", "307", "EP", "Armoire", "AGGLO-COMMUN", "CH",
                 "address", "CH_C", null, false, null);
         equipmentService.saveOrUpdateEquipments(List.of(equipment, equipment2)); // 2 messages
 
-        // save event 
-        var equipId = equipmentService.getEquipments(List.of("CHALONS_COMMUN")).stream().findFirst().get().getId();
+        // save event
+        var equipId = equipmentService.getEquipments(List.of("CHALONS-COMMUN")).stream().findFirst().get().getId();
         var event = new EventWriteDto(null,
                 "saved event",
                 "desc",
@@ -93,8 +93,8 @@ public class EnrichedProducerTest {
                 "source");
         var savedEvent = eventService.saveEvent(event); // 1 message
 
-        // update event 
-        var equipId2 = equipmentService.getEquipments(List.of("AGGLO_COMMUN")).stream().findFirst().get().getId();
+        // update event
+        var equipId2 = equipmentService.getEquipments(List.of("AGGLO-COMMUN")).stream().findFirst().get().getId();
         var eventUpdated = new EventWriteDto(savedEvent.getId(),
                 "totoooo",
                 "desc",
@@ -122,13 +122,13 @@ public class EnrichedProducerTest {
     public void should_consume_enriched_equipment_when_create_events() {
         // given
         companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
-        var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS_COMMUN", "CH",
+        var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS-COMMUN", "CH",
                 "address", "CH_C", null, false, null);
-        var equipment2 = new EquipmentWriteDto("technical_id2", 0, "equipment2", "307", "EP", "Armoire", "AGGLO_COMMUN", "CH",
+        var equipment2 = new EquipmentWriteDto("technical_id2", 0, "equipment2", "307", "EP", "Armoire", "AGGLO-COMMUN", "CH",
                 "address", "CH_C", null, false, null);
         equipmentService.saveOrUpdateEquipments(List.of(equipment, equipment2)); // 2 messages
 
-        var equipId = equipmentService.getEquipments(List.of("CHALONS_COMMUN")).stream().findFirst().get().getId();
+        var equipId = equipmentService.getEquipments(List.of("CHALONS-COMMUN")).stream().findFirst().get().getId();
 
         var event = new EventWriteDto(null,
                 "toto",
@@ -156,7 +156,7 @@ public class EnrichedProducerTest {
     public void should_consume_enriched_equipment_when_create_service() {
         // given
         companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
-        var equipment = new EquipmentWriteDto("technical_id", 0, "306", "306", "EP", "Armoire", "CHALONS_COMMUN", "CH",
+        var equipment = new EquipmentWriteDto("technical_id", 0, "306", "306", "EP", "Armoire", "CHALONS-COMMUN", "CH",
                 "address", "CH_C", null, false, null);
         equipmentService.saveOrUpdateEquipments(List.of(equipment)); // 1 messages
 

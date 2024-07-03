@@ -70,10 +70,10 @@ public class TestDataService {
         var foyerLumineux = equipmentDatabaseReader.getFamilyByCode("EP_FOYER_LUMINEUX").get();
         var ouvrage = equipmentDatabaseReader.getFamilyByCode("EP_OUVRAGE").get();
 
-        var chalons = equipmentDatabaseReader.getEquipmentEntityByName("CHALONS_COMMUN").get();
-        var agglo = equipmentDatabaseReader.getEquipmentEntityByName("AGGLO_COMMUN").get();
-        var fagnieres = equipmentDatabaseReader.getEquipmentEntityByName("FAGNIERES_COMMUN").get();
-        var stm = equipmentDatabaseReader.getEquipmentEntityByName("SAINT_MARTIN_COMMUN").get();
+        var chalons = equipmentDatabaseReader.getEquipmentEntityByCode("CHALONS-COMMUN").get();
+        var agglo = equipmentDatabaseReader.getEquipmentEntityByCode("AGGLO-COMMUN").get();
+        var fagnieres = equipmentDatabaseReader.getEquipmentEntityByCode("FAGNIERES-COMMUN").get();
+        var stm = equipmentDatabaseReader.getEquipmentEntityByCode("SAINT-MARTIN-COMMUN").get();
 
         var equip1 = initEquipment("P-1000", foyerLumineux, fagnieres, fagniereCity, fagniereDistrict, 0);
         var equip2 = initEquipment("A-230", armoire, stm, chalonsCity, chalonsDistrict, 1);

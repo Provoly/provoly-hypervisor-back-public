@@ -126,14 +126,14 @@ public class MetricsDatabaseReader extends DatabaseReader {
         var managed = getManagedPath(builder, equipment.get(Equipment_.attributes));
 
         var query = criteriaQuery.multiselect(
-                entity.get(EquipmentEntity_.name),
+                entity.get(EquipmentEntity_.code),
                 managed,
                 builder.count(equipment))
                 .where(builder.and(
                         builder.isFalse(equipment.get(Equipment_.deleted)),
                         builder.equal(equipment.get(Equipment_.family), family),
                         builder.equal(equipment.get(Equipment_.domain), domain)))
-                .groupBy(entity.get(EquipmentEntity_.name), managed);
+                .groupBy(entity.get(EquipmentEntity_.code), managed);
 
         return em.createQuery(query)
                 .getResultStream()
