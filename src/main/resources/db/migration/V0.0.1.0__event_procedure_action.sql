@@ -19,6 +19,15 @@ create table domain
     code varchar(20) unique not null
 );
 
+create table category
+(
+    id        bigint primary key,
+    name      varchar(50) unique not null,
+    code      varchar(20) unique not null,
+    parent_id bigint,
+    constraint fk_parent foreign key (parent_id) references category (id)
+);
+
 create table service_category
 (
     id   bigint primary key,
@@ -59,7 +68,7 @@ create table equipment
     city_id             bigint              not null references city,
     district_id         bigint              not null references district,
     equipment_entity_id bigint              not null references equipment_entity,
-    attributes          jsonb default '{}',
+    attributes          jsonb   default '{}',
     parent_id           uuid,
     deleted             boolean default false,
     constraint fk_parent foreign key (parent_id) references equipment (id)
@@ -150,36 +159,19 @@ create table sms_action
 create table event
 (
     id                     serial primary key,
-    name                   varchar(50) unique not null,
-    type                   varchar(20)        not null,
-    criticality            varchar(50)        not null,
-    category               varchar(50)        not null,
+    name                   varchar(50) unique         not null,
+    criticality            varchar(50)                not null,
+    category_id            bigint references category not null,
     status                 varchar(20) default 'NEW',
-    description            varchar(256)       not null,
-    address                varchar(256)       not null,
+    description            varchar(256)               not null,
+    address                varchar(256),
     creation_date          timestamptz default current_timestamp,
     last_modification_date timestamptz default current_timestamp,
     close_date             timestamptz,
+    start_date             timestamptz,
+    end_date               timestamptz,
     equipment_id           uuid references equipment,
     procedure_id           int references procedure,
-    domain_id              bigint references domain
-);
-
-create table event_operator
-(
-    id         serial primary key references event,
-    start_date timestamptz,
-    end_date   timestamptz
-);
-
-create table event_report
-(
-    id                  serial primary key references event,
-    external_source_ref varchar not null
-);
-
-create table event_alert
-(
-    id                  serial primary key references event,
-    external_source_ref varchar not null
+    domain_id              bigint references domain,
+    external_source_ref    varchar
 );

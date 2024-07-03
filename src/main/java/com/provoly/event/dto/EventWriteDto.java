@@ -1,26 +1,14 @@
 package com.provoly.event.dto;
 
-import java.util.Objects;
+import java.time.Instant;
 import java.util.UUID;
 
-import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-import com.provoly.event.Category;
 import com.provoly.event.Criticality;
-import com.provoly.event.EventType;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true)
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = ReportEventWriteDto.class, name = "REPORT"),
-        @JsonSubTypes.Type(value = AlertEventWriteDto.class, name = "ALERT"),
-        @JsonSubTypes.Type(value = OperatorEventWriteDto.class, name = "OPERATOR"),
-})
-public abstract class EventWriteDto {
+public class EventWriteDto {
     private final Integer id;
 
     @NotNull
@@ -35,33 +23,46 @@ public abstract class EventWriteDto {
     private final Criticality criticality;
 
     @NotNull
-    protected Category category;
+    private final String category;
+
+    private final String subCategory;
 
     private final String address;
 
     private final UUID equipmentId;
 
-    private final EventType type;
-
     private final String domain;
 
-    protected EventWriteDto(Integer id, String name, String description, Criticality criticality, Category category,
-            String address, UUID equipmentId,
-            EventType type, String domain) {
+    private final Instant startDate;
+
+    private final Instant endDate;
+
+    private final String externalSourceRef;
+
+    public EventWriteDto(Integer id,
+            String name,
+            String description,
+            Criticality criticality,
+            String category,
+            String subCategory,
+            String address,
+            UUID equipmentId,
+            String domain,
+            Instant startDate,
+            Instant endDate,
+            String externalSourceRef) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.criticality = criticality;
         this.category = category;
+        this.subCategory = subCategory;
         this.address = address;
         this.equipmentId = equipmentId;
-        this.type = type;
         this.domain = domain;
-    }
-
-    @AssertTrue(message = "Category is invalid")
-    public boolean isValidCategory() {
-        return Objects.nonNull(category) && category.getEventType() == type;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.externalSourceRef = externalSourceRef;
     }
 
     public Integer getId() {
@@ -80,8 +81,12 @@ public abstract class EventWriteDto {
         return criticality;
     }
 
-    public Category getCategory() {
+    public String getCategory() {
         return category;
+    }
+
+    public String getSubCategory() {
+        return subCategory;
     }
 
     public String getAddress() {
@@ -92,11 +97,20 @@ public abstract class EventWriteDto {
         return equipmentId;
     }
 
-    public EventType getType() {
-        return type;
-    }
-
     public String getDomain() {
         return domain;
     }
+
+    public Instant getEndDate() {
+        return endDate;
+    }
+
+    public Instant getStartDate() {
+        return startDate;
+    }
+
+    public String getExternalSourceRef() {
+        return externalSourceRef;
+    }
+
 }

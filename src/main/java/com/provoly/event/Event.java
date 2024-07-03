@@ -13,7 +13,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Event {
+public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -27,14 +27,12 @@ public abstract class Event {
     @Enumerated(EnumType.STRING)
     private Criticality criticality;
 
-    @Enumerated(EnumType.STRING)
+    @ManyToOne
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @Enumerated(EnumType.STRING)
-    private EventType type;
-
-    @Enumerated(EnumType.STRING)
-    private Status status;
+    private Status status = Status.NEW;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -44,6 +42,8 @@ public abstract class Event {
     private Instant lastModificationDate;
 
     private Instant closeDate;
+    private Instant startDate;
+    private Instant endDate;
 
     @ManyToOne
     @JoinColumn(name = "equipment_id")
@@ -53,13 +53,10 @@ public abstract class Event {
     @JoinColumn(name = "procedure_id")
     private Procedure procedure;
 
-    protected Event() {
-        // Only for JPA
-    }
+    private String externalSourceRef;
 
-    protected Event(EventType type) {
-        this.type = type;
-        this.status = Status.NEW;
+    public Event() {
+        // Only for JPA
     }
 
     public Integer getId() {
@@ -99,19 +96,15 @@ public abstract class Event {
     }
 
     public Category getCategory() {
-        return category;
+        return category.getParent() != null ? category.getParent() : category;
+    }
+
+    public Category getSubCategory() {
+        return category.getParent() != null ? category : null;
     }
 
     public void setCategory(Category category) {
         this.category = category;
-    }
-
-    public EventType getType() {
-        return type;
-    }
-
-    public void setType(EventType type) {
-        this.type = type;
     }
 
     public Status getStatus() {
@@ -142,6 +135,22 @@ public abstract class Event {
         this.closeDate = closeDate;
     }
 
+    public Instant getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Instant startDate) {
+        this.startDate = startDate;
+    }
+
+    public Instant getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Instant endDate) {
+        this.endDate = endDate;
+    }
+
     public Equipment getEquipment() {
         return equipment;
     }
@@ -167,6 +176,14 @@ public abstract class Event {
 
     public void setDomain(Domain domain) {
         this.domain = domain;
+    }
+
+    public String getExternalSourceRef() {
+        return externalSourceRef;
+    }
+
+    public void setExternalSourceRef(String externalSourceRef) {
+        this.externalSourceRef = externalSourceRef;
     }
 
     @Override

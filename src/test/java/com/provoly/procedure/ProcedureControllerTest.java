@@ -15,8 +15,11 @@ import com.provoly.action.dto.ActionWriteDto;
 import com.provoly.action.dto.EmailActionWriteDto;
 import com.provoly.action.dto.OtherActionWriteDto;
 import com.provoly.action.dto.PhoneActionWriteDto;
-import com.provoly.event.*;
-import com.provoly.event.dto.ReportEventWriteDto;
+import com.provoly.event.Criticality;
+import com.provoly.event.Event;
+import com.provoly.event.EventController;
+import com.provoly.event.Status;
+import com.provoly.event.dto.EventWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
@@ -71,26 +74,28 @@ public class ProcedureControllerTest {
 
     @Test
     @TestSecurity(user = "reader")
-    void should_update_report_event_in_procedure() {
+    void should_not_update_external_event_in_procedure() {
         // given
-        var eventReportId = eventController
+        var event = eventController
                 .getEvents(1, 1, null, null, null, List.of(Criticality.HIGH.name()), List.of(),
-                        List.of(Category.REPORT.name()),
+                        List.of("OUTOFORDER"),
                         List.of(), List.of())
                 .stream()
                 .toList()
-                .getFirst()
-                .getId();
+                .getFirst();
 
-        ReportEventWriteDto reportDto = new ReportEventWriteDto(eventReportId,
+        var reportDto = new EventWriteDto(event.getId(),
                 "Maintenance ouvrage updated",
                 "description",
                 Criticality.HIGH,
+                "OUTOFORDER",
+                null,
                 "new address",
                 null,
-                Category.REPORT,
-                "external_source_ref",
-                null);
+                null,
+                null,
+                null,
+                "external_source_ref");
 
         Integer procedureId = dataService.getProcedure3().getId();
         ProcedureWriteDto dto = new ProcedureWriteDto(
@@ -102,13 +107,57 @@ public class ProcedureControllerTest {
 
         // when
         procedureController.updateProcedure(procedureId, dto);
-        var updatedEvent = eventController.getEventDetails(eventReportId);
+        var updatedEvent = eventController.getEventDetails(event.getId());
+
+        // then
+        assertThat(updatedEvent)
+                .extracting("name", "address")
+                .containsExactly(event.getName(), event.getAddress());
+
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_update_event_in_procedure() {
+        // given
+        var eventId = eventController
+                .getEvents(1, 1, null, null, null, List.of(Criticality.MEDIUM.name()), List.of(),
+                        List.of("OUTOFORDER"),
+                        List.of(), List.of())
+                .stream()
+                .toList()
+                .getFirst()
+                .getId();
+
+        var reportDto = new EventWriteDto(eventId,
+                "Maintenance ouvrage updated",
+                "description",
+                Criticality.HIGH,
+                "OUTOFORDER",
+                null,
+                "new address",
+                null,
+                null,
+                null,
+                null,
+                null);
+
+        Integer procedureId = dataService.getProcedure1().getId();
+        ProcedureWriteDto dto = new ProcedureWriteDto(
+                procedureId,
+                "procedure maintenance",
+                "desc",
+                List.of(reportDto),
+                List.of());
+
+        // when
+        procedureController.updateProcedure(procedureId, dto);
+        var updatedEvent = eventController.getEventDetails(eventId);
 
         // then
         assertThat(updatedEvent)
                 .extracting("name", "address")
                 .containsExactly("Maintenance ouvrage updated", "new address");
-
     }
 
     @Test

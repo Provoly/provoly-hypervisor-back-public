@@ -53,10 +53,7 @@ paths:
           schema:
             type: array
             items:
-              oneOf:
-                - $ref: '#/components/schemas/OperatorCategory'
-                - $ref: '#/components/schemas/AlertCategory'
-                - $ref: '#/components/schemas/ReportCategory'
+              type: string
         - name: entity
           in: query
           description: The equipment entity name. It must be known to the system.
@@ -89,10 +86,7 @@ paths:
               schema:
                 type: array
                 items:
-                  oneOf:
-                    - $ref: '#/components/schemas/AlertEventReadDto'
-                    - $ref: '#/components/schemas/ReportEventReadDto'
-                    - $ref: '#/components/schemas/OperatorCategory'
+                  $ref: '#/components/schemas/EventReadDto'
               examples:
                 default:
                   value: |
@@ -104,7 +98,6 @@ paths:
                         "description": "description",
                         "criticality": "LOW",
                         "status": "DONE",
-                        "type": "ALERT",
                         "lastModificationDate": "2024-02-23T11:12:39.375184Z",
                         "creationDate": "2024-01-22T11:12:39.375184Z",
                         "equipment": {
@@ -117,7 +110,7 @@ paths:
                         "linkedEvents": 2,
                         "procedureProgress": 100,
                         "externalSourceRef": "citylinx_1",
-                        "category": "MALFUNCTION"
+                        "category": "OUTOFORDER"
                       },
                       {
                         "id": 2,
@@ -126,7 +119,6 @@ paths:
                         "description": "description",
                         "criticality": "MEDIUM",
                         "status": "DONE",
-                        "type": "REPORT",
                         "lastModificationDate": "2024-02-22T11:12:39.375184Z",
                         "creationDate": "2024-01-23T11:12:39.375184Z",
                         "equipment": null,
@@ -134,7 +126,7 @@ paths:
                         "linkedEvents": 2,
                         "procedureProgress": 100,
                         "externalSourceRef": "external_source3",
-                        "category": "REPORT"
+                        "category": "LIMIT"
                       },
                       {
                         "id": 3,
@@ -143,7 +135,6 @@ paths:
                         "description": "description",
                         "criticality": "MEDIUM",
                         "status": "IN_PROGRESS",
-                        "type": "OPERATOR",
                         "lastModificationDate": "2024-02-20T11:12:39.375184Z",
                         "creationDate": "2024-01-20T11:12:39.375184Z",
                         "equipment": null,
@@ -172,10 +163,7 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/AlertEventWriteDto'
-                - $ref: '#/components/schemas/OperatorEventWriteDto'
-                - $ref: '#/components/schemas/ReportEventWriteDto'
+              $ref: '#/components/schemas/EventWriteDto'
             examples:
               default:
                 summary: Create "alert" event
@@ -195,10 +183,7 @@ paths:
           content:
             application/json:
               schema:
-                  oneOf:
-                    - $ref: '#/components/schemas/AlertEventReadDto'
-                    - $ref: '#/components/schemas/ReportEventReadDto'
-                    - $ref: '#/components/schemas/OperatorCategory'
+                $ref: '#/components/schemas/EventReadDto'
         "400":
           description: Bad Request
           content:
@@ -244,10 +229,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/AlertEventReadDto'
-                  - $ref: '#/components/schemas/ReportEventReadDto'
-                  - $ref: '#/components/schemas/OperatorEventReadDto'
+                $ref: '#/components/schemas/EventReadDto'
               examples:
                 default:
                   value: |
@@ -258,10 +240,9 @@ paths:
                       "description": null,
                       "criticality": "LOW",
                       "status": "DONE",
-                      "type": "ALERT",
                       "lastModificationDate": "2024-02-23T12:56:00.802501Z",
                       "creationDate": "2024-02-23T12:56:00.802501Z",
-                      "category": "MALFUNCTION",
+                      "category": "LIMIT",
                       "equipment": {
                         "id": "12a64ae7-70ca-4d12-bcd9-9f1c75f23915",
                         "name": "C-1034",
@@ -298,9 +279,7 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/OperatorEventWriteDto'
-                - $ref: '#/components/schemas/ReportEventWriteDto'
+              $ref: '#/components/schemas/EventWriteDto'
             examples:
               default:
                 summary: Update "report" event
@@ -417,7 +396,6 @@ paths:
                             "name": "Festival Chalons",
                             "criticality": "MEDIUM",
                             "status": "IN_PROGRESS",
-                            "type": "OPERATOR",
                             "lastModificationDate": "2024-02-20T10:37:33.792659Z",
                             "category": "MANIFESTATION",
                             "interventionRequestTitle": null,
@@ -441,9 +419,8 @@ paths:
                             "name": "Maintenance ouvrage2",
                             "criticality": "MEDIUM",
                             "status": "NEW",
-                            "type": "REPORT",
                             "lastModificationDate": "2024-02-20T10:37:33.792659Z",
-                            "category": "REPORT",
+                            "category": "LIMIT",
                             "interventionRequestTitle": "intervention procedure_2",
                             "interventionRequestCount": 2,
                             "manifestation": {}
@@ -901,10 +878,9 @@ paths:
                           "description": null,
                           "criticality": "LOW",
                           "status": "DONE",
-                          "type": "ALERT",
                           "lastModificationDate": "2024-02-23T12:56:00.802501Z",
                           "creationDate": "2024-02-23T12:56:00.802501Z",
-                          "category": "MALFUNCTION",
+                          "category": "OUTOFORDER",
                           "equipment": {
                             "id": "12a64ae7-70ca-4d12-bcd9-9f1c75f23915",
                             "name": "C-1034",
@@ -920,10 +896,9 @@ paths:
                           "description": null,
                           "criticality": "MEDIUM",
                           "status": "NEW",
-                          "type": "REPORT",
                           "lastModificationDate": "2024-02-23T12:56:00.802501Z",
                           "creationDate": "2024-02-23T12:56:00.802501Z",
-                          "category": "REPORT",
+                          "category": "LIMIT",
                           "equipment": {
                             "id": "12a64ae7-70ca-4d12-bcd9-9f1c75f23916",
                             "name": "C-761",
@@ -982,10 +957,9 @@ paths:
                         "address": "10 Rue du Camp d'Attila, 51000 Châlons-en-Champagne",
                         "description": "description",
                         "criticality": "HIGH",
-                        "type": "REPORT",
                         "equipmentId": "4ead3c85-f120-4144-8ca2-29ac9882ff5f",
                         "externalSourceRef": "external_source2",
-                        "category": "REPORT"
+                        "category": "LIMIT"
                       }
                     ]
                   }
@@ -1439,10 +1413,7 @@ paths:
           in: query
           schema:
             items:
-              anyOf:
-                - $ref: '#/components/schemas/AlertCategory'
-                - $ref: '#/components/schemas/OperatorCategory'
-                - $ref: '#/components/schemas/ReportCategory'
+              type: string
         - name: place
           in: query
           description: Must match city or district value from equipment
@@ -1634,13 +1605,6 @@ components:
         - NEW
         - IN_PROGRESS
         - DONE
-    Type:
-      type: string
-      required: true
-      enum:
-        - ALERT
-        - OPERATOR
-        - REPORT
     ActionType:
       type: string
       required: true
@@ -1650,21 +1614,6 @@ components:
         - EMAIL
         - ASKED_SERVICE
         - ORDER
-    OperatorCategory:
-      type: string
-      required: true
-      enum:
-        - MANIFESTATION,
-        - OPERATOR
-    AlertCategory:
-      type: string
-      required: true
-      enum:
-        - LIMIT,
-        - MALFUNCTION
-    ReportCategory:
-      enum:
-        - REPORT
     EventSort:
       type: string
       enum:
@@ -1853,10 +1802,7 @@ components:
         events:
           type: array
           items:
-            anyOf:
-              - $ref: '#/components/schemas/AlertEventReadDto'
-              - $ref: '#/components/schemas/ReportEventReadDto'
-              - $ref: '#/components/schemas/OperatorEventReadDto'
+            $ref: '#/components/schemas/EventReadDto'
     EquipmentShortDto:
       type: object
       properties:
@@ -2025,7 +1971,7 @@ components:
           required: true
         externalServiceId:
           type: string
-    OperatorEventWriteDto:
+    EventWriteDto:
       type: object
       properties:
         id:
@@ -2042,75 +1988,23 @@ components:
         criticality:
           $ref: '#/components/schemas/Criticality'
         category:
-          $ref: '#/components/schemas/OperatorCategory'
+          type: string
+          description: must be a known category
+          required: true
+        subCategory:
+          type: string
         equipmentId:
           $ref: '#/components/schemas/UUID'
         endDate:
           $ref: '#/components/schemas/DateTime'
+          description: required if category is "MANIFESTATION"
         startDate:
           $ref: '#/components/schemas/DateTime'
-        type:
-          type: string
-          enum:
-            - OPERATOR
-          required: true
-    AlertEventWriteDto:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-          required: true
-        address:
-          type: string
-          required: true
-        description:
-          type: string
-          required: true
-        criticality:
-          $ref: '#/components/schemas/Criticality'
-        category:
-          $ref: '#/components/schemas/AlertCategory'
-        equipmentId:
-          $ref: '#/components/schemas/UUID'
+          description: required if category is "MANIFESTATION"
         externalSourceRef:
           type: string
-          required: true
-        type:
-          type: string
-          enum:
-            - ALERT
-          required: true
-    ReportEventWriteDto:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-          required: true
-        address:
-          type: string
-          required: true
-        description:
-          type: string
-          required: true
-        criticality:
-          $ref: '#/components/schemas/Criticality'
-        category:
-          $ref: '#/components/schemas/ReportCategory'
-        equipmentId:
-          $ref: '#/components/schemas/UUID'
-        externalSourceRef:
-          type: string
-          required: true
-        type:
-          type: string
-          enum:
-            - REPORT
-          required: true
-    AlertEventReadDto:
+          description: forbidden if category is "MANIFESTATION"
+    EventReadDto:
       type: object
       properties:
         id:
@@ -2121,8 +2015,6 @@ components:
           type: string
         description:
           type: string
-        type:
-          $ref: '#/components/schemas/Type'
         criticality:
           $ref: '#/components/schemas/Criticality'
         equipment:
@@ -2130,81 +2022,10 @@ components:
         status:
           $ref: '#/components/schemas/Status'
         category:
-          $ref: '#/components/schemas/AlertCategory'
-        lastModificationDate:
-          $ref: '#/components/schemas/DateTime'
-        creationDate:
-          $ref: '#/components/schemas/DateTime'
-        closeDate:
-          $ref: '#/components/schemas/DateTime'
-        externalSourceRef:
           type: string
-        procedureId:
-          $ref: '#/components/schemas/UUID'
-        linkedEvents:
-          type: number
-          description: Number of events that have the same procedure as the current event
-        procedureProgress:
-          type: number
-          description: Percentage progress of the procedure
-    ReportEventReadDto:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
+          description: must be a known category
+        subCategory:
           type: string
-        address:
-          type: string
-        description:
-          type: string
-        type:
-          $ref: '#/components/schemas/Type'
-        criticality:
-          $ref: '#/components/schemas/Criticality'
-        equipment:
-          $ref: '#/components/schemas/EquipmentShortDto'
-        status:
-          $ref: '#/components/schemas/Status'
-        category:
-          $ref: '#/components/schemas/ReportCategory'
-        lastModificationDate:
-          $ref: '#/components/schemas/DateTime'
-        creationDate:
-          $ref: '#/components/schemas/DateTime'
-        closeDate:
-          $ref: '#/components/schemas/DateTime'
-        externalSourceRef:
-          type: string
-        procedureId:
-          $ref: '#/components/schemas/UUID'
-        linkedEvents:
-          type: number
-          description: Number of events that have the same procedure as the current event
-        procedureProgress:
-          type: number
-          description: Percentage progress of the procedure
-    OperatorEventReadDto:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        address:
-          type: string
-        description:
-          type: string
-        type:
-          $ref: '#/components/schemas/Type'
-        criticality:
-          $ref: '#/components/schemas/Criticality'
-        equipment:
-          $ref: '#/components/schemas/EquipmentShortDto'
-        status:
-          $ref: '#/components/schemas/Status'
-        category:
-          $ref: '#/components/schemas/OperatorCategory'
         lastModificationDate:
           $ref: '#/components/schemas/DateTime'
         creationDate:
@@ -2241,10 +2062,7 @@ components:
         events:
           type: array
           items:
-            oneOf:
-              - $ref: '#/components/schemas/OperatorEventReadDto'
-              - $ref: '#/components/schemas/AlertEventReadDto'
-              - $ref: '#/components/schemas/ReportEventReadDto'
+            $ref: '#/components/schemas/EventReadDto'
         actions:
           type: array
           items:
@@ -2259,14 +2077,11 @@ components:
         events:
           type: array
           items:
-            oneOf:
-              - $ref: '#/components/schemas/OperatorEventWriteDto'
-              - $ref: '#/components/schemas/AlertEventWriteDto'
-              - $ref: '#/components/schemas/ReportEventWriteDto'
+            $ref: '#/components/schemas/EventWriteDto'
         actions:
           type: array
           items:
-            $ref: '#/components/schemas/ActionReadDto'
+            $ref: '#/components/schemas/ActionWriteDto'
     ProcedureModelWriteDto:
       type: object
       properties:
@@ -2320,8 +2135,6 @@ components:
           $ref: '#/components/schemas/UUID'
         name:
           type: string
-        type:
-          $ref: '#/components/schemas/Type'
         criticality:
           $ref: '#/components/schemas/Criticality'
         status:
@@ -2329,23 +2142,18 @@ components:
         lastModificationDate:
           $ref: '#/components/schemas/DateTime'
         category:
-          oneOf:
-            - $ref: '#/components/schemas/AlertCategory'
-            - $ref: '#/components/schemas/OperatorCategory'
-            - $ref: '#/components/schemas/ReportCategory'
+          type: string
+          description: must be a known category
         interventionRequestTitle:
           type: string
           description: The last in progress or new intervention request title
         interventionRequestCount:
           type: integer
           description: The total number of intervention requests linked to the procedure event
-        manifestation:
-          type: object
-          properties:
-            startDate:
-              $ref: '#/components/schemas/DateTime'
-            endDate:
-              $ref: '#/components/schemas/DateTime'
+        startDate:
+          $ref: '#/components/schemas/DateTime'
+        endDate:
+          $ref: '#/components/schemas/DateTime'
     EventsSummariesByStatusDto:
       type: object
       properties:

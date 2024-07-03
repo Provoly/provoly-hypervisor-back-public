@@ -5,16 +5,18 @@ import static com.provoly.service.ServiceStatus.ASKED;
 import static com.provoly.service.ServiceStatus.IN_PROGRESS;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
 import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.Family;
-import com.provoly.event.Category;
 import com.provoly.event.Criticality;
 import com.provoly.event.Domain;
+import com.provoly.event.EventService;
 import com.provoly.service.ServiceStatus;
 
 import org.jboss.logging.Logger;
@@ -23,14 +25,17 @@ import org.jboss.logging.Logger;
 public class MetricsService {
     public static final String ARMOIRE_CODE = "EP_ARMOIRE";
     public static final String FOYER_LUMINEUX_CODE = "EP_FOYER_LUMINEUX";
-    private Logger logger;
-    private MetricsDatabaseReader metricsDatabaseReader;
-    private EquipmentService equipmentService;
+    private final Logger logger;
+    private final MetricsDatabaseReader metricsDatabaseReader;
+    private final EquipmentService equipmentService;
+    private final EventService eventService;
 
-    public MetricsService(Logger logger, MetricsDatabaseReader metricsDatabaseReader, EquipmentService equipmentService) {
+    public MetricsService(Logger logger, MetricsDatabaseReader metricsDatabaseReader, EquipmentService equipmentService,
+            EventService eventService) {
         this.logger = logger;
         this.metricsDatabaseReader = metricsDatabaseReader;
         this.equipmentService = equipmentService;
+        this.eventService = eventService;
     }
 
     @Transactional
@@ -47,8 +52,8 @@ public class MetricsService {
                 """.formatted(criticalities, categories, entities, places));
 
         var eventCriticalities = criticalities.stream().map(Criticality::fromString).toList();
-        var eventCategories = categories.stream().map(Category::fromString).toList();
-        var districts = places.stream().map(code -> equipmentService.getDistrictByCode(code)).toList();
+        var eventCategories = categories.stream().map(eventService::getCategory).toList();
+        var districts = places.stream().map(equipmentService::getDistrictByCode).toList();
 
         logger.debug("Get all equipment linked with at least one undone event which is not a Manifestation");
         var equipmentWithUndoneEvents = metricsDatabaseReader.getEquipmentsWithUnDoneEvents(entities, eventCriticalities,

@@ -1,15 +1,15 @@
 package com.provoly.event;
 
-import java.time.Instant;
 import java.util.Collection;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
 import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.ShortEquipmentMapper;
-import com.provoly.event.dto.*;
+import com.provoly.event.dto.EventReadDto;
+import com.provoly.event.dto.EventSummaryDto;
+import com.provoly.event.dto.EventWriteDto;
 import com.provoly.procedure.Procedure;
 import com.provoly.procedure.ProcedureService;
 
@@ -29,15 +29,15 @@ public class EventMapper {
     }
 
     public EventReadDto mapToEventReadDto(Event event) {
-        var eventDto = new EventReadDto(
+        return new EventReadDto(
                 event.getId(),
                 event.getName(),
                 event.getAddress(),
                 event.getDescription(),
                 event.getCriticality(),
-                event.getCategory(),
+                event.getCategory().getCode(),
+                event.getSubCategory() == null ? null : event.getSubCategory().getCode(),
                 event.getStatus(),
-                event.getType(),
                 event.getLastModificationDate(),
                 event.getCreationDate(),
                 event.getCloseDate(),
@@ -45,14 +45,10 @@ public class EventMapper {
                 getProcedureId(event),
                 procedureService.getLinkedEventCountByProcedure(event.getProcedure()),
                 getProgressActions(event.getProcedure()),
-                mapToString(event.getDomain()));
-
-        return switch (event) {
-            case EventOperator e -> new OperatorEventReadDto(eventDto, e.getStartDate(), e.getEndDate());
-            case EventAlert e -> new AlertEventReadDto(eventDto, e.getExternalSourceRef());
-            case EventReport e -> new ReportEventReadDto(eventDto, e.getExternalSourceRef());
-            default -> throw new IllegalStateException("Unexpected value: " + event);
-        };
+                mapToString(event.getDomain()),
+                event.getStartDate(),
+                event.getEndDate(),
+                event.getExternalSourceRef());
 
     }
 
@@ -61,43 +57,29 @@ public class EventMapper {
                 event.getName(),
                 event.getCriticality(),
                 event.getStatus(),
-                event.getType(),
                 event.getLastModificationDate(),
-                getCategory(event),
+                event.getCategory().getCode(),
                 serviceTitle,
                 (long) serviceCount,
-                getManifestationDate(event),
+                event.getStartDate(),
+                event.getEndDate(),
                 event.getProcedure() == null ? null : event.getProcedure().getId());
-    }
-
-    public void updateOperatorEvent(OperatorEventWriteDto dto, EventOperator entity) {
-        setCommonEventProperties(dto, entity);
-        entity.setStartDate(dto.getStartDate());
-        entity.setEndDate(dto.getEndDate());
-    }
-
-    public void saveAlertEvent(AlertEventWriteDto dto, EventAlert entity) {
-        setCommonEventProperties(dto, entity);
-        entity.setExternalSourceRef(dto.getExternalSourceRef());
-    }
-
-    public void updateReportEvent(ReportEventWriteDto dto, EventReport entity) {
-        setCommonEventProperties(dto, entity);
-        entity.setExternalSourceRef(dto.getExternalSourceRef());
     }
 
     public Collection<EventReadDto> mapToEventReadDto(Stream<Event> events) {
         return events.map(this::mapToEventReadDto).toList();
     }
 
-    private void setCommonEventProperties(EventWriteDto dto, Event entity) {
+    public void updateEvent(EventWriteDto dto, Event entity) {
         entity.setName(dto.getName());
         entity.setAddress(dto.getAddress());
         entity.setDescription(dto.getDescription());
         entity.setCriticality(dto.getCriticality());
-        entity.setCategory(dto.getCategory());
+        entity.setCategory(mapToCategory(dto));
         entity.setDomain(mapToDomain(dto.getDomain()));
         entity.setEquipment(equipmentService.getEquipmentByIdOrNull(dto.getEquipmentId()));
+        entity.setStartDate(dto.getStartDate());
+        entity.setEndDate(dto.getEndDate());
     }
 
     private String mapToString(Domain domain) {
@@ -112,6 +94,12 @@ public class EventMapper {
                 .orElseThrow(() -> new IllegalArgumentException("Domain with code %s invalid".formatted(domain)));
     }
 
+    private Category mapToCategory(EventWriteDto dto) {
+        var category = dto.getSubCategory() == null ? dto.getCategory() : dto.getSubCategory();
+        return databaseReader.getCategoryByCode(category)
+                .orElseThrow(() -> new IllegalArgumentException("Category with code %s invalid".formatted(category)));
+    }
+
     private float getProgressActions(Procedure procedure) {
         return procedure == null ? 0 : procedure.getProcedureProgress();
     }
@@ -120,22 +108,4 @@ public class EventMapper {
         return event.getProcedure() != null ? event.getProcedure().getId() : null;
     }
 
-    private Map<String, Instant> getManifestationDate(Event event) {
-        if (event.getType() == EventType.OPERATOR) {
-            EventOperator eventOp = (EventOperator) event;
-            if (eventOp.getCategory() == Category.MANIFESTATION) {
-                return Map.of("startDate", eventOp.getStartDate(), "endDate", eventOp.getEndDate());
-            }
-        }
-        return null;
-    }
-
-    private String getCategory(Event event) {
-        return switch (event) {
-            case EventOperator e -> e.getCategory().name();
-            case EventAlert e -> e.getCategory().name();
-            case EventReport e -> e.getCategory().name();
-            default -> throw new IllegalStateException("Unexpected value: " + event);
-        };
-    }
 }

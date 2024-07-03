@@ -11,10 +11,9 @@ import jakarta.inject.Inject;
 
 import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.EquipmentWriteDto;
-import com.provoly.event.Category;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventService;
-import com.provoly.event.dto.ReportEventWriteDto;
+import com.provoly.event.dto.EventWriteDto;
 import com.provoly.service.ServiceService;
 import com.provoly.service.ServiceWriteDto;
 
@@ -70,6 +69,7 @@ public class EnrichedProducerTest {
     @Test
     public void should_consume_enriched_equipment_when_update_events() {
         // given
+        // save equipments
         companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
         var equipment = new EquipmentWriteDto("technical_id", 0, "equipment", "306", "EP", "Armoire", "CHALONS_COMMUN", "CH",
                 "address", "CH_C", null, false, null);
@@ -77,13 +77,36 @@ public class EnrichedProducerTest {
                 "address", "CH_C", null, false, null);
         equipmentService.saveOrUpdateEquipments(List.of(equipment, equipment2)); // 2 messages
 
+        // save event 
         var equipId = equipmentService.getEquipments(List.of("CHALONS_COMMUN")).stream().findFirst().get().getId();
-        var savedEvent = eventService.saveEvent(new ReportEventWriteDto(null, "toto",
-                "desc", Criticality.HIGH, "address", equipId, Category.REPORT, "ref", "EP")); // 1 message
+        var event = new EventWriteDto(null,
+                "saved event",
+                "desc",
+                Criticality.HIGH,
+                "OUTOFORDER",
+                null,
+                "address",
+                equipId,
+                "EP",
+                null,
+                null,
+                "source");
+        var savedEvent = eventService.saveEvent(event); // 1 message
 
+        // update event 
         var equipId2 = equipmentService.getEquipments(List.of("AGGLO_COMMUN")).stream().findFirst().get().getId();
-        var eventUpdated = new ReportEventWriteDto(savedEvent.getId(), "toto",
-                "desc", Criticality.HIGH, "address", equipId2, Category.REPORT, "ref", "EP");
+        var eventUpdated = new EventWriteDto(savedEvent.getId(),
+                "totoooo",
+                "desc",
+                Criticality.HIGH,
+                "OUTOFORDER",
+                null,
+                "address",
+                equipId2,
+                "EP",
+                null,
+                null,
+                null);
         eventService.updateEvent(savedEvent.getId(), eventUpdated); // 2 messages : one for updated event and one for previous equipment
 
         // when
@@ -106,8 +129,19 @@ public class EnrichedProducerTest {
         equipmentService.saveOrUpdateEquipments(List.of(equipment, equipment2)); // 2 messages
 
         var equipId = equipmentService.getEquipments(List.of("CHALONS_COMMUN")).stream().findFirst().get().getId();
-        var event = new ReportEventWriteDto(null, "tutu",
-                "desc", Criticality.HIGH, "address", equipId, Category.REPORT, "ref", "EP");
+
+        var event = new EventWriteDto(null,
+                "toto",
+                "desc",
+                Criticality.HIGH,
+                "OUTOFORDER",
+                null,
+                "adress",
+                equipId,
+                "EP",
+                null,
+                null,
+                "source");
         eventService.saveEvent(event); // 1 messages
 
         // when
@@ -127,7 +161,15 @@ public class EnrichedProducerTest {
         equipmentService.saveOrUpdateEquipments(List.of(equipment)); // 1 messages
 
         var service = new ServiceWriteDto("technical_id1", "",
-                "306", Instant.now(), Instant.now(), Instant.now(), Instant.now(), null, "EP", ASKED, "CURA");
+                "306",
+                Instant.now(),
+                Instant.now(),
+                Instant.now(),
+                Instant.now(),
+                null,
+                "EP",
+                ASKED,
+                "CURA");
         serviceService.saveOrUpdateServices(List.of(service)); // 1 message
 
         // when

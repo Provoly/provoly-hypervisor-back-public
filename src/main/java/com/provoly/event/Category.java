@@ -1,23 +1,18 @@
 package com.provoly.event;
 
-public enum Category {
-    MANIFESTATION(EventType.OPERATOR),
-    OPERATOR(EventType.OPERATOR),
-    REPORT(EventType.REPORT),
-    LIMIT(EventType.ALERT),
-    MALFUNCTION(EventType.ALERT);
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
-    private final EventType eventType;
+import com.provoly.EnumEntity;
 
-    Category(EventType eventType) {
-        this.eventType = eventType;
-    }
+@Entity
+public class Category extends EnumEntity {
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Category parent;
 
-    public EventType getEventType() {
-        return eventType;
-    }
-
-    public static Category fromString(String category) {
-        return category == null ? null : valueOf(category);
+    public Category getParent() {
+        return parent;
     }
 }

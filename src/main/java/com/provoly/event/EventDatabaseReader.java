@@ -4,13 +4,16 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
 
 import com.provoly.DatabaseReader;
-import com.provoly.equipment.*;
+import com.provoly.equipment.EquipmentEntity;
+import com.provoly.equipment.Equipment_;
+import com.provoly.equipment.Family;
 import com.provoly.procedure.Procedure_;
 
 import org.jboss.logging.Logger;
@@ -70,7 +73,7 @@ public class EventDatabaseReader extends DatabaseReader {
         }
 
         if (!categories.isEmpty()) {
-            logger.debugf("filter on categories %s", criticalities);
+            logger.debugf("filter on categories %s", categories);
             predicates.add(root.get(Event_.category).in(categories));
         }
 
@@ -196,6 +199,40 @@ public class EventDatabaseReader extends DatabaseReader {
                 .findFirst()
                 .isPresent();
 
+    }
+
+    public Collection<Category> getCategories() {
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<Category> criteriaQuery = builder.createQuery(Category.class);
+        Root<Category> root = criteriaQuery.from(Category.class);
+
+        return em.createQuery(criteriaQuery.select(root))
+                .getResultList();
+    }
+
+    public Optional<Category> getCategoryByCode(String code) {
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<Category> criteriaQuery = builder.createQuery(Category.class);
+        Root<Category> root = criteriaQuery.from(Category.class);
+
+        var query = criteriaQuery.select(root)
+                .where(builder.equal(root.get(Category_.code), code));
+
+        return em.createQuery(query)
+                .getResultStream()
+                .findFirst();
+    }
+
+    public Stream<Category> getSubCategories(Category category) {
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<Category> criteriaQuery = builder.createQuery(Category.class);
+        Root<Category> root = criteriaQuery.from(Category.class);
+
+        var query = criteriaQuery.select(root)
+                .where(builder.equal(root.get(Category_.parent), category));
+
+        return em.createQuery(query)
+                .getResultStream();
     }
 
 }

@@ -202,7 +202,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
     }
 
     private Predicate<Event> isNotManifestation() {
-        return event -> event.getCategory() != Category.MANIFESTATION;
+        return event -> !event.getCategory().getCode().equals("MANIFESTATION");
     }
 
     private Predicate<Event> isOneOfCriticality(Collection<Criticality> criticalities) {

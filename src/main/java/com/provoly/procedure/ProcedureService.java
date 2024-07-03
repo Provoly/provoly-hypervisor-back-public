@@ -9,7 +9,6 @@ import com.provoly.action.ActionMapper;
 import com.provoly.action.ActionService;
 import com.provoly.event.Event;
 import com.provoly.event.EventService;
-import com.provoly.event.dto.AlertEventWriteDto;
 import com.provoly.model.ProcedureModel;
 
 import org.jboss.logging.Logger;
@@ -62,8 +61,8 @@ public class ProcedureService {
         var procedure = databaseReader.getProcedureById(id);
         logger.debug("Update events");
         for (var event : dto.events()) {
-            if (event instanceof AlertEventWriteDto) {
-                logger.debugf("Can't update alert event with id %s", dto.id());
+            if (event.getExternalSourceRef() != null) {
+                logger.debugf("Event %s has an external source and can't be updated. Skipping.", event.getId());
                 continue;
             }
             eventService.updateEvent(event.getId(), event);

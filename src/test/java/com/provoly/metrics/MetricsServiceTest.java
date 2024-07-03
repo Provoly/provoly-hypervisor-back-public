@@ -10,10 +10,9 @@ import jakarta.inject.Inject;
 
 import com.provoly.TestDataService;
 import com.provoly.equipment.EquipmentService;
-import com.provoly.event.Category;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventService;
-import com.provoly.event.dto.ReportEventWriteDto;
+import com.provoly.event.dto.EventWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
 
@@ -62,7 +61,7 @@ public class MetricsServiceTest {
         assertThat(result).extracting("nbServiceTodoWithEquip_FL").isEqualTo(0L);
         assertThat(result).extracting("nbServiceInProgressWithEquip_FL").isEqualTo(0L);
 
-        assertThat(result).extracting("nbEquipWithEvent_unmanaged").isEqualTo(3L);
+        assertThat(result).extracting("nbEquipWithEvent_unmanaged").isEqualTo(2L);
         assertThat(result).extracting("totalEquipWithEvent_unmanaged").isEqualTo(4L);
         assertThat(result).extracting("nbServiceTodoWithEquip_unmanaged").isEqualTo(1L);
         assertThat(result).extracting("nbServiceInProgressWithEquip_unmanaged").isEqualTo(0L);
@@ -94,7 +93,7 @@ public class MetricsServiceTest {
     void should_get_equipment_from_agglo_with_event_metrics_with_criticality_low_medium_and_category_alert() {
         // when
         var result = metricsService.getEquipmentsWithEventMetrics(List.of(Criticality.LOW.name(), Criticality.MEDIUM.name()),
-                List.of(Category.LIMIT.name(), Category.MALFUNCTION.name()), List.of("AGGLO_COMMUN"), List.of());
+                List.of("LIMIT", "OUTOFORDER"), List.of("AGGLO_COMMUN"), List.of());
 
         //then
         assertThat(result).extracting("nbEquipWithEvent_A").isEqualTo(0L);
@@ -117,19 +116,23 @@ public class MetricsServiceTest {
     void should_get_distinct_equipment_with_event_metrics_when_linked_to_many_events() {
         //given
         var result = metricsService.getEquipmentsWithEventMetrics(List.of(), List.of(), List.of(), List.of());
-        assertThat(result).extracting("nbEquipWithEvent_unmanaged").isEqualTo(3L);
+        assertThat(result).extracting("nbEquipWithEvent_unmanaged").isEqualTo(2L);
 
         // when adding a new event for an unmanaged equipment
-        var equipUnmanaged = equipmentService.getEquipmentByName("P-1000");
-        eventService.saveEvent(new ReportEventWriteDto(null,
+        var equipUnmanaged = equipmentService.getEquipmentByName("C-762");
+
+        eventService.saveEvent(new EventWriteDto(null,
                 "new report event",
                 "description",
                 Criticality.LOW,
+                "LIMIT",
+                null,
                 "address",
                 equipUnmanaged.getId(),
-                Category.REPORT,
-                "ref",
-                "EP"));
+                "EP",
+                null,
+                null,
+                null));
 
         var resultUpdated = metricsService.getEquipmentsWithEventMetrics(List.of(), List.of(), List.of(), List.of());
 

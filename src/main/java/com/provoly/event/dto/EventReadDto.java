@@ -3,9 +3,7 @@ package com.provoly.event.dto;
 import java.time.Instant;
 
 import com.provoly.equipment.EquipmentShortDto;
-import com.provoly.event.Category;
 import com.provoly.event.Criticality;
-import com.provoly.event.EventType;
 import com.provoly.event.Status;
 
 public class EventReadDto {
@@ -14,9 +12,9 @@ public class EventReadDto {
     private String address;
     private String description;
     private Criticality criticality;
-    private Category category;
+    private String category;
+    private String subCategory;
     private Status status;
-    private EventType type;
     private Instant lastModificationDate;
     private Instant creationDate;
     private Instant closeDate;
@@ -25,14 +23,18 @@ public class EventReadDto {
     private long linkedEvents;
     private float procedureProgress;
     private String domain;
+    private Instant startDate;
+    private Instant endDate;
+    private String externalSourceRef;
 
     public EventReadDto(Integer id,
             String name,
             String address,
             String description,
-            Criticality criticality, Category category,
+            Criticality criticality,
+            String category,
+            String subCategory,
             Status status,
-            EventType type,
             Instant lastModificationDate,
             Instant creationDate,
             Instant closeDate,
@@ -40,15 +42,17 @@ public class EventReadDto {
             Integer procedureId,
             long linkedEvents,
             float procedureProgress,
-            String domain) {
+            String domain,
+            Instant startDate,
+            Instant endDate, String externalSourceRef) {
         this.id = id;
         this.name = name;
         this.address = address;
         this.description = description;
         this.criticality = criticality;
         this.category = category;
+        this.subCategory = subCategory;
         this.status = status;
-        this.type = type;
         this.lastModificationDate = lastModificationDate;
         this.creationDate = creationDate;
         this.closeDate = closeDate;
@@ -57,6 +61,9 @@ public class EventReadDto {
         this.linkedEvents = linkedEvents;
         this.procedureProgress = procedureProgress;
         this.domain = domain;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.externalSourceRef = externalSourceRef;
     }
 
     public EventReadDto(EventReadDto dto) {
@@ -66,7 +73,6 @@ public class EventReadDto {
         this.description = dto.getDescription();
         this.criticality = dto.getCriticality();
         this.status = dto.getStatus();
-        this.type = dto.getType();
         this.lastModificationDate = dto.getLastModificationDate();
         this.creationDate = dto.getCreationDate();
         this.closeDate = dto.getCloseDate();
@@ -76,6 +82,10 @@ public class EventReadDto {
         this.procedureProgress = dto.getProcedureProgress();
         this.domain = dto.getDomain();
         this.category = dto.getCategory();
+        this.subCategory = dto.getSubCategory();
+        this.startDate = dto.getStartDate();
+        this.endDate = dto.getEndDate();
+        this.externalSourceRef = dto.getExternalSourceRef();
     }
 
     public Integer getId() {
@@ -98,16 +108,16 @@ public class EventReadDto {
         return criticality;
     }
 
-    public Category getCategory() {
+    public String getCategory() {
         return category;
+    }
+
+    public String getSubCategory() {
+        return subCategory;
     }
 
     public Status getStatus() {
         return status;
-    }
-
-    public EventType getType() {
-        return type;
     }
 
     public Instant getLastModificationDate() {
@@ -142,7 +152,15 @@ public class EventReadDto {
         return domain;
     }
 
-    public void setDomain(String domain) {
-        this.domain = domain;
+    public Instant getStartDate() {
+        return startDate;
+    }
+
+    public Instant getEndDate() {
+        return endDate;
+    }
+
+    public String getExternalSourceRef() {
+        return externalSourceRef;
     }
 }

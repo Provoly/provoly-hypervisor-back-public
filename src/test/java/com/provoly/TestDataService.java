@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -18,6 +19,7 @@ import jakarta.transaction.Transactional;
 import com.provoly.action.AskedService;
 import com.provoly.equipment.*;
 import com.provoly.event.*;
+import com.provoly.event.dto.EventWriteDto;
 import com.provoly.model.ProcedureModel;
 import com.provoly.procedure.Procedure;
 import com.provoly.service.Service;
@@ -28,23 +30,31 @@ import com.provoly.service.ServiceDatabaseReader;
 public class TestDataService {
     private EntityManager em;
     private EquipmentDatabaseReader equipmentDatabaseReader;
+    private EventDatabaseReader eventDatabaseReader;
     private ServiceDatabaseReader serviceDatabaseReader;
     private Random rand = new Random();
-    private Procedure procedure1, procedure2, procedure3;
+    private Map<String, Category> categories;
+    private Procedure procedure1, procedure3;
     private Event event1, doneEvent, associatedEvent;
     private Domain domainEP;
     private ServiceCategory prev;
     private ServiceCategory cura;
 
     public TestDataService(EntityManager em, EquipmentDatabaseReader equipmentDatabaseReader,
+            EventDatabaseReader eventDatabaseReader,
             ServiceDatabaseReader serviceDatabaseReader) {
         this.em = em;
         this.equipmentDatabaseReader = equipmentDatabaseReader;
+        this.eventDatabaseReader = eventDatabaseReader;
         this.serviceDatabaseReader = serviceDatabaseReader;
     }
 
     @Transactional
     public void init() {
+        categories = eventDatabaseReader.getCategories()
+                .stream()
+                .collect(Collectors.toMap(Category::getCode, c -> c));
+
         domainEP = equipmentDatabaseReader.getDomainByCode("EP").get();
         var domainVP = equipmentDatabaseReader.getDomainByCode("VP").get();
         prev = serviceDatabaseReader.getServiceCategoryByCode("PREV").get();
@@ -86,14 +96,15 @@ public class TestDataService {
         var asked2 = new AskedService(UUID.randomUUID(), Status.NEW, "service 2");
         var asked6 = new AskedService(UUID.randomUUID(), Status.DONE, "service 6");
 
-        event1 = initOperatorEvent("operator1", Category.OPERATOR, Criticality.LOW, Status.NEW, equip1);
-        associatedEvent = initOperatorEvent("manfestation1", Category.MANIFESTATION, Criticality.MEDIUM, Status.IN_PROGRESS,
-                equip2);
-        initReportEvent("report1", Criticality.LOW, Status.NEW, equip6);
-        var event4 = initReportEvent("report2", Criticality.HIGH, Status.IN_PROGRESS, equip3);
-        doneEvent = initReportEvent("report3", Criticality.MEDIUM, Status.DONE, equip6);
-        var event6 = initAlertEvent("malfunction1", Category.MALFUNCTION, Criticality.LOW, Status.IN_PROGRESS, equip4);
-        initAlertEvent("limit1", Category.LIMIT, Criticality.LOW, Status.NEW, equip7);
+        event1 = initEvent("operator1", categories.get("MANIFESTATION"), Criticality.LOW, Status.NEW, equip1, null);
+        associatedEvent = initEvent("manfestation1", categories.get("MANIFESTATION"), Criticality.MEDIUM, Status.IN_PROGRESS,
+                equip2, null);
+        initEvent("report1", categories.get("OUTOFORDER"), Criticality.LOW, Status.NEW, equip6, "source");
+        var event4 = initEvent("report2", categories.get("OUTOFORDER"), Criticality.HIGH, Status.IN_PROGRESS, equip3, "source");
+        doneEvent = initEvent("report3", categories.get("OUTOFORDER"), Criticality.MEDIUM, Status.DONE, equip6, null);
+        var event6 = initEvent("malfunction1", categories.get("OUTOFORDER"), Criticality.LOW, Status.IN_PROGRESS, equip4,
+                "source");
+        initEvent("limit1", categories.get("LIMIT"), Criticality.LOW, Status.NEW, equip7, "source");
 
         procedure1 = initProcedure("procedure1", List.of(asked1, asked2), List.of(associatedEvent));
         procedure3 = initProcedure("procedure3", List.of(asked6), List.of(event4, event6));
@@ -130,6 +141,10 @@ public class TestDataService {
         return procedure3;
     }
 
+    public Category getCategory(String code) {
+        return categories.get(code);
+    }
+
     public Event getEvent1() {
         return event1;
     }
@@ -140,6 +155,22 @@ public class TestDataService {
 
     public Event getAssociatedEvent() {
         return associatedEvent;
+    }
+
+    public EventWriteDto buildEvent(String name, String category, Criticality criticality, boolean isWithDate,
+            boolean externalSource) {
+        return new EventWriteDto(null,
+                name,
+                "desc",
+                criticality,
+                category,
+                null,
+                null,
+                null,
+                null,
+                isWithDate ? Instant.now() : null,
+                isWithDate ? Instant.now().minusMillis(1000) : null,
+                externalSource ? "source" : null);
     }
 
     @Transactional
@@ -162,40 +193,14 @@ public class TestDataService {
         return procedure;
     }
 
-    private Event initOperatorEvent(String name, Category category, Criticality criticality, Status status,
-            Equipment equipment) {
-        var event = (EventOperator) initEvent(EventType.OPERATOR, name, category, criticality, status, equipment);
-        if (event.getCategory() == Category.MANIFESTATION) {
-            event.setStartDate(Instant.now());
-            event.setEndDate(Instant.now());
-        }
-        em.persist(event);
-        return event;
-    }
+    private Event initEvent(String name,
+            Category category,
+            Criticality criticality,
+            Status status,
+            Equipment equipment,
+            String externalRef) {
 
-    private Event initAlertEvent(String name, Category category, Criticality criticality, Status status,
-            Equipment equipment) {
-        var event = (EventAlert) initEvent(EventType.ALERT, name, category, criticality, status, equipment);
-        event.setExternalSourceRef("external_source_ref");
-        em.persist(event);
-        return event;
-    }
-
-    private Event initReportEvent(String name, Criticality criticality, Status status,
-            Equipment equipment) {
-        var event = (EventReport) initEvent(EventType.REPORT, name, Category.REPORT, criticality, status, equipment);
-        event.setExternalSourceRef("external_source_ref");
-        em.persist(event);
-        return event;
-    }
-
-    private Event initEvent(EventType type, String name, Category category, Criticality criticality, Status status,
-            Equipment equipment) {
-        var event = switch (type) {
-            case ALERT -> new EventAlert();
-            case REPORT -> new EventReport();
-            case OPERATOR -> new EventOperator();
-        };
+        var event = new Event();
 
         event.setName(name);
         event.setAddress("event address");
@@ -211,6 +216,13 @@ public class TestDataService {
         if (equipment != null) {
             event.setEquipment(equipment);
         }
+        if (category.getCode().equals("MANIFESTATION")) {
+            event.setStartDate(Instant.now());
+            event.setEndDate(Instant.now());
+        } else {
+            event.setExternalSourceRef(externalRef);
+        }
+        em.persist(event);
         return event;
     }
 

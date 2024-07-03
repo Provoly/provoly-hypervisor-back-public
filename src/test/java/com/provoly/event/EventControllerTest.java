@@ -13,7 +13,7 @@ import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
 
 import com.provoly.TestDataService;
-import com.provoly.event.dto.OperatorEventWriteDto;
+import com.provoly.event.dto.EventWriteDto;
 
 import io.quarkus.security.UnauthorizedException;
 import io.quarkus.test.junit.QuarkusTest;
@@ -171,12 +171,12 @@ public class EventControllerTest {
                 null,
                 List.of(),
                 List.of(Status.IN_PROGRESS.name()),
-                List.of(Category.MANIFESTATION.name(), Category.LIMIT.name(), Category.REPORT.name()),
+                List.of("MANIFESTATION", "LIMIT", "OUTOFORDER"),
                 List.of(),
                 List.of());
         //then
         assertThat(events).extracting("status").containsOnly(Status.IN_PROGRESS);
-        assertThat(events).extracting("category").containsOnly(Category.MANIFESTATION, Category.REPORT);
+        assertThat(events).extracting("category").containsOnly("MANIFESTATION", "OUTOFORDER");
     }
 
     @Test
@@ -366,7 +366,7 @@ public class EventControllerTest {
         assertThat(result.get(Status.IN_PROGRESS).events())
                 .extracting("serviceTitle").isNotEmpty();
         assertThat(result.get(Status.IN_PROGRESS).events())
-                .extracting("serviceCount").containsExactly(1L);
+                .extracting("serviceCount").containsExactly(0L);
 
         assertThat(result.get(Status.DONE).events())
                 .extracting("serviceTitle").isNotEmpty();
@@ -374,8 +374,7 @@ public class EventControllerTest {
                 .extracting("serviceCount").containsExactly(0L);
 
         assertThat(result.get(Status.NEW).events())
-                .extracting("manifestation").containsOnlyNulls();
-
+                .extracting("startDate").containsOnlyNulls();
     }
 
     @Test
@@ -436,7 +435,18 @@ public class EventControllerTest {
     @TestSecurity(user = "reader")
     void should_throw_create_event_missing_required_property() {
         // given
-        var event = new OperatorEventWriteDto(null, null, "desc", null, null, null, null, null, null, null);
+        var event = new EventWriteDto(null,
+                null,
+                "desc",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
 
         // then
         assertThatThrownBy(() -> eventController.saveEvent(event))
@@ -447,8 +457,7 @@ public class EventControllerTest {
     @TestSecurity(user = "reader")
     void should_throw_if_name_blank_when_create_event() {
         // given
-        var event = new OperatorEventWriteDto(null, "", "desc", Criticality.MEDIUM, "adress", null,
-                Category.OPERATOR, null, null, null);
+        var event = dataService.buildEvent("", "LIMIT", Criticality.MEDIUM, false, false);
 
         // then
         assertThatThrownBy(() -> eventController.saveEvent(event))
@@ -459,11 +468,10 @@ public class EventControllerTest {
     @TestSecurity(user = "reader")
     void should_throw_if_category_invalid_when_create_event() {
         // given
-        var event = new OperatorEventWriteDto(null, "event operator", "desc", Criticality.MEDIUM, "adress", null,
-                Category.REPORT, null, null, null);
+        var event = dataService.buildEvent("out of order", "OUTOF", Criticality.MEDIUM, false, false);
 
         // then
         assertThatThrownBy(() -> eventController.saveEvent(event))
-                .isInstanceOf(ConstraintViolationException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

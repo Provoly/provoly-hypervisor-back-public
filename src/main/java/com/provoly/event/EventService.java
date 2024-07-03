@@ -9,13 +9,17 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.ForbiddenException;
 
+import com.provoly.EnumEntity;
 import com.provoly.EquipmentEnrichedProducer;
 import com.provoly.action.ActionType;
 import com.provoly.action.AskedService;
 import com.provoly.equipment.Equipment;
 import com.provoly.equipment.EquipmentService;
-import com.provoly.event.dto.*;
+import com.provoly.event.dto.EventSummaryDto;
+import com.provoly.event.dto.EventWriteDto;
+import com.provoly.event.dto.EventsSummariesByStatusDto;
 import com.provoly.service.Service;
 import com.provoly.service.ServiceService;
 
@@ -124,7 +128,7 @@ public class EventService {
                 .map(equipmentService::getFamilyByCode).toList();
 
         var categories = category.stream()
-                .map(Category::valueOf).toList();
+                .map(this::getCategory).toList();
 
         return databaseReader.getEvents(page,
                 pageSize,
@@ -148,6 +152,14 @@ public class EventService {
     }
 
     @Transactional
+    public Category getCategory(String category) {
+        logger.debugf("Get category with code %s", category);
+        return category != null ? databaseReader.getCategoryByCode(category)
+                .orElseThrow(() -> new IllegalArgumentException("Category %s invalid".formatted(category)))
+                : null;
+    }
+
+    @Transactional
     public Event getEventDetails(Integer id) {
         logger.infof("Get event details with id  %s".formatted(id));
         return databaseReader.getEventById(id);
@@ -155,14 +167,17 @@ public class EventService {
 
     @Transactional
     public Event saveEvent(EventWriteDto eventDto) {
-        logger.infof("Create %s event with name %s".formatted(eventDto.getType(), eventDto.getName()));
-        checkIsNameAlreadyExists(eventDto.getName());
-        var event = switch (eventDto) {
-            case OperatorEventWriteDto dto -> saveOperatorEvent(dto);
-            case ReportEventWriteDto dto -> saveReportEvent(dto);
-            case AlertEventWriteDto dto -> saveAlertEvent(dto);
-            default -> throw new IllegalStateException("Unexpected value: " + eventDto);
-        };
+        logger.infof("Create %s event with name %s".formatted(eventDto.getCategory(), eventDto.getName()));
+        checkNameAlreadyExists(eventDto.getName());
+        checkManifestationCategory(eventDto);
+        checkSubCategoryCoherence(eventDto);
+
+        if (eventDto.getExternalSourceRef() != null && eventDto.getEquipmentId() == null) {
+            throw new ForbiddenException("Events with external source must provide an equipment.");
+        }
+
+        Event event = new Event();
+        eventMapper.updateEvent(eventDto, event);
         databaseReader.saveEvent(event);
         enrichEquipmentFromUpdatedEvent(event.getId(), eventDto.getEquipmentId(), null);
         logger.debugf("Event %s is created".formatted(event.getId()));
@@ -171,23 +186,23 @@ public class EventService {
 
     @Transactional
     public void updateEvent(Integer id, EventWriteDto eventDto) {
+        logger.infof("Update %s event with name %s".formatted(eventDto.getCategory(), eventDto.getName()));
+        checkManifestationCategory(eventDto);
+        checkSubCategoryCoherence(eventDto);
+
         Event eventToUpdate = databaseReader.getEventById(id);
         var previousEquipmentId = eventToUpdate.getEquipment() != null ? eventToUpdate.getEquipment().getId() : null;
 
-        if (!eventDto.getName().equals(eventToUpdate.getName())) {
-            checkIsNameAlreadyExists(eventDto.getName());
+        if (eventDto.getExternalSourceRef() != null) {
+            throw new ForbiddenException("Event %s has an external source and can't be updated.".formatted(eventDto.getId()));
         }
 
-        switch (eventDto) {
-            case OperatorEventWriteDto dto -> updateOperatorEvent(dto, (EventOperator) eventToUpdate);
-            case ReportEventWriteDto dto -> updateReportEvent(dto, (EventReport) eventToUpdate);
-            case AlertEventWriteDto dto -> {
-                logger.errorf("It's not possible to update event %s of type Alert.".formatted(dto.getId()));
-                throw new IllegalArgumentException(
-                        "It's not possible to update event %s of type Alert.".formatted(dto.getId()));
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + eventDto);
+        if (!eventDto.getName().equals(eventToUpdate.getName())) {
+            checkNameAlreadyExists(eventDto.getName());
         }
+
+        eventMapper.updateEvent(eventDto, eventToUpdate);
+        logger.debugf("Event %s is updated".formatted(id));
         enrichEquipmentFromUpdatedEvent(id, eventDto.getEquipmentId(), previousEquipmentId);
     }
 
@@ -216,48 +231,12 @@ public class EventService {
         }
     }
 
-    private Event saveAlertEvent(AlertEventWriteDto dto) {
-        if (dto.getEquipmentId() == null) {
-            throw new IllegalArgumentException("Alert event must reference an equipment");
-        }
-
-        EventAlert event = new EventAlert();
-        eventMapper.saveAlertEvent(dto, event);
-        return event;
-    }
-
-    private Event saveOperatorEvent(OperatorEventWriteDto dto) {
-        checkManifestationCategory(dto);
-        EventOperator event = new EventOperator();
-        eventMapper.updateOperatorEvent(dto, event);
-        logger.debugf("Event %s successfully created".formatted(dto.getId()));
-        return event;
-    }
-
-    private Event saveReportEvent(ReportEventWriteDto dto) {
-        EventReport event = new EventReport();
-        eventMapper.updateReportEvent(dto, event);
-        logger.debugf("Event %s successfully created".formatted(dto.getId()));
-        return event;
-    }
-
-    private void updateOperatorEvent(OperatorEventWriteDto dto, EventOperator eventEntity) {
-        checkManifestationCategory(dto);
-        eventMapper.updateOperatorEvent(dto, eventEntity);
-        logger.debugf("Event %s successfully updated".formatted(dto.getId()));
-    }
-
-    private void updateReportEvent(ReportEventWriteDto dto, EventReport eventEntity) {
-        if (!eventEntity.getExternalSourceRef().equals(dto.getExternalSourceRef())) {
-            throw new IllegalArgumentException("It's not possible to update externalSourceRef value");
-        }
-        eventMapper.updateReportEvent(dto, eventEntity);
-        logger.debugf("Event %s successfully updated".formatted(dto.getId()));
-    }
-
-    private void checkManifestationCategory(OperatorEventWriteDto e) {
+    private void checkManifestationCategory(EventWriteDto e) {
         logger.debugf("Check if event %s has manifestation dates".formatted(e.getId()));
-        if (e.getCategory() == Category.MANIFESTATION) {
+        if (e.getCategory().equals("MANIFESTATION")) {
+            if (e.getExternalSourceRef() != null) {
+                throw new ForbiddenException("Manfifestation can't have an external source.");
+            }
             if (e.getStartDate() == null || e.getEndDate() == null) {
                 throw new IllegalArgumentException(
                         "Properties 'startDate' and 'endDate' are required for 'MANIFESTATION' category");
@@ -268,7 +247,26 @@ public class EventService {
         }
     }
 
-    private void checkIsNameAlreadyExists(String name) {
+    private void checkSubCategoryCoherence(EventWriteDto eventDto) {
+        var category = getCategory(eventDto.getCategory());
+        var subCategories = databaseReader.getSubCategories(category).map(EnumEntity::getCode).toList();
+
+        if (!subCategories.isEmpty()) {
+            logger.debugf("Category %s has subcategories", category);
+            if (eventDto.getSubCategory() == null || !subCategories.contains(eventDto.getSubCategory())) {
+                throw new ForbiddenException("Subcategory is required. Valid subcategories are %s for category %s"
+                        .formatted(subCategories, eventDto.getName()));
+            }
+        } else {
+            logger.debugf("Category %s has'nt subcategories", category);
+            if (eventDto.getSubCategory() != null) {
+                throw new ForbiddenException(
+                        "No subcategories are avalaible for category %s".formatted(eventDto.getCategory()));
+            }
+        }
+    }
+
+    private void checkNameAlreadyExists(String name) {
         if (databaseReader.isEventWithNameExists(name)) {
             throw new IllegalArgumentException("Event with name '%s' already exists".formatted(name));
         }

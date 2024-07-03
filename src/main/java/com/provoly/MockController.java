@@ -3,10 +3,7 @@ package com.provoly;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -45,6 +42,8 @@ public class MockController {
         var epDomain = databaseReader.getDomainByCode("EP").get();
         var vpDomain = databaseReader.getDomainByCode("VP").get();
 
+        var categories = databaseReader.getCategories();
+
         for (int i = 0; i < procedureNumber; i++) {
             var procedureModel = new ProcedureModel("modele de procédure n°%s".formatted(suffix(UUID.randomUUID())),
                     "Agathe ThePower", "desc", randomDomain(List.of(epDomain, vpDomain)), List.of());
@@ -52,31 +51,15 @@ public class MockController {
         }
 
         for (int i = 0; i <= eventNumber; i++) {
-            Event event = new EventOperator();
-            if (i % 3 == 0) {
-                event.setName("Evenement operateur %s".formatted(suffix(UUID.randomUUID())));
-                event.setCategory(randomCategory(EventType.OPERATOR));
-                if (event.getCategory() == Category.MANIFESTATION) {
-                    ((EventOperator) event).setStartDate(Instant.now());
-                    ((EventOperator) event).setEndDate(Instant.now().plus(rand.nextInt(1, 10), ChronoUnit.DAYS));
-                }
+            Event event = new Event();
+            event.setCategory(randomCategory(categories));
+            event.setName("Evenement %s %s".formatted(event.getCategory().name, suffix(UUID.randomUUID())));
 
+            if (event.getCategory().getCode().equals("MANIFESTATION")) {
+                event.setStartDate(Instant.now());
+                event.setEndDate(Instant.now().plus(rand.nextInt(1, 10), ChronoUnit.DAYS));
             }
-            if (i % 3 == 1) {
-                event = new EventAlert();
-                event.setName("Alerte %s".formatted(suffix(UUID.randomUUID())));
-                event.setCategory(randomCategory(EventType.ALERT));
-                ((EventAlert) event).setExternalSourceRef("citylinx_%s".formatted(i));
-
-            }
-            if (i % 3 == 2) {
-                event = new EventReport();
-                event.setName("Signalement %s".formatted(suffix(UUID.randomUUID())));
-                event.setCategory(Category.REPORT);
-                ((EventReport) event).setExternalSourceRef("grc_%s".formatted(i));
-
-            }
-            event.setAddress(getAddress(i));
+            event.setAddress("%s rue de Chalons".formatted(i));
             event.setDescription("description of %s".formatted(event.getName()));
             event.setCriticality(randomCriticality());
             event.setDomain(randomDomain(List.of(epDomain, vpDomain)));
@@ -104,10 +87,6 @@ public class MockController {
         return Instant.ofEpochSecond(rand.nextLong(date2 - date1) + date1);
     }
 
-    private String getAddress(int i) {
-        return "%s rue de Chalons".formatted(i);
-    }
-
     private String suffix(UUID id) {
         return id.toString().split("-")[0];
     }
@@ -121,9 +100,8 @@ public class MockController {
         return domains.get(rand.nextInt(domains.size()));
     }
 
-    private Category randomCategory(EventType type) {
-        var values = Arrays.stream(Category.values()).filter(category -> category.getEventType() == type).toList();
-        return values.get(rand.nextInt(values.size()));
+    private Category randomCategory(Collection<Category> categories) {
+        return categories.stream().toList().get(rand.nextInt(categories.size()));
     }
 
 }

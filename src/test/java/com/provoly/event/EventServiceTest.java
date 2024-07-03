@@ -7,11 +7,10 @@ import java.time.Instant;
 import java.util.List;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import com.provoly.TestDataService;
-import com.provoly.event.dto.AlertEventWriteDto;
-import com.provoly.event.dto.OperatorEventWriteDto;
-import com.provoly.event.dto.ReportEventWriteDto;
+import com.provoly.event.dto.EventWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
 
@@ -43,8 +42,7 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_create_event_name_with_already_exists() {
         // given
-        var event = new OperatorEventWriteDto(null, "operator1", "desc", Criticality.HIGH,
-                null, null, Category.OPERATOR, null, null, null);
+        var event = dataService.buildEvent("operator1", "MANIFESTATION", Criticality.HIGH, false, false);
 
         // then
         assertThatThrownBy(() -> eventService.saveEvent(event))
@@ -55,8 +53,7 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_create_operator_event_with_missing_dates() {
         // given
-        var event = new OperatorEventWriteDto(null, "tutu", "desc", Criticality.HIGH, null, null,
-                Category.MANIFESTATION, null, null, null);
+        var event = dataService.buildEvent("tutu", "MANIFESTATION", Criticality.HIGH, false, false);
 
         // then
         assertThatThrownBy(() -> eventService.saveEvent(event))
@@ -67,8 +64,7 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_create_operator_event_with_invalid_dates() {
         // given
-        var event = new OperatorEventWriteDto(null, "tutu", "desc", Criticality.HIGH, null, null,
-                Category.MANIFESTATION, Instant.now(), Instant.now().minusMillis(1000), null);
+        var event = dataService.buildEvent("tutu", "MANIFESTATION", Criticality.HIGH, true, false);
 
         // then
         assertThatThrownBy(() -> eventService.saveEvent(event))
@@ -77,67 +73,143 @@ public class EventServiceTest {
     }
 
     @Test
-    void should_throw_exception_create_alert_event_missing_equipment_id() {
+    void should_throw_exception_create_external_event_missing_equipment_id() {
         // given
-        var event = new AlertEventWriteDto(null, "tata", "desc", Criticality.HIGH, null, null,
-                null, "ref", null);
+        var event = dataService.buildEvent("alert", "LIMIT", Criticality.HIGH, false, true);
 
         // then
         assertThatThrownBy(() -> eventService.saveEvent(event))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Alert event must reference an equipment");
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("must provide an equipment.");
     }
 
     @Test
-    void should_throw_exception_update_alert_event() {
+    void should_throw_exception_update_external_event() {
         // given
         var eventAlertId = eventService
-                .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of(Category.LIMIT.name()), List.of(),
+                .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of("LIMIT"), List.of(),
                         List.of())
                 .stream()
                 .toList()
                 .getFirst()
                 .getId();
 
-        var event = new AlertEventWriteDto(eventAlertId, "tutu",
-                "desc", Criticality.HIGH, null, null, null, "ref", null);
+        var event = dataService.buildEvent("tutu", "LIMIT", Criticality.HIGH, false, true);
 
         // then
         assertThatThrownBy(() -> eventService.updateEvent(eventAlertId, event))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("It's not possible to update event");
-    }
-
-    @Test
-    void should_throw_exception_update_report_event_externalSourceRef_property() {
-        // given
-        var eventReportId = eventService
-                .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of(Category.REPORT.name()), List.of(),
-                        List.of())
-                .stream()
-                .toList()
-                .getFirst()
-                .getId();
-
-        var event = new ReportEventWriteDto(eventReportId, "toto",
-                "desc", Criticality.HIGH, null, null, null, "ref", null);
-
-        // then
-        assertThatThrownBy(() -> eventService.updateEvent(eventReportId, event))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("It's not possible to update externalSourceRef value");
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("has an external source and can't be updated.");
     }
 
     @Test
     void should_throw_exception_create_event_with_invalid_domain() {
         // given
-        var event = new OperatorEventWriteDto(null, "new event", "desc", Criticality.HIGH,
-                null, null, Category.OPERATOR, null, null, "invalid_domain");
+        var event = new EventWriteDto(null,
+                "new event",
+                "desc",
+                Criticality.HIGH,
+                "LIMIT",
+                null,
+                null,
+                null,
+                "invalid_domain",
+                null,
+                null,
+                null);
 
         // then
         assertThatThrownBy(() -> eventService.saveEvent(event))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("invalid");
+    }
+
+    @Test
+    void should_throw_exception_create_event_with_invalid_sub_category() {
+        // given
+        var event = new EventWriteDto(null,
+                "new event",
+                "desc",
+                Criticality.HIGH,
+                "ANOMALY",
+                "TOTO",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+
+        // then
+        assertThatThrownBy(() -> eventService.saveEvent(event))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("Subcategory is required");
+    }
+
+    @Test
+    void should_throw_exception_create_event_category_without_kwnown_sub_category() {
+        // given
+        var event = new EventWriteDto(null,
+                "new event",
+                "desc",
+                Criticality.HIGH,
+                "MANIFESTATION",
+                "TOTO",
+                null,
+                null,
+                null,
+                Instant.now(),
+                Instant.now(),
+                null);
+
+        // then
+        assertThatThrownBy(() -> eventService.saveEvent(event))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("No subcategories are avalaible for");
+    }
+
+    @Test
+    void should_throw_exception_create_event_external_source_without_equipment() {
+        // given
+        var event = new EventWriteDto(null,
+                "new event",
+                "desc",
+                Criticality.HIGH,
+                "LIMIT",
+                null,
+                null,
+                null,
+                null,
+                Instant.now(),
+                Instant.now(),
+                "source");
+
+        // then
+        assertThatThrownBy(() -> eventService.saveEvent(event))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("Events with external source must provide an equipment");
+    }
+
+    @Test
+    void should_throw_exception_create_event_manfifestation_with_external_source() {
+        // given
+        var event = new EventWriteDto(null,
+                "new event",
+                "desc",
+                Criticality.HIGH,
+                "MANIFESTATION",
+                "TOTO",
+                null,
+                null,
+                null,
+                Instant.now(),
+                Instant.now(),
+                "source");
+
+        // then
+        assertThatThrownBy(() -> eventService.saveEvent(event))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("can't have an external source.");
     }
 
     @Test
