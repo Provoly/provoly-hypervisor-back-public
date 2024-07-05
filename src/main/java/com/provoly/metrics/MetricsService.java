@@ -12,6 +12,7 @@ import java.util.Map;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
+import com.provoly.EnumEntity;
 import com.provoly.equipment.Equipment;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.Family;
@@ -28,6 +29,7 @@ public class MetricsService {
     public static final String ARMOIRE_CODE = "EP_ARMOIRE";
     public static final String FOYER_LUMINEUX_CODE = "EP_FOYER_LUMINEUX";
     public static final String CAMERA_CODE = "VP_CAM";
+    public static final String ANOMALY_CATEGORY = "ANOMALY";
     private final Logger logger;
     private final MetricsDatabaseReader metricsDatabaseReader;
     private final EquipmentService equipmentService;
@@ -151,6 +153,61 @@ public class MetricsService {
                 districts);
     }
 
+    @Transactional
+    public Map<String, Long> getAnomalyEventsGroupedBySubCategories(String domain, Instant date, String status) {
+        logger.infof("""
+                Get number of ANOMALY events grouped by sub categories, filter on
+                domain : %s,
+                date: %s,
+                status: %s
+                """, domain, date, status);
+        var domainEntity = domain == null ? null : metricsDatabaseReader.getDomainByCode(domain);
+        var anomalyCategory = metricsDatabaseReader.getCategoryByCode(ANOMALY_CATEGORY);
+        return metricsDatabaseReader.getAnomalyEventsGroupedBySubCategories(domainEntity, anomalyCategory, date,
+                Status.fromString(status));
+    }
+
+    @Transactional
+    public Collection<AnomalyQueryResult> getAnomalyEventsGroupedBySubCategoriesAndEntities(String domain, Instant startDate) {
+        logger.infof("""
+                Get number of ANOMALY events grouped by equipment entities and sub categories, filter on
+                domain : %s,
+                startDate: %s
+                """, domain, startDate);
+        var domainEntity = domain == null ? null : metricsDatabaseReader.getDomainByCode(domain);
+        var anomalyCategory = metricsDatabaseReader.getCategoryByCode(ANOMALY_CATEGORY);
+        var subcategory = metricsDatabaseReader.getSubCategories(anomalyCategory).map(EnumEntity::getCode).toList();
+        return metricsDatabaseReader.getAnomalyEventsGroupedBySubCategoriesAndEntities(domainEntity, subcategory,
+                startDate);
+    }
+
+    @Transactional
+    public Collection<AggregateServiceDto> aggregateAnomaliesEvents(DateInterval interval,
+            int buckets,
+            String domain,
+            Instant startDate) {
+        logger.infof("""
+                Aggregate anomaly events in the last %s %s from %s
+                filter on
+                domain: %s
+                """.formatted(buckets, interval, startDate, domain));
+
+        startDate = startDate != null ? startDate : Instant.now();
+        var domainId = domain != null
+                ? metricsDatabaseReader.getDomainByCode(domain).getId()
+                : null;
+
+        var anomalyCategory = metricsDatabaseReader.getCategoryByCode(ANOMALY_CATEGORY);
+        var subcategory = metricsDatabaseReader.getSubCategories(anomalyCategory).map(EnumEntity::getCode).toList();
+
+        return metricsDatabaseReader.aggregateAnomaliesEvents(
+                interval,
+                buckets,
+                startDate,
+                domainId,
+                subcategory);
+    }
+
     private Collection<Equipment> getEquipmentWithUndoneEvents(String domain,
             Collection<String> criticalities,
             Collection<String> categories,
@@ -178,30 +235,5 @@ public class MetricsService {
     private Long getServicesForEquipmentAndStatus(Map<String, Map<ServiceStatus, Long>> servicesByEquipments, String code,
             ServiceStatus status) {
         return servicesByEquipments.getOrDefault(code, Map.of(status, 0L)).getOrDefault(status, 0L);
-    }
-
-    public Map<String, Long> getAnomalyEventsGroupedBySubCategories(String domain, Instant date, String status) {
-        logger.infof("""
-                Get number of ANOMALY events grouped by sub categories, filter on
-                domain : %s,
-                date: %s,
-                status: %s
-                """, domain, date, status);
-        var domainEntity = domain == null ? null : metricsDatabaseReader.getDomainByCode(domain);
-        var anomalyCategory = metricsDatabaseReader.getCategoryByCode("ANOMALY");
-        return metricsDatabaseReader.getAnomalyEventsGroupedBySubCategories(domainEntity, anomalyCategory, date,
-                Status.fromString(status));
-    }
-
-    public Collection<AnomalyQueryResult> getAnomalyEventsGroupedBySubCategoriesAndEntities(String domain, Instant startDate) {
-        logger.infof("""
-                Get number of ANOMALY events grouped by equipment entities and sub categories, filter on
-                domain : %s,
-                startDate: %s
-                """, domain, startDate);
-        var domainEntity = domain == null ? null : metricsDatabaseReader.getDomainByCode(domain);
-        var anomalyCategory = metricsDatabaseReader.getCategoryByCode("ANOMALY");
-        return metricsDatabaseReader.getAnomalyEventsGroupedBySubCategoriesAndEntities(domainEntity, anomalyCategory,
-                startDate);
     }
 }

@@ -1783,6 +1783,78 @@ paths:
       security:
         - oidc:
             - authenticated
+  /aggregate/anomalies/{interval}:
+    get:
+      tags:
+        - Metrics Controller
+      summary: |
+        Returns an aggregation of anomaly events
+      description: |
+        Aggregates the number of `ANOMALY` events over a given interval and over a number of buckets from a given start date.
+        Results are grouped by subcategories
+      operationId: com.provoly.metrics.MetricsController_aggregateAnomaliesEvents
+      parameters:
+        - name: interval
+          description: must be one of `hour`,`day`,`week`,`month`,`quarter`,`year`
+          in: path
+          schema:
+            type: string
+          example: month
+          required: true
+        - name: startDate
+          description: The timezoned reference date for building the aggregation over the last n intervals
+          in: query
+          schema:
+            type: integer
+          example: 2024-05-28T08:10:00Z
+        - name: buckets
+          description: Number of buckets. Default to `12`. Must be a positive number.
+          in: query
+          schema:
+            type: integer
+          example: 12
+        - name: domain
+          in: query
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Not Authorized
+        "400":
+          description: Invalid interval, domain, bucket or startDate
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AggregatedService'
+              examples:
+                default:
+                  value: |
+                    [
+                      {
+                        "start": "2023-05-01T00:00:00Z",
+                        "code": "UNUSUAL_FLOW",
+                        "count": 3
+                      },
+                      {
+                        "start": "2024-01-01T00:00:00Z",
+                        "code": "UNUSUAL_FLOW",
+                        "count": 2
+                      },
+                      {
+                        "start": "2024-03-01T00:00:00Z",
+                        "code": "WILD_STORAGE",
+                        "count": 4
+                      },
+                      {
+                        "start": "2024-05-01T00:00:00Z",
+                        "code": "TRAFFIC_CONGESTION",
+                        "count": 1
+                      }
+                    ]
+      security:
+        - oidc:
+            - authenticated
 components:
   securitySchemes:
     oidc:
@@ -2461,6 +2533,17 @@ components:
         properties:
           start:
             $ref: '#/components/schemas/DateTime'
+          count:
+            type: integer
+    AggregatedAnomaly:
+      type: array
+      items:
+        type: object
+        properties:
+          start:
+            $ref: '#/components/schemas/DateTime'
+          subCategory:
+            type: string
           count:
             type: integer
     AnomalyCount:

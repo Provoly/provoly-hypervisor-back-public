@@ -263,7 +263,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
 
     @Transactional
     public Collection<AnomalyQueryResult> getAnomalyEventsGroupedBySubCategoriesAndEntities(Domain domain,
-            Category anomalyCategory,
+            List<String> subcategoryCodes,
             Instant startDate) {
 
         var builder = em.getCriteriaBuilder();
@@ -272,10 +272,9 @@ public class MetricsDatabaseReader extends DatabaseReader {
         var equipment = event.join(Event_.equipment, JoinType.LEFT);
         var equipmentEntity = equipment.join(Equipment_.entity, JoinType.LEFT);
         var category = event.join(Event_.category, JoinType.LEFT);
-        var subcategory = getSubCategories(anomalyCategory).toList();
-        var subCode = subcategory.stream().map(EnumEntity::getCode).toList();
 
         var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
+        predicates.add(category.get(Category_.code).in(subcategoryCodes));
 
         if (domain != null) {
             logger.debugf("filter on domain %s", domain);
@@ -298,8 +297,37 @@ public class MetricsDatabaseReader extends DatabaseReader {
         var results = em.createQuery(query)
                 .getResultList();
 
-        completeAnomaliesCountWithZeros(results, subCode);
+        completeAnomaliesCountWithZeros(results, subcategoryCodes);
         return results;
+    }
+
+    public Collection<AggregateServiceDto> aggregateAnomaliesEvents(DateInterval interval, int buckets, Instant startDate,
+            Long domainId, List<String> subcategoryCodes) {
+        return em
+                .createNativeQuery(
+                        """
+                                select date_trunc(:interval, creation_date, 'UTC') start, category.code, count(*) from {h-schema}event
+                                left join {h-schema}equipment on event.equipment_id = equipment.id
+                                left join {h-schema}category on event.category_id = category.id
+                                where category.code in :categories
+                                and creation_date < cast (:reference_date as timestamptz)
+                                and creation_date > date_trunc(:interval, cast (:reference_date as timestamptz) - cast (:interval_number as interval))
+                                and (equipment.domain_id = :domain_id or :domain_id is null)
+                                group by start, category.code
+                                order by 1;
+                                """,
+                        Tuple.class)
+                .setParameter("categories", subcategoryCodes)
+                .setParameter("interval", interval.name())
+                .setParameter("reference_date", startDate)
+                .setParameter("interval_number", "%s %s".formatted(buckets, interval))
+                .setParameter("domain_id", new TypedParameterValue(StandardBasicTypes.LONG, domainId))
+                .getResultStream()
+                .map(res -> new AggregateAnomalyDto(
+                        Instant.parse(((Tuple) res).get(0).toString()),
+                        ((Tuple) res).get(1).toString(),
+                        Long.parseLong(((Tuple) res).get(2).toString())))
+                .toList();
     }
 
     private void completeAnomaliesCountWithZeros(List<AnomalyQueryResult> results, List<String> subCode) {
@@ -364,5 +392,4 @@ public class MetricsDatabaseReader extends DatabaseReader {
         return em.createQuery(query)
                 .getResultStream();
     }
-
 }

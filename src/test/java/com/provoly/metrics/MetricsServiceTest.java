@@ -479,4 +479,32 @@ public class MetricsServiceTest {
                 .isEqualTo(1L);
     }
 
+    @Test
+    void should_get_anomaly_event_for_last_2_months() {
+        // given
+        var vpEquipment = equipmentService.getEquipmentByName("camera1");
+        eventService.saveEvent(new EventWriteDto(null,
+                "new anomaly event",
+                "description",
+                Criticality.LOW,
+                "ANOMALY",
+                "TRAFFIC_CONGESTION",
+                "address",
+                vpEquipment.getId(),
+                "VP",
+                null,
+                null,
+                null));
+
+        var startDate = Instant.parse(LocalDate.now().atStartOfDay().plusDays(10) + ":00.000Z");
+        // when
+        var result = metricsService.aggregateAnomaliesEvents(DateInterval.month, 2, "VP", startDate);
+
+        //then
+        assertThat(result).hasSize(1);
+        assertThat(result).extracting("start").containsExactly(
+                Instant.parse(LocalDate.now().withDayOfMonth(1) + "T00:00:00.000Z"));
+        assertThat(result).extracting("count").containsExactly(1L);
+    }
+
 }

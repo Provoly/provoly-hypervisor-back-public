@@ -85,4 +85,15 @@ public class MetricsController {
         return metricsService.getAnomalyEventsGroupedBySubCategoriesAndEntities(domain, startDate);
     }
 
+    @Path("/aggregate/anomalies/{interval}")
+    @GET
+    @Authenticated
+    public Collection<AggregateServiceDto> aggregateAnomaliesEvents(
+            DateInterval interval,
+            @RestQuery @Positive @DefaultValue("12") int buckets,
+            @RestQuery String domain,
+            @RestQuery Instant startDate) {
+        return metricsService.aggregateAnomaliesEvents(interval, buckets, domain, startDate);
+    }
+
 }
