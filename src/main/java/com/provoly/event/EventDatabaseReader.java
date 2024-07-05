@@ -74,6 +74,10 @@ public class EventDatabaseReader extends DatabaseReader {
 
         if (!categories.isEmpty()) {
             logger.debugf("filter on categories %s", categories);
+            categories = categories.stream()
+                    .map(this::getCategoryOrSubCategories)
+                    .flatMap(Collection::stream)
+                    .toList();
             predicates.add(root.get(Event_.category).in(categories));
         }
 
@@ -89,54 +93,6 @@ public class EventDatabaseReader extends DatabaseReader {
                 .setFirstResult((page - 1) * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList();
-    }
-
-    private List<Order> buildEventOrders(EventSort sort,
-            SortOrder order,
-            CriteriaBuilder builder,
-            Root<Event> root) {
-        List<Order> orders = new ArrayList<>();
-        if (sort == null) {
-            logger.debugf("No sort provided, use default sort: by status and last modification date");
-            orders.add(builder.asc(getStatusOrder(builder, root)));
-            orders.add(builder.asc(getCriticalityOrder(builder, root)));
-            orders.add(builder.desc(root.get(Event_.lastModificationDate)));
-            return orders;
-        }
-
-        logger.debugf("Sort on %s with order %s", sort, order);
-        var sortProperty = getSortProperty(sort, builder, root);
-        orders.add(order == SortOrder.DESC ? builder.desc(sortProperty) : builder.asc(sortProperty));
-
-        return orders;
-    }
-
-    private Expression<?> getSortProperty(EventSort event, CriteriaBuilder builder, Root<Event> root) {
-        return switch (event) {
-            case CREATION_DATE -> root.get(Event_.creationDate);
-            case LAST_MODIFICATION_DATE -> root.get(Event_.lastModificationDate);
-            case STATUS -> getStatusOrder(builder, root);
-            case PROCEDURE_PROGRESS -> {
-                var procedure = root.join(Event_.procedure, JoinType.LEFT);
-                yield builder.coalesce(procedure.get(Procedure_.procedureProgress), 0);
-            }
-        };
-    }
-
-    private Expression<Object> getStatusOrder(CriteriaBuilder builder, Root<Event> root) {
-        return builder.selectCase(root.get(Event_.status))
-                .when(Status.NEW, Status.NEW.getPriority())
-                .when(Status.IN_PROGRESS, Status.IN_PROGRESS.getPriority())
-                .when(Status.DONE, Status.DONE.getPriority())
-                .otherwise(10);
-    }
-
-    private Expression<Object> getCriticalityOrder(CriteriaBuilder builder, Root<Event> root) {
-        return builder.selectCase(root.get(Event_.criticality))
-                .when(Criticality.HIGH, Criticality.HIGH.getPriority())
-                .when(Criticality.MEDIUM, Criticality.MEDIUM.getPriority())
-                .when(Criticality.LOW, Criticality.LOW.getPriority())
-                .otherwise(10);
     }
 
     public List<Event> getEvents(Status status, int limit, Criticality criticality) {
@@ -201,26 +157,13 @@ public class EventDatabaseReader extends DatabaseReader {
 
     }
 
-    public Collection<Category> getCategories() {
+    public Collection<Category> getCategoryOrSubCategories() {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<Category> criteriaQuery = builder.createQuery(Category.class);
         Root<Category> root = criteriaQuery.from(Category.class);
 
         return em.createQuery(criteriaQuery.select(root))
                 .getResultList();
-    }
-
-    public Optional<Category> getCategoryByCode(String code) {
-        var builder = em.getCriteriaBuilder();
-        CriteriaQuery<Category> criteriaQuery = builder.createQuery(Category.class);
-        Root<Category> root = criteriaQuery.from(Category.class);
-
-        var query = criteriaQuery.select(root)
-                .where(builder.equal(root.get(Category_.code), code));
-
-        return em.createQuery(query)
-                .getResultStream()
-                .findFirst();
     }
 
     public Stream<Category> getSubCategories(Category category) {
@@ -233,6 +176,62 @@ public class EventDatabaseReader extends DatabaseReader {
 
         return em.createQuery(query)
                 .getResultStream();
+    }
+
+    private List<Order> buildEventOrders(EventSort sort,
+            SortOrder order,
+            CriteriaBuilder builder,
+            Root<Event> root) {
+        List<Order> orders = new ArrayList<>();
+        if (sort == null) {
+            logger.debugf("No sort provided, use default sort: by status and last modification date");
+            orders.add(builder.asc(getStatusOrder(builder, root)));
+            orders.add(builder.asc(getCriticalityOrder(builder, root)));
+            orders.add(builder.desc(root.get(Event_.lastModificationDate)));
+            return orders;
+        }
+
+        logger.debugf("Sort on %s with order %s", sort, order);
+        var sortProperty = getSortProperty(sort, builder, root);
+        orders.add(order == SortOrder.DESC ? builder.desc(sortProperty) : builder.asc(sortProperty));
+
+        return orders;
+    }
+
+    private Expression<?> getSortProperty(EventSort event, CriteriaBuilder builder, Root<Event> root) {
+        return switch (event) {
+            case CREATION_DATE -> root.get(Event_.creationDate);
+            case LAST_MODIFICATION_DATE -> root.get(Event_.lastModificationDate);
+            case STATUS -> getStatusOrder(builder, root);
+            case PROCEDURE_PROGRESS -> {
+                var procedure = root.join(Event_.procedure, JoinType.LEFT);
+                yield builder.coalesce(procedure.get(Procedure_.procedureProgress), 0);
+            }
+        };
+    }
+
+    private List<Category> getCategoryOrSubCategories(Category category) {
+        var children = getSubCategories(category).toList();
+        if (children.isEmpty()) {
+            return List.of(category);
+        }
+        return children;
+    }
+
+    private Expression<Object> getStatusOrder(CriteriaBuilder builder, Root<Event> root) {
+        return builder.selectCase(root.get(Event_.status))
+                .when(Status.NEW, Status.NEW.getPriority())
+                .when(Status.IN_PROGRESS, Status.IN_PROGRESS.getPriority())
+                .when(Status.DONE, Status.DONE.getPriority())
+                .otherwise(10);
+    }
+
+    private Expression<Object> getCriticalityOrder(CriteriaBuilder builder, Root<Event> root) {
+        return builder.selectCase(root.get(Event_.criticality))
+                .when(Criticality.HIGH, Criticality.HIGH.getPriority())
+                .when(Criticality.MEDIUM, Criticality.MEDIUM.getPriority())
+                .when(Criticality.LOW, Criticality.LOW.getPriority())
+                .otherwise(10);
     }
 
 }

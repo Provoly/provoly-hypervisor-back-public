@@ -3,41 +3,52 @@ package com.provoly.metrics;
 import static java.util.stream.Collectors.groupingBy;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.*;
+import jakarta.transaction.Transactional;
 
 import com.provoly.DatabaseReader;
+import com.provoly.EnumEntity;
 import com.provoly.equipment.*;
 import com.provoly.event.*;
 import com.provoly.service.Service;
 import com.provoly.service.ServiceStatus;
 
+import org.hibernate.query.TypedParameterValue;
+import org.hibernate.type.StandardBasicTypes;
+import org.jboss.logging.Logger;
+
 @ApplicationScoped
 public class MetricsDatabaseReader extends DatabaseReader {
     public static final String UNMANAGED = "unmanaged";
     public static final String MANAGED = "managed";
-    private static final long EP_ID = 1;
 
+    private final Logger logger;
     private final EquipmentService equipmentService;
 
-    public MetricsDatabaseReader(EntityManager em, EquipmentService equipmentService) {
+    public MetricsDatabaseReader(EntityManager em, Logger logger, EquipmentService equipmentService) {
         super(em);
+        this.logger = logger;
         this.equipmentService = equipmentService;
     }
 
     private record QueryResult(String code, int managed, long count) {
     }
 
-    public Collection<Equipment> getEquipmentsWithUnDoneEvents(Collection<String> entities,
+    public Collection<Equipment> getEquipmentsWithUnDoneEvents(
+            Long domainId,
+            Collection<String> entities,
             Collection<Criticality> criticalities,
             Collection<Category> categories,
             Collection<District> districts) {
@@ -45,7 +56,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
         return equipmentService
                 .getEquipments(entities)
                 .stream()
-                .filter(equipment -> equipment.getDomain().getId() == EP_ID)
+                .filter(equipment -> equipment.getDomain().getId().equals(domainId))
                 .filter(equipment -> districts.isEmpty() || districts.contains(equipment.getDistrict()))
                 .filter(equipment -> matchEvents(equipment.getEvents(), criticalities, categories))
                 .toList();
@@ -75,7 +86,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
         return result;
     }
 
-    public Map<String, Long> getTotalEquipmentGroupedByFamilyAndManaged() {
+    public Map<String, Long> getTotalEpEquipmentGroupedByFamilyAndManaged() {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<QueryResult> criteriaQuery = builder.createQuery(QueryResult.class);
         Root<Equipment> equipment = criteriaQuery.from(Equipment.class);
@@ -88,7 +99,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
                         family.get(Family_.code),
                         managed,
                         builder.count(equipment))
-                .where(builder.equal(domain.get(Domain_.id), EP_ID))
+                .where(builder.equal(domain.get(Domain_.code), "EP"))
                 .groupBy(family.get(Family_.code), managed);
 
         var result = em.createQuery(query)
@@ -97,7 +108,20 @@ public class MetricsDatabaseReader extends DatabaseReader {
         return gatherUnmanagedEquipments(result);
     }
 
-    public Map<String, Map<ServiceStatus, Long>> getEquipmentServicesByStatus(Collection<Equipment> equipments) {
+    public Long getTotalVpEquipments() {
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
+        Root<Equipment> equipment = criteriaQuery.from(Equipment.class);
+        var domain = equipment.join(Equipment_.domain, JoinType.LEFT);
+
+        var query = criteriaQuery
+                .select(builder.count(equipment))
+                .where(builder.equal(domain.get(Domain_.code), "VP"));
+
+        return em.createQuery(query).getSingleResult();
+    }
+
+    public Map<String, Map<ServiceStatus, Long>> getEpEquipmentServicesByStatus(Collection<Equipment> equipments) {
         var equipmentServices = equipments.stream()
                 .map(Equipment::getServices)
                 .flatMap(Collection::stream)
@@ -116,6 +140,15 @@ public class MetricsDatabaseReader extends DatabaseReader {
 
         result.put(UNMANAGED, mergedUnmanagedEquipments);
         return result;
+    }
+
+    public Map<ServiceStatus, Long> getVpEquipmentServicesByStatus(Collection<Equipment> equipments) {
+        return equipments.stream()
+                .map(Equipment::getServices)
+                .flatMap(Collection::stream)
+                .filter(service -> service.getStatus() == ServiceStatus.ASKED
+                        || service.getStatus() == ServiceStatus.IN_PROGRESS)
+                .collect(groupingBy(Service::getStatus, Collectors.counting()));
     }
 
     public Map<String, Long> getEquipmentsGroupByEntityAndManaged(Family family, Domain domain) {
@@ -146,6 +179,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
     public List<AggregateServiceDto> aggregateDoneServices(DateInterval interval,
             int buckets,
             Instant date,
+            Long domainId,
             Collection<Long> families,
             Collection<Long> entities,
             Collection<Long> districts) {
@@ -162,6 +196,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
                                 and (:families_id is null or equipment.family_id in :families_id)
                                 and (:entities_id is null or equipment.equipment_entity_id in :entities_id)
                                 and (:districts_id is null or equipment.district_id in :districts_id )
+                                and (service.domain_id = :domain_id or :domain_id is null)
                                 group by start
                                 order by 1;
                                 """,
@@ -173,11 +208,58 @@ public class MetricsDatabaseReader extends DatabaseReader {
                 .setParameter("families_id", families)
                 .setParameter("entities_id", entities)
                 .setParameter("districts_id", districts)
+                .setParameter("domain_id", new TypedParameterValue(StandardBasicTypes.LONG, domainId))
                 .getResultStream()
                 .map(res -> new AggregateServiceDto(
                         Instant.parse(((Tuple) res).get(0).toString()),
                         Long.parseLong(((Tuple) res).get(1).toString())))
                 .toList();
+    }
+
+    @Transactional
+    public Map<String, Long> getAnomalyEventsGroupedBySubCategories(Domain domain,
+            Category anomalyCategory,
+            Instant date,
+            Status status) {
+
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<Tuple> criteriaQuery = builder.createQuery(Tuple.class);
+        Root<Event> event = criteriaQuery.from(Event.class);
+        var equipment = event.join(Event_.equipment, JoinType.LEFT);
+        var category = event.join(Event_.category, JoinType.LEFT);
+        var subcategory = getSubCategories(anomalyCategory).toList();
+
+        var predicates = Stream.of(
+                event.get(Event_.category).in(subcategory))
+                .collect(Collectors.toList());
+
+        if (domain != null) {
+            predicates.add(builder.equal(equipment.get(Equipment_.domain), domain));
+        }
+
+        if (date != null) {
+            logger.debugf("filter on creation date %s", date);
+            predicates.add(builder.between(event.get(Event_.creationDate),
+                    date,
+                    date.plus(1, ChronoUnit.DAYS)));
+            predicates.add(builder.notEqual(event.get(Event_.status), Status.DONE));
+        }
+
+        if (status != null) {
+            logger.debugf("filter on status %s", status);
+            predicates.add(builder.equal(event.get(Event_.status), status));
+        }
+
+        var query = criteriaQuery.multiselect(
+                builder.coalesce(category.get(Category_.code), 0),
+                builder.coalesce(builder.count(event), 0))
+                .where(builder.and(getPredicatesAsArray(predicates)))
+                .groupBy(category.get(Category_.code));
+
+        var res = em.createQuery(query)
+                .getResultStream()
+                .collect(Collectors.toMap(k -> k.get(0).toString(), k -> Long.parseLong(k.get(1).toString())));
+        return subcategory.stream().collect(Collectors.toMap(EnumEntity::getCode, v -> res.getOrDefault(v.getCode(), 0L)));
     }
 
     private Map<String, Long> gatherUnmanagedEquipments(List<QueryResult> result) {
@@ -211,6 +293,18 @@ public class MetricsDatabaseReader extends DatabaseReader {
 
     private Predicate<Event> isOneOfCategory(Collection<Category> categories) {
         return event -> (categories.isEmpty()) || (categories.contains(event.getCategory()));
+    }
+
+    public Stream<Category> getSubCategories(Category category) {
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<Category> criteriaQuery = builder.createQuery(Category.class);
+        Root<Category> root = criteriaQuery.from(Category.class);
+
+        var query = criteriaQuery.select(root)
+                .where(builder.equal(root.get(Category_.parent), category));
+
+        return em.createQuery(query)
+                .getResultStream();
     }
 
 }

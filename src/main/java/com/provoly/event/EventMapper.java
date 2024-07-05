@@ -90,14 +90,12 @@ public class EventMapper {
         if (domain == null) {
             return null;
         }
-        return databaseReader.getDomainByCode(domain)
-                .orElseThrow(() -> new IllegalArgumentException("Domain with code %s invalid".formatted(domain)));
+        return databaseReader.getDomainByCode(domain);
     }
 
     private Category mapToCategory(EventWriteDto dto) {
         var category = dto.getSubCategory() == null ? dto.getCategory() : dto.getSubCategory();
-        return databaseReader.getCategoryByCode(category)
-                .orElseThrow(() -> new IllegalArgumentException("Category with code %s invalid".formatted(category)));
+        return databaseReader.getCategoryByCode(category);
     }
 
     private float getProgressActions(Procedure procedure) {

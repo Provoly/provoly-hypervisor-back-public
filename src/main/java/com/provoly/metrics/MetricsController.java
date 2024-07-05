@@ -3,6 +3,7 @@ package com.provoly.metrics;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
@@ -23,15 +24,26 @@ public class MetricsController {
         this.metricsService = metricsService;
     }
 
-    @Path("/equipments-with-events")
+    @Path("/equipments-with-events/EP")
     @GET
     @Authenticated
-    public EquipmentWithEventsDto getEquipmentWithEvent(@RestQuery List<String> criticality,
+    public EpEquipmentWithEventsDto getEpEquipmentWithEvent(@RestQuery List<String> criticality,
             @RestQuery List<String> category,
             @RestQuery List<String> entity,
             @RestQuery List<String> place) {
 
-        return metricsService.getEquipmentsWithEventMetrics(criticality, category, entity, place);
+        return metricsService.getEpEquipmentsWithEventMetrics(criticality, category, entity, place);
+    }
+
+    @Path("/equipments-with-events/VP")
+    @GET
+    @Authenticated
+    public VpEquipmentWithEventsDto getVpEquipmentWithEvent(@RestQuery List<String> criticality,
+            @RestQuery List<String> category,
+            @RestQuery List<String> entity,
+            @RestQuery List<String> place) {
+
+        return metricsService.getVpEquipmentsWithEventMetrics(criticality, category, entity, place);
     }
 
     @Path("/equipments-by-entity")
@@ -46,10 +58,22 @@ public class MetricsController {
     @Authenticated
     public Collection<AggregateServiceDto> aggregateDoneServices(DateInterval interval,
             @RestQuery Instant date,
+            @RestQuery String domain,
             @RestQuery @Positive @DefaultValue("24") int buckets,
             @RestQuery List<String> family,
             @RestQuery List<String> entity,
             @RestQuery List<String> place) {
-        return metricsService.aggregateDoneServices(interval, date, buckets, family, entity, place);
+        return metricsService.aggregateDoneServices(interval, date, domain, buckets, family, entity, place);
     }
+
+    @Path("/events/anomaly")
+    @GET
+    @Authenticated
+    public Map<String, Long> getAnomalyEventsGroupedBySubCategories(
+            @RestQuery String domain,
+            @RestQuery Instant date,
+            @RestQuery String status) {
+        return metricsService.getAnomalyEventsGroupedBySubCategories(domain, date, status);
+    }
+
 }

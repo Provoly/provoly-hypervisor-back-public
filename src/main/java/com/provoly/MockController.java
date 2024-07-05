@@ -39,10 +39,10 @@ public class MockController {
     public void mock(@DefaultValue("30") @Positive @RestQuery int eventNumber,
             @DefaultValue("10") @PositiveOrZero @RestQuery int procedureNumber) {
 
-        var epDomain = databaseReader.getDomainByCode("EP").get();
-        var vpDomain = databaseReader.getDomainByCode("VP").get();
+        var epDomain = databaseReader.getDomainByCode("EP");
+        var vpDomain = databaseReader.getDomainByCode("VP");
 
-        var categories = databaseReader.getCategories();
+        var categories = databaseReader.getCategoryOrSubCategories();
 
         for (int i = 0; i < procedureNumber; i++) {
             var procedureModel = new ProcedureModel("modele de procédure n°%s".formatted(suffix(UUID.randomUUID())),
@@ -62,7 +62,7 @@ public class MockController {
             event.setAddress("%s rue de Chalons".formatted(i));
             event.setDescription("description of %s".formatted(event.getName()));
             event.setCriticality(randomCriticality());
-            event.setDomain(randomDomain(List.of(epDomain, vpDomain)));
+            event.setDomain(vpDomain);
             entityManager.persist(event);
             setStatus(event);
             setCloseDate(event);
@@ -101,6 +101,7 @@ public class MockController {
     }
 
     private Category randomCategory(Collection<Category> categories) {
+        categories = categories.stream().filter(category -> !category.getCode().equals("ANOMALY")).toList();
         return categories.stream().toList().get(rand.nextInt(categories.size()));
     }
 

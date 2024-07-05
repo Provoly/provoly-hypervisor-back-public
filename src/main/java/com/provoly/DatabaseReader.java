@@ -10,6 +10,8 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
+import com.provoly.event.Category;
+import com.provoly.event.Category_;
 import com.provoly.event.Domain;
 import com.provoly.event.Domain_;
 
@@ -26,7 +28,7 @@ public class DatabaseReader {
         this.em = em;
     }
 
-    public Optional<Domain> getDomainByCode(String code) {
+    public Optional<Domain> getOptionalDomainByCode(String code) {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<Domain> criteriaQuery = builder.createQuery(Domain.class);
         Root<Domain> root = criteriaQuery.from(Domain.class);
@@ -39,6 +41,11 @@ public class DatabaseReader {
                 .findFirst();
     }
 
+    public Domain getDomainByCode(String code) {
+        return getOptionalDomainByCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Domain %s invalid".formatted(code)));
+    }
+
     public Collection<Domain> getDomains() {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<Domain> criteriaQuery = builder.createQuery(Domain.class);
@@ -46,6 +53,24 @@ public class DatabaseReader {
 
         return em.createQuery(criteriaQuery.select(root))
                 .getResultList();
+    }
+
+    public Optional<Category> getOptionalCategoryByCode(String code) {
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<Category> criteriaQuery = builder.createQuery(Category.class);
+        Root<Category> root = criteriaQuery.from(Category.class);
+
+        var query = criteriaQuery.select(root)
+                .where(builder.equal(root.get(Category_.code), code));
+
+        return em.createQuery(query)
+                .getResultStream()
+                .findFirst();
+    }
+
+    public Category getCategoryByCode(String code) {
+        return getOptionalCategoryByCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Category %s invalid".formatted(code)));
     }
 
     protected Predicate[] getPredicatesAsArray(List<Predicate> predicatesList) {

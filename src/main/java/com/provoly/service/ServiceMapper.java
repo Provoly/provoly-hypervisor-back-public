@@ -56,8 +56,7 @@ public class ServiceMapper {
         entity.setStatus(dto.status());
 
         var domain = databaseReader
-                .getDomainByCode(dto.domain())
-                .orElseThrow(() -> new IllegalArgumentException("Domain name %s not found".formatted(dto.domain())));
+                .getDomainByCode(dto.domain());
 
         entity.setDomain(domain);
 

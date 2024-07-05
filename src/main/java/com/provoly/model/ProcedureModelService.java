@@ -63,8 +63,7 @@ public class ProcedureModelService {
         }
 
         var domainEntities = domains.stream()
-                .map(code -> databaseReader.getDomainByCode(code)
-                        .orElseThrow(() -> new IllegalArgumentException("Domain name %s not found".formatted(code))))
+                .map(databaseReader::getDomainByCode)
                 .toList();
         return databaseReader.getProcedureModels(page,
                 pageSize,

@@ -44,7 +44,7 @@ public class ProcedureModelServiceTest {
         // when
         assertThatThrownBy(() -> procedureModelService.getProceduresModel(1, 3, null, null, List.of("toto"), null))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("not found");
+                .hasMessageContaining("invalid");
     }
 
     @Test
@@ -66,7 +66,7 @@ public class ProcedureModelServiceTest {
         // when
         assertThatThrownBy(() -> procedureModelService.saveProcedureModel(procedureModelToSave))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("not found");
+                .hasMessageContaining("invalid");
     }
 
     @Test

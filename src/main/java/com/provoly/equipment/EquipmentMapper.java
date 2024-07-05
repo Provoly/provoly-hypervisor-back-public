@@ -85,8 +85,7 @@ public class EquipmentMapper {
 
     private Domain mapToDomain(String domain) {
         return databaseReader
-                .getDomainByCode(domain)
-                .orElseThrow(() -> new IllegalArgumentException("Domain name %s not found".formatted(domain)));
+                .getDomainByCode(domain);
     }
 
     private City mapToCity(String city) {

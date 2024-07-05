@@ -36,7 +36,7 @@ public class TestDataService {
     private Map<String, Category> categories;
     private Procedure procedure1, procedure3;
     private Event event1, doneEvent, associatedEvent;
-    private Domain domainEP;
+    private Domain domainEP, domainVP;
     private ServiceCategory prev;
     private ServiceCategory cura;
 
@@ -51,12 +51,12 @@ public class TestDataService {
 
     @Transactional
     public void init() {
-        categories = eventDatabaseReader.getCategories()
+        categories = eventDatabaseReader.getCategoryOrSubCategories()
                 .stream()
                 .collect(Collectors.toMap(Category::getCode, c -> c));
 
-        domainEP = equipmentDatabaseReader.getDomainByCode("EP").get();
-        var domainVP = equipmentDatabaseReader.getDomainByCode("VP").get();
+        domainEP = equipmentDatabaseReader.getDomainByCode("EP");
+        domainVP = equipmentDatabaseReader.getDomainByCode("VP");
         prev = serviceDatabaseReader.getServiceCategoryByCode("PREV").get();
         cura = serviceDatabaseReader.getServiceCategoryByCode("CURA").get();
 
@@ -69,19 +69,22 @@ public class TestDataService {
         var armoire = equipmentDatabaseReader.getFamilyByCode("EP_ARMOIRE").get();
         var foyerLumineux = equipmentDatabaseReader.getFamilyByCode("EP_FOYER_LUMINEUX").get();
         var ouvrage = equipmentDatabaseReader.getFamilyByCode("EP_OUVRAGE").get();
+        var camera = equipmentDatabaseReader.getFamilyByCode("VP_CAM").get();
 
         var chalons = equipmentDatabaseReader.getEquipmentEntityByCode("CHALONS-COMMUN").get();
         var agglo = equipmentDatabaseReader.getEquipmentEntityByCode("AGGLO-COMMUN").get();
         var fagnieres = equipmentDatabaseReader.getEquipmentEntityByCode("FAGNIERES-COMMUN").get();
         var stm = equipmentDatabaseReader.getEquipmentEntityByCode("SAINT-MARTIN-COMMUN").get();
 
-        var equip1 = initEquipment("P-1000", foyerLumineux, fagnieres, fagniereCity, fagniereDistrict, 0);
-        var equip2 = initEquipment("A-230", armoire, stm, chalonsCity, chalonsDistrict, 1);
-        var equip3 = initEquipment("A-4901", armoire, agglo, chalonsCity, chalonsDistrict, 0);
-        var equip4 = initEquipment("C-1034", foyerLumineux, agglo, chalonsCity, chalonsDistrict, 1);
-        var equip5 = initEquipment("C-7614", ouvrage, chalons, chalonsCity, chalonsDistrict, 0);
-        var equip6 = initEquipment("C-762", ouvrage, agglo, fagniereCity, fagniereDistrict, 1);
-        var equip7 = initEquipment("C-763", ouvrage, agglo, fagniereCity, fagniereDistrict, 0);
+        var equip1 = initEquipment("P-1000", foyerLumineux, fagnieres, fagniereCity, fagniereDistrict, 0, domainEP);
+        var equip2 = initEquipment("A-230", armoire, stm, chalonsCity, chalonsDistrict, 1, domainEP);
+        var equip3 = initEquipment("A-4901", armoire, agglo, chalonsCity, chalonsDistrict, 0, domainEP);
+        var equip4 = initEquipment("C-1034", foyerLumineux, agglo, chalonsCity, chalonsDistrict, 1, domainEP);
+        var equip5 = initEquipment("C-7614", ouvrage, chalons, chalonsCity, chalonsDistrict, 0, domainEP);
+        var equip6 = initEquipment("C-762", ouvrage, agglo, fagniereCity, fagniereDistrict, 1, domainEP);
+        var equip7 = initEquipment("C-763", ouvrage, agglo, fagniereCity, fagniereDistrict, 0, domainEP);
+        var equip8Cam = initEquipment("camera1", camera, agglo, fagniereCity, fagniereDistrict, 1, domainVP);
+        var equip9Cam = initEquipment("camera2", camera, chalons, chalonsCity, chalonsDistrict, 1, domainVP);
 
         var service1 = new Service(UUID.randomUUID(), "DI1234", Instant.now(), Instant.now(), Instant.now(), Instant.now(),
                 Instant.now(), equip3, domainEP, ASKED, prev);
@@ -174,10 +177,15 @@ public class TestDataService {
     }
 
     @Transactional
-    public void persistDoneService(String externalId, Instant closeDate, Equipment equip, boolean isCura) {
+    public void persistDoneService(String externalId, Instant closeDate, Equipment equip, boolean isCura, boolean isVp) {
         var service = new Service(UUID.randomUUID(), externalId, Instant.now(), Instant.now(), Instant.now(), Instant.now(),
-                closeDate, equip, domainEP, DONE, isCura ? cura : prev);
+                closeDate, equip, isVp ? domainVP : domainEP, DONE, isCura ? cura : prev);
         em.persist(service);
+    }
+
+    @Transactional
+    public void persistDoneService(String externalId, Instant closeDate, Equipment equip, boolean isCura) {
+        persistDoneService(externalId, closeDate, equip, isCura, false);
     }
 
     @Transactional
@@ -227,7 +235,7 @@ public class TestDataService {
     }
 
     private Equipment initEquipment(String name, Family family, EquipmentEntity entity, City city, District district,
-            int managed) {
+            int managed, Domain domain) {
         var equipment = new Equipment(UUID.randomUUID());
         equipment.setExternalId(name);
         equipment.setName(name);
@@ -235,7 +243,7 @@ public class TestDataService {
         equipment.setAddress("address");
         equipment.setFamily(family);
         equipment.setEntity(entity);
-        equipment.setDomain(domainEP);
+        equipment.setDomain(domain);
         equipment.setCity(city);
         equipment.setDistrict(district);
         equipment.setAttributes(Map.of("managed", managed));

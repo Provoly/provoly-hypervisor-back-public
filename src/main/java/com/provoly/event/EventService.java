@@ -154,9 +154,7 @@ public class EventService {
     @Transactional
     public Category getCategory(String category) {
         logger.debugf("Get category with code %s", category);
-        return category != null ? databaseReader.getCategoryByCode(category)
-                .orElseThrow(() -> new IllegalArgumentException("Category %s invalid".formatted(category)))
-                : null;
+        return category != null ? databaseReader.getCategoryByCode(category) : null;
     }
 
     @Transactional
@@ -172,7 +170,8 @@ public class EventService {
         checkManifestationCategory(eventDto);
         checkSubCategoryCoherence(eventDto);
 
-        if (eventDto.getExternalSourceRef() != null && eventDto.getEquipmentId() == null) {
+        if ((eventDto.getExternalSourceRef() != null && !eventDto.getExternalSourceRef().isBlank())
+                && eventDto.getEquipmentId() == null) {
             throw new ForbiddenException("Events with external source must provide an equipment.");
         }
 

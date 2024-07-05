@@ -1386,16 +1386,16 @@ paths:
       security:
         - oidc:
             - authenticated
-  /metrics/equipments-with-events:
+  /metrics/equipments-with-events/EP:
     get:
       tags:
         - Metrics Controller
-      summary: Retrieve equipments with event metrics
+      summary: Retrieve equipments from EP domain with event metrics
       description: |
         Returns the number of cabinets, light fittings and unmanaged equipment connected to 
         at least one event that has not been closed, the number of services requested for this equipment, 
         and the number of services in progress.
-      operationId: com.provoly.metrics.MetricsController_getEquipmentWithEvent
+      operationId: com.provoly.metrics.MetricsController_getEpEquipmentWithEvent
       parameters:
         - name: entity
           in: query
@@ -1428,10 +1428,10 @@ paths:
           description: Not Authorized
         "200":
           content:
-            description: Returns Equipment wiht event
+            description: Returns Equipments with events
             application/json:
               schema:
-                $ref: '#/components/schemas/EquipmentWithEventDto'
+                $ref: '#/components/schemas/EpEquipmentWithEventDto'
               examples:
                 default:
                   value: |
@@ -1448,6 +1448,64 @@ paths:
                       "totalEquipWithEvent_unmanaged": 4,
                       "nbServiceTodoWithEquip_unmanaged": 0,
                       "nbServiceInProgressWithEquip_unmanaged": 0
+                    }
+      security:
+        - oidc:
+            - authenticated
+  /metrics/equipments-with-events/VP:
+    get:
+      tags:
+        - Metrics Controller
+      summary: Retrieve equipments from VP domain with event metrics
+      description: |
+        Returns the number of Cameras connected to at least one event that has not been closed, 
+        the number of services requested for this equipment,
+        and the number of services in progress.
+      operationId: com.provoly.metrics.MetricsController_getVpEquipmentWithEvent
+      parameters:
+        - name: entity
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: criticality
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Criticality'
+        - name: category
+          in: query
+          schema:
+            items:
+              type: string
+        - name: place
+          in: query
+          description: Must match city or district value from equipment
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "400":
+          description: Entity/Criticality/Category Not found, Or place is not a valide City/District
+        "401":
+          description: Not Authorized
+        "200":
+          content:
+            description: Returns VP Equipments with events
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VpEquipmentWithEventDto'
+              examples:
+                default:
+                  value: |
+                    {
+                      "nbEquipWithEvent_C": 0,
+                      "totalEquipWithEvent_C": 2,
+                      "nbServiceTodoWithEquip_C": 0,
+                      "nbServiceInProgressWithEquip_C": 0
                     }
       security:
         - oidc:
@@ -1521,6 +1579,10 @@ paths:
           schema:
             type: integer
           example: 12
+        - name: domain
+          in: query
+          schema:
+            type: string
         - name: entity
           in : query
           schema:
@@ -1571,6 +1633,54 @@ paths:
                         "count": 1
                       }
                     ]
+      security:
+        - oidc:
+            - authenticated
+  /events/anomaly:
+    get:
+      tags:
+        - Metrics Controller
+      summary: |
+        Count open events grouped by anomaly's subcategories
+      description: |
+        It's possible to filter on event creation date, event status. If creation date is set, then ignore Done events.
+        If a domain filter is set, count all events linked to a equipment with this domain.
+      operationId: com.provoly.metrics.MetricsController_getAnomalyEventsGroupedBySubCategories
+      parameters:
+        - name: date
+          description: event creation date
+          in: query
+          schema:
+            type: string
+            example: 2024-01-20T00:00:00Z
+        - name: domain
+          description: domain from equipment linked to event
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: event status
+          schema:
+            $ref: '#/components/schemas/Status'
+      responses:
+        "401":
+          description: Not Authorized
+        "400":
+          description: Invalid domain, date, or status
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnomalyCount'
+              examples:
+                default:
+                  value: |
+                    {
+                      "UNUSUAL_FLOW": 0,
+                      "WILD_STORAGE": 1,
+                      "TRAFFIC_CONGESTION": 0
+                    }
       security:
         - oidc:
             - authenticated
@@ -2164,8 +2274,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EventSummaryDto'
-
-    EquipmentWithEventDto:
+    EpEquipmentWithEventDto:
       type: object
       properties:
         nbEquipWithEvent_A:
@@ -2204,6 +2313,21 @@ components:
         nbServiceInProgressWithEquip_unmanaged:
           type: integer
           description: Count of in progress services linked to an unmanaged equipment
+    VpEquipmentWithEventDto:
+      type: object
+      properties:
+        nbEquipWithEvent_C:
+          type: integer
+          description: Count of equipments "Camera" with at least one event not finished and that is not a "MANIFESTATION"
+        totalEquipWithEvent_C:
+          type: integer
+          description: Total count of equipments "Camera"
+        nbServiceTodoWithEquip_C:
+          type: integer
+          description: Count of requested services linked to an "Camera" equipment
+        nbServiceInProgressWithEquip_C:
+          type: integer
+          description: Count of in progress services linked to an "Camera" equipment
     EquipmentsByEntity:
       type: object
       properties:
@@ -2240,3 +2364,12 @@ components:
             $ref: '#/components/schemas/DateTime'
           count:
             type: integer
+    AnomalyCount:
+      type: object
+      properties:
+        UNUSUAL_FLOW:
+          type: integer
+        WILD_STORAGE:
+          type: integer
+        "TRAFFIC_CONGESTION":
+          type: integer

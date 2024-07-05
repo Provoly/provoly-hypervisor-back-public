@@ -38,9 +38,7 @@ public class ProcedureModelMapper {
     }
 
     private Domain mapToDomain(String domain) {
-        return databaseReader
-                .getDomainByCode(domain)
-                .orElseThrow(() -> new IllegalArgumentException("Domain name %s not found".formatted(domain)));
+        return databaseReader.getDomainByCode(domain);
     }
 
 }

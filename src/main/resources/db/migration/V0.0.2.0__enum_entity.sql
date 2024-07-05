@@ -9,6 +9,7 @@ insert into domain (id,name,code) values (7, 'Cadre de vie','CDV');
 insert into family (id,name,code) values (1,'Armoire','EP_ARMOIRE');
 insert into family (id,name,code) values (2,'Foyer Lumineux','EP_FOYER_LUMINEUX');
 insert into family (id,name,code) values (3,'Ouvrage','EP_OUVRAGE');
+insert into family (id,name,code) values (4,'Camera','VP_CAM');
 
 insert into category (id,name,code, parent_id) values (1,'Manifestation','MANIFESTATION',null);
 insert into category (id,name,code, parent_id) values (2,'Hors Service','OUTOFORDER',null);

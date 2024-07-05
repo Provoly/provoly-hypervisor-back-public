@@ -1,6 +1,6 @@
 package com.provoly.metrics;
 
-public record EquipmentWithEventsDto(
+public record EpEquipmentWithEventsDto(
         long nbEquipWithEvent_A,
         long totalEquipWithEvent_A,
         long nbServiceTodoWithEquip_A,
