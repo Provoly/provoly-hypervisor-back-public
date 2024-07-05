@@ -10,6 +10,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
+import com.provoly.equipment.EquipmentEntity;
 import com.provoly.event.Category;
 import com.provoly.event.Category_;
 import com.provoly.event.Domain;
@@ -71,6 +72,15 @@ public class DatabaseReader {
     public Category getCategoryByCode(String code) {
         return getOptionalCategoryByCode(code)
                 .orElseThrow(() -> new IllegalArgumentException("Category %s invalid".formatted(code)));
+    }
+
+    public Collection<EquipmentEntity> getEquipmentEntities() {
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<EquipmentEntity> criteriaQuery = builder.createQuery(EquipmentEntity.class);
+        Root<EquipmentEntity> root = criteriaQuery.from(EquipmentEntity.class);
+
+        return em.createQuery(criteriaQuery.select(root))
+                .getResultList();
     }
 
     protected Predicate[] getPredicatesAsArray(List<Predicate> predicatesList) {

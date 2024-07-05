@@ -76,4 +76,13 @@ public class MetricsController {
         return metricsService.getAnomalyEventsGroupedBySubCategories(domain, date, status);
     }
 
+    @Path("/events/anomalies-by-entity")
+    @GET
+    @Authenticated
+    public Collection<AnomalyQueryResult> getAnomalyEventsGroupedBySubCategoriesAndEntities(
+            @RestQuery String domain,
+            @RestQuery Instant startDate) {
+        return metricsService.getAnomalyEventsGroupedBySubCategoriesAndEntities(domain, startDate);
+    }
+
 }

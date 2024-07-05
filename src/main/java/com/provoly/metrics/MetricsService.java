@@ -181,9 +181,27 @@ public class MetricsService {
     }
 
     public Map<String, Long> getAnomalyEventsGroupedBySubCategories(String domain, Instant date, String status) {
+        logger.infof("""
+                Get number of ANOMALY events grouped by sub categories, filter on
+                domain : %s,
+                date: %s,
+                status: %s
+                """, domain, date, status);
         var domainEntity = domain == null ? null : metricsDatabaseReader.getDomainByCode(domain);
         var anomalyCategory = metricsDatabaseReader.getCategoryByCode("ANOMALY");
         return metricsDatabaseReader.getAnomalyEventsGroupedBySubCategories(domainEntity, anomalyCategory, date,
                 Status.fromString(status));
+    }
+
+    public Collection<AnomalyQueryResult> getAnomalyEventsGroupedBySubCategoriesAndEntities(String domain, Instant startDate) {
+        logger.infof("""
+                Get number of ANOMALY events grouped by equipment entities and sub categories, filter on
+                domain : %s,
+                startDate: %s
+                """, domain, startDate);
+        var domainEntity = domain == null ? null : metricsDatabaseReader.getDomainByCode(domain);
+        var anomalyCategory = metricsDatabaseReader.getCategoryByCode("ANOMALY");
+        return metricsDatabaseReader.getAnomalyEventsGroupedBySubCategoriesAndEntities(domainEntity, anomalyCategory,
+                startDate);
     }
 }

@@ -428,7 +428,7 @@ public class MetricsServiceTest {
     @Test
     void should_get_all_anomalies_number_grouped_by_subcategories_because_done() {
         // given
-        var savedEvent = eventService.saveEvent(new EventWriteDto(null,
+        eventService.saveEvent(new EventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -448,6 +448,35 @@ public class MetricsServiceTest {
         assertThat(result).extracting("TRAFFIC_CONGESTION").isEqualTo(1L);
         assertThat(result).extracting("WILD_STORAGE").isEqualTo(0L);
         assertThat(result).extracting("UNUSUAL_FLOW").isEqualTo(0L);
+    }
+
+    @Test
+    void should_get_all_anomalies_number_grouped_by_subcategories_and_equipment_entities() {
+        // given
+        var vpEquipment = equipmentService.getEquipmentByName("camera1");
+        eventService.saveEvent(new EventWriteDto(null,
+                "new anomaly event",
+                "description",
+                Criticality.LOW,
+                "ANOMALY",
+                "TRAFFIC_CONGESTION",
+                "address",
+                vpEquipment.getId(),
+                "VP",
+                null,
+                null,
+                null));
+
+        // when
+        var creationDate = Instant.parse(LocalDate.now().atStartOfDay().minusDays(3) + ":00.000Z");
+        var result = metricsService.getAnomalyEventsGroupedBySubCategoriesAndEntities("VP", creationDate);
+
+        //then
+        assertThat(result)
+                .filteredOn(r -> r.entity().equals("AGGLO-COMMUN") && r.subCategory().equals("TRAFFIC_CONGESTION"))
+                .extracting("count")
+                .first()
+                .isEqualTo(1L);
     }
 
 }

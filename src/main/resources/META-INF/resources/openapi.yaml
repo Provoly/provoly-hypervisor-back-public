@@ -1684,6 +1684,105 @@ paths:
       security:
         - oidc:
             - authenticated
+  /events/anomalies-by-entity:
+    get:
+      tags:
+        - Metrics Controller
+      summary: |
+        Count events linked by equipment grouped by anomaly's subcategories and equipment entities
+      description: |
+        It's possible to filter on equipment domain and set start date to filter on events created from this date.
+      operationId: com.provoly.metrics.MetricsController_getAnomalyEventsGroupedBySubCategoriesAndEntities
+      parameters:
+        - name: startDate
+          description: filter on events created from this date
+          in: query
+          schema:
+            type: string
+            example: 2024-01-20T00:00:00Z
+        - name: domain
+          description: domain from equipment linked to event
+          in: query
+          schema:
+            type: string
+      responses:
+        "401":
+          description: Not Authorized
+        "400":
+          description: Invalid domain, date
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnomalyQueryResult'
+              examples:
+                default:
+                  value: |
+                    [
+                      {
+                        "entity": "AGGLO-COMMUN",
+                        "subCategory": "UNUSUAL_FLOW",
+                        "count": 0
+                      },
+                      {
+                        "entity": "AGGLO-COMMUN",
+                        "subCategory": "TRAFFIC_CONGESTION",
+                        "count": 0
+                      },
+                      {
+                        "entity": "AGGLO-COMMUN",
+                        "subCategory": "WILD_STORAGE",
+                        "count": 0
+                      },
+                      {
+                        "entity": "CHALONS-COMMUN",
+                        "subCategory": "UNUSUAL_FLOW",
+                        "count": 0
+                      },
+                      {
+                        "entity": "CHALONS-COMMUN",
+                        "subCategory": "TRAFFIC_CONGESTION",
+                        "count": 0
+                      },
+                      {
+                        "entity": "CHALONS-COMMUN",
+                        "subCategory": "WILD_STORAGE",
+                        "count": 0
+                      },
+                      {
+                        "entity": "FAGNIERES-COMMUN",
+                        "subCategory": "UNUSUAL_FLOW",
+                        "count": 0
+                      },
+                      {
+                        "entity": "FAGNIERES-COMMUN",
+                        "subCategory": "TRAFFIC_CONGESTION",
+                        "count": 0
+                      },
+                      {
+                        "entity": "FAGNIERES-COMMUN",
+                        "subCategory": "WILD_STORAGE",
+                        "count": 0
+                      },
+                      {
+                        "entity": "SAINT-MARTIN-COMMUN",
+                        "subCategory": "UNUSUAL_FLOW",
+                        "count": 0
+                      },
+                      {
+                        "entity": "SAINT-MARTIN-COMMUN",
+                        "subCategory": "TRAFFIC_CONGESTION",
+                        "count": 0
+                      },
+                      {
+                        "entity": "SAINT-MARTIN-COMMUN",
+                        "subCategory": "WILD_STORAGE",
+                        "count": 0
+                      }
+                    ]
+      security:
+        - oidc:
+            - authenticated
 components:
   securitySchemes:
     oidc:
@@ -2373,3 +2472,14 @@ components:
           type: integer
         "TRAFFIC_CONGESTION":
           type: integer
+    AnomalyQueryResult:
+      type: array
+      items:
+        type: object
+        properties:
+          entity:
+            type: string
+          subCategory:
+            type: string
+          count:
+            type: integer

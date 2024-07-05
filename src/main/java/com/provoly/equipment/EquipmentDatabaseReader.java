@@ -63,15 +63,6 @@ public class EquipmentDatabaseReader extends DatabaseReader {
                 .getResultList();
     }
 
-    public Collection<EquipmentEntity> getEquipmentEntities() {
-        var builder = em.getCriteriaBuilder();
-        CriteriaQuery<EquipmentEntity> criteriaQuery = builder.createQuery(EquipmentEntity.class);
-        Root<EquipmentEntity> root = criteriaQuery.from(EquipmentEntity.class);
-
-        return em.createQuery(criteriaQuery.select(root))
-                .getResultList();
-    }
-
     public Optional<EquipmentEntity> getEquipmentEntityByCode(String name) {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<EquipmentEntity> criteriaQuery = builder.createQuery(EquipmentEntity.class);

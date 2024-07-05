@@ -4,10 +4,7 @@ import static java.util.stream.Collectors.groupingBy;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -229,11 +226,10 @@ public class MetricsDatabaseReader extends DatabaseReader {
         var category = event.join(Event_.category, JoinType.LEFT);
         var subcategory = getSubCategories(anomalyCategory).toList();
 
-        var predicates = Stream.of(
-                event.get(Event_.category).in(subcategory))
-                .collect(Collectors.toList());
+        var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
 
         if (domain != null) {
+            logger.debugf("filter on domain %s", domain);
             predicates.add(builder.equal(equipment.get(Equipment_.domain), domain));
         }
 
@@ -251,15 +247,77 @@ public class MetricsDatabaseReader extends DatabaseReader {
         }
 
         var query = criteriaQuery.multiselect(
-                builder.coalesce(category.get(Category_.code), 0),
-                builder.coalesce(builder.count(event), 0))
+                category.get(Category_.code),
+                builder.count(event))
                 .where(builder.and(getPredicatesAsArray(predicates)))
                 .groupBy(category.get(Category_.code));
 
         var res = em.createQuery(query)
                 .getResultStream()
                 .collect(Collectors.toMap(k -> k.get(0).toString(), k -> Long.parseLong(k.get(1).toString())));
-        return subcategory.stream().collect(Collectors.toMap(EnumEntity::getCode, v -> res.getOrDefault(v.getCode(), 0L)));
+
+        return subcategory
+                .stream()
+                .collect(Collectors.toMap(EnumEntity::getCode, v -> res.getOrDefault(v.getCode(), 0L)));
+    }
+
+    @Transactional
+    public Collection<AnomalyQueryResult> getAnomalyEventsGroupedBySubCategoriesAndEntities(Domain domain,
+            Category anomalyCategory,
+            Instant startDate) {
+
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<AnomalyQueryResult> criteriaQuery = builder.createQuery(AnomalyQueryResult.class);
+        Root<Event> event = criteriaQuery.from(Event.class);
+        var equipment = event.join(Event_.equipment, JoinType.LEFT);
+        var equipmentEntity = equipment.join(Equipment_.entity, JoinType.LEFT);
+        var category = event.join(Event_.category, JoinType.LEFT);
+        var subcategory = getSubCategories(anomalyCategory).toList();
+        var subCode = subcategory.stream().map(EnumEntity::getCode).toList();
+
+        var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
+
+        if (domain != null) {
+            logger.debugf("filter on domain %s", domain);
+            predicates.add(builder.equal(equipment.get(Equipment_.domain), domain));
+        }
+
+        if (startDate != null) {
+            logger.debugf("from creation date %s", startDate);
+            predicates.add(builder.greaterThanOrEqualTo(event.get(Event_.creationDate), startDate));
+            predicates.add(builder.notEqual(event.get(Event_.status), Status.DONE));
+        }
+
+        var query = criteriaQuery.multiselect(
+                equipmentEntity.get(EquipmentEntity_.code),
+                category.get(Category_.code),
+                builder.count(event))
+                .where(builder.and(getPredicatesAsArray(predicates)))
+                .groupBy(equipmentEntity.get(EquipmentEntity_.code), category.get(Category_.code));
+
+        var results = em.createQuery(query)
+                .getResultList();
+
+        completeAnomaliesCountWithZeros(results, subCode);
+        return results;
+    }
+
+    private void completeAnomaliesCountWithZeros(List<AnomalyQueryResult> results, List<String> subCode) {
+        getEquipmentEntities().stream().map(EnumEntity::getCode).forEach(
+                entity -> {
+                    if (results.stream()
+                            .noneMatch(r -> r.entity().equals(entity))) {
+                        subCode.forEach(sc -> results.add(new AnomalyQueryResult(entity, sc, 0L)));
+                    } else {
+                        subCode.forEach(sc -> {
+                            if (results.stream()
+                                    .filter(r -> r.entity().equals(entity))
+                                    .noneMatch(r -> r.subCategory().equals(sc))) {
+                                results.add(new AnomalyQueryResult(entity, sc, 0L));
+                            }
+                        });
+                    }
+                });
     }
 
     private Map<String, Long> gatherUnmanagedEquipments(List<QueryResult> result) {
