@@ -28,7 +28,6 @@ import org.jboss.logging.Logger;
 public class MetricsService {
     public static final String ARMOIRE_CODE = "EP_ARMOIRE";
     public static final String FOYER_LUMINEUX_CODE = "EP_FOYER_LUMINEUX";
-    public static final String CAMERA_CODE = "VP_CAM";
     public static final String ANOMALY_CATEGORY = "ANOMALY";
     private final Logger logger;
     private final MetricsDatabaseReader metricsDatabaseReader;
@@ -101,7 +100,7 @@ public class MetricsService {
     public EquipmentByEntityDto getTotalEquipmentsByEntity(String code) {
         logger.infof("Get all equipments by entity for EP domain and family %s", code);
         Family family = equipmentService.getFamilyByCode(code);
-        Domain domain = metricsDatabaseReader.getDomainByCode("EP");
+        Domain domain = getDomainByCode("EP");
 
         var result = metricsDatabaseReader.getEquipmentsGroupByEntityAndManaged(family, domain);
         return new EquipmentByEntityDto(
@@ -161,7 +160,7 @@ public class MetricsService {
                 date: %s,
                 status: %s
                 """, domain, date, status);
-        var domainEntity = domain == null ? null : metricsDatabaseReader.getDomainByCode(domain);
+        var domainEntity = getDomainByCode(domain);
         var anomalyCategory = metricsDatabaseReader.getCategoryByCode(ANOMALY_CATEGORY);
         return metricsDatabaseReader.getAnomalyEventsGroupedBySubCategories(domainEntity, anomalyCategory, date,
                 Status.fromString(status));
@@ -174,7 +173,7 @@ public class MetricsService {
                 domain : %s,
                 startDate: %s
                 """, domain, startDate);
-        var domainEntity = domain == null ? null : metricsDatabaseReader.getDomainByCode(domain);
+        var domainEntity = getDomainByCode(domain);
         var anomalyCategory = metricsDatabaseReader.getCategoryByCode(ANOMALY_CATEGORY);
         var subcategory = metricsDatabaseReader.getSubCategories(anomalyCategory).map(EnumEntity::getCode).toList();
         return metricsDatabaseReader.getAnomalyEventsGroupedBySubCategoriesAndEntities(domainEntity, subcategory,
@@ -186,17 +185,17 @@ public class MetricsService {
             int buckets,
             String domain,
             Instant startDate) {
+
+        startDate = startDate != null ? startDate : Instant.now();
         logger.infof("""
                 Aggregate anomaly events in the last %s %s from %s
                 filter on
                 domain: %s
                 """.formatted(buckets, interval, startDate, domain));
 
-        startDate = startDate != null ? startDate : Instant.now();
         var domainId = domain != null
                 ? metricsDatabaseReader.getDomainByCode(domain).getId()
                 : null;
-
         var anomalyCategory = metricsDatabaseReader.getCategoryByCode(ANOMALY_CATEGORY);
         var subcategory = metricsDatabaseReader.getSubCategories(anomalyCategory).map(EnumEntity::getCode).toList();
 
@@ -206,6 +205,25 @@ public class MetricsService {
                 startDate,
                 domainId,
                 subcategory);
+    }
+
+    @Transactional
+    public Collection<EventsByEquipment> getEventsByEquipments(String domain, String category, int limit, Instant date) {
+        logger.debugf("""
+                Get Events counts by equipments filter on :
+                domain : %s,
+                category : %s,
+                from date %s
+                """, domain, category, date);
+
+        var domainEntity = getDomainByCode(domain);
+        var eventCategory = eventService.getCategory(category);
+
+        return metricsDatabaseReader.getEventsByEquipments(
+                domainEntity,
+                eventCategory,
+                limit,
+                date);
     }
 
     private Collection<Equipment> getEquipmentWithUndoneEvents(String domain,
@@ -230,6 +248,10 @@ public class MetricsService {
         return metricsDatabaseReader.getEquipmentsWithUnDoneEvents(domainId, entities,
                 eventCriticalities,
                 eventCategories, districts);
+    }
+
+    private Domain getDomainByCode(String code) {
+        return code == null ? null : metricsDatabaseReader.getDomainByCode(code);
     }
 
     private Long getServicesForEquipmentAndStatus(Map<String, Map<ServiceStatus, Long>> servicesByEquipments, String code,

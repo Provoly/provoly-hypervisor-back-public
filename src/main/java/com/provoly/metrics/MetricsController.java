@@ -46,6 +46,17 @@ public class MetricsController {
         return metricsService.getVpEquipmentsWithEventMetrics(criticality, category, entity, place);
     }
 
+    @Path("/events-by-equipments")
+    @GET
+    @Authenticated
+    public Collection<EventsByEquipment> getEventsByEquipments(
+            @RestQuery String category,
+            @RestQuery String domain,
+            @RestQuery @Positive @DefaultValue("10") int limit,
+            @RestQuery Instant date) {
+        return metricsService.getEventsByEquipments(domain, category, limit, date);
+    }
+
     @Path("/equipments-by-entity")
     @GET
     @Authenticated

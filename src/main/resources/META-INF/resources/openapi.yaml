@@ -1550,6 +1550,58 @@ paths:
       security:
         - oidc:
             - authenticated
+  /metrics/events-by-equipments:
+    get:
+      tags:
+        - Metrics Controller
+      summary: Retrieve first n events count by equipments
+      description: |
+        It's possible to filter on category, domain, and count events that was created after a specific date. Limit is set to 10 but it can be changed.
+      operationId: com.provoly.metrics.MetricsController_getTotalEquipmentsByEntity
+      parameters:
+        - name: domain
+          in: query
+          schema:
+            type: string
+          example: VP
+        - name: category
+          in: query
+          schema:
+            type: string
+          example: ANOMALY
+        - name: date
+          in: query
+          schema:
+            $ref: '#/components/schemas/DateTime'
+          example: 2024-05-28T08:10:00Z
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+          example: 10
+      responses:
+        "401":
+          description: Not Authorized
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventsByEquipment'
+              examples:
+                default:
+                  value: |
+                    [
+                      {
+                        "code": "camera1",
+                        "address": "1 rue Chalons",
+                        "city": "CH",
+                        "count": 1
+                      }
+                    ]
+      security:
+        - oidc:
+            - authenticated
   /services/closed/{interval}:
     get:
       tags:
@@ -1571,7 +1623,7 @@ paths:
           description: The timezoned reference date for building the aggregation over the last n intervals
           in: query
           schema:
-            type: integer
+            $ref: '#/components/schemas/DateTime'
           example: 2024-05-28T08:10:00Z
         - name: buckets
           description: Number of buckets. Default to `24`. Must be a positive number.
@@ -1651,8 +1703,8 @@ paths:
           description: event creation date
           in: query
           schema:
-            type: string
-            example: 2024-01-20T00:00:00Z
+            $ref: '#/components/schemas/DateTime'
+          example: 2024-01-20T00:00:00Z
         - name: domain
           description: domain from equipment linked to event
           in: query
@@ -2526,6 +2578,19 @@ components:
         SMP_unmanaged:
           type: integer
           description: Count of unmanaged equipments where entity is `SAINT-MARTIN-COMMUN`
+    EventsByEquipment:
+      type: array
+      items:
+        type: object
+        properties:
+          code:
+            type: string
+          address:
+            type : string
+          city:
+            type: string
+          count:
+            type: integer
     AggregatedService:
       type: array
       items:

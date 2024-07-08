@@ -173,6 +173,49 @@ public class MetricsDatabaseReader extends DatabaseReader {
 
     }
 
+    public Collection<EventsByEquipment> getEventsByEquipments(Domain domainEntity, Category eventCategory, int limit,
+            Instant date) {
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<EventsByEquipment> criteriaQuery = builder.createQuery(EventsByEquipment.class);
+        Root<Event> event = criteriaQuery.from(Event.class);
+        var equipment = event.join(Event_.equipment, JoinType.LEFT);
+        var city = equipment.join(Equipment_.city, JoinType.LEFT);
+
+        var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
+
+        if (eventCategory != null) {
+            var subcategory = getSubCategories(eventCategory).toList();
+            logger.debugf("filter on categories %s", subcategory);
+            predicates.add(event.get(Event_.category).in(subcategory));
+        }
+
+        if (domainEntity != null) {
+            logger.debugf("filter on domain %s", domainEntity);
+            predicates.add(builder.equal(equipment.get(Equipment_.domain), domainEntity));
+        }
+
+        if (date != null) {
+            logger.debugf("Creation date is greater than %s", date);
+            predicates.add(builder.greaterThanOrEqualTo(event.get(Event_.creationDate), date));
+        }
+
+        var query = criteriaQuery
+                .multiselect(
+                        equipment.get(Equipment_.code),
+                        equipment.get(Equipment_.address),
+                        city.get(City_.code),
+                        builder.count(event))
+                .where(builder.and(getPredicatesAsArray(predicates)))
+                .groupBy(equipment.get(Equipment_.code),
+                        equipment.get(Equipment_.address),
+                        city.get(City_.code))
+                .orderBy(builder.desc(builder.count(event)));
+
+        return em.createQuery(query)
+                .setMaxResults(limit)
+                .getResultList();
+    }
+
     public List<AggregateServiceDto> aggregateDoneServices(DateInterval interval,
             int buckets,
             Instant date,

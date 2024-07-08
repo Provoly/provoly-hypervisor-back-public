@@ -507,4 +507,55 @@ public class MetricsServiceTest {
         assertThat(result).extracting("count").containsExactly(1L);
     }
 
+    @Test
+    void should_get_anomaly_events_count_for_vp_equipments() {
+        // given
+        var vpEquipment = equipmentService.getEquipmentByName("camera1");
+        eventService.saveEvent(new EventWriteDto(null,
+                "new anomaly event",
+                "description",
+                Criticality.LOW,
+                "ANOMALY",
+                "TRAFFIC_CONGESTION",
+                "address",
+                vpEquipment.getId(),
+                "VP",
+                null,
+                null,
+                null));
+
+        var startDate = Instant.parse(LocalDate.now().atStartOfDay().minusDays(1) + ":00.000Z");
+        // when
+        var result = metricsService.getEventsByEquipments("VP", "ANOMALY", 10, startDate);
+
+        //then
+        assertThat(result).hasSize(1);
+        assertThat(result).extracting("count").containsExactly(1L);
+    }
+
+    @Test
+    void should_not_get_anomaly_events_count_for_vp_equipments_date_is_too_late() {
+        // given
+        var vpEquipment = equipmentService.getEquipmentByName("camera1");
+        eventService.saveEvent(new EventWriteDto(null,
+                "new anomaly event",
+                "description",
+                Criticality.LOW,
+                "ANOMALY",
+                "TRAFFIC_CONGESTION",
+                "address",
+                vpEquipment.getId(),
+                "VP",
+                null,
+                null,
+                null));
+
+        var startDate = Instant.parse(LocalDate.now().atStartOfDay().plusDays(1) + ":00.000Z");
+        // when
+        var result = metricsService.getEventsByEquipments("VP", "ANOMALY", 10, startDate);
+
+        //then
+        assertThat(result).isEmpty();
+    }
+
 }
