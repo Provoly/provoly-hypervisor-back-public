@@ -8,11 +8,11 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
-import com.provoly.EnumEntity;
 import com.provoly.equipment.Equipment;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.Family;
@@ -28,7 +28,11 @@ import org.jboss.logging.Logger;
 public class MetricsService {
     public static final String ARMOIRE_CODE = "EP_ARMOIRE";
     public static final String FOYER_LUMINEUX_CODE = "EP_FOYER_LUMINEUX";
-    public static final String ANOMALY_CATEGORY = "ANOMALY";
+    public static final String MANIFESTATION = "MANIFESTATION";
+    public static final String LIMIT = "LIMIT";
+    public static final String OUTOFORDER = "OUTOFORDER";
+    public static final String ANOMALY = "ANOMALY";
+
     private final Logger logger;
     private final MetricsDatabaseReader metricsDatabaseReader;
     private final EquipmentService equipmentService;
@@ -43,66 +47,91 @@ public class MetricsService {
     }
 
     @Transactional
-    public EpEquipmentWithEventsDto getEpEquipmentsWithEventMetrics(
+    public EpEquipmentWithEventsDto getEpEquipmentsWithEvent(
             Collection<String> criticalities,
             Collection<String> categories,
             Collection<String> entities, Collection<String> places) {
 
-        var equipmentWithUndoneEvents = getEquipmentWithUndoneEvents("EP", criticalities, categories, entities, places);
-
-        logger.debugf("grouped by Managed/ unmanaged");
-        var equipments = metricsDatabaseReader.equipmentsCountGroupedByManaged(equipmentWithUndoneEvents);
-
-        logger.debug("Get all equipments grouped by family");
-        var totalEquipmentWithEvent = metricsDatabaseReader.getTotalEpEquipmentGroupedByFamilyAndManaged();
-
-        logger.debug("Get services equipments grouped by family and service status");
-        var servicesByEquipments = metricsDatabaseReader.getEpEquipmentServicesByStatus(equipmentWithUndoneEvents);
-
-        return new EpEquipmentWithEventsDto(
-                equipments.getOrDefault(ARMOIRE_CODE, 0L),
-                totalEquipmentWithEvent.getOrDefault(ARMOIRE_CODE, 0L),
-                getServicesForEquipmentAndStatus(servicesByEquipments, ARMOIRE_CODE, ASKED),
-                getServicesForEquipmentAndStatus(servicesByEquipments, ARMOIRE_CODE, IN_PROGRESS),
-
-                equipments.getOrDefault(FOYER_LUMINEUX_CODE, 0L),
-                totalEquipmentWithEvent.getOrDefault(FOYER_LUMINEUX_CODE, 0L),
-                getServicesForEquipmentAndStatus(servicesByEquipments, FOYER_LUMINEUX_CODE, ASKED),
-                getServicesForEquipmentAndStatus(servicesByEquipments, FOYER_LUMINEUX_CODE, IN_PROGRESS),
-
-                equipments.getOrDefault(UNMANAGED, 0L),
-                totalEquipmentWithEvent.getOrDefault(UNMANAGED, 0L),
-                getServicesForEquipmentAndStatus(servicesByEquipments, UNMANAGED, ASKED),
-                getServicesForEquipmentAndStatus(servicesByEquipments, UNMANAGED, IN_PROGRESS));
+        var equipments = getEquipmentForEventsExceptManifestation("EP",
+                criticalities,
+                categories,
+                entities,
+                places);
+        return buildEpEquimentWithEvent(equipments);
 
     }
 
     @Transactional
-    public VpEquipmentWithEventsDto getVpEquipmentsWithEventMetrics(
+    public EpEquipmentWithEventsDetailedDto getEpEquipmentWithEventDetailed() {
+        var domainEntity = metricsDatabaseReader.getDomainByCode("EP");
+
+        logger.debug("Get equipments with events grouped by event category");
+        var equipmentByCategory = metricsDatabaseReader.getEquipmentsByEventCategory(domainEntity,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of());
+
+        var equipmentsWithEvent = buildEpEquimentWithEvent(equipmentByCategory
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .distinct()
+                .toList());
+
+        var equipmentsByFamily = equipmentByCategory.entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        item -> metricsDatabaseReader.getEpEquipmentByFamily(item.getValue())));
+
+        return new EpEquipmentWithEventsDetailedDto(equipmentsWithEvent,
+                buildEpEquipmentByCategory(MANIFESTATION, equipmentsByFamily),
+                buildEpEquipmentByCategory(LIMIT, equipmentsByFamily),
+                buildEpEquipmentByCategory(OUTOFORDER, equipmentsByFamily),
+                buildEpEquipmentByCategory(ANOMALY, equipmentsByFamily));
+
+    }
+
+    @Transactional
+    public VpEquipmentWithEventsDto getVpEquipmentsWithEvent(
             List<String> criticalities,
             List<String> categories,
             List<String> entities,
             List<String> places) {
-        var equipmentWithUndoneEvents = getEquipmentWithUndoneEvents("VP", criticalities, categories, entities, places);
-        var totalEquipments = metricsDatabaseReader.getTotalVpEquipments();
-
-        logger.debug("Get services equipments grouped by family and service status");
-        var servicesByEquipments = metricsDatabaseReader.getVpEquipmentServicesByStatus(equipmentWithUndoneEvents);
-
-        return new VpEquipmentWithEventsDto(
-                equipmentWithUndoneEvents.size(),
-                totalEquipments,
-                servicesByEquipments.getOrDefault(ASKED, 0L),
-                servicesByEquipments.getOrDefault(IN_PROGRESS, 0L));
+        var equipments = getEquipmentForEventsExceptManifestation("VP",
+                criticalities,
+                categories,
+                entities,
+                places);
+        return buildVpEquipmentWithEventsDto(equipments);
     }
 
     @Transactional
-    public EquipmentByEntityDto getTotalEquipmentsByEntity(String code) {
+    public VpEquipmentWithEventsDetailedDto getVpEquipmentsWithEventDetailed() {
+        var domainEntity = metricsDatabaseReader.getDomainByCode("VP");
+        var equipmentByCategory = metricsDatabaseReader.getEquipmentsByEventCategory(domainEntity, List.of(), List.of(),
+                List.of(),
+                List.of());
+
+        var equipmentsWithEvent = buildVpEquipmentWithEventsDto(
+                equipmentByCategory.values().stream().flatMap(Collection::stream).distinct().toList());
+
+        return new VpEquipmentWithEventsDetailedDto(
+                equipmentsWithEvent,
+                new VpEquipmentByCategoryDto(equipmentByCategory.getOrDefault(MANIFESTATION, List.of()).size()),
+                new VpEquipmentByCategoryDto(equipmentByCategory.getOrDefault(LIMIT, List.of()).size()),
+                new VpEquipmentByCategoryDto(equipmentByCategory.getOrDefault(OUTOFORDER, List.of()).size()),
+                new VpEquipmentByCategoryDto(equipmentByCategory.getOrDefault(ANOMALY, List.of()).size()));
+    }
+
+    @Transactional
+    public EquipmentByEntityDto getTotalEpEquipmentsByEntity(String code) {
         logger.infof("Get all equipments by entity for EP domain and family %s", code);
         Family family = equipmentService.getFamilyByCode(code);
         Domain domain = getDomainByCode("EP");
 
-        var result = metricsDatabaseReader.getEquipmentsGroupByEntityAndManaged(family, domain);
+        var result = metricsDatabaseReader.getEpEquipmentsByEntity(family, domain);
         return new EquipmentByEntityDto(
                 result.getOrDefault("AGGLO-COMMUN_managed", 0L),
                 result.getOrDefault("AGGLO-COMMUN_unmanaged", 0L),
@@ -161,8 +190,7 @@ public class MetricsService {
                 status: %s
                 """, domain, date, status);
         var domainEntity = getDomainByCode(domain);
-        var anomalyCategory = metricsDatabaseReader.getCategoryByCode(ANOMALY_CATEGORY);
-        return metricsDatabaseReader.getAnomalyEventsGroupedBySubCategories(domainEntity, anomalyCategory, date,
+        return metricsDatabaseReader.getAnomalyEventsBySubCategories(domainEntity, date,
                 Status.fromString(status));
     }
 
@@ -174,10 +202,8 @@ public class MetricsService {
                 startDate: %s
                 """, domain, startDate);
         var domainEntity = getDomainByCode(domain);
-        var anomalyCategory = metricsDatabaseReader.getCategoryByCode(ANOMALY_CATEGORY);
-        var subcategory = metricsDatabaseReader.getSubCategories(anomalyCategory).map(EnumEntity::getCode).toList();
-        return metricsDatabaseReader.getAnomalyEventsGroupedBySubCategoriesAndEntities(domainEntity, subcategory,
-                startDate);
+
+        return metricsDatabaseReader.getAnomalyEventsBySubCategoriesAndEntities(domainEntity, startDate);
     }
 
     @Transactional
@@ -196,15 +222,12 @@ public class MetricsService {
         var domainId = domain != null
                 ? metricsDatabaseReader.getDomainByCode(domain).getId()
                 : null;
-        var anomalyCategory = metricsDatabaseReader.getCategoryByCode(ANOMALY_CATEGORY);
-        var subcategory = metricsDatabaseReader.getSubCategories(anomalyCategory).map(EnumEntity::getCode).toList();
 
         return metricsDatabaseReader.aggregateAnomaliesEvents(
                 interval,
                 buckets,
                 startDate,
-                domainId,
-                subcategory);
+                domainId);
     }
 
     @Transactional
@@ -226,7 +249,7 @@ public class MetricsService {
                 date);
     }
 
-    private Collection<Equipment> getEquipmentWithUndoneEvents(String domain,
+    private Collection<Equipment> getEquipmentForEventsExceptManifestation(String domain,
             Collection<String> criticalities,
             Collection<String> categories,
             Collection<String> entities,
@@ -239,15 +262,67 @@ public class MetricsService {
                 equipment entity : %s
                 places: %s
                 """.formatted(domain, criticalities, categories, entities, places));
-        var domainId = metricsDatabaseReader.getDomainByCode(domain).getId();
+        var domainEntity = metricsDatabaseReader.getDomainByCode(domain);
         var eventCriticalities = criticalities.stream().map(Criticality::fromString).toList();
         var eventCategories = categories.stream().map(eventService::getCategory).toList();
         var districts = places.stream().map(equipmentService::getDistrictByCode).toList();
+        var equipmentEntities = entities.stream().map(equipmentService::getEquipmentEntity).toList();
 
         logger.debugf("Get all %s equipments linked with at least one undone event which is not a Manifestation", domain);
-        return metricsDatabaseReader.getEquipmentsWithUnDoneEvents(domainId, entities,
+        return metricsDatabaseReader.getEquipmentsByEventCategory(
+                domainEntity,
+                equipmentEntities,
                 eventCriticalities,
-                eventCategories, districts);
+                eventCategories,
+                districts)
+                .entrySet()
+                .stream()
+                .filter(item -> !item.getKey().equals(MANIFESTATION))
+                .map(Map.Entry::getValue)
+                .flatMap(Collection::stream)
+                .distinct()
+                .toList();
+
+    }
+
+    private EpEquipmentWithEventsDto buildEpEquimentWithEvent(Collection<Equipment> equipmentWithUndoneEvents) {
+        logger.debug("grouped by familiy and managed/unmanaged");
+        var equipments = metricsDatabaseReader.getEpEquipmentByFamily(equipmentWithUndoneEvents);
+
+        logger.debug("Get all equipments grouped by family");
+        var totalEquipmentWithEvent = metricsDatabaseReader.getTotalEpEquipmentByFamily();
+
+        logger.debug("Get ep services equipments grouped by family and service status");
+        var servicesByEquipments = metricsDatabaseReader.getEpServicesByStatus(equipmentWithUndoneEvents);
+
+        return new EpEquipmentWithEventsDto(
+                equipments.getOrDefault(ARMOIRE_CODE, 0L),
+                totalEquipmentWithEvent.getOrDefault(ARMOIRE_CODE, 0L),
+                getServicesForEquipmentAndStatus(servicesByEquipments, ARMOIRE_CODE, ASKED),
+                getServicesForEquipmentAndStatus(servicesByEquipments, ARMOIRE_CODE, IN_PROGRESS),
+
+                equipments.getOrDefault(FOYER_LUMINEUX_CODE, 0L),
+                totalEquipmentWithEvent.getOrDefault(FOYER_LUMINEUX_CODE, 0L),
+                getServicesForEquipmentAndStatus(servicesByEquipments, FOYER_LUMINEUX_CODE, ASKED),
+                getServicesForEquipmentAndStatus(servicesByEquipments, FOYER_LUMINEUX_CODE, IN_PROGRESS),
+
+                equipments.getOrDefault(UNMANAGED, 0L),
+                totalEquipmentWithEvent.getOrDefault(UNMANAGED, 0L),
+                getServicesForEquipmentAndStatus(servicesByEquipments, UNMANAGED, ASKED),
+                getServicesForEquipmentAndStatus(servicesByEquipments, UNMANAGED, IN_PROGRESS));
+    }
+
+    private VpEquipmentWithEventsDto buildVpEquipmentWithEventsDto(Collection<Equipment> equipmentWithUndoneEvents) {
+        var totalEquipments = metricsDatabaseReader.getTotalVpEquipments();
+
+        logger.debug("Get vp services equipments grouped by family and service status");
+        var servicesByEquipments = metricsDatabaseReader.getVpServicesByStatus(equipmentWithUndoneEvents);
+
+        return new VpEquipmentWithEventsDto(
+                equipmentWithUndoneEvents.size(),
+                totalEquipments,
+                servicesByEquipments.getOrDefault(ASKED, 0L),
+                servicesByEquipments.getOrDefault(IN_PROGRESS, 0L));
     }
 
     private Domain getDomainByCode(String code) {
@@ -258,4 +333,13 @@ public class MetricsService {
             ServiceStatus status) {
         return servicesByEquipments.getOrDefault(code, Map.of(status, 0L)).getOrDefault(status, 0L);
     }
+
+    private EpEquipmentByCategoryDto buildEpEquipmentByCategory(String category,
+            Map<String, Map<String, Long>> equipmentsByCategory) {
+        return new EpEquipmentByCategoryDto(
+                equipmentsByCategory.getOrDefault(category, Map.of()).getOrDefault(ARMOIRE_CODE, 0L),
+                equipmentsByCategory.getOrDefault(category, Map.of()).getOrDefault(FOYER_LUMINEUX_CODE, 0L),
+                equipmentsByCategory.getOrDefault(category, Map.of()).getOrDefault(UNMANAGED, 0L));
+    }
+
 }

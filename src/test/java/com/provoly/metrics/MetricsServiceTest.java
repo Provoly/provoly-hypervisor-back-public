@@ -49,7 +49,7 @@ public class MetricsServiceTest {
     @Test
     void should_get_equipment_with_event_metrics() {
         // when
-        var result = metricsService.getEpEquipmentsWithEventMetrics(List.of(), List.of(), List.of(), List.of());
+        var result = metricsService.getEpEquipmentsWithEvent(List.of(), List.of(), List.of(), List.of());
 
         //then
         assertThat(result).extracting("nbEquipWithEvent_A").isEqualTo(0L);
@@ -69,9 +69,34 @@ public class MetricsServiceTest {
     }
 
     @Test
+    void should_get_ep_equipment_with_event_detailed_metrics() {
+        // when
+        var result = metricsService.getEpEquipmentWithEventDetailed();
+
+        //then
+        assertThat(result.getManifestation()).extracting("nbEquipWithEvent_A").isEqualTo(1L);
+
+        assertThat(result.getAnomaly())
+                .extracting("nbEquipWithEvent_FL").isEqualTo(1L);
+
+        assertThat(result).extracting("totalEquipWithEvent_A").isEqualTo(1L);
+        assertThat(result).extracting("totalEquipWithEvent_FL").isEqualTo(1L);
+        assertThat(result).extracting("totalEquipWithEvent_unmanaged").isEqualTo(4L);
+
+        assertThat(result).extracting("nbServiceTodoWithEquip_A").isEqualTo(0L);
+        assertThat(result).extracting("nbServiceInProgressWithEquip_A").isEqualTo(0L);
+
+        assertThat(result).extracting("nbServiceTodoWithEquip_FL").isEqualTo(0L);
+        assertThat(result).extracting("nbServiceInProgressWithEquip_FL").isEqualTo(0L);
+
+        assertThat(result).extracting("nbServiceTodoWithEquip_unmanaged").isEqualTo(1L);
+        assertThat(result).extracting("nbServiceInProgressWithEquip_unmanaged").isEqualTo(0L);
+    }
+
+    @Test
     void should_get_equipment_with_event_metrics_filter_on_place() {
         // when
-        var result = metricsService.getEpEquipmentsWithEventMetrics(List.of(), List.of(), List.of(), List.of("CH_C"));
+        var result = metricsService.getEpEquipmentsWithEvent(List.of(), List.of(), List.of(), List.of("CH_C"));
 
         //then
         assertThat(result).extracting("nbEquipWithEvent_A").isEqualTo(0L);
@@ -93,7 +118,7 @@ public class MetricsServiceTest {
     @Test
     void should_get_equipment_from_agglo_with_event_metrics_with_criticality_low_medium_and_category_alert() {
         // when
-        var result = metricsService.getEpEquipmentsWithEventMetrics(List.of(Criticality.LOW.name(), Criticality.MEDIUM.name()),
+        var result = metricsService.getEpEquipmentsWithEvent(List.of(Criticality.LOW.name(), Criticality.MEDIUM.name()),
                 List.of("LIMIT", "OUTOFORDER"), List.of("AGGLO-COMMUN"), List.of());
 
         //then
@@ -116,7 +141,7 @@ public class MetricsServiceTest {
     @Test
     void should_get_distinct_equipment_with_event_metrics_when_linked_to_many_events() {
         //given
-        var result = metricsService.getEpEquipmentsWithEventMetrics(List.of(), List.of(), List.of(), List.of());
+        var result = metricsService.getEpEquipmentsWithEvent(List.of(), List.of(), List.of(), List.of());
         assertThat(result).extracting("nbEquipWithEvent_unmanaged").isEqualTo(2L);
 
         // when adding a new event for an unmanaged equipment
@@ -135,11 +160,11 @@ public class MetricsServiceTest {
                 null,
                 null));
 
-        var resultUpdated = metricsService.getEpEquipmentsWithEventMetrics(List.of(), List.of(), List.of(), List.of());
+        var resultUpdated = metricsService.getEpEquipmentsWithEvent(List.of(), List.of(), List.of(), List.of());
 
         //then
         assertThat(resultUpdated).extracting("nbEquipWithEvent_unmanaged")
-                .isEqualTo(result.nbEquipWithEvent_unmanaged());
+                .isEqualTo(result.getNbEquipWithEvent_unmanaged());
 
     }
 
@@ -149,7 +174,7 @@ public class MetricsServiceTest {
         dataService.clean();
 
         // when
-        var result = metricsService.getEpEquipmentsWithEventMetrics(List.of(), List.of(), List.of(), List.of());
+        var result = metricsService.getEpEquipmentsWithEvent(List.of(), List.of(), List.of(), List.of());
 
         //then
         assertThat(result).extracting("nbEquipWithEvent_A").isEqualTo(0L);
@@ -171,7 +196,7 @@ public class MetricsServiceTest {
     @Test
     void should_get_equipment_FL_by_entities() {
         // when
-        var result = metricsService.getTotalEquipmentsByEntity("EP_FOYER_LUMINEUX");
+        var result = metricsService.getTotalEpEquipmentsByEntity("EP_FOYER_LUMINEUX");
 
         //then
         assertThat(result).extracting("aggloManaged").isEqualTo(1L);
@@ -188,7 +213,7 @@ public class MetricsServiceTest {
     @Test
     void should_get_equipment_A_by_entities() {
         // when
-        var result = metricsService.getTotalEquipmentsByEntity("EP_ARMOIRE");
+        var result = metricsService.getTotalEpEquipmentsByEntity("EP_ARMOIRE");
 
         //then
         assertThat(result).extracting("aggloManaged").isEqualTo(0L);
@@ -208,7 +233,7 @@ public class MetricsServiceTest {
         dataService.clean();
 
         // when
-        var result = metricsService.getTotalEquipmentsByEntity("EP_ARMOIRE");
+        var result = metricsService.getTotalEpEquipmentsByEntity("EP_ARMOIRE");
 
         //then
         assertThat(result).extracting("aggloManaged").isEqualTo(0L);
@@ -225,7 +250,7 @@ public class MetricsServiceTest {
     @Test
     void should_get_equipment_null_family_should_throw_exception() {
         //then
-        assertThatThrownBy(() -> metricsService.getTotalEquipmentsByEntity(null))
+        assertThatThrownBy(() -> metricsService.getTotalEpEquipmentsByEntity(null))
                 .hasMessageContaining("Code null invalid");
 
     }
@@ -331,13 +356,30 @@ public class MetricsServiceTest {
     @Test
     void should_get_vp_equipment_from_agglo_with_event_metrics_with_criticality_low_medium_and_category_alert() {
         // when
-        var result = metricsService.getVpEquipmentsWithEventMetrics(List.of(), List.of(), List.of(), List.of());
+        var result = metricsService.getVpEquipmentsWithEvent(List.of(), List.of(), List.of(), List.of());
 
         //then
         assertThat(result).extracting("nbEquipWithEvent_C").isEqualTo(0L);
         assertThat(result).extracting("totalEquipWithEvent_C").isEqualTo(2L);
         assertThat(result).extracting("nbServiceTodoWithEquip_C").isEqualTo(0L);
         assertThat(result).extracting("nbServiceInProgressWithEquip_C").isEqualTo(0L);
+    }
+
+    @Test
+    void should_get_vp_equipment_with_event_detailed_metrics() {
+        // when
+        var result = metricsService.getVpEquipmentsWithEventDetailed();
+
+        //then
+        assertThat(result.getManifestation()).extracting("nbEquipWithEvent_C").isEqualTo(0L);
+
+        assertThat(result.getAnomaly())
+                .extracting("nbEquipWithEvent_C").isEqualTo(0L);
+
+        assertThat(result).extracting("totalEquipWithEvent_C").isEqualTo(2L);
+        assertThat(result).extracting("nbServiceTodoWithEquip_C").isEqualTo(0L);
+        assertThat(result).extracting("nbServiceInProgressWithEquip_C").isEqualTo(0L);
+
     }
 
     @Test

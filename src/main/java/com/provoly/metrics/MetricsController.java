@@ -32,7 +32,14 @@ public class MetricsController {
             @RestQuery List<String> entity,
             @RestQuery List<String> place) {
 
-        return metricsService.getEpEquipmentsWithEventMetrics(criticality, category, entity, place);
+        return metricsService.getEpEquipmentsWithEvent(criticality, category, entity, place);
+    }
+
+    @Path("/equipments-with-events/EP/detailed")
+    @GET
+    @Authenticated
+    public EpEquipmentWithEventsDetailedDto getEpEquipmentWithEventDetailed() {
+        return metricsService.getEpEquipmentWithEventDetailed();
     }
 
     @Path("/equipments-with-events/VP")
@@ -43,7 +50,14 @@ public class MetricsController {
             @RestQuery List<String> entity,
             @RestQuery List<String> place) {
 
-        return metricsService.getVpEquipmentsWithEventMetrics(criticality, category, entity, place);
+        return metricsService.getVpEquipmentsWithEvent(criticality, category, entity, place);
+    }
+
+    @Path("/equipments-with-events/VP/detailed")
+    @GET
+    @Authenticated
+    public VpEquipmentWithEventsDetailedDto getVpEquipmentWithEventDetailed() {
+        return metricsService.getVpEquipmentsWithEventDetailed();
     }
 
     @Path("/events-by-equipments")
@@ -61,7 +75,7 @@ public class MetricsController {
     @GET
     @Authenticated
     public EquipmentByEntityDto getTotalEquipmentsByEntity(@RestQuery String family) {
-        return metricsService.getTotalEquipmentsByEntity(family);
+        return metricsService.getTotalEpEquipmentsByEntity(family);
     }
 
     @Path("/services/closed/{interval}")

@@ -1452,6 +1452,64 @@ paths:
       security:
         - oidc:
             - authenticated
+  /metrics/equipments-with-events/EP/detailed:
+    get:
+      tags:
+        - Metrics Controller
+      summary: Retrieve equipments from EP domain with event metrics
+      description: |
+        Similar to the endpoint `/metrics/equipments-with-events/EP` but the number of events is grouped by category and includes the "MANIFESTATION" category.
+      operationId: com.provoly.metrics.MetricsController_getEpEquipmentWithEventDetailed
+      responses:
+        "401":
+          description: Not Authorized
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EpEquipmentWithEventDetailedDto'
+              examples:
+                default:
+                  value: |
+                    {
+                      "nbEquipWithEvent_A": 0,
+                      "totalEquipWithEvent_A": 4,
+                      "nbServiceTodoWithEquip_A": 0,
+                      "nbServiceInProgressWithEquip_A": 0,
+                      "nbEquipWithEvent_FL": 1,
+                      "totalEquipWithEvent_FL": 2,
+                      "nbServiceTodoWithEquip_FL": 0,
+                      "nbServiceInProgressWithEquip_FL": 0,
+                      "nbEquipWithEvent_unmanaged": 0,
+                      "totalEquipWithEvent_unmanaged": 3,
+                      "nbServiceTodoWithEquip_unmanaged": 0,
+                      "nbServiceInProgressWithEquip_unmanaged": 0,    
+                      "limit": {
+                        "nbEquipWithEvent_A": 0,
+                        "nbEquipWithEvent_FL": 1,
+                        "nbEquipWithEvent_unmanaged": 0
+                      },
+                      "anomaly": {
+                        "nbEquipWithEvent_A": 0,
+                        "nbEquipWithEvent_FL": 0,
+                        "nbEquipWithEvent_unmanaged": 0
+                      },
+                      "manifestation": {
+                        "nbEquipWithEvent_A": 0,
+                        "nbEquipWithEvent_FL": 1,
+                        "nbEquipWithEvent_unmanaged": 0
+                      },
+                      "outoforder": {
+                        "nbEquipWithEvent_A": 0,
+                        "nbEquipWithEvent_FL": 1,
+                        "nbEquipWithEvent_unmanaged": 0
+                      }
+                    }
+
+
+      security:
+        - oidc:
+            - authenticated
   /metrics/equipments-with-events/VP:
     get:
       tags:
@@ -1507,6 +1565,47 @@ paths:
                       "nbServiceTodoWithEquip_C": 0,
                       "nbServiceInProgressWithEquip_C": 0
                     }
+      security:
+        - oidc:
+            - authenticated
+  /metrics/equipments-with-events/VP/detailed:
+    get:
+      tags:
+        - Metrics Controller
+      summary: Retrieve equipments from VP domain with event metrics
+      description: |
+        Similar to the endpoint `/metrics/equipments-with-events/VP` but the number of events is grouped by category and includes the "MANIFESTATION" category.
+      operationId: com.provoly.metrics.MetricsController_getVpEquipmentWithEventDetailed
+      responses:
+        "401":
+          description: Not Authorized
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VpEquipmentWithEventDetailedDto'
+              examples:
+                default:
+                  value: |
+                    {
+                      "nbEquipWithEvent_C": 1,
+                      "totalEquipWithEvent_C": 2,
+                      "nbServiceTodoWithEquip_C": 0,
+                      "nbServiceInProgressWithEquip_C": 0,                      
+                      "limit": {
+                        "nbEquipWithEvent_C": 1
+                      },
+                      "anomaly": {
+                        "nbEquipWithEvent_C": 0
+                      },
+                      "manifestation": {
+                        "nbEquipWithEvent_C": 1
+                      },
+                      "outoforder": {
+                        "nbEquipWithEvent_C": 1
+                      }
+                    }
+
       security:
         - oidc:
             - authenticated
@@ -2536,6 +2635,47 @@ components:
         nbServiceInProgressWithEquip_unmanaged:
           type: integer
           description: Count of in progress services linked to an unmanaged equipment
+    EpEquipmentWithEventDetailedDto:
+      allOf:
+        - $ref: '#/components/schemas/EpEquipmentWithEventDto'
+        - type: object
+          properties:
+            manifestation:
+              type: object
+              properties:
+                nbEquipWithEvent_A:
+                  type: integer
+                nbEquipWithEvent_FL:
+                  type: integer
+                nbEquipWithEvent_unmanaged:
+                  type: integer
+            outoforder:
+              type: object
+              properties:
+                nbEquipWithEvent_A:
+                  type: integer
+                nbEquipWithEvent_FL:
+                  type: integer
+                nbEquipWithEvent_unmanaged:
+                  type: integer
+            anomaly:
+              type: object
+              properties:
+                nbEquipWithEvent_A:
+                  type: integer
+                nbEquipWithEvent_FL:
+                  type: integer
+                nbEquipWithEvent_unmanaged:
+                  type: integer
+            limit:
+              type: object
+              properties:
+                nbEquipWithEvent_A:
+                  type: integer
+                nbEquipWithEvent_FL:
+                  type: integer
+                nbEquipWithEvent_unmanaged:
+                  type: integer
     VpEquipmentWithEventDto:
       type: object
       properties:
@@ -2551,6 +2691,31 @@ components:
         nbServiceInProgressWithEquip_C:
           type: integer
           description: Count of in progress services linked to an "Camera" equipment
+    VpEquipmentWithEventDetailedDto:
+      allOf:
+        - $ref: '#/components/schemas/VpEquipmentWithEventDto'
+        - type: object
+          properties:
+            manifestation:
+              type: object
+              properties:
+                nbEquipWithEvent_C:
+                  type: integer
+            outoforder:
+              type: object
+              properties:
+                nbEquipWithEvent_C:
+                  type: integer
+            anomaly:
+              type: object
+              properties:
+                nbEquipWithEvent_C:
+                  type: integer
+            limit:
+              type: object
+              properties:
+                nbEquipWithEvent_C:
+                  type: integer
     EquipmentsByEntity:
       type: object
       properties:

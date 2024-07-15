@@ -1,11 +1,11 @@
 package com.provoly.metrics;
 
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,64 +28,128 @@ import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class MetricsDatabaseReader extends DatabaseReader {
+    public static final String ANOMALY_CATEGORY = "ANOMALY";
     public static final String UNMANAGED = "unmanaged";
     public static final String MANAGED = "managed";
 
     private final Logger logger;
-    private final EquipmentService equipmentService;
 
-    public MetricsDatabaseReader(EntityManager em, Logger logger, EquipmentService equipmentService) {
+    public MetricsDatabaseReader(EntityManager em, Logger logger) {
         super(em);
         this.logger = logger;
-        this.equipmentService = equipmentService;
     }
 
-    private record QueryResult(String code, int managed, long count) {
+    private record ManagedResult(String code, int managed, long count) {
     }
 
-    public Collection<Equipment> getEquipmentsWithUnDoneEvents(
-            Long domainId,
-            Collection<String> entities,
+    private record EquipmentResult(Category category, Equipment equipment) {
+    }
+
+    public Map<String, List<Equipment>> getEquipmentsByEventCategory(
+            Domain domainEntity,
+            Collection<EquipmentEntity> entities,
             Collection<Criticality> criticalities,
             Collection<Category> categories,
             Collection<District> districts) {
 
-        return equipmentService
-                .getEquipments(entities)
-                .stream()
-                .filter(equipment -> equipment.getDomain().getId().equals(domainId))
-                .filter(equipment -> districts.isEmpty() || districts.contains(equipment.getDistrict()))
-                .filter(equipment -> matchEvents(equipment.getEvents(), criticalities, categories))
-                .toList();
+        logger.debug("Get equipment linked with an undone event grouped by category");
 
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<EquipmentResult> criteriaQuery = builder.createQuery(EquipmentResult.class);
+        Root<Event> event = criteriaQuery.from(Event.class);
+        var category = event.join(Event_.category, JoinType.LEFT);
+        var equipment = event.join(Event_.equipment, JoinType.LEFT);
+
+        var predicates = new ArrayList<Predicate>();
+        predicates.add(builder.notEqual(event.get(Event_.status), Status.DONE));
+
+        filterOnDomain(domainEntity, predicates, builder, equipment);
+
+        if (!entities.isEmpty()) {
+            logger.debugf("filter on entities %s", entities);
+            predicates.add(equipment.get(Equipment_.entity).in(entities));
+        }
+
+        if (!criticalities.isEmpty()) {
+            logger.debugf("filter on criticalities %s", criticalities);
+            predicates.add(event.get(Event_.criticality).in(criticalities));
+        }
+
+        if (!categories.isEmpty()) {
+            logger.debugf("filter on categories %s", categories);
+            predicates.add(event.get(Event_.category).in(categories));
+        }
+
+        if (!districts.isEmpty()) {
+            logger.debugf("filter on districts %s", districts);
+            predicates.add(equipment.get(Equipment_.district).in(districts));
+        }
+
+        var query = criteriaQuery
+                .multiselect(
+                        category,
+                        equipment)
+                .distinct(true)
+                .where(getPredicatesAsArray(predicates));
+
+        return em.createQuery(query)
+                .getResultStream()
+                .collect(groupingBy(this::getCategoryCode, mapping(EquipmentResult::equipment, Collectors.toList())));
     }
 
-    private boolean matchEvents(Collection<Event> events, Collection<Criticality> criticalities,
-            Collection<Category> categories) {
-        return events
-                .stream()
-                .anyMatch(event -> isUnDone()
-                        .and(isNotManifestation())
-                        .and(isOneOfCategory(categories))
-                        .and(isOneOfCriticality(criticalities)).test(event));
+    private String getCategoryCode(EquipmentResult r) {
+        return r.category().getParent() != null
+                ? r.category().getParent().getCode()
+                : r.category().getCode();
     }
 
-    public Map<String, Long> equipmentsCountGroupedByManaged(Collection<Equipment> equipments) {
+    public Map<String, Long> getEpEquipmentByFamily(Collection<Equipment> equipments) {
         var groupedByManagedAndCode = equipments
                 .stream()
                 .collect(groupingBy(equipment -> equipment.getAttributes().get(MANAGED),
                         groupingBy(equipment -> equipment.getFamily().getCode(), Collectors.counting())));
 
         var result = groupedByManagedAndCode.getOrDefault(1, new HashMap<>());
-        long mergedUnmanagedEquipments = groupedByManagedAndCode.getOrDefault(0, Map.of()).values().stream()
-                .mapToLong(v -> v).sum();
+
+        logger.debugf("merge unmanaged equipments");
+        long mergedUnmanagedEquipments = groupedByManagedAndCode.getOrDefault(0, Map.of())
+                .values()
+                .stream()
+                .mapToLong(v -> v)
+                .sum();
+
         result.put(UNMANAGED, mergedUnmanagedEquipments);
         return result;
     }
 
-    public Map<String, Long> getTotalEpEquipmentGroupedByFamilyAndManaged() {
+    public Map<String, Long> getEpEquipmentsByEntity(Family family, Domain domain) {
         var builder = em.getCriteriaBuilder();
-        CriteriaQuery<QueryResult> criteriaQuery = builder.createQuery(QueryResult.class);
+        CriteriaQuery<ManagedResult> criteriaQuery = builder.createQuery(ManagedResult.class);
+        Root<Equipment> equipment = criteriaQuery.from(Equipment.class);
+        var entity = equipment.join(Equipment_.entity, JoinType.LEFT);
+        var managed = getManagedPath(builder, equipment.get(Equipment_.attributes));
+
+        var query = criteriaQuery.multiselect(
+                entity.get(EquipmentEntity_.code),
+                managed,
+                builder.count(equipment))
+                .where(builder.and(
+                        builder.isFalse(equipment.get(Equipment_.deleted)),
+                        builder.equal(equipment.get(Equipment_.family), family),
+                        builder.equal(equipment.get(Equipment_.domain), domain)))
+                .groupBy(entity.get(EquipmentEntity_.code), managed);
+
+        return em.createQuery(query)
+                .getResultStream()
+                .collect(Collectors.toMap(
+                        r -> "%s_%s".formatted(r.code(), r.managed() == 1 ? MANAGED : UNMANAGED),
+                        ManagedResult::count));
+
+    }
+
+    public Map<String, Long> getTotalEpEquipmentByFamily() {
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<ManagedResult> criteriaQuery = builder.createQuery(ManagedResult.class);
         Root<Equipment> equipment = criteriaQuery.from(Equipment.class);
         var family = equipment.join(Equipment_.family, JoinType.LEFT);
         var domain = equipment.join(Equipment_.domain, JoinType.LEFT);
@@ -118,7 +182,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
         return em.createQuery(query).getSingleResult();
     }
 
-    public Map<String, Map<ServiceStatus, Long>> getEpEquipmentServicesByStatus(Collection<Equipment> equipments) {
+    public Map<String, Map<ServiceStatus, Long>> getEpServicesByStatus(Collection<Equipment> equipments) {
         var equipmentServices = equipments.stream()
                 .map(Equipment::getServices)
                 .flatMap(Collection::stream)
@@ -139,38 +203,13 @@ public class MetricsDatabaseReader extends DatabaseReader {
         return result;
     }
 
-    public Map<ServiceStatus, Long> getVpEquipmentServicesByStatus(Collection<Equipment> equipments) {
+    public Map<ServiceStatus, Long> getVpServicesByStatus(Collection<Equipment> equipments) {
         return equipments.stream()
                 .map(Equipment::getServices)
                 .flatMap(Collection::stream)
                 .filter(service -> service.getStatus() == ServiceStatus.ASKED
                         || service.getStatus() == ServiceStatus.IN_PROGRESS)
                 .collect(groupingBy(Service::getStatus, Collectors.counting()));
-    }
-
-    public Map<String, Long> getEquipmentsGroupByEntityAndManaged(Family family, Domain domain) {
-        var builder = em.getCriteriaBuilder();
-        CriteriaQuery<QueryResult> criteriaQuery = builder.createQuery(QueryResult.class);
-        Root<Equipment> equipment = criteriaQuery.from(Equipment.class);
-        var entity = equipment.join(Equipment_.entity, JoinType.LEFT);
-        var managed = getManagedPath(builder, equipment.get(Equipment_.attributes));
-
-        var query = criteriaQuery.multiselect(
-                entity.get(EquipmentEntity_.code),
-                managed,
-                builder.count(equipment))
-                .where(builder.and(
-                        builder.isFalse(equipment.get(Equipment_.deleted)),
-                        builder.equal(equipment.get(Equipment_.family), family),
-                        builder.equal(equipment.get(Equipment_.domain), domain)))
-                .groupBy(entity.get(EquipmentEntity_.code), managed);
-
-        return em.createQuery(query)
-                .getResultStream()
-                .collect(Collectors.toMap(
-                        r -> "%s_%s".formatted(r.code(), r.managed() == 1 ? MANAGED : UNMANAGED),
-                        QueryResult::count));
-
     }
 
     public Collection<EventsByEquipment> getEventsByEquipments(Domain domainEntity, Category eventCategory, int limit,
@@ -189,10 +228,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
             predicates.add(event.get(Event_.category).in(subcategory));
         }
 
-        if (domainEntity != null) {
-            logger.debugf("filter on domain %s", domainEntity);
-            predicates.add(builder.equal(equipment.get(Equipment_.domain), domainEntity));
-        }
+        filterOnDomain(domainEntity, predicates, builder, equipment);
 
         if (date != null) {
             logger.debugf("Creation date is greater than %s", date);
@@ -257,8 +293,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
     }
 
     @Transactional
-    public Map<String, Long> getAnomalyEventsGroupedBySubCategories(Domain domain,
-            Category anomalyCategory,
+    public Map<String, Long> getAnomalyEventsBySubCategories(Domain domain,
             Instant date,
             Status status) {
 
@@ -267,14 +302,11 @@ public class MetricsDatabaseReader extends DatabaseReader {
         Root<Event> event = criteriaQuery.from(Event.class);
         var equipment = event.join(Event_.equipment, JoinType.LEFT);
         var category = event.join(Event_.category, JoinType.LEFT);
-        var subcategory = getSubCategories(anomalyCategory).toList();
+        var subcategory = getAnomalySubCategoriesCode();
 
         var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
 
-        if (domain != null) {
-            logger.debugf("filter on domain %s", domain);
-            predicates.add(builder.equal(equipment.get(Equipment_.domain), domain));
-        }
+        filterOnDomain(domain, predicates, builder, equipment);
 
         if (date != null) {
             logger.debugf("filter on creation date %s", date);
@@ -301,13 +333,13 @@ public class MetricsDatabaseReader extends DatabaseReader {
 
         return subcategory
                 .stream()
-                .collect(Collectors.toMap(EnumEntity::getCode, v -> res.getOrDefault(v.getCode(), 0L)));
+                .collect(Collectors.toMap(code -> code, code -> res.getOrDefault(code, 0L)));
     }
 
     @Transactional
-    public Collection<AnomalyQueryResult> getAnomalyEventsGroupedBySubCategoriesAndEntities(Domain domain,
-            List<String> subcategoryCodes,
+    public Collection<AnomalyQueryResult> getAnomalyEventsBySubCategoriesAndEntities(Domain domain,
             Instant startDate) {
+        var subcategoryCodes = getAnomalySubCategoriesCode();
 
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<AnomalyQueryResult> criteriaQuery = builder.createQuery(AnomalyQueryResult.class);
@@ -319,10 +351,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
         var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
         predicates.add(category.get(Category_.code).in(subcategoryCodes));
 
-        if (domain != null) {
-            logger.debugf("filter on domain %s", domain);
-            predicates.add(builder.equal(equipment.get(Equipment_.domain), domain));
-        }
+        filterOnDomain(domain, predicates, builder, equipment);
 
         if (startDate != null) {
             logger.debugf("from creation date %s", startDate);
@@ -344,8 +373,10 @@ public class MetricsDatabaseReader extends DatabaseReader {
         return results;
     }
 
-    public Collection<AggregateServiceDto> aggregateAnomaliesEvents(DateInterval interval, int buckets, Instant startDate,
-            Long domainId, List<String> subcategoryCodes) {
+    public Collection<AggregateServiceDto> aggregateAnomaliesEvents(DateInterval interval,
+            int buckets,
+            Instant startDate,
+            Long domainId) {
         return em
                 .createNativeQuery(
                         """
@@ -360,7 +391,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
                                 order by 1;
                                 """,
                         Tuple.class)
-                .setParameter("categories", subcategoryCodes)
+                .setParameter("categories", getAnomalySubCategoriesCode())
                 .setParameter("interval", interval.name())
                 .setParameter("reference_date", startDate)
                 .setParameter("interval_number", "%s %s".formatted(buckets, interval))
@@ -371,6 +402,34 @@ public class MetricsDatabaseReader extends DatabaseReader {
                         ((Tuple) res).get(1).toString(),
                         Long.parseLong(((Tuple) res).get(2).toString())))
                 .toList();
+    }
+
+    private List<String> getAnomalySubCategoriesCode() {
+        return getSubCategories(getCategoryByCode(ANOMALY_CATEGORY))
+                .map(EnumEntity::getCode)
+                .toList();
+    }
+
+    private Stream<Category> getSubCategories(Category category) {
+        logger.debugf("Get sub categories for %s", category);
+
+        var builder = em.getCriteriaBuilder();
+        CriteriaQuery<Category> criteriaQuery = builder.createQuery(Category.class);
+        Root<Category> root = criteriaQuery.from(Category.class);
+
+        var query = criteriaQuery.select(root)
+                .where(builder.equal(root.get(Category_.parent), category));
+
+        return em.createQuery(query)
+                .getResultStream();
+    }
+
+    private void filterOnDomain(Domain domain, ArrayList<jakarta.persistence.criteria.Predicate> predicates,
+            CriteriaBuilder builder, Join<Event, Equipment> equipment) {
+        if (domain != null) {
+            logger.debugf("filter on domain %s", domain);
+            predicates.add(builder.equal(equipment.get(Equipment_.domain), domain));
+        }
     }
 
     private void completeAnomaliesCountWithZeros(List<AnomalyQueryResult> results, List<String> subCode) {
@@ -391,14 +450,15 @@ public class MetricsDatabaseReader extends DatabaseReader {
                 });
     }
 
-    private Map<String, Long> gatherUnmanagedEquipments(List<QueryResult> result) {
+    private Map<String, Long> gatherUnmanagedEquipments(List<ManagedResult> result) {
+        logger.debug("Gathering unmanaged equipments");
         var equipmentWithEventsTotal = result.stream()
-                .filter(queryResult -> queryResult.managed == 1)
-                .collect(Collectors.toMap(QueryResult::code, QueryResult::count));
+                .filter(managedResult -> managedResult.managed == 1)
+                .collect(Collectors.toMap(ManagedResult::code, ManagedResult::count));
 
         equipmentWithEventsTotal.put(UNMANAGED, result.stream()
-                .filter(queryResult -> queryResult.managed == 0)
-                .mapToLong(QueryResult::count)
+                .filter(managedResult -> managedResult.managed == 0)
+                .mapToLong(ManagedResult::count)
                 .sum());
         return equipmentWithEventsTotal;
     }
@@ -408,31 +468,4 @@ public class MetricsDatabaseReader extends DatabaseReader {
                 attributes, builder.literal(MANAGED));
     }
 
-    private Predicate<Event> isUnDone() {
-        return event -> event.getStatus() != Status.DONE;
-    }
-
-    private Predicate<Event> isNotManifestation() {
-        return event -> !event.getCategory().getCode().equals("MANIFESTATION");
-    }
-
-    private Predicate<Event> isOneOfCriticality(Collection<Criticality> criticalities) {
-        return event -> (criticalities.isEmpty()) || (criticalities.contains(event.getCriticality()));
-    }
-
-    private Predicate<Event> isOneOfCategory(Collection<Category> categories) {
-        return event -> (categories.isEmpty()) || (categories.contains(event.getCategory()));
-    }
-
-    public Stream<Category> getSubCategories(Category category) {
-        var builder = em.getCriteriaBuilder();
-        CriteriaQuery<Category> criteriaQuery = builder.createQuery(Category.class);
-        Root<Category> root = criteriaQuery.from(Category.class);
-
-        var query = criteriaQuery.select(root)
-                .where(builder.equal(root.get(Category_.parent), category));
-
-        return em.createQuery(query)
-                .getResultStream();
-    }
 }
