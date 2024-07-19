@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -50,7 +51,8 @@ public class MetricsService {
     public EpEquipmentWithEventsDto getEpEquipmentsWithEvent(
             Collection<String> criticalities,
             Collection<String> categories,
-            Collection<String> entities, Collection<String> places) {
+            Collection<String> entities,
+            Collection<String> places) {
 
         var equipments = getEquipmentForEventsExceptManifestation("EP",
                 criticalities,
@@ -128,7 +130,7 @@ public class MetricsService {
     @Transactional
     public EquipmentByEntityDto getTotalEpEquipmentsByEntity(String code) {
         logger.infof("Get all equipments by entity for EP domain and family %s", code);
-        Family family = equipmentService.getFamilyByCode(code);
+        Family family = equipmentService.getFamilyByCodeOrNull(code);
         Domain domain = getDomainByCode("EP");
 
         var result = metricsDatabaseReader.getEpEquipmentsByEntity(family, domain);
@@ -164,9 +166,15 @@ public class MetricsService {
                 place: %s
                 """.formatted(nbBuckets, interval, date, domain, family, entity, place));
 
-        var families = family.stream().map(code -> equipmentService.getFamilyByCode(code).getId()).toList();
-        var entities = entity.stream().map(code -> equipmentService.getEquipmentEntity(code).getId()).toList();
-        var districts = place.stream().map(code -> equipmentService.getDistrictByCode(code).getId()).toList();
+        var families = family.stream()
+                .map(code -> code == null || code.isEmpty() ? null : equipmentService.getFamilyByCodeOrNull(code).getId())
+                .toList();
+        var entities = entity.stream()
+                .map(code -> code == null || code.isEmpty() ? null : equipmentService.getEquipmentEntityOrNull(code).getId())
+                .toList();
+        var districts = place.stream()
+                .map(code -> code == null || code.isEmpty() ? null : equipmentService.getDistrictByCodeOrNull(code).getId())
+                .toList();
         var domainId = domain != null
                 ? metricsDatabaseReader.getDomainByCode(domain).getId()
                 : null;
@@ -182,16 +190,43 @@ public class MetricsService {
     }
 
     @Transactional
-    public Map<String, Long> getAnomalyEventsGroupedBySubCategories(String domain, Instant date, String status) {
+    public Map<String, Long> getAnomalyEventsBySubCategories(String domain,
+            Instant date,
+            String status,
+            List<String> place,
+            List<String> entity,
+            List<String> criticality,
+            List<String> family,
+            String name) {
         logger.infof("""
                 Get number of ANOMALY events grouped by sub categories, filter on
                 domain : %s,
                 date: %s,
-                status: %s
-                """, domain, date, status);
+                status: %s,
+                places: %s,
+                entities: %s,
+                criticalities: %s,
+                family: %s
+                equipment: %s
+                """, domain, date, status, place, entity, criticality, family, name);
+
         var domainEntity = getDomainByCode(domain);
-        return metricsDatabaseReader.getAnomalyEventsBySubCategories(domainEntity, date,
-                Status.fromString(status));
+        var districts = place.stream().map(equipmentService::getDistrictByCodeOrNull).toList();
+        var entities = entity.stream().map(equipmentService::getEquipmentEntityOrNull).toList();
+        var families = family.stream().map(equipmentService::getFamilyByCodeOrNull).toList();
+
+        List<String> criticalities = getCriticalityList(criticality);
+
+        var equipmentName = name != null ? equipmentService.getEquipmentByName(name).getName() : null;
+
+        return metricsDatabaseReader.getAnomalyEventsBySubCategories(domainEntity,
+                date,
+                Status.fromString(status),
+                entities,
+                districts,
+                criticalities,
+                families,
+                equipmentName);
     }
 
     @Transactional
@@ -210,43 +245,84 @@ public class MetricsService {
     public Collection<AggregateServiceDto> aggregateAnomaliesEvents(DateInterval interval,
             int buckets,
             String domain,
-            Instant startDate) {
+            Instant startDate,
+            List<String> place,
+            List<String> entity,
+            List<String> criticality,
+            List<String> family) {
 
         startDate = startDate != null ? startDate : Instant.now();
         logger.infof("""
                 Aggregate anomaly events in the last %s %s from %s
                 filter on
-                domain: %s
-                """.formatted(buckets, interval, startDate, domain));
+                domain: %s,
+                places : %s,
+                entities: %s,
+                criticalities: %s
+                """.formatted(buckets, interval, startDate, domain, place, entity, criticality));
 
         var domainId = domain != null
                 ? metricsDatabaseReader.getDomainByCode(domain).getId()
                 : null;
 
+        var families = family.stream()
+                .map(code -> code == null || code.isEmpty() ? null : equipmentService.getFamilyByCodeOrNull(code).getId())
+                .toList();
+        var districts = place.stream()
+                .map(code -> code == null || code.isEmpty() ? null : equipmentService.getDistrictByCode(code).getId()).toList();
+        var entities = entity.stream()
+                .map(code -> code == null || code.isEmpty() ? null : equipmentService.getEquipmentEntity(code).getId())
+                .toList();
+        var criticalities = getCriticalityList(criticality);
+
         return metricsDatabaseReader.aggregateAnomaliesEvents(
                 interval,
                 buckets,
                 startDate,
-                domainId);
+                domainId,
+                districts,
+                entities,
+                criticalities,
+                families);
     }
 
     @Transactional
-    public Collection<EventsByEquipment> getEventsByEquipments(String domain, String category, int limit, Instant date) {
+    public Collection<EventsByEquipment> getEventsByEquipments(String domain,
+            String category,
+            int limit,
+            Instant date,
+            List<String> place,
+            List<String> entity,
+            List<String> criticality,
+            List<String> family) {
         logger.debugf("""
                 Get Events counts by equipments filter on :
                 domain : %s,
                 category : %s,
                 from date %s
-                """, domain, category, date);
+                place: %s,
+                entity: %s,
+                criticality: %s,
+                family: %s
+                """, domain, category, date, place, entity, criticality, family);
 
         var domainEntity = getDomainByCode(domain);
-        var eventCategory = eventService.getCategory(category);
+        var eventCategory = eventService.getCategoryOrNull(category);
+
+        var districts = place.stream().map(equipmentService::getDistrictByCodeOrNull).toList();
+        var entities = entity.stream().map(equipmentService::getEquipmentEntityOrNull).toList();
+        var families = family.stream().map(equipmentService::getFamilyByCodeOrNull).toList();
+        var criticalities = getCriticalityList(criticality);
 
         return metricsDatabaseReader.getEventsByEquipments(
                 domainEntity,
                 eventCategory,
                 limit,
-                date);
+                date,
+                districts,
+                entities,
+                criticalities,
+                families);
     }
 
     private Collection<Equipment> getEquipmentForEventsExceptManifestation(String domain,
@@ -263,10 +339,10 @@ public class MetricsService {
                 places: %s
                 """.formatted(domain, criticalities, categories, entities, places));
         var domainEntity = metricsDatabaseReader.getDomainByCode(domain);
-        var eventCriticalities = criticalities.stream().map(Criticality::fromString).toList();
-        var eventCategories = categories.stream().map(eventService::getCategory).toList();
-        var districts = places.stream().map(equipmentService::getDistrictByCode).toList();
-        var equipmentEntities = entities.stream().map(equipmentService::getEquipmentEntity).toList();
+        var eventCriticalities = getCriticalityList(criticalities);
+        var eventCategories = categories.stream().map(eventService::getCategoryOrNull).toList();
+        var districts = places.stream().map(equipmentService::getDistrictByCodeOrNull).toList();
+        var equipmentEntities = entities.stream().map(equipmentService::getEquipmentEntityOrNull).toList();
 
         logger.debugf("Get all %s equipments linked with at least one undone event which is not a Manifestation", domain);
         return metricsDatabaseReader.getEquipmentsByEventCategory(
@@ -327,6 +403,16 @@ public class MetricsService {
 
     private Domain getDomainByCode(String code) {
         return code == null ? null : metricsDatabaseReader.getDomainByCode(code);
+    }
+
+    private List<String> getCriticalityList(Collection<String> criticality) {
+        if (criticality.isEmpty()) {
+            return List.of();
+        }
+
+        return criticality.stream().noneMatch(Objects::nonNull)
+                ? List.of("null")
+                : criticality.stream().map(c -> Criticality.fromString(c).name()).toList();
     }
 
     private Long getServicesForEquipmentAndStatus(Map<String, Map<ServiceStatus, Long>> servicesByEquipments, String code,

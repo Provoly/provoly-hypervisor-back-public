@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -13,6 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.*;
+import jakarta.persistence.metamodel.SingularAttribute;
 import jakarta.transaction.Transactional;
 
 import com.provoly.DatabaseReader;
@@ -48,7 +48,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
     public Map<String, List<Equipment>> getEquipmentsByEventCategory(
             Domain domainEntity,
             Collection<EquipmentEntity> entities,
-            Collection<Criticality> criticalities,
+            Collection<String> criticalities,
             Collection<Category> categories,
             Collection<District> districts) {
 
@@ -64,25 +64,25 @@ public class MetricsDatabaseReader extends DatabaseReader {
         predicates.add(builder.notEqual(event.get(Event_.status), Status.DONE));
 
         filterOnDomain(domainEntity, predicates, builder, equipment);
-
-        if (!entities.isEmpty()) {
-            logger.debugf("filter on entities %s", entities);
-            predicates.add(equipment.get(Equipment_.entity).in(entities));
-        }
-
-        if (!criticalities.isEmpty()) {
-            logger.debugf("filter on criticalities %s", criticalities);
-            predicates.add(event.get(Event_.criticality).in(criticalities));
-        }
+        filterOnCriticality(criticalities, predicates, event);
+        filterOn(entities, predicates, builder, equipment, Equipment_.entity);
+        filterOn(districts, predicates, builder, equipment, Equipment_.district);
 
         if (!categories.isEmpty()) {
             logger.debugf("filter on categories %s", categories);
-            predicates.add(event.get(Event_.category).in(categories));
-        }
-
-        if (!districts.isEmpty()) {
-            logger.debugf("filter on districts %s", districts);
-            predicates.add(equipment.get(Equipment_.district).in(districts));
+            if (categories.stream().noneMatch(Objects::nonNull)) {
+                logger.debugf("filter on null  %s");
+                predicates.add(builder.isNull(event.get(Event_.category)));
+            } else {
+                var subcategory = categories
+                        .stream()
+                        .map(c -> getSubCategories(c).toList())
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList());
+                subcategory.addAll(categories);
+                logger.debugf("filter on  %s", subcategory);
+                predicates.add(event.get(Event_.category).in(subcategory));
+            }
         }
 
         var query = criteriaQuery
@@ -95,12 +95,6 @@ public class MetricsDatabaseReader extends DatabaseReader {
         return em.createQuery(query)
                 .getResultStream()
                 .collect(groupingBy(this::getCategoryCode, mapping(EquipmentResult::equipment, Collectors.toList())));
-    }
-
-    private String getCategoryCode(EquipmentResult r) {
-        return r.category().getParent() != null
-                ? r.category().getParent().getCode()
-                : r.category().getCode();
     }
 
     public Map<String, Long> getEpEquipmentByFamily(Collection<Equipment> equipments) {
@@ -129,13 +123,16 @@ public class MetricsDatabaseReader extends DatabaseReader {
         var entity = equipment.join(Equipment_.entity, JoinType.LEFT);
         var managed = getManagedPath(builder, equipment.get(Equipment_.attributes));
 
+        var familyPredicate = family == null ? builder.isNull(equipment.get(Equipment_.family))
+                : builder.equal(equipment.get(Equipment_.family), family);
+
         var query = criteriaQuery.multiselect(
                 entity.get(EquipmentEntity_.code),
                 managed,
                 builder.count(equipment))
                 .where(builder.and(
                         builder.isFalse(equipment.get(Equipment_.deleted)),
-                        builder.equal(equipment.get(Equipment_.family), family),
+                        familyPredicate,
                         builder.equal(equipment.get(Equipment_.domain), domain)))
                 .groupBy(entity.get(EquipmentEntity_.code), managed);
 
@@ -212,8 +209,14 @@ public class MetricsDatabaseReader extends DatabaseReader {
                 .collect(groupingBy(Service::getStatus, Collectors.counting()));
     }
 
-    public Collection<EventsByEquipment> getEventsByEquipments(Domain domainEntity, Category eventCategory, int limit,
-            Instant date) {
+    public Collection<EventsByEquipment> getEventsByEquipments(Domain domainEntity,
+            Category eventCategory,
+            int limit,
+            Instant date, Collection<District> districts,
+            Collection<EquipmentEntity> entities,
+            Collection<String> criticalities,
+            Collection<Family> families) {
+
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<EventsByEquipment> criteriaQuery = builder.createQuery(EventsByEquipment.class);
         Root<Event> event = criteriaQuery.from(Event.class);
@@ -229,6 +232,10 @@ public class MetricsDatabaseReader extends DatabaseReader {
         }
 
         filterOnDomain(domainEntity, predicates, builder, equipment);
+        filterOn(entities, predicates, builder, equipment, Equipment_.entity);
+        filterOn(districts, predicates, builder, equipment, Equipment_.district);
+        filterOn(families, predicates, builder, equipment, Equipment_.family);
+        filterOnCriticality(criticalities, predicates, event);
 
         if (date != null) {
             logger.debugf("Creation date is greater than %s", date);
@@ -269,9 +276,9 @@ public class MetricsDatabaseReader extends DatabaseReader {
                                 and category_id = :category
                                 and close_date < cast (:reference_date as timestamptz)
                                 and close_date > date_trunc(:interval, cast (:reference_date as timestamptz) - cast (:interval_number as interval))
-                                and (:families_id is null or equipment.family_id in :families_id)
-                                and (:entities_id is null or equipment.equipment_entity_id in :entities_id)
-                                and (:districts_id is null or equipment.district_id in :districts_id )
+                                and (:no_family_list or equipment.family_id in :families_id or (:is_family_null and equipment.family_id is null))
+                                and (:no_entity_list or equipment.equipment_entity_id in :entities_id or (:is_entity_null and equipment.equipment_entity_id is null))
+                                and (:no_district_list or equipment.district_id in :districts_id or (:is_district_null and equipment.district_id is null) )
                                 and (service.domain_id = :domain_id or :domain_id is null)
                                 group by start
                                 order by 1;
@@ -281,9 +288,15 @@ public class MetricsDatabaseReader extends DatabaseReader {
                 .setParameter("interval", interval.name())
                 .setParameter("reference_date", date)
                 .setParameter("interval_number", "%s %s".formatted(buckets, interval))
-                .setParameter("families_id", families)
-                .setParameter("entities_id", entities)
-                .setParameter("districts_id", districts)
+                .setParameter("entities_id", entities.stream().noneMatch(Objects::nonNull) ? List.of() : entities)
+                .setParameter("families_id", families.stream().noneMatch(Objects::nonNull) ? List.of() : families)
+                .setParameter("districts_id", districts.stream().noneMatch(Objects::nonNull) ? List.of() : districts)
+                .setParameter("is_family_null", families.stream().noneMatch(Objects::nonNull))
+                .setParameter("no_family_list", families.isEmpty())
+                .setParameter("is_entity_null", entities.stream().noneMatch(Objects::nonNull))
+                .setParameter("no_entity_list", entities.isEmpty())
+                .setParameter("is_district_null", districts.stream().noneMatch(Objects::nonNull))
+                .setParameter("no_district_list", districts.isEmpty())
                 .setParameter("domain_id", new TypedParameterValue(StandardBasicTypes.LONG, domainId))
                 .getResultStream()
                 .map(res -> new AggregateServiceDto(
@@ -295,7 +308,12 @@ public class MetricsDatabaseReader extends DatabaseReader {
     @Transactional
     public Map<String, Long> getAnomalyEventsBySubCategories(Domain domain,
             Instant date,
-            Status status) {
+            Status status,
+            List<EquipmentEntity> entities,
+            List<District> districts,
+            List<String> criticalities,
+            List<Family> families,
+            String equipmentName) {
 
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<Tuple> criteriaQuery = builder.createQuery(Tuple.class);
@@ -307,18 +325,25 @@ public class MetricsDatabaseReader extends DatabaseReader {
         var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
 
         filterOnDomain(domain, predicates, builder, equipment);
+        filterOn(entities, predicates, builder, equipment, Equipment_.entity);
+        filterOn(districts, predicates, builder, equipment, Equipment_.district);
+        filterOn(families, predicates, builder, equipment, Equipment_.family);
+        filterOnCriticality(criticalities, predicates, event);
 
         if (date != null) {
             logger.debugf("filter on creation date %s", date);
-            predicates.add(builder.between(event.get(Event_.creationDate),
-                    date,
-                    date.plus(1, ChronoUnit.DAYS)));
+            predicates.add(builder.greaterThan(event.get(Event_.creationDate), date));
             predicates.add(builder.notEqual(event.get(Event_.status), Status.DONE));
         }
 
         if (status != null) {
             logger.debugf("filter on status %s", status);
             predicates.add(builder.equal(event.get(Event_.status), status));
+        }
+
+        if (equipmentName != null) {
+            logger.debugf("filter on equipment name  %s", equipmentName);
+            predicates.add(builder.equal(equipment.get(Equipment_.name), equipmentName));
         }
 
         var query = criteriaQuery.multiselect(
@@ -376,7 +401,11 @@ public class MetricsDatabaseReader extends DatabaseReader {
     public Collection<AggregateServiceDto> aggregateAnomaliesEvents(DateInterval interval,
             int buckets,
             Instant startDate,
-            Long domainId) {
+            Long domainId,
+            Collection<Long> districts,
+            Collection<Long> entities,
+            Collection<String> criticalities,
+            Collection<Long> families) {
         return em
                 .createNativeQuery(
                         """
@@ -387,6 +416,10 @@ public class MetricsDatabaseReader extends DatabaseReader {
                                 and creation_date < cast (:reference_date as timestamptz)
                                 and creation_date > date_trunc(:interval, cast (:reference_date as timestamptz) - cast (:interval_number as interval))
                                 and (equipment.domain_id = :domain_id or :domain_id is null)
+                                and (:no_family_list or equipment.family_id in :families_id or (:is_family_null and equipment.family_id is null))
+                                and (:no_entity_list or equipment.equipment_entity_id in :entities_id or (:is_entity_null and equipment.equipment_entity_id is null))
+                                and (:no_district_list or equipment.district_id in :districts_id or (:is_district_null and equipment.district_id is null) )
+                                and (:criticalities is null or event.criticality in :criticalities )
                                 group by start, category.code
                                 order by 1;
                                 """,
@@ -396,12 +429,28 @@ public class MetricsDatabaseReader extends DatabaseReader {
                 .setParameter("reference_date", startDate)
                 .setParameter("interval_number", "%s %s".formatted(buckets, interval))
                 .setParameter("domain_id", new TypedParameterValue(StandardBasicTypes.LONG, domainId))
+                .setParameter("entities_id", entities.stream().noneMatch(Objects::nonNull) ? List.of() : entities)
+                .setParameter("families_id", families.stream().noneMatch(Objects::nonNull) ? List.of() : families)
+                .setParameter("districts_id", districts.stream().noneMatch(Objects::nonNull) ? List.of() : districts)
+                .setParameter("is_family_null", families.stream().noneMatch(Objects::nonNull))
+                .setParameter("no_family_list", families.isEmpty())
+                .setParameter("is_entity_null", entities.stream().noneMatch(Objects::nonNull))
+                .setParameter("no_entity_list", entities.isEmpty())
+                .setParameter("is_district_null", districts.stream().noneMatch(Objects::nonNull))
+                .setParameter("no_district_list", districts.isEmpty())
+                .setParameter("criticalities", criticalities)
                 .getResultStream()
                 .map(res -> new AggregateAnomalyDto(
                         Instant.parse(((Tuple) res).get(0).toString()),
                         ((Tuple) res).get(1).toString(),
                         Long.parseLong(((Tuple) res).get(2).toString())))
                 .toList();
+    }
+
+    private String getCategoryCode(EquipmentResult r) {
+        return r.category().getParent() != null
+                ? r.category().getParent().getCode()
+                : r.category().getCode();
     }
 
     private List<String> getAnomalySubCategoriesCode() {
@@ -429,6 +478,29 @@ public class MetricsDatabaseReader extends DatabaseReader {
         if (domain != null) {
             logger.debugf("filter on domain %s", domain);
             predicates.add(builder.equal(equipment.get(Equipment_.domain), domain));
+        }
+    }
+
+    private void filterOnCriticality(Collection<String> criticalities, ArrayList<Predicate> predicates, Root<Event> event) {
+        if (!criticalities.isEmpty()) {
+            logger.debugf("filter on event criticalities  %s", criticalities);
+            predicates.add(event.get(Event_.criticality).in(criticalities));
+        }
+    }
+
+    private void filterOn(Collection<? extends EnumEntity> entities,
+            ArrayList<Predicate> predicates,
+            CriteriaBuilder builder,
+            Join<Event, Equipment> equipment,
+            SingularAttribute<Equipment, ? extends EnumEntity> attribute) {
+        if (!entities.isEmpty()) {
+            if (entities.stream().noneMatch(Objects::nonNull)) {
+                logger.debugf("filter on null  %s");
+                predicates.add(builder.isNull(equipment.get(attribute)));
+            } else {
+                logger.debugf("filter on  %s", entities);
+                predicates.add(equipment.get(attribute).in(entities));
+            }
         }
     }
 

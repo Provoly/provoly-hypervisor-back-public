@@ -1679,6 +1679,32 @@ paths:
             type: integer
             default: 10
           example: 10
+        - name: entity
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: criticality
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Criticality'
+        - name: place
+          in: query
+          description: Must match city or district value from equipment
+          schema:
+            type: array
+            items:
+              type: string
+        - name: family
+          in: query
+          description: Must match family from equipment
+          schema:
+            type: array
+            items:
+              type: string
       responses:
         "401":
           description: Not Authorized
@@ -1814,11 +1840,42 @@ paths:
           description: event status
           schema:
             $ref: '#/components/schemas/Status'
+        - name: entity
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: criticality
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Criticality'
+        - name: place
+          in: query
+          description: Must match city or district value from equipment
+          schema:
+            type: array
+            items:
+              type: string
+        - name: family
+          in: query
+          description: Must match family from equipment
+          schema:
+            type: array
+            items:
+              type: string
+        - name: equipment
+          in : query
+          description: Must match equipment name to get anomalies count for this equipment
+          schema:
+            type: string
       responses:
         "401":
           description: Not Authorized
         "400":
-          description: Invalid domain, date, or status
+          description: Invalid domain, date, status, or other filters
         "200":
           content:
             application/json:
@@ -1860,7 +1917,7 @@ paths:
         "401":
           description: Not Authorized
         "400":
-          description: Invalid domain, date
+          description: Invalid domain, date or other filter
         "200":
           content:
             application/json:
@@ -1968,6 +2025,32 @@ paths:
           in: query
           schema:
             type: string
+        - name: entity
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: criticality
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Criticality'
+        - name: place
+          in: query
+          description: Must match city or district value from equipment
+          schema:
+            type: array
+            items:
+              type: string
+        - name: family
+          in: query
+          description: Must match family from equipment
+          schema:
+            type: array
+            items:
+              type: string
       responses:
         "401":
           description: Not Authorized

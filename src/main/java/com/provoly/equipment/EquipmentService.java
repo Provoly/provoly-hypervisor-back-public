@@ -89,42 +89,50 @@ public class EquipmentService {
     }
 
     @Transactional
-    public Collection<EquipmentEntity> getEquipmentEntities() {
-        logger.debugf("Get all equipments entities");
-        return databaseReader.getEquipmentEntities();
-    }
-
-    @Transactional
-    public Collection<Family> getFamilies() {
-        logger.debugf("Get all equipments families");
-        return databaseReader.getFamilies();
-    }
-
-    @Transactional
     public EquipmentEntity getEquipmentEntity(String entity) {
         logger.debugf("Get equipment entity %s", entity);
-        return entity != null ? databaseReader.getEquipmentEntityByCode(entity)
-                .orElseThrow(() -> new IllegalArgumentException("Entity %s invalid".formatted(entity)))
-                : null;
+        return databaseReader.getEquipmentEntityByCode(entity)
+                .orElseThrow(() -> new IllegalArgumentException("Entity code %s invalid".formatted(entity)));
+    }
+
+    @Transactional
+    public EquipmentEntity getEquipmentEntityOrNull(String code) {
+        logger.debugf("Get equipment entity %s", code);
+        return code == null || code.isEmpty()
+                ? null
+                : databaseReader.getEquipmentEntityByCode(code)
+                        .orElseThrow(() -> new IllegalArgumentException("Entity code %s invalid".formatted(code)));
     }
 
     @Transactional
     public Family getFamilyByCode(String code) {
         logger.debugf("Get equipment family by code  %s", code);
         return databaseReader.getFamilyByCode(code)
-                .orElseThrow(() -> new IllegalArgumentException("Code %s invalid".formatted(code)));
+                .orElseThrow(() -> new IllegalArgumentException("Family code %s invalid".formatted(code)));
     }
 
     @Transactional
-    public Optional<City> getCityByCode(String code) {
-        logger.debugf("Get city by code  %s", code);
-        return databaseReader.getCityByCode(code);
+    public Family getFamilyByCodeOrNull(String code) {
+        logger.debugf("Get equipment family by code  %s", code);
+        return code == null || code.isEmpty()
+                ? null
+                : databaseReader.getFamilyByCode(code)
+                        .orElseThrow(() -> new IllegalArgumentException("Family code %s invalid".formatted(code)));
     }
 
     @Transactional
     public District getDistrictByCode(String code) {
         logger.debugf("Get district by code  %s", code);
         return databaseReader.getDistrictByCode(code)
-                .orElseThrow(() -> new IllegalArgumentException("Code %s invalid".formatted(code)));
+                .orElseThrow(() -> new IllegalArgumentException("District code %s invalid".formatted(code)));
+    }
+
+    @Transactional
+    public District getDistrictByCodeOrNull(String code) {
+        logger.debugf("Get district by code  %s", code);
+        return code == null || code.isEmpty()
+                ? null
+                : databaseReader.getDistrictByCode(code)
+                        .orElseThrow(() -> new IllegalArgumentException("District code %s invalid".formatted(code)));
     }
 }

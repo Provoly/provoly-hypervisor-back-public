@@ -191,28 +191,6 @@ public class EventServiceTest {
     }
 
     @Test
-    void should_throw_exception_create_event_manfifestation_with_external_source() {
-        // given
-        var event = new EventWriteDto(null,
-                "new event",
-                "desc",
-                Criticality.HIGH,
-                "MANIFESTATION",
-                "TOTO",
-                null,
-                null,
-                null,
-                Instant.now(),
-                Instant.now(),
-                "source");
-
-        // then
-        assertThatThrownBy(() -> eventService.saveEvent(event))
-                .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("can't have an external source.");
-    }
-
-    @Test
     void should_close_event() {
         // given
         var eventIdInProgress = eventService

@@ -67,8 +67,12 @@ public class MetricsController {
             @RestQuery String category,
             @RestQuery String domain,
             @RestQuery @Positive @DefaultValue("10") int limit,
-            @RestQuery Instant date) {
-        return metricsService.getEventsByEquipments(domain, category, limit, date);
+            @RestQuery Instant date,
+            @RestQuery List<String> place,
+            @RestQuery List<String> entity,
+            @RestQuery List<String> criticality,
+            @RestQuery List<String> family) {
+        return metricsService.getEventsByEquipments(domain, category, limit, date, place, entity, criticality, family);
     }
 
     @Path("/equipments-by-entity")
@@ -97,8 +101,14 @@ public class MetricsController {
     public Map<String, Long> getAnomalyEventsGroupedBySubCategories(
             @RestQuery String domain,
             @RestQuery Instant date,
-            @RestQuery String status) {
-        return metricsService.getAnomalyEventsGroupedBySubCategories(domain, date, status);
+            @RestQuery String status,
+            @RestQuery List<String> place,
+            @RestQuery List<String> entity,
+            @RestQuery List<String> criticality,
+            @RestQuery List<String> family,
+            @RestQuery String equipment) {
+        return metricsService.getAnomalyEventsBySubCategories(domain, date, status, place, entity, criticality, family,
+                equipment);
     }
 
     @Path("/events/anomalies-by-entity")
@@ -117,8 +127,13 @@ public class MetricsController {
             DateInterval interval,
             @RestQuery @Positive @DefaultValue("12") int buckets,
             @RestQuery String domain,
-            @RestQuery Instant startDate) {
-        return metricsService.aggregateAnomaliesEvents(interval, buckets, domain, startDate);
+            @RestQuery Instant startDate,
+            @RestQuery List<String> place,
+            @RestQuery List<String> entity,
+            @RestQuery List<String> criticality,
+            @RestQuery List<String> family) {
+        return metricsService.aggregateAnomaliesEvents(interval, buckets, domain, startDate, place, entity, criticality,
+                family);
     }
 
 }

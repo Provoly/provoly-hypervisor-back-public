@@ -158,6 +158,14 @@ public class EventService {
     }
 
     @Transactional
+    public Category getCategoryOrNull(String category) {
+        logger.debugf("Get category with code %s", category);
+        return category == null || category.isEmpty()
+                ? null
+                : databaseReader.getCategoryByCode(category);
+    }
+
+    @Transactional
     public Event getEventDetails(Integer id) {
         logger.infof("Get event details with id  %s".formatted(id));
         return databaseReader.getEventById(id);
@@ -230,12 +238,9 @@ public class EventService {
         }
     }
 
-    private void checkManifestationCategory(EventWriteDto e) {
+    private void checkManifestationCategory(EventWriteDto e) { // FIXME: il faut eviter les reference au categories propres à chalons dans le code
         logger.debugf("Check if event %s has manifestation dates".formatted(e.getId()));
         if (e.getCategory().equals("MANIFESTATION")) {
-            if (e.getExternalSourceRef() != null) {
-                throw new ForbiddenException("Manfifestation can't have an external source.");
-            }
             if (e.getStartDate() == null || e.getEndDate() == null) {
                 throw new IllegalArgumentException(
                         "Properties 'startDate' and 'endDate' are required for 'MANIFESTATION' category");

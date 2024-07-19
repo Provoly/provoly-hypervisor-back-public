@@ -1,10 +1,10 @@
 package com.provoly.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -248,10 +248,20 @@ public class MetricsServiceTest {
     }
 
     @Test
-    void should_get_equipment_null_family_should_throw_exception() {
-        //then
-        assertThatThrownBy(() -> metricsService.getTotalEpEquipmentsByEntity(null))
-                .hasMessageContaining("Code null invalid");
+    void should_get_equipment_null_family_returns_empty_result() {
+        // when
+        var result = metricsService.getTotalEpEquipmentsByEntity(null);
+
+        // then
+        assertThat(result).extracting("aggloManaged").isEqualTo(0L);
+        assertThat(result).extracting("aggloUnmanaged").isEqualTo(0L);
+        assertThat(result).extracting("chManaged").isEqualTo(0L);
+        assertThat(result).extracting("chUnmanaged").isEqualTo(0L);
+
+        assertThat(result).extracting("fagnManaged").isEqualTo(0L);
+        assertThat(result).extracting("fagnUnmanaged").isEqualTo(0L);
+        assertThat(result).extracting("smpManaged").isEqualTo(0L);
+        assertThat(result).extracting("smpUnmanaged").isEqualTo(0L);
 
     }
 
@@ -278,6 +288,60 @@ public class MetricsServiceTest {
                 Instant.parse("2024-03-01T00:00:00Z"),
                 Instant.parse("2024-04-01T00:00:00Z"));
         assertThat(result).extracting("count").containsExactly(2L, 1L, 1L);
+    }
+
+    @Test
+    void should_not_get_done_services_family_is_null() {
+        // given
+        var equip = equipmentService.getEquipmentByName("P-1000");
+
+        dataService.persistDoneService("DI5871", Instant.parse("2024-04-15T00:00:00.00Z"), equip, true);
+        dataService.persistDoneService("DI5872", Instant.parse("2024-04-30T00:00:00.00Z"), equip, true);
+
+        // when
+        List<String> family = new ArrayList<>();
+        family.add(null);
+        var result = metricsService.aggregateDoneServices(DateInterval.month, Instant.parse("2024-04-20T00:00:00.00Z"), null, 2,
+                family, List.of(), List.of());
+
+        //then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void should_not_get_done_services_place_is_null() {
+        // given
+        var equip = equipmentService.getEquipmentByName("P-1000");
+
+        dataService.persistDoneService("DI5871", Instant.parse("2024-04-15T00:00:00.00Z"), equip, true);
+        dataService.persistDoneService("DI5872", Instant.parse("2024-04-30T00:00:00.00Z"), equip, true);
+
+        // when
+        List<String> place = new ArrayList<>();
+        place.add(null);
+        var result = metricsService.aggregateDoneServices(DateInterval.month, Instant.parse("2024-04-20T00:00:00.00Z"), null, 2,
+                List.of(), List.of(), place);
+
+        //then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void should_not_get_done_services_entity_is_null() {
+        // given
+        var equip = equipmentService.getEquipmentByName("P-1000");
+
+        dataService.persistDoneService("DI5871", Instant.parse("2024-04-15T00:00:00.00Z"), equip, true);
+        dataService.persistDoneService("DI5872", Instant.parse("2024-04-30T00:00:00.00Z"), equip, true);
+
+        // when
+        List<String> entity = new ArrayList<>();
+        entity.add(null);
+        var result = metricsService.aggregateDoneServices(DateInterval.month, Instant.parse("2024-04-20T00:00:00.00Z"), null, 2,
+                List.of(), entity, List.of());
+
+        //then
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -328,7 +392,7 @@ public class MetricsServiceTest {
     }
 
     @Test
-    void should_get_done_services_for_last_2_months_filter_on_chalon_place() {
+    void should_get_done_services_for_last_2_months_filter_on_chalons_place() {
         // given
         var equipFagniere = equipmentService.getEquipmentByName("P-1000");
         var equipChalons = equipmentService.getEquipmentByName("A-230");
@@ -429,7 +493,38 @@ public class MetricsServiceTest {
         var creationDate = Instant.parse(LocalDate.now().atStartOfDay() + ":00.000Z");
 
         // when
-        var result = metricsService.getAnomalyEventsGroupedBySubCategories("VP", creationDate, null);
+        var result = metricsService.getAnomalyEventsBySubCategories("VP", creationDate, null, List.of(), List.of(),
+                List.of(), List.of(), null);
+
+        //then
+        assertThat(result).extracting("TRAFFIC_CONGESTION").isEqualTo(1L);
+        assertThat(result).extracting("WILD_STORAGE").isEqualTo(0L);
+        assertThat(result).extracting("UNUSUAL_FLOW").isEqualTo(0L);
+    }
+
+    @Test
+    void should_get_equipment_vp_anomalies_number_grouped_by_subcategories_for_specific_equipment() {
+        // given
+        var vpEquipment = equipmentService.getEquipmentByName("camera1");
+
+        eventService.saveEvent(new EventWriteDto(null,
+                "new anomaly event",
+                "description",
+                Criticality.LOW,
+                "ANOMALY",
+                "TRAFFIC_CONGESTION",
+                "address",
+                vpEquipment.getId(),
+                "VP",
+                null,
+                null,
+                null));
+
+        var creationDate = Instant.parse(LocalDate.now().atStartOfDay() + ":00.000Z");
+
+        // when
+        var result = metricsService.getAnomalyEventsBySubCategories("VP", creationDate, null, List.of(), List.of(),
+                List.of(), List.of(), "camera1");
 
         //then
         assertThat(result).extracting("TRAFFIC_CONGESTION").isEqualTo(1L);
@@ -459,7 +554,8 @@ public class MetricsServiceTest {
         eventService.closeEventById(savedEvent.getId());
 
         // when
-        var result = metricsService.getAnomalyEventsGroupedBySubCategories("VP", creationDate, null);
+        var result = metricsService.getAnomalyEventsBySubCategories("VP", creationDate, null, List.of(), List.of(),
+                List.of(), List.of(), null);
 
         //then
         assertThat(result).extracting("TRAFFIC_CONGESTION").isEqualTo(0L);
@@ -484,7 +580,8 @@ public class MetricsServiceTest {
                 null));
 
         // when
-        var result = metricsService.getAnomalyEventsGroupedBySubCategories(null, null, null);
+        var result = metricsService.getAnomalyEventsBySubCategories(null, null, null, List.of(), List.of(), List.of(),
+                List.of(), null);
 
         //then
         assertThat(result).extracting("TRAFFIC_CONGESTION").isEqualTo(1L);
@@ -540,13 +637,127 @@ public class MetricsServiceTest {
 
         var startDate = Instant.parse(LocalDate.now().atStartOfDay().plusDays(10) + ":00.000Z");
         // when
-        var result = metricsService.aggregateAnomaliesEvents(DateInterval.month, 2, "VP", startDate);
+        var result = metricsService.aggregateAnomaliesEvents(DateInterval.month, 2, "VP", startDate, List.of(), List.of(),
+                List.of(), List.of());
 
         //then
         assertThat(result).hasSize(1);
         assertThat(result).extracting("start").containsExactly(
                 Instant.parse(LocalDate.now().withDayOfMonth(1) + "T00:00:00.000Z"));
         assertThat(result).extracting("count").containsExactly(1L);
+    }
+
+    @Test
+    void should_get_anomaly_event_for_last_2_months_for_fagniere_place() {
+        // given
+        var vpEquipment = equipmentService.getEquipmentByName("camera1");
+        eventService.saveEvent(new EventWriteDto(null,
+                "new anomaly event",
+                "description",
+                Criticality.LOW,
+                "ANOMALY",
+                "TRAFFIC_CONGESTION",
+                "address",
+                vpEquipment.getId(),
+                "VP",
+                null,
+                null,
+                null));
+
+        var startDate = Instant.parse(LocalDate.now().atStartOfDay().plusDays(10) + ":00.000Z");
+        // when
+        var result = metricsService.aggregateAnomaliesEvents(DateInterval.month, 2, "VP", startDate, List.of("FAGN"), List.of(),
+                List.of(), List.of());
+
+        //then
+        assertThat(result).hasSize(1);
+        assertThat(result).extracting("start").containsExactly(
+                Instant.parse(LocalDate.now().withDayOfMonth(1) + "T00:00:00.000Z"));
+        assertThat(result).extracting("count").containsExactly(1L);
+    }
+
+    @Test
+    void should_get_anomaly_event_for_last_2_months_for_entity_SMP() {
+        // given
+        var vpEquipment = equipmentService.getEquipmentByName("camera1");
+        eventService.saveEvent(new EventWriteDto(null,
+                "new anomaly event",
+                "description",
+                Criticality.LOW,
+                "ANOMALY",
+                "TRAFFIC_CONGESTION",
+                "address",
+                vpEquipment.getId(),
+                "VP",
+                null,
+                null,
+                null));
+
+        var startDate = Instant.parse(LocalDate.now().atStartOfDay().plusDays(10) + ":00.000Z");
+        // when
+        var result = metricsService.aggregateAnomaliesEvents(DateInterval.month, 2, "VP", startDate, List.of(),
+                List.of("SAINT-MARTIN-COMMUN"),
+                List.of(), List.of());
+
+        //then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void should_get_anomaly_event_for_last_2_months_for_all_domains() {
+        // given
+        var vpEquipment = equipmentService.getEquipmentByName("camera1");
+        eventService.saveEvent(new EventWriteDto(null,
+                "new anomaly event",
+                "description",
+                Criticality.LOW,
+                "ANOMALY",
+                "TRAFFIC_CONGESTION",
+                "address",
+                vpEquipment.getId(),
+                "VP",
+                null,
+                null,
+                null));
+
+        var startDate = Instant.parse(LocalDate.now().atStartOfDay().plusDays(10) + ":00.000Z");
+        // when
+        var result = metricsService.aggregateAnomaliesEvents(DateInterval.month, 2, null, startDate, List.of(), List.of(),
+                List.of(), List.of());
+
+        //then
+        assertThat(result).hasSize(1);
+        assertThat(result).extracting("start").containsExactly(
+                Instant.parse(LocalDate.now().withDayOfMonth(1) + "T00:00:00.000Z"));
+        assertThat(result).extracting("count").containsExactly(1L);
+    }
+
+    @Test
+    void should_get_anomaly_event_for_last_2_months_with_null_criticality() {
+        // given
+        var vpEquipment = equipmentService.getEquipmentByName("camera1");
+        eventService.saveEvent(new EventWriteDto(null,
+                "new anomaly event",
+                "description",
+                Criticality.LOW,
+                "ANOMALY",
+                "TRAFFIC_CONGESTION",
+                "address",
+                vpEquipment.getId(),
+                "VP",
+                null,
+                null,
+                null));
+
+        var startDate = Instant.parse(LocalDate.now().atStartOfDay().plusDays(10) + ":00.000Z");
+        var criticalities = new ArrayList<String>();
+        criticalities.add(null);
+        // when
+        var result = metricsService.aggregateAnomaliesEvents(DateInterval.month, 2, null, startDate, List.of(), List.of(),
+                criticalities, List.of());
+
+        //then
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -568,7 +779,8 @@ public class MetricsServiceTest {
 
         var startDate = Instant.parse(LocalDate.now().atStartOfDay().minusDays(1) + ":00.000Z");
         // when
-        var result = metricsService.getEventsByEquipments("VP", "ANOMALY", 10, startDate);
+        var result = metricsService.getEventsByEquipments("VP", "ANOMALY", 10, startDate, List.of(), List.of(), List.of(),
+                List.of());
 
         //then
         assertThat(result).hasSize(1);
@@ -594,7 +806,8 @@ public class MetricsServiceTest {
 
         var startDate = Instant.parse(LocalDate.now().atStartOfDay().plusDays(1) + ":00.000Z");
         // when
-        var result = metricsService.getEventsByEquipments("VP", "ANOMALY", 10, startDate);
+        var result = metricsService.getEventsByEquipments("VP", "ANOMALY", 10, startDate, List.of(), List.of(), List.of(),
+                List.of());
 
         //then
         assertThat(result).isEmpty();
