@@ -2,6 +2,7 @@ package com.provoly.service;
 
 import java.util.Collection;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -29,8 +30,9 @@ public class ServiceController {
 
     @GET
     @Authenticated
+    @Transactional
     public Collection<ServiceReadDto> getServices() {
-        var equipments = serviceService.getServices();
-        return serviceMapper.mapToServiceReadDtos(equipments);
+        var services = serviceService.getServices();
+        return serviceMapper.mapToServiceReadDtos(services);
     }
 }

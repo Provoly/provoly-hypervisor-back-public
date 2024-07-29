@@ -83,8 +83,8 @@ public class TestDataService {
         var equip5 = initEquipment("C-7614", ouvrage, chalons, chalonsCity, chalonsDistrict, 0, domainEP);
         var equip6 = initEquipment("C-762", ouvrage, agglo, fagniereCity, fagniereDistrict, 1, domainEP);
         var equip7 = initEquipment("C-763", ouvrage, agglo, fagniereCity, fagniereDistrict, 0, domainEP);
-        var equip8Cam = initEquipment("camera1", camera, agglo, fagniereCity, fagniereDistrict, 1, domainVP);
-        var equip9Cam = initEquipment("camera2", camera, chalons, chalonsCity, chalonsDistrict, 1, domainVP);
+        initEquipment("camera1", camera, agglo, fagniereCity, fagniereDistrict, 1, domainVP);
+        initEquipment("camera2", camera, chalons, chalonsCity, chalonsDistrict, 1, domainVP);
 
         var service1 = new Service(UUID.randomUUID(), "DI1234", Instant.now(), Instant.now(), Instant.now(), Instant.now(),
                 Instant.now(), equip3, domainEP, ASKED, prev);
@@ -160,8 +160,7 @@ public class TestDataService {
         return associatedEvent;
     }
 
-    public EventWriteDto buildEvent(String name, String category, Criticality criticality, boolean isWithDate,
-            boolean externalSource) {
+    public EventWriteDto buildEvent(String name, String category, Criticality criticality, boolean isWithDate) {
         return new EventWriteDto(null,
                 name,
                 "desc",
@@ -173,7 +172,23 @@ public class TestDataService {
                 null,
                 isWithDate ? Instant.now() : null,
                 isWithDate ? Instant.now().minusMillis(1000) : null,
-                externalSource ? "source" : null);
+                null);
+    }
+
+    public EventWriteDto buildExternalEvent(String name, String category, Criticality criticality, boolean isWithDate,
+            UUID equipmentId) {
+        return new EventWriteDto(null,
+                name,
+                "desc",
+                criticality,
+                category,
+                null,
+                null,
+                equipmentId,
+                null,
+                isWithDate ? Instant.now() : null,
+                isWithDate ? Instant.now().minusMillis(1000) : null,
+                "source");
     }
 
     @Transactional

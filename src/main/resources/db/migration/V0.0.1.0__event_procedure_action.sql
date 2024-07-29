@@ -159,7 +159,7 @@ create table sms_action
 create table event
 (
     id                     serial primary key,
-    name                   varchar(50) unique         not null,
+    name                   varchar(50)                not null,
     criticality            varchar(50)                not null,
     category_id            bigint references category not null,
     status                 varchar(20) default 'NEW',

@@ -40,20 +40,9 @@ public class EventServiceTest {
     }
 
     @Test
-    void should_throw_exception_create_event_name_with_already_exists() {
-        // given
-        var event = dataService.buildEvent("operator1", "MANIFESTATION", Criticality.HIGH, false, false);
-
-        // then
-        assertThatThrownBy(() -> eventService.saveEvent(event))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("already exists");
-    }
-
-    @Test
     void should_throw_exception_create_operator_event_with_missing_dates() {
         // given
-        var event = dataService.buildEvent("tutu", "MANIFESTATION", Criticality.HIGH, false, false);
+        var event = dataService.buildEvent("tutu", "MANIFESTATION", Criticality.HIGH, false);
 
         // then
         assertThatThrownBy(() -> eventService.saveEvent(event))
@@ -64,7 +53,7 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_create_operator_event_with_invalid_dates() {
         // given
-        var event = dataService.buildEvent("tutu", "MANIFESTATION", Criticality.HIGH, true, false);
+        var event = dataService.buildEvent("tutu", "MANIFESTATION", Criticality.HIGH, true);
 
         // then
         assertThatThrownBy(() -> eventService.saveEvent(event))
@@ -75,7 +64,7 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_create_external_event_missing_equipment_id() {
         // given
-        var event = dataService.buildEvent("alert", "LIMIT", Criticality.HIGH, false, true);
+        var event = dataService.buildExternalEvent("alert", "LIMIT", Criticality.HIGH, false, null);
 
         // then
         assertThatThrownBy(() -> eventService.saveEvent(event))
@@ -86,20 +75,21 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_update_external_event() {
         // given
-        var eventAlertId = eventService
+        var eventAlert = eventService
                 .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of("LIMIT"), List.of(),
                         List.of())
                 .stream()
                 .toList()
-                .getFirst()
-                .getId();
+                .getFirst();
 
-        var event = dataService.buildEvent("tutu", "LIMIT", Criticality.HIGH, false, true);
+        var event = dataService.buildExternalEvent("tutu", "OUTOFORDER", Criticality.HIGH, false,
+                eventAlert.getEquipment().getId());
 
         // then
-        assertThatThrownBy(() -> eventService.updateEvent(eventAlertId, event))
+        assertThatThrownBy(() -> eventService.updateEvent(eventAlert.getId(), event))
                 .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("has an external source and can't be updated.");
+                .hasMessageContaining(
+                        "It's only possible to update description, address or criticality of events with external reference");
     }
 
     @Test

@@ -117,8 +117,8 @@ public class EventControllerTest {
                 List.of());
         //then
         assertThat(events).hasSize(1);
-        assertThat(events.stream().toList().getFirst().getCreationDate().isAfter(creationDate));
-        assertThat(events.stream().toList().getFirst().getCreationDate().isBefore(creationDate.plus(1, ChronoUnit.DAYS)));
+        assertThat(events.stream().toList().getFirst().getCreationDate()).isAfter(creationDate);
+        assertThat(events.stream().toList().getFirst().getCreationDate()).isBefore(creationDate.plus(1, ChronoUnit.DAYS));
     }
 
     @Test
@@ -457,7 +457,7 @@ public class EventControllerTest {
     @TestSecurity(user = "reader")
     void should_throw_if_name_blank_when_create_event() {
         // given
-        var event = dataService.buildEvent("", "LIMIT", Criticality.MEDIUM, false, false);
+        var event = dataService.buildEvent("", "LIMIT", Criticality.MEDIUM, false);
 
         // then
         assertThatThrownBy(() -> eventController.saveEvent(event))
@@ -468,7 +468,7 @@ public class EventControllerTest {
     @TestSecurity(user = "reader")
     void should_throw_if_category_invalid_when_create_event() {
         // given
-        var event = dataService.buildEvent("out of order", "OUTOF", Criticality.MEDIUM, false, false);
+        var event = dataService.buildEvent("out of order", "OUTOF", Criticality.MEDIUM, false);
 
         // then
         assertThatThrownBy(() -> eventController.saveEvent(event))

@@ -174,7 +174,6 @@ public class EventService {
     @Transactional
     public Event saveEvent(EventWriteDto eventDto) {
         logger.infof("Create %s event with name %s".formatted(eventDto.getCategory(), eventDto.getName()));
-        checkNameAlreadyExists(eventDto.getName());
         checkManifestationCategory(eventDto);
         checkSubCategoryCoherence(eventDto);
 
@@ -200,17 +199,22 @@ public class EventService {
         Event eventToUpdate = databaseReader.getEventById(id);
         var previousEquipmentId = eventToUpdate.getEquipment() != null ? eventToUpdate.getEquipment().getId() : null;
 
-        if (eventDto.getExternalSourceRef() != null) {
-            throw new ForbiddenException("Event %s has an external source and can't be updated.".formatted(eventDto.getId()));
-        }
-
-        if (!eventDto.getName().equals(eventToUpdate.getName())) {
-            checkNameAlreadyExists(eventDto.getName());
+        if (eventDto.getExternalSourceRef() != null
+                && forbiddenPropertiesAreUpdated(eventDto, eventToUpdate)) {
+            throw new ForbiddenException(
+                    "It's only possible to update description, address or criticality of events with external reference");
         }
 
         eventMapper.updateEvent(eventDto, eventToUpdate);
         logger.debugf("Event %s is updated".formatted(id));
         enrichEquipmentFromUpdatedEvent(id, eventDto.getEquipmentId(), previousEquipmentId);
+    }
+
+    private boolean forbiddenPropertiesAreUpdated(EventWriteDto eventDto, Event eventToUpdate) {
+        return !eventDto.getEquipmentId().equals(eventToUpdate.getEquipment().getId())
+                || !eventDto.getName().equals(eventToUpdate.getName())
+                || !eventDto.getCategory().equals(eventToUpdate.getCategory().getName())
+                || !eventDto.getSubCategory().equals(eventToUpdate.getSubCategory().getName());
     }
 
     @Transactional
@@ -267,12 +271,6 @@ public class EventService {
                 throw new ForbiddenException(
                         "No subcategories are avalaible for category %s".formatted(eventDto.getCategory()));
             }
-        }
-    }
-
-    private void checkNameAlreadyExists(String name) {
-        if (databaseReader.isEventWithNameExists(name)) {
-            throw new IllegalArgumentException("Event with name '%s' already exists".formatted(name));
         }
     }
 
