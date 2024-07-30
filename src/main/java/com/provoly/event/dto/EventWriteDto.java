@@ -8,6 +8,8 @@ import jakarta.validation.constraints.NotNull;
 
 import com.provoly.event.Criticality;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public class EventWriteDto {
     private final Integer id;
 
@@ -37,7 +39,38 @@ public class EventWriteDto {
 
     private final Instant endDate;
 
+    private final Instant creationDate;
+
     private final String externalSourceRef;
+
+    @JsonCreator
+    public EventWriteDto(Integer id,
+            String name,
+            String description,
+            Criticality criticality,
+            String category,
+            String subCategory,
+            String address,
+            UUID equipmentId,
+            String domain,
+            Instant startDate,
+            Instant endDate,
+            Instant creationDate,
+            String externalSourceRef) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.criticality = criticality;
+        this.category = category;
+        this.subCategory = subCategory;
+        this.address = address;
+        this.equipmentId = equipmentId;
+        this.domain = domain;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.externalSourceRef = externalSourceRef;
+        this.creationDate = creationDate;
+    }
 
     public EventWriteDto(Integer id,
             String name,
@@ -63,6 +96,7 @@ public class EventWriteDto {
         this.startDate = startDate;
         this.endDate = endDate;
         this.externalSourceRef = externalSourceRef;
+        this.creationDate = null;
     }
 
     public Integer getId() {
@@ -99,6 +133,10 @@ public class EventWriteDto {
 
     public String getDomain() {
         return domain;
+    }
+
+    public Instant getCreationDate() {
+        return creationDate;
     }
 
     public Instant getEndDate() {

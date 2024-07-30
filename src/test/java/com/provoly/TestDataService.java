@@ -232,6 +232,7 @@ public class TestDataService {
         event.setCriticality(criticality);
         event.setStatus(status);
         event.setDomain(domainEP);
+        event.setCreationDate(Instant.now());
         if (status == Status.DONE) {
             event.setCloseDate(randomInstantBetweenNowAndAMonthLater());
         }

@@ -381,7 +381,6 @@ public class MetricsDatabaseReader extends DatabaseReader {
         if (startDate != null) {
             logger.debugf("from creation date %s", startDate);
             predicates.add(builder.greaterThanOrEqualTo(event.get(Event_.creationDate), startDate));
-            predicates.add(builder.notEqual(event.get(Event_.status), Status.DONE));
         }
 
         var query = criteriaQuery.multiselect(

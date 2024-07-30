@@ -1,5 +1,6 @@
 package com.provoly.event;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.stream.Stream;
 
@@ -77,6 +78,7 @@ public class EventMapper {
         entity.setCriticality(dto.getCriticality());
         entity.setCategory(mapToCategory(dto));
         entity.setDomain(mapToDomain(dto.getDomain()));
+        entity.setCreationDate(dto.getCreationDate() != null ? dto.getCreationDate() : Instant.now());
         entity.setEquipment(equipmentService.getEquipmentByIdOrNull(dto.getEquipmentId()));
         entity.setStartDate(dto.getStartDate());
         entity.setEndDate(dto.getEndDate());

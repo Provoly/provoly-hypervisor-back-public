@@ -8,7 +8,6 @@ import jakarta.persistence.*;
 import com.provoly.equipment.Equipment;
 import com.provoly.procedure.Procedure;
 
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
@@ -34,7 +33,6 @@ public class Event {
     @Enumerated(EnumType.STRING)
     private Status status = Status.NEW;
 
-    @CreationTimestamp
     @Column(updatable = false)
     private Instant creationDate;
 
@@ -113,6 +111,10 @@ public class Event {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public void setCreationDate(Instant creationDate) {
+        this.creationDate = creationDate;
     }
 
     public Instant getCreationDate() {
