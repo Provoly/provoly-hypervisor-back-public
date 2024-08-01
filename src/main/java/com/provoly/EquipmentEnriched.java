@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 
 public class EquipmentEnriched {
     private final UUID id;
-    private final String externalId;
     private final String name;
     private final String code;
     private final String domain;
@@ -30,7 +29,6 @@ public class EquipmentEnriched {
 
     public EquipmentEnriched(Equipment equipment) {
         this.id = equipment.getId();
-        this.externalId = equipment.getExternalId();
         this.name = equipment.getName();
         this.code = equipment.getCode();
         this.domain = equipment.getDomain().getCode();
@@ -60,7 +58,6 @@ public class EquipmentEnriched {
             String place, Map<String, Object> attributes, EquipmentEnriched parent, List<CondensedEvent> events,
             long nbServicesAskedInProgress, List<CondensedService> services) {
         this.id = id;
-        this.externalId = externalId;
         this.name = name;
         this.code = code;
         this.domain = domain;
@@ -76,10 +73,6 @@ public class EquipmentEnriched {
 
     public UUID getId() {
         return id;
-    }
-
-    public String getExternalId() {
-        return externalId;
     }
 
     public String getName() {

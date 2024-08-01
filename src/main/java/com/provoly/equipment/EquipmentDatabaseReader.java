@@ -4,9 +4,7 @@ import java.util.*;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 
 import com.provoly.DatabaseReader;
 
@@ -137,13 +135,20 @@ public class EquipmentDatabaseReader extends DatabaseReader {
                 .findFirst();
     }
 
-    public Optional<Equipment> getEquipmentWithExternalId(String id) {
+    public Optional<Equipment> getEquipmentWithExternalId(Map<String, String> id) {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<Equipment> criteriaQuery = builder.createQuery(Equipment.class);
         Root<Equipment> root = criteriaQuery.from(Equipment.class);
+        MapJoin<Equipment, String, String> externalId = root.joinMap("externalId");
+
+        var predicate = id.entrySet().stream()
+                .map(item -> builder.and(
+                        builder.equal(externalId.key(), item.getKey()),
+                        builder.equal(externalId.value(), item.getValue())))
+                .toList();
 
         var query = criteriaQuery.select(root)
-                .where(builder.equal(root.get(Equipment_.externalId), id));
+                .where(builder.or(getPredicatesAsArray(predicate)));
 
         return em.createQuery(query)
                 .getResultStream()

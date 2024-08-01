@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 
 public record EquipmentReadDto(
         UUID id,
-        String externalId,
+        Map<String, String> externalId,
         String name,
         String code,
         String domain,

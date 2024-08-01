@@ -59,7 +59,7 @@ public class EquipmentMapper {
     }
 
     public void updateEquipment(EquipmentWriteDto dto, Equipment entity) {
-        entity.setExternalId(dto.id());
+        entity.getExternalId().putAll(dto.id());
         entity.setName(dto.name());
         entity.setCode(dto.code());
         entity.setAddress(dto.address());

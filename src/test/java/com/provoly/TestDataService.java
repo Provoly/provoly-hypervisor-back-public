@@ -253,7 +253,7 @@ public class TestDataService {
     private Equipment initEquipment(String name, Family family, EquipmentEntity entity, City city, District district,
             int managed, Domain domain) {
         var equipment = new Equipment(UUID.randomUUID());
-        equipment.setExternalId(name);
+        equipment.setExternalId(Map.of(name, name));
         equipment.setName(name);
         equipment.setCode(name);
         equipment.setAddress("address");

@@ -62,7 +62,7 @@ public class EnrichedProducerTest {
                 .withOffsetReset(OffsetResetStrategy.EARLIEST)
                 .fromTopics("equipment").awaitRecords(1, Duration.ofSeconds(5)).getFirstRecord();
 
-        assertThat(result.value()).extracting("externalId").isEqualTo(equipment.id());
+        assertThat(result.value()).extracting("code").isEqualTo(equipment.code());
         assertThat(result.value()).extracting("place").isEqualTo(equipment.district());
     }
 

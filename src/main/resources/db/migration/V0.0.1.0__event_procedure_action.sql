@@ -59,7 +59,6 @@ create table district
 create table equipment
 (
     id                  uuid primary key,
-    external_id         varchar(50) unique  not null,
     name                varchar(50)         not null,
     code                varchar(200) unique not null,
     address             varchar(256)        not null,
@@ -72,6 +71,14 @@ create table equipment
     parent_id           uuid,
     deleted             boolean default false,
     constraint fk_parent foreign key (parent_id) references equipment (id)
+);
+
+create table equipment_external_id
+(
+    equipment_id     uuid         not null references equipment,
+    external_id     varchar(255),
+    external_id_key varchar(255) not null,
+    primary key (equipment_id, external_id_key)
 );
 
 create table service

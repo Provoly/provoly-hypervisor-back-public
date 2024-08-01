@@ -17,7 +17,8 @@ public class Equipment {
     @Id
     private UUID id;
 
-    private String externalId;
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Map<String, String> externalId = new HashMap<>();
 
     private String name;
 
@@ -65,7 +66,7 @@ public class Equipment {
         this.id = id;
     }
 
-    public Equipment(UUID id, String externalId, String name, String code, String address, Domain domain,
+    public Equipment(UUID id, Map<String, String> externalId, String name, String code, String address, Domain domain,
             EquipmentEntity entity, Family family,
             City city, District district,
             Collection<Service> services, Map<String, Object> attributes, Equipment parent) {
@@ -88,12 +89,12 @@ public class Equipment {
         return id;
     }
 
-    public String getExternalId() {
+    public Map<String, String> getExternalId() {
         return externalId;
     }
 
-    public void setExternalId(String technicalId) {
-        this.externalId = technicalId;
+    public void setExternalId(Map<String, String> externalId) {
+        this.externalId = externalId;
     }
 
     public String getName() {

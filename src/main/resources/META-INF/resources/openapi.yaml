@@ -1028,6 +1028,7 @@ paths:
       tags:
         - Equipment Controller
       summary: Save or update equipments
+      description: if one of external id entry exists, update equipment, else create it
       operationId: com.provoly.equipment.EquipmentController_saveOrUpdateEquipments
       requestBody:
         content:
@@ -1042,7 +1043,9 @@ paths:
                 value: |
                   [
                     {
-                      "id": "technical_unique_id",
+                      "id": {
+                        "GMAO": "technical_unique_id"
+                      },
                       "code":"C306",
                       "name":"C306",
                       "family": "Armoire",
@@ -1056,7 +1059,9 @@ paths:
                       "parent": "C307"
                     },
                     {
-                      "id": "technical_unique_id2",
+                      "id":  {
+                        "GMAO": "technical_unique_id2"
+                      },
                       "code":"C307",
                       "name":"C307",
                       "family": "Armoire",
@@ -1070,7 +1075,9 @@ paths:
                       "parent": null
                     },
                     {
-                      "id": "technical_unique_id3",
+                      "id":  {
+                        "GMAO": "technical_unique_id3"
+                      },
                       "code":"C308",
                       "name":"C308",
                       "family": "Armoire",
@@ -1143,7 +1150,9 @@ paths:
                     [
                       {
                         "id": "c538a660-6450-4281-9fa9-c925f340eb54",
-                        "externalId": "technical_unique_id",
+                        "externalId": {
+                          "GMAO": "technical_unique_id"
+                        },
                         "name": "C306",
                         "code": "C306",
                         "family": "Armoire",
@@ -1196,7 +1205,9 @@ paths:
                   value: |
                     {
                       "id": "c538a660-6450-4281-9fa9-c925f340eb54",
-                      "externalId": "technical_unique_id",
+                      "externalId": {
+                        "GMAO": "technical_unique_id"
+                      },
                       "name": "C306",
                       "code": "C306",
                       "family": "Armoire",
@@ -1249,6 +1260,9 @@ paths:
                   value: |
                     {
                       "id": "0c728960-d5fd-49ea-8fe8-f72cb9cfcccd",
+                      "externalId": {
+                        "GMAO": "technical_unique_id"
+                      },
                       "name": "P-1000",
                       "type": "Point Lumineux",
                       "entity": "FAGNIERES"
@@ -2237,7 +2251,9 @@ components:
       additionalProperties: true
       properties:
         id:
-          type: string
+          type: object
+          description: | 
+            contains a map of external ids like : {SOURCE1: id1, SOURCE2: id2}
           required: true
         code:
           type: string
