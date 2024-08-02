@@ -4,11 +4,13 @@ import static com.provoly.event.Status.DONE;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.ForbiddenException;
 
+import com.provoly.action.Action;
 import com.provoly.action.ActionService;
 import com.provoly.action.dto.ActionWriteDto;
 import com.provoly.event.Event;
@@ -98,6 +100,18 @@ public class ProcedureModelService {
                     "It's not possible to update Procedure model creator for procedure %s".formatted(model.getId()));
         }
         procedureModelMapper.updateProcedureModel(model, dto);
+
+        var currentActionIds = model.getActions().stream().map(Action::getId).collect(Collectors.toSet());
+        var newActionIds = dto.actions().stream().map(ActionWriteDto::getId).collect(Collectors.toSet());
+
+        currentActionIds.removeAll(newActionIds);
+        if (!currentActionIds.isEmpty()) {
+            logger.debugf("delete actions with id %s", currentActionIds);
+            for (var actionId : currentActionIds) {
+                model.getAction(actionId).ifPresent(model::removeAction);
+            }
+        }
+
         addActionsForModel(dto.actions(), model);
         logger.debugf("Procedure model %s is updated".formatted(model.getId()));
 

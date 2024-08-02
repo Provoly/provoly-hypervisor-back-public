@@ -71,6 +71,10 @@ public class ProcedureModel {
         action.setProcedureModel(this);
     }
 
+    public void removeAction(Action action) {
+        actions.remove(action);
+    }
+
     public Integer getId() {
         return id;
     }

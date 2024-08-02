@@ -68,17 +68,31 @@ public class ProcedureService {
             eventService.updateEvent(event.getId(), event);
         }
 
+        logger.debug("Update actions");
         var currentActionIds = procedure.getActions().stream().map(Action::getId).collect(Collectors.toSet());
         var newActionIds = dto.actions().stream().map(ActionWriteDto::getId).collect(Collectors.toSet());
-        //        if(!currentActionIds.equals(newActionIds) && pas event_proc_write) {
-        //            throw new ForbiddenException("");
-        //        }
 
-        logger.debug("Update actions");
+        if (currentActionIds.equals(newActionIds)) {
+            //if(&& pas event_proc_write){
+            //  throw new ForbiddenException("");
+            //}
+        }
+
+        currentActionIds.removeAll(newActionIds);
+        if (!currentActionIds.isEmpty()) {
+            logger.debugf("delete actions with id %s", currentActionIds);
+            for (var actionId : currentActionIds) {
+                procedure.getAction(actionId).ifPresent(procedure::removeAction);
+            }
+        }
+
         int index = 0;
         for (var actionDto : dto.actions()) {
             actionService.saveActionForInstance(actionDto, procedure, index++);
         }
+
+        logger.debugf("Procedure %s is updated".formatted(procedure.getId()));
+
     }
 
     @Transactional

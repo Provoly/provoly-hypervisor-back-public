@@ -48,6 +48,11 @@ public class Procedure {
         setProcedureProgress(calculateProgressActions());
     }
 
+    public void removeAction(Action action) {
+        actions.remove(action);
+        setProcedureProgress(calculateProgressActions());
+    }
+
     public void addEvent(Event event) {
         events.add(event);
         event.setProcedure(this);
