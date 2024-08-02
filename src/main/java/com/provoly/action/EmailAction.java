@@ -10,17 +10,10 @@ public class EmailAction extends Action {
     private String email;
 
     public EmailAction() {
-        super();
     }
 
-    public EmailAction(Action action, String name, String email) {
-        super(action.getId(), ActionType.EMAIL.name(), action.getStatus());
-        this.name = name;
-        this.email = email;
-    }
-
-    public EmailAction(String name, String email) {
-        super(ActionType.EMAIL.name());
+    public EmailAction(int order, String name, String email) {
+        super(order, ActionType.EMAIL.name());
         this.name = name;
         this.email = email;
     }
@@ -33,4 +26,11 @@ public class EmailAction extends Action {
         return email;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }

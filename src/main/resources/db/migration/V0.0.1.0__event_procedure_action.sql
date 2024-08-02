@@ -75,7 +75,7 @@ create table equipment
 
 create table equipment_external_id
 (
-    equipment_id     uuid         not null references equipment,
+    equipment_id    uuid         not null references equipment,
     external_id     varchar(255),
     external_id_key varchar(255) not null,
     primary key (equipment_id, external_id_key)
@@ -124,8 +124,9 @@ create table action
     procedure_id           int references procedure,
     procedure_model_id     int references procedure_model,
     type                   varchar(20) not null,
-    status                 varchar(20) default 'NEW',
-    last_modification_date timestamptz default current_timestamp
+    status                 varchar(20)          default 'NEW',
+    action_order           int         not null default 0,
+    last_modification_date timestamptz          default current_timestamp
         check (procedure_id is not null or procedure_model_id is not null)
 );
 
@@ -172,7 +173,7 @@ create table event
     status                 varchar(20) default 'NEW',
     description            varchar(256)               not null,
     address                varchar(256),
-    creation_date          timestamptz default current_timestamp,
+    creation_date          timestamptz                not null,
     last_modification_date timestamptz default current_timestamp,
     close_date             timestamptz,
     start_date             timestamptz,

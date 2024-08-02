@@ -1,11 +1,7 @@
 package com.provoly.action;
 
-import java.util.UUID;
-
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-
-import com.provoly.event.Status;
 
 @Entity
 @DiscriminatorValue("PHONE")
@@ -17,14 +13,8 @@ public class PhoneAction extends Action {
         super();
     }
 
-    public PhoneAction(UUID id, String type, Status status, String name, String number) {
-        super(id, type, status);
-        this.name = name;
-        this.number = number;
-    }
-
-    public PhoneAction(String name, String number) {
-        super(ActionType.PHONE.name());
+    public PhoneAction(int order, String name, String number) {
+        super(order, ActionType.PHONE.name());
         this.name = name;
         this.number = number;
     }
@@ -35,5 +25,13 @@ public class PhoneAction extends Action {
 
     public String getNumber() {
         return number;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
     }
 }

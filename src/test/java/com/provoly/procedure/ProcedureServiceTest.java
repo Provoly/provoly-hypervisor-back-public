@@ -48,8 +48,8 @@ public class ProcedureServiceTest {
     @Test
     void procedure_progress_action_should_return_half_terminated() {
         // given
-        var intervention = new AskedService(UUID.randomUUID(), Status.NEW, "my_intervention");
-        var todo = new OtherAction(UUID.randomUUID(), Status.DONE, "other action");
+        var intervention = new AskedService(UUID.randomUUID(), Status.NEW, "my_intervention", 1);
+        var todo = new OtherAction(UUID.randomUUID(), Status.DONE, "other action", 2);
 
         Procedure procedure = new Procedure("my_procedure", "desc");
         procedure.addAction(intervention);
@@ -65,9 +65,9 @@ public class ProcedureServiceTest {
     @Test
     void procedure_progress_action_should_return_parsed_long() {
         // given
-        var intervention = new AskedService(UUID.randomUUID(), Status.NEW, "my_intervention");
-        var intervention2 = new AskedService(UUID.randomUUID(), Status.NEW, "my_intervention2");
-        var todo = new OtherAction(UUID.randomUUID(), Status.DONE, "other action");
+        var intervention = new AskedService(UUID.randomUUID(), Status.NEW, "my_intervention", 1);
+        var intervention2 = new AskedService(UUID.randomUUID(), Status.NEW, "my_intervention2", 2);
+        var todo = new OtherAction(UUID.randomUUID(), Status.DONE, "other action", 3);
 
         Procedure procedure = new Procedure("my_procedure", "desc");
         procedure.addAction(intervention);
@@ -94,14 +94,13 @@ public class ProcedureServiceTest {
     }
 
     @Test
-    void procedure_progress_action_should_return_none_when_only_no_done_actions() {
+    void procedure_progress_action_should_return_none_when_only_undone_actions() {
         // given
-        var intervention = new AskedService(UUID.randomUUID(), Status.IN_PROGRESS,
-                "my_intervention");
-        var todo = new OtherAction(UUID.randomUUID(), Status.NEW, "other action");
+        var service = new AskedService(UUID.randomUUID(), Status.IN_PROGRESS, "my_intervention", 1);
+        var todo = new OtherAction(UUID.randomUUID(), Status.NEW, "other action", 2);
 
         Procedure procedure = new Procedure("my_procedure", "desc");
-        procedure.addAction(intervention);
+        procedure.addAction(service);
         procedure.addAction(todo);
 
         // when

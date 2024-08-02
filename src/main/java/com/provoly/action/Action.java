@@ -26,6 +26,9 @@ public class Action {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @Column(name = "action_order")
+    private int order;
+
     @ManyToOne
     @Immutable
     private Procedure procedure;
@@ -42,16 +45,18 @@ public class Action {
         this.id = id;
     }
 
-    protected Action(UUID id, String type, Status status) {
+    protected Action(UUID id, String type, Status status, int order) {
         this.id = id;
         this.type = type;
         this.status = status;
+        this.order = order;
     }
 
-    protected Action(String type) {
+    protected Action(int order, String type) {
         this.id = UUID.randomUUID();
         this.type = type;
         this.status = Status.NEW;
+        this.order = order;
 
     }
 
@@ -67,12 +72,28 @@ public class Action {
         return type;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public Instant getLastModificationDate() {
         return lastModificationDate;
     }
 
     public Status getStatus() {
         return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 
     public Procedure getProcedure() {

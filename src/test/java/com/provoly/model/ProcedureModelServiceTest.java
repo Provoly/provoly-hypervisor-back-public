@@ -1,14 +1,19 @@
 package com.provoly.model;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ForbiddenException;
 
 import com.provoly.TestDataService;
+import com.provoly.action.dto.AskedServiceWriteDto;
+import com.provoly.action.dto.OtherActionWriteDto;
+import com.provoly.event.Status;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
@@ -101,7 +106,7 @@ public class ProcedureModelServiceTest {
 
     @Test
     @TestSecurity(user = "reader")
-    void should_throw_associate_procedure_model_with_unkown_event() {
+    void should_throw_associate_procedure_model_with_unknown_event() {
         // given
         var dto = new ProcedureModelWriteDto(null, "proc model unkwown event", "desc", "EP", "bloom",
                 List.of());
@@ -142,4 +147,37 @@ public class ProcedureModelServiceTest {
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessageContaining("already associated to a procedure");
     }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_update_action_order_when_update_procedure_model() {
+        // given
+        var id = procedureModelService.getProceduresModel(1, 1, null, null, List.of(), "flora model2")
+                .stream()
+                .findFirst()
+                .get()
+                .getId();
+
+        var service = new AskedServiceWriteDto(UUID.randomUUID(), "ASKED_SERVICES", Status.IN_PROGRESS, "service", null);
+        var todo = new OtherActionWriteDto(UUID.randomUUID(), "OTHER", Status.NEW, "other");
+
+        //when add actions
+        var procedureModelUpdated = new ProcedureModelWriteDto(id, "proc model1 updated", "desc", "EP", "musa",
+                List.of(service, todo));
+
+        // then
+        assertThat(procedureModelUpdated.actions())
+                .extracting("name")
+                .containsExactly("service", "other");
+
+        // when update order actions
+        var procedureModelUpdatedActionOrder = new ProcedureModelWriteDto(id, "proc model1 updated", "desc", "EP", "musa",
+                List.of(todo, service));
+
+        // then
+        assertThat(procedureModelUpdatedActionOrder.actions()).extracting("name")
+                .containsExactly("other", "service");
+
+    }
+
 }

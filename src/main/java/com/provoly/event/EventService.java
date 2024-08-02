@@ -211,7 +211,8 @@ public class EventService {
     }
 
     private boolean forbiddenPropertiesAreUpdated(EventWriteDto eventDto, Event eventToUpdate) {
-        return !eventDto.getEquipmentId().equals(eventToUpdate.getEquipment().getId())
+        return eventDto.getEquipmentId() == null
+                || !eventDto.getEquipmentId().equals(eventToUpdate.getEquipment().getId())
                 || !eventDto.getName().equals(eventToUpdate.getName())
                 || !eventDto.getCategory().equals(eventToUpdate.getCategory().getName())
                 || !eventDto.getSubCategory().equals(eventToUpdate.getSubCategory().getName());

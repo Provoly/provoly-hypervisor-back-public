@@ -18,19 +18,19 @@ public class AskedService extends Action {
     }
 
     public AskedService(Action action, String name, String serviceExternalId) {
-        super(action.getId(), ActionType.ASKED_SERVICE.name(), action.getStatus());
+        super(action.getId(), ActionType.ASKED_SERVICE.name(), action.getStatus(), action.getOrder());
         this.name = name;
         this.serviceExternalId = serviceExternalId;
     }
 
-    public AskedService(UUID id, Status status, String name) {
-        super(id, ActionType.ASKED_SERVICE.name(), status);
+    public AskedService(UUID id, Status status, String name, int order) {
+        super(id, ActionType.ASKED_SERVICE.name(), status, order);
         this.name = name;
         this.serviceExternalId = null;
     }
 
-    public AskedService(String name, String serviceExternalId) {
-        super(ActionType.ASKED_SERVICE.name());
+    public AskedService(int order, String name, String serviceExternalId) {
+        super(order, ActionType.ASKED_SERVICE.name());
         this.name = name;
         this.serviceExternalId = serviceExternalId;
     }
@@ -43,4 +43,11 @@ public class AskedService extends Action {
         return serviceExternalId;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setServiceExternalId(String serviceExternalId) {
+        this.serviceExternalId = serviceExternalId;
+    }
 }

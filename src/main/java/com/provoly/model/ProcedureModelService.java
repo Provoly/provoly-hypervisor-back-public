@@ -98,10 +98,9 @@ public class ProcedureModelService {
                     "It's not possible to update Procedure model creator for procedure %s".formatted(model.getId()));
         }
         procedureModelMapper.updateProcedureModel(model, dto);
-
-        logger.debugf("Remove %s actions", model.getActions().size());
-        model.removeAllActions();
         addActionsForModel(dto.actions(), model);
+        logger.debugf("Procedure model %s is updated".formatted(model.getId()));
+
     }
 
     @Transactional
@@ -134,8 +133,9 @@ public class ProcedureModelService {
 
     private void addActionsForModel(Collection<ActionWriteDto> actions, ProcedureModel model) {
         logger.debugf("Save or update %s actions", actions.size());
+        int index = 0;
         for (var dtoAction : actions) {
-            actionService.saveActionForModel(dtoAction, model);
+            actionService.saveActionForModel(dtoAction, model, index++);
         }
     }
 }

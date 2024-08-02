@@ -1,7 +1,6 @@
 package com.provoly.action;
 
 import java.util.Collection;
-import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -32,31 +31,45 @@ public class ActionMapper {
         return actions.stream().map(this::mapToActionReadDto).toList();
     }
 
-    public Action mapToActionEntity(ActionWriteDto actionDto) {
-        var action = new Action(actionDto.getId(), actionDto.getType(),
-                actionDto.getStatus() == null ? Status.NEW : actionDto.getStatus());
-        return switch (actionDto) {
-            case EmailActionWriteDto dto -> new EmailAction(action, dto.getName(), dto.getEmail());
-            case OtherActionWriteDto dto -> new OtherAction(action, dto.getName());
-            case AskedServiceWriteDto dto -> new AskedService(action, dto.getName(), dto.getServiceId());
+    public void updateAction(ActionWriteDto actionDto, Action action, int index) {
+        action.setId(actionDto.getId());
+        action.setOrder(index);
+        action.setStatus(actionDto.getStatus() == null ? Status.NEW : actionDto.getStatus());
+        action.setType(actionDto.getType());
+
+        switch (actionDto) {
+            case EmailActionWriteDto dto -> {
+                ((EmailAction) action).setName(dto.getName());
+                ((EmailAction) action).setEmail(dto.getEmail());
+            }
+            case OtherActionWriteDto dto -> ((OtherAction) action).setName(dto.getName());
+            case AskedServiceWriteDto dto -> {
+                ((AskedService) action).setName(dto.getName());
+                ((AskedService) action).setServiceExternalId(dto.getServiceId());
+            }
             case PhoneActionWriteDto dto -> {
                 if (ActionType.valueOf(dto.getType()) == ActionType.SMS) {
-                    yield new SmsAction(action.getId(), action.getType(), action.getStatus(), dto.getName(), dto.getNumber());
+                    ((SmsAction) action).setName(dto.getName());
+                    ((SmsAction) action).setNumber(dto.getNumber());
+                    return;
                 }
-                yield new PhoneAction(action.getId(), action.getType(), action.getStatus(), dto.getName(), dto.getNumber());
+                ((PhoneAction) action).setName(dto.getName());
+                ((PhoneAction) action).setNumber(dto.getNumber());
             }
-            default -> action;
-        };
+            default -> {
+            }
+        }
+
     }
 
     public Action duplicateAction(Action action) {
         return switch (action) {
-            case EmailAction a -> new EmailAction(a.getName(), a.getEmail());
-            case OtherAction a -> new OtherAction(a.getName());
-            case AskedService a -> new AskedService(a.getName(), a.getServiceExternalId());
-            case SmsAction a -> new SmsAction(UUID.randomUUID(), ActionType.SMS.name(), Status.NEW, a.getName(), a.getNumber());
-            case PhoneAction a -> new PhoneAction(a.getName(), a.getNumber());
-            default -> new Action(action.getType());
+            case EmailAction a -> new EmailAction(a.getOrder(), a.getName(), a.getEmail());
+            case OtherAction a -> new OtherAction(a.getOrder(), a.getName());
+            case AskedService a -> new AskedService(a.getOrder(), a.getName(), a.getServiceExternalId());
+            case SmsAction a -> new SmsAction(a.getOrder(), a.getName(), a.getNumber());
+            case PhoneAction a -> new PhoneAction(a.getOrder(), a.getName(), a.getNumber());
+            default -> new Action(action.getOrder(), action.getType());
         };
     }
 }

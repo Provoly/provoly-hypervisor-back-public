@@ -1,12 +1,15 @@
 package com.provoly.procedure;
 
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
+import com.provoly.action.Action;
 import com.provoly.action.ActionMapper;
 import com.provoly.action.ActionService;
+import com.provoly.action.dto.ActionWriteDto;
 import com.provoly.event.Event;
 import com.provoly.event.EventService;
 import com.provoly.model.ProcedureModel;
@@ -59,23 +62,23 @@ public class ProcedureService {
                 dto.events().size());
 
         var procedure = databaseReader.getProcedureById(id);
+        // if role event_write sinon forbidden exception
         logger.debug("Update events");
         for (var event : dto.events()) {
-            if (event.getExternalSourceRef() != null) {
-                logger.debugf("Event %s has an external source and can't be updated. Skipping.", event.getId());
-                continue;
-            }
             eventService.updateEvent(event.getId(), event);
         }
 
-        logger.debugf("Remove %s actions", procedure.getActions().size());
-        procedure.removeActions();
+        var currentActionIds = procedure.getActions().stream().map(Action::getId).collect(Collectors.toSet());
+        var newActionIds = dto.actions().stream().map(ActionWriteDto::getId).collect(Collectors.toSet());
+        //        if(!currentActionIds.equals(newActionIds) && pas event_proc_write) {
+        //            throw new ForbiddenException("");
+        //        }
 
         logger.debug("Update actions");
-        for (var action : dto.actions()) {
-            actionService.saveActionForInstance(action, procedure);
+        int index = 0;
+        for (var actionDto : dto.actions()) {
+            actionService.saveActionForInstance(actionDto, procedure, index++);
         }
-
     }
 
     @Transactional

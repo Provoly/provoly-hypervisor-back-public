@@ -1,9 +1,7 @@
 package com.provoly.procedure;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import jakarta.persistence.*;
 
@@ -31,7 +29,8 @@ public class Procedure {
     private List<Event> events = new ArrayList<>();
 
     @OneToMany(mappedBy = "procedure", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private Collection<Action> actions = new ArrayList<>();
+    @OrderBy("order ASC")
+    private List<Action> actions = new ArrayList<>();
 
     public Procedure() {
         // Only for JPA
@@ -53,6 +52,13 @@ public class Procedure {
         events.add(event);
         event.setProcedure(this);
         event.setStatus(Status.IN_PROGRESS);
+    }
+
+    public Optional<Action> getAction(UUID id) {
+        return actions
+                .stream()
+                .filter(a -> a.getId().equals(id))
+                .findFirst();
     }
 
     public void dissociateEvents() {

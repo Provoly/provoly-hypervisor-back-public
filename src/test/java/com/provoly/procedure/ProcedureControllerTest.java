@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.ws.rs.ForbiddenException;
 
 import com.provoly.TestDataService;
 import com.provoly.action.dto.ActionWriteDto;
@@ -106,13 +107,8 @@ public class ProcedureControllerTest {
                 List.of());
 
         // when
-        procedureController.updateProcedure(procedureId, dto);
-        var updatedEvent = eventController.getEventDetails(event.getId());
-
-        // then
-        assertThat(updatedEvent)
-                .extracting("name", "address")
-                .containsExactly(event.getName(), event.getAddress());
+        assertThatThrownBy(() -> procedureController.updateProcedure(procedureId, dto))
+                .isInstanceOf(ForbiddenException.class);
 
     }
 

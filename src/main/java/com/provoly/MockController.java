@@ -54,6 +54,7 @@ public class MockController {
             Event event = new Event();
             event.setCategory(randomCategory(categories));
             event.setName("Evenement %s %s".formatted(event.getCategory().name, suffix(UUID.randomUUID())));
+            event.setCreationDate(Instant.now());
 
             if (event.getCategory().getCode().equals("MANIFESTATION")) {
                 event.setStartDate(Instant.now());

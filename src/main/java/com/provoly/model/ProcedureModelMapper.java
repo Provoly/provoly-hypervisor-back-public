@@ -34,7 +34,6 @@ public class ProcedureModelMapper {
         entity.setName(dto.name());
         entity.setDescription(dto.description());
         entity.setDomain(mapToDomain(dto.domain()));
-
     }
 
     private Domain mapToDomain(String domain) {

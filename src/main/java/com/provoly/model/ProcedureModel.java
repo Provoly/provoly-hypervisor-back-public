@@ -3,6 +3,8 @@ package com.provoly.model;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
+import java.util.UUID;
 
 import jakarta.persistence.*;
 
@@ -37,6 +39,7 @@ public class ProcedureModel {
     private Instant lastModificationDate;
 
     @OneToMany(mappedBy = "procedureModel", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OrderBy("order ASC")
     private Collection<Action> actions = new ArrayList<>();
 
     public ProcedureModel() {
@@ -56,13 +59,16 @@ public class ProcedureModel {
         this.actions = actions;
     }
 
+    public Optional<Action> getAction(UUID id) {
+        return actions
+                .stream()
+                .filter(a -> a.getId().equals(id))
+                .findFirst();
+    }
+
     public void addAction(Action action) {
         actions.add(action);
         action.setProcedureModel(this);
-    }
-
-    public void removeAllActions() {
-        actions.clear();
     }
 
     public Integer getId() {

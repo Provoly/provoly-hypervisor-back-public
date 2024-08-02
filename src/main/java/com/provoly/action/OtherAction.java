@@ -16,22 +16,21 @@ public class OtherAction extends Action {
         super();
     }
 
-    public OtherAction(Action action, String name) {
-        super(action.getId(), ActionType.OTHER.name(), action.getStatus());
+    public OtherAction(UUID id, Status status, String name, int order) {
+        super(id, ActionType.OTHER.name(), status, order);
         this.name = name;
     }
 
-    public OtherAction(UUID id, Status status, String name) {
-        super(id, ActionType.OTHER.name(), status);
-        this.name = name;
-    }
-
-    public OtherAction(String name) {
-        super(ActionType.OTHER.name());
+    public OtherAction(int order, String name) {
+        super(order, ActionType.OTHER.name());
         this.name = name;
     }
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
