@@ -1270,6 +1270,53 @@ paths:
       security:
         - oidc:
             - authenticated
+  /equipments/{source}/id/{id}:
+    get:
+      tags:
+        - Equipment Controller
+      summary: Retrieve an equipment by source and externalId
+      operationId: com.provoly.equipment.EquipmentController_getEquipmentsDetailsByExternalId
+      parameters:
+        - name: source
+          in: path
+          schema:
+            type: string
+          example: GMAO
+          required: true
+        - name: id
+          in: path
+          schema:
+            type: string
+          example: technical_unique_id
+          required: true
+      responses:
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden if page not specified
+        "404":
+          description: Equipment Not found
+        "200":
+          description: Returns equipment Details by name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentReadDto'
+              examples:
+                default:
+                  value: |
+                    {
+                      "id": "0c728960-d5fd-49ea-8fe8-f72cb9cfcccd",
+                      "externalId": {
+                        "GMAO": "technical_unique_id"
+                      },
+                      "name": "P-1000",
+                      "type": "Point Lumineux",
+                      "entity": "FAGNIERES"
+                    }
+      security:
+        - oidc:
+            - authenticated
   /equipments/entities:
     get:
       tags:

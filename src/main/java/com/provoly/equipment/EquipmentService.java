@@ -135,4 +135,11 @@ public class EquipmentService {
                 : databaseReader.getDistrictByCode(code)
                         .orElseThrow(() -> new IllegalArgumentException("District code %s invalid".formatted(code)));
     }
+
+    @Transactional
+    public Equipment getEquipmentByIdExternalId(String source, String id) {
+        return databaseReader.getEquipmentWithExternalId(Map.of(source.toUpperCase(), id))
+                .orElseThrow(
+                        () -> new NoSuchElementException("Equipment with source %s and id %s not found".formatted(source, id)));
+    }
 }

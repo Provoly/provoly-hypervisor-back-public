@@ -57,6 +57,15 @@ public class EquipmentServiceTest {
     }
 
     @Test
+    void should_get_equipment_by_external_id() {
+        // when
+        var equipment = equipmentService.getEquipmentByIdExternalId("A-230","A-230");
+
+        //then
+        assertThat(equipment).isInstanceOf(Equipment.class);
+    }
+
+    @Test
     void should_throw_exception_when_get_equipment_id_not_exists() {
         // when
         assertThatThrownBy(() -> equipmentService.getEquipmentById(UUID.randomUUID()))
@@ -68,6 +77,14 @@ public class EquipmentServiceTest {
     void should_throw_exception_when_get_equipment_name_not_exists() {
         // when
         assertThatThrownBy(() -> equipmentService.getEquipmentByName("toto"))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessageContaining("not found");
+    }
+
+    @Test
+    void should_throw_exception_when_get_equipment_external_id_not_exists() {
+        // when
+        assertThatThrownBy(() -> equipmentService.getEquipmentByIdExternalId("UNKOWN","A-230"))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessageContaining("not found");
     }

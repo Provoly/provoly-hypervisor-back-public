@@ -50,6 +50,15 @@ public class EquipmentController {
 
     @GET
     @Authenticated
+    @Path("/{source}/id/{id}")
+    public EquipmentReadDto getEquipmentByExternalId(String source, String id) {
+        var equipment = equipmentService.getEquipmentByIdExternalId(source, id);
+        return equipmentMapper.mapToEquipmentReadDto(equipment);
+
+    }
+
+    @GET
+    @Authenticated
     @Path("/name/{name}")
     public EquipmentReadDto getEquipmentDetails(String name) {
         var equipment = equipmentService.getEquipmentByName(name);
