@@ -209,7 +209,7 @@ paths:
           description: Forbidden if missing a required property
       security:
         - oidc:
-            - authenticated
+            - event_write
   /events/id/{id}:
     get:
       tags:
@@ -259,7 +259,7 @@ paths:
           description: Event Not found
       security:
         - oidc:
-            - authenticated
+            - event_read
     put:
       tags:
         - Event Controller
@@ -324,7 +324,7 @@ paths:
           description: Event not Found
       security:
         - oidc:
-            - authenticated
+            - event_write
   /events/id/{id}/close:
     put:
       tags:
@@ -348,7 +348,7 @@ paths:
           description: Event Not found
       security:
         - oidc:
-            - authenticated
+            - event_write
   /events/summary:
     get:
       tags:
@@ -570,7 +570,7 @@ paths:
           description: Forbidden if page not specified
       security:
         - oidc:
-            - authenticated
+            - proc_model_read
     post:
       tags:
         - Procedure Model Controller
@@ -655,7 +655,7 @@ paths:
           description: Forbidden if missing a required property
       security:
         - oidc:
-            - authenticated
+            - proc_model_write
   /procedures/model/id/{id}:
     get:
       tags:
@@ -715,7 +715,7 @@ paths:
                     }
       security:
         - oidc:
-            - authenticate
+            - proc_model_read
     put:
       tags:
         - Procedure Model Controller
@@ -770,7 +770,7 @@ paths:
           description: Not Authorized
       security:
         - oidc:
-            - authenticated
+            - proc_model_write
   /procedures/model/id/{id}/associate:
     put:
       tags:
@@ -817,7 +817,7 @@ paths:
           description: Procedure model not found
       security:
         - oidc:
-            - authenticated
+            - event_write
   /procedures/id/{id}:
     get:
       tags:
@@ -912,7 +912,7 @@ paths:
                     }
       security:
         - oidc:
-            - authenticate
+            - event_read
     put:
       tags:
         - Procedure Controller
@@ -972,7 +972,8 @@ paths:
           description: Not Authorized
       security:
         - oidc:
-            - authenticated
+            - event_proc_write
+            - event_write
     delete:
       tags:
         - Procedure Controller
@@ -998,7 +999,7 @@ paths:
           description: Procedure deleted
       security:
         - oidc:
-            - authenticate
+            - event_write
   /procedures/id/{id}/close:
     put:
       tags:
@@ -1022,7 +1023,7 @@ paths:
           description: Event Not found
       security:
         - oidc:
-            - authenticated
+            - event_write
   /equipments:
     post:
       tags:

@@ -13,6 +13,10 @@ import com.provoly.action.dto.ActionWriteDto;
 import com.provoly.event.Event;
 import com.provoly.event.EventService;
 import com.provoly.model.ProcedureModel;
+import com.provoly.user.Role;
+
+import io.quarkus.security.ForbiddenException;
+import io.quarkus.security.identity.SecurityIdentity;
 
 import org.jboss.logging.Logger;
 
@@ -23,15 +27,17 @@ public class ProcedureService {
     private final ActionService actionService;
     private final ActionMapper actionMapper;
     private final Logger logger;
+    private final SecurityIdentity securityIdentity;
 
     public ProcedureService(ProcedureDatabaseReader databaseReader, EventService eventService, ActionService actionService,
             ActionMapper actionMapper,
-            Logger logger) {
+            Logger logger, SecurityIdentity securityIdentity) {
         this.databaseReader = databaseReader;
         this.eventService = eventService;
         this.actionService = actionService;
         this.actionMapper = actionMapper;
         this.logger = logger;
+        this.securityIdentity = securityIdentity;
     }
 
     @Transactional
@@ -62,7 +68,7 @@ public class ProcedureService {
                 dto.events().size());
 
         var procedure = databaseReader.getProcedureById(id);
-        // if role event_write sinon forbidden exception
+
         logger.debug("Update events");
         for (var event : dto.events()) {
             eventService.updateEvent(event.getId(), event);
@@ -72,15 +78,13 @@ public class ProcedureService {
         var currentActionIds = procedure.getActions().stream().map(Action::getId).collect(Collectors.toSet());
         var newActionIds = dto.actions().stream().map(ActionWriteDto::getId).collect(Collectors.toSet());
 
-        if (currentActionIds.equals(newActionIds)) {
-            //if(&& pas event_proc_write){
-            //  throw new ForbiddenException("");
-            //}
+        if (!currentActionIds.equals(newActionIds) && !securityIdentity.hasRole(Role.STR_EVENT_PROC_WRITE)) {
+            throw new ForbiddenException("Missing permission to add or delete actions.");
         }
 
         currentActionIds.removeAll(newActionIds);
         if (!currentActionIds.isEmpty()) {
-            logger.debugf("delete actions with id %s", currentActionIds);
+            logger.debugf("Delete actions with id %s", currentActionIds);
             for (var actionId : currentActionIds) {
                 procedure.getAction(actionId).ifPresent(procedure::removeAction);
             }
@@ -92,7 +96,6 @@ public class ProcedureService {
         }
 
         logger.debugf("Procedure %s is updated".formatted(procedure.getId()));
-
     }
 
     @Transactional

@@ -9,20 +9,20 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import jakarta.inject.Inject;
-import jakarta.validation.ConstraintViolationException;
-
-import com.provoly.TestDataService;
-import com.provoly.event.dto.EventWriteDto;
-
-import io.quarkus.security.UnauthorizedException;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.security.TestSecurity;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+
+import com.provoly.TestDataService;
+import com.provoly.event.dto.EventWriteDto;
+
+import io.quarkus.security.ForbiddenException;
+import io.quarkus.security.UnauthorizedException;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
+import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolationException;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -408,7 +408,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_event_by_id() {
         var firstEventId = eventController
                 .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of())
@@ -424,7 +424,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_throw_not_found_when_invalid_event_id() {
         assertThatThrownBy(() -> eventController.getEventDetails(666))
                 .isInstanceOf(NoSuchElementException.class)
@@ -432,7 +432,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_write" })
     void should_throw_create_event_missing_required_property() {
         // given
         var event = new EventWriteDto(null,
@@ -454,7 +454,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_write" })
     void should_throw_if_name_blank_when_create_event() {
         // given
         var event = dataService.buildEvent("", "LIMIT", Criticality.MEDIUM, false);
@@ -465,7 +465,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_write" })
     void should_throw_if_category_invalid_when_create_event() {
         // given
         var event = dataService.buildEvent("out of order", "OUTOF", Criticality.MEDIUM, false);
@@ -473,5 +473,16 @@ public class EventControllerTest {
         // then
         assertThatThrownBy(() -> eventController.saveEvent(event))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_throw_if_role_event_write_is_missing() {
+        // given
+        var event = dataService.buildEvent("out of order", "OUTOF", Criticality.MEDIUM, false);
+
+        // then
+        assertThatThrownBy(() -> eventController.saveEvent(event))
+                .isInstanceOf(ForbiddenException.class);
     }
 }

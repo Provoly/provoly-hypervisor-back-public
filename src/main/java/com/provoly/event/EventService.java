@@ -22,6 +22,9 @@ import com.provoly.event.dto.EventWriteDto;
 import com.provoly.event.dto.EventsSummariesByStatusDto;
 import com.provoly.service.Service;
 import com.provoly.service.ServiceService;
+import com.provoly.user.Role;
+
+import io.quarkus.security.identity.SecurityIdentity;
 
 import org.jboss.logging.Logger;
 
@@ -34,17 +37,19 @@ public class EventService {
     private final ServiceService serviceService;
     private final EquipmentEnrichedProducer equipmentEnrichedProducer;
     private final Logger logger;
+    private final SecurityIdentity securityIdentity;
 
     public EventService(EventDatabaseReader databaseReader, EventMapper eventMapper, EquipmentService equipmentService,
             ServiceService serviceService,
             EquipmentEnrichedProducer equipmentEnrichedProducer,
-            Logger logger) {
+            Logger logger, SecurityIdentity securityIdentity) {
         this.databaseReader = databaseReader;
         this.eventMapper = eventMapper;
         this.equipmentService = equipmentService;
         this.serviceService = serviceService;
         this.equipmentEnrichedProducer = equipmentEnrichedProducer;
         this.logger = logger;
+        this.securityIdentity = securityIdentity;
     }
 
     @Transactional
@@ -197,10 +202,20 @@ public class EventService {
         checkSubCategoryCoherence(eventDto);
 
         Event eventToUpdate = databaseReader.getEventById(id);
+
         var previousEquipmentId = eventToUpdate.getEquipment() != null ? eventToUpdate.getEquipment().getId() : null;
 
+        if (!securityIdentity.hasRole(Role.STR_EVENT_WRITE)
+                && forbiddenPropertiesAreUpdatedWhenExternalSource(eventDto, eventToUpdate)
+                && !eventDto.getDescription().equals(eventToUpdate.getDescription())
+                && (eventDto.getAddress() != null && !eventDto.getAddress().equals(eventToUpdate.getAddress()))
+                && !eventDto.getCriticality().equals(eventToUpdate.getCriticality())
+                && !eventDto.getDomain().equals(eventToUpdate.getDomain().getCode())) {
+            throw new io.quarkus.security.ForbiddenException("Missing permission to update event.");
+        }
+
         if (eventDto.getExternalSourceRef() != null
-                && forbiddenPropertiesAreUpdated(eventDto, eventToUpdate)) {
+                && forbiddenPropertiesAreUpdatedWhenExternalSource(eventDto, eventToUpdate)) {
             throw new ForbiddenException(
                     "It's only possible to update description, address or criticality of events with external reference");
         }
@@ -210,7 +225,7 @@ public class EventService {
         enrichEquipmentFromUpdatedEvent(id, eventDto.getEquipmentId(), previousEquipmentId);
     }
 
-    private boolean forbiddenPropertiesAreUpdated(EventWriteDto eventDto, Event eventToUpdate) {
+    private boolean forbiddenPropertiesAreUpdatedWhenExternalSource(EventWriteDto eventDto, Event eventToUpdate) {
         return eventDto.getEquipmentId() == null
                 || !eventDto.getEquipmentId().equals(eventToUpdate.getEquipment().getId())
                 || !eventDto.getName().equals(eventToUpdate.getName())

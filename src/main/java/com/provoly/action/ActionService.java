@@ -6,19 +6,24 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
 import com.provoly.action.dto.*;
+import com.provoly.event.Status;
 import com.provoly.model.ProcedureModel;
 import com.provoly.procedure.Procedure;
+import com.provoly.user.Role;
 
 import io.quarkus.security.ForbiddenException;
+import io.quarkus.security.identity.SecurityIdentity;
 
 @ApplicationScoped
 public class ActionService {
     private final ActionDatabaseReader databaseReader;
     private final ActionMapper actionMapper;
+    private final SecurityIdentity securityIdentity;
 
-    public ActionService(ActionDatabaseReader databaseReader, ActionMapper actionMapper) {
+    public ActionService(ActionDatabaseReader databaseReader, ActionMapper actionMapper, SecurityIdentity securityIdentity) {
         this.databaseReader = databaseReader;
         this.actionMapper = actionMapper;
+        this.securityIdentity = securityIdentity;
     }
 
     @Transactional
@@ -42,8 +47,10 @@ public class ActionService {
         procedure.getAction(dto.getId())
                 .ifPresentOrElse(
                         action -> {
-                            if (false) { // if pas le droit proc_event_write
-                                throw new ForbiddenException("");
+                            if (!securityIdentity.hasRole(Role.STR_EVENT_WRITE)
+                                    && action.getStatus() != dto.getStatus()
+                                    && dto.getStatus() == Status.DONE) {
+                                throw new ForbiddenException("Missing permission to update action status.");
                             }
                             actionMapper.updateAction(dto, action, index);
                         },

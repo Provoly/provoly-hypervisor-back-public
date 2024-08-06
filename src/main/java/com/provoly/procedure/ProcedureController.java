@@ -1,8 +1,11 @@
 package com.provoly.procedure;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+
+import com.provoly.user.Role;
 
 import io.quarkus.security.Authenticated;
 
@@ -21,7 +24,7 @@ public class ProcedureController {
 
     @Path("/id/{id}")
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_EVENT_READ })
     public ProcedureReadDto getProcedureDetails(Integer id) {
         var procedure = procedureService.getProcedureDetails(id);
         return procedureMapper.mapToProcedureReadDetailsDto(procedure);
@@ -29,21 +32,21 @@ public class ProcedureController {
 
     @Path("/id/{id}")
     @DELETE
-    @Authenticated
+    @RolesAllowed({ Role.STR_EVENT_WRITE })
     public void deleteProcedure(Integer id) {
         procedureService.deleteProcedure(id);
     }
 
     @Path("/id/{id}/close")
     @PUT
-    @Authenticated
+    @RolesAllowed({ Role.STR_EVENT_WRITE })
     public void closeAllProcedureEvents(Integer id) {
         procedureService.closeAllProcedureEvents(id);
     }
 
     @Path("/id/{id}")
     @PUT
-    @Authenticated
+    @RolesAllowed({ Role.STR_EVENT_WRITE, Role.STR_EVENT_PROC_WRITE })
     public void updateProcedure(Integer id, @Valid ProcedureWriteDto dto) {
         procedureService.updateProcedure(id, dto);
     }

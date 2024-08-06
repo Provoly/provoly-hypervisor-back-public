@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
@@ -13,6 +14,7 @@ import jakarta.ws.rs.core.MediaType;
 import com.provoly.event.dto.EventReadDto;
 import com.provoly.event.dto.EventWriteDto;
 import com.provoly.event.dto.EventsSummariesByStatusDto;
+import com.provoly.user.Role;
 
 import io.quarkus.security.Authenticated;
 
@@ -31,7 +33,7 @@ public class EventController {
     }
 
     @POST
-    @Authenticated
+    @RolesAllowed({ Role.STR_EVENT_WRITE })
     public EventReadDto saveEvent(@Valid EventWriteDto eventDto) {
         var event = eventService.saveEvent(eventDto);
         return eventMapper.mapToEventReadDto(event);
@@ -39,7 +41,7 @@ public class EventController {
 
     @PUT
     @Path("/id/{id}")
-    @Authenticated
+    @RolesAllowed({ Role.STR_EVENT_WRITE })
     public void updateEvent(Integer id, @Valid EventWriteDto eventDto) {
         eventService.updateEvent(id, eventDto);
     }
@@ -66,7 +68,7 @@ public class EventController {
 
     @Path("/id/{id}")
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_EVENT_READ })
     public EventReadDto getEventDetails(Integer id) {
         var event = eventService.getEventDetails(id);
         return eventMapper.mapToEventReadDto(event);
@@ -74,7 +76,7 @@ public class EventController {
 
     @Path("/id/{id}/close")
     @PUT
-    @Authenticated
+    @RolesAllowed({ Role.STR_EVENT_WRITE })
     public void closeEvent(Integer id) {
         eventService.closeEventById(id);
     }

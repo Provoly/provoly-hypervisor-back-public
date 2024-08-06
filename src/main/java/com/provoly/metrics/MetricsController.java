@@ -5,9 +5,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+
+import com.provoly.user.Role;
 
 import io.quarkus.security.Authenticated;
 
@@ -122,7 +125,6 @@ public class MetricsController {
 
     @Path("/aggregate/anomalies/{interval}")
     @GET
-    @Authenticated
     public Collection<AggregateServiceDto> aggregateAnomaliesEvents(
             DateInterval interval,
             @RestQuery @Positive @DefaultValue("12") int buckets,

@@ -3,6 +3,7 @@ package com.provoly.model;
 import java.util.Collection;
 import java.util.List;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
@@ -10,6 +11,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import com.provoly.procedure.ProcedureMapper;
 import com.provoly.procedure.ProcedureReadDto;
+import com.provoly.user.Role;
 
 import io.quarkus.security.Authenticated;
 
@@ -32,7 +34,7 @@ public class ProcedureModelController {
     }
 
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_PROC_MODEL_READ })
     public Collection<ProcedureModelReadDto> getProceduresModel(
             @DefaultValue("1") @Positive @RestQuery int page,
             @DefaultValue("20") @Positive @RestQuery int pageSize,
@@ -47,7 +49,7 @@ public class ProcedureModelController {
     }
 
     @POST
-    @Authenticated
+    @RolesAllowed({ Role.STR_PROC_MODEL_WRITE })
     public ProcedureModelReadDto saveProcedureModel(@Valid ProcedureModelWriteDto dto) {
         var model = procedureModelService.saveProcedureModel(dto);
         return procedureModelMapper.mapToProcedureReadDetailsDto(model);
@@ -55,7 +57,7 @@ public class ProcedureModelController {
 
     @Path("/id/{id}")
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_PROC_MODEL_READ })
     public ProcedureModelReadDto getProcedureModelDetails(Integer id) {
         var model = procedureModelService.getProcedureModelDetails(id);
         return procedureModelMapper.mapToProcedureReadDetailsDto(model);
@@ -63,14 +65,14 @@ public class ProcedureModelController {
 
     @Path("/id/{id}")
     @PUT
-    @Authenticated
+    @RolesAllowed({ Role.STR_PROC_MODEL_WRITE })
     public void updateProcedureModel(Integer id, @Valid ProcedureModelWriteDto dto) {
         procedureModelService.updateProcedureModel(id, dto);
     }
 
     @Path("/id/{id}/associate")
     @PUT
-    @Authenticated
+    @RolesAllowed({ Role.STR_EVENT_WRITE })
     public ProcedureReadDto associateProcedureModelToEvents(Integer id, List<Integer> eventIds) {
         var procedure = procedureModelService.associateProcedureModelToEvents(id, eventIds);
         return procedureMapper.mapToProcedureReadDetailsDto(procedure);

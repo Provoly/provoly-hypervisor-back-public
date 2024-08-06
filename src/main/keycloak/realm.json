@@ -46,7 +46,36 @@
   "maxDeltaTimeSeconds" : 43200,
   "failureFactor" : 30,
   "roles" : {
-    "realm" : [ {
+    "realm" : [
+      {
+        "id" : "06a1564b-6f64-4b78-9987-5c293259b263",
+        "name" : "event_read",
+        "composite" : false,
+        "clientRole" : false,
+        "containerId" : "b4826ea7-ebaf-4ae4-96e3-70e80bbd9f61",
+        "attributes" : { }
+      }, {
+        "id" : "ea05c23b-8c11-44d4-8ab8-1e3788e2688a",
+        "name" : "event_write",
+        "composite" : false,
+        "clientRole" : false,
+        "containerId" : "b4826ea7-ebaf-4ae4-96e3-70e80bbd9f61",
+        "attributes" : { }
+      }, {
+        "id" : "89613638-2f50-4568-855c-52cd28e0b3e3",
+        "name" : "proc_model_read",
+        "composite" : false,
+        "clientRole" : false,
+        "containerId" : "b4826ea7-ebaf-4ae4-96e3-70e80bbd9f61",
+        "attributes" : { }
+      }, {
+        "id" : "3293a956-fd29-45fa-baab-6454b212c649",
+        "name" : "proc_model_write",
+        "composite" : false,
+        "clientRole" : false,
+        "containerId" : "b4826ea7-ebaf-4ae4-96e3-70e80bbd9f61",
+        "attributes" : { }
+      }, {
       "id" : "d710bf51-980f-4245-8da8-ff25cccbcdc1",
       "name" : "admin",
       "composite" : false,
@@ -410,7 +439,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "default-roles-quarkus" ],
+    "realmRoles" : [ "default-roles-quarkus" ,"event_read", "event_write","proc_model_read","proc_model_write"],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -656,7 +685,7 @@
         "jsonType.label" : "String"
       }
     } ],
-    "defaultClientScopes" : [ "microprofile-jwt" ],
+    "defaultClientScopes" : [ "microprofile-jwt", "roles", "groups", "profile","email" ],
     "optionalClientScopes" : [ ]
   }, {
     "id" : "a7c998ad-e4ba-4bb4-ab48-c0d03ebb9672",

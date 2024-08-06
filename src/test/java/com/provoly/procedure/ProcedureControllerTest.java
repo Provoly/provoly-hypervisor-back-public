@@ -7,15 +7,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-import jakarta.inject.Inject;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.ws.rs.ForbiddenException;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import com.provoly.TestDataService;
-import com.provoly.action.dto.ActionWriteDto;
-import com.provoly.action.dto.EmailActionWriteDto;
-import com.provoly.action.dto.OtherActionWriteDto;
-import com.provoly.action.dto.PhoneActionWriteDto;
+import com.provoly.action.AskedService;
+import com.provoly.action.dto.*;
 import com.provoly.event.Criticality;
 import com.provoly.event.Event;
 import com.provoly.event.EventController;
@@ -24,11 +23,9 @@ import com.provoly.event.dto.EventWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
-
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.ws.rs.ForbiddenException;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -53,7 +50,7 @@ public class ProcedureControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_procedure_by_id() {
         // given
         var id = dataService.getProcedure1().getId();
@@ -66,7 +63,7 @@ public class ProcedureControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_throw_procedure_not_found() {
         assertThatThrownBy(() -> procedureController.getProcedureDetails(666))
                 .isInstanceOf(NoSuchElementException.class)
@@ -74,7 +71,7 @@ public class ProcedureControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_write"})
     void should_not_update_external_event_in_procedure() {
         // given
         var event = eventController
@@ -113,7 +110,7 @@ public class ProcedureControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_write", "event_read" })
     void should_update_event_in_procedure() {
         // given
         var eventId = eventController
@@ -138,16 +135,21 @@ public class ProcedureControllerTest {
                 null,
                 null);
 
-        Integer procedureId = dataService.getProcedure1().getId();
+        var procedure = dataService.getProcedure1();
+
+        List<ActionWriteDto> actionWrite = procedure.getActions()
+                .stream()
+                .map(a -> new ActionWriteDto(a.getId(), "ASKED_SERVICE", a.getStatus()))
+                .toList();
         ProcedureWriteDto dto = new ProcedureWriteDto(
-                procedureId,
+                procedure.getId(),
                 "procedure maintenance",
                 "desc",
                 List.of(reportDto),
-                List.of());
+                actionWrite);
 
         // when
-        procedureController.updateProcedure(procedureId, dto);
+        procedureController.updateProcedure(procedure.getId(), dto);
         var updatedEvent = eventController.getEventDetails(eventId);
 
         // then
@@ -157,7 +159,7 @@ public class ProcedureControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_write", "event_read" })
     void should_reset_event_status_when_delete_procedure() {
         // given
         var procedure = dataService.getProcedure3();
@@ -174,7 +176,7 @@ public class ProcedureControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_proc_write" })
     void should_throw_action_invalid_email() {
         // given
         Integer procedureId = dataService.getProcedure3().getId();
@@ -192,7 +194,7 @@ public class ProcedureControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_proc_write" })
     void should_throw_action_invalid_number() {
         // given
         Integer procedureId = dataService.getProcedure3().getId();
@@ -210,7 +212,7 @@ public class ProcedureControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_proc_write" })
     void should_throw_action_invalid_type() {
         // given
         Integer procedureId = dataService.getProcedure3().getId();
@@ -228,7 +230,7 @@ public class ProcedureControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_proc_write" })
     void should_throw_action_invalid_property() {
         // given
         Integer procedureId = dataService.getProcedure3().getId();
@@ -244,4 +246,46 @@ public class ProcedureControllerTest {
                 .isInstanceOf(ConstraintViolationException.class)
                 .hasMessageContaining("name: must not be null");
     }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_write", "event_read" })
+    void should_throw_forbiden_when_update_action_from_procedure_without_event_proc_write() {
+        // given
+        Integer procedureId = dataService.getProcedure1().getId();
+        ProcedureWriteDto dto = new ProcedureWriteDto(
+                procedureId,
+                "procedure maintenance",
+                "desc",
+                List.of(),
+                List.of());
+
+        // then
+        assertThatThrownBy(() -> procedureController.updateProcedure(procedureId, dto))
+                .isInstanceOf(io.quarkus.security.ForbiddenException.class)
+                .hasMessageContaining("Missing permission to add");
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_proc_write" })
+    void should_throw_forbiden_when_terminate_action_from_procedure_without_event_proc_write() {
+        // given
+        var procedure = dataService.getProcedure1();
+        List<ActionWriteDto> actionWrite = procedure.getActions()
+                .stream()
+                .map(a -> new ActionWriteDto(a.getId(), "ASKED_SERVICE", Status.DONE))
+                .toList();
+
+        ProcedureWriteDto dto = new ProcedureWriteDto(
+                procedure.getId(),
+                "procedure maintenance",
+                "desc",
+                List.of(),
+                actionWrite);
+
+        // then
+        assertThatThrownBy(() -> procedureController.updateProcedure(procedure.getId(), dto))
+                .isInstanceOf(io.quarkus.security.ForbiddenException.class)
+                .hasMessageContaining("Missing permission to update action status");
+    }
+
 }
