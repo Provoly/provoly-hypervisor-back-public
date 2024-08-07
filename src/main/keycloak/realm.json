@@ -439,7 +439,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "default-roles-quarkus" ,"event_read", "event_write","proc_model_read","proc_model_write"],
+    "realmRoles" : [ "default-roles-quarkus" ,"event_read", "event_write","proc_model_read","proc_model_write","event_proc_write"],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
