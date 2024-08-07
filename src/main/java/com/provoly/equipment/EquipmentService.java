@@ -32,12 +32,12 @@ public class EquipmentService {
                 .forEach(dto -> databaseReader.getEquipmentWithExternalId(dto.id())
                         .ifPresentOrElse(
                                 equipment -> {
-                                    logger.infof("Equipment with external id %s already exists, update it", dto.id());
+                                    logger.debugf("Equipment with external id %s already exists, update it", dto.id());
                                     equipmentMapper.updateEquipment(dto, equipment);
                                     equipmentEnrichedProducer.updateFor(equipment);
                                 },
                                 () -> {
-                                    logger.infof("Equipment with external id %s not exists, create it", dto.id());
+                                    logger.debugf("Equipment with external id %s not exists, create it", dto.id());
                                     Equipment equipment = new Equipment(UUID.randomUUID());
                                     equipmentMapper.updateEquipment(dto, equipment);
                                     databaseReader.saveEquipment(equipment);

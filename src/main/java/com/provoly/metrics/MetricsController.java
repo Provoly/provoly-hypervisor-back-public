@@ -5,12 +5,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-
-import com.provoly.user.Role;
 
 import io.quarkus.security.Authenticated;
 

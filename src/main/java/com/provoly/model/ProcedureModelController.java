@@ -13,8 +13,6 @@ import com.provoly.procedure.ProcedureMapper;
 import com.provoly.procedure.ProcedureReadDto;
 import com.provoly.user.Role;
 
-import io.quarkus.security.Authenticated;
-
 import org.jboss.resteasy.reactive.RestQuery;
 
 @Path("/procedures/model")

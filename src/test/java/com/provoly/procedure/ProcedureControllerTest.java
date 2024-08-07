@@ -7,13 +7,11 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.ws.rs.ForbiddenException;
 
 import com.provoly.TestDataService;
-import com.provoly.action.AskedService;
 import com.provoly.action.dto.*;
 import com.provoly.event.Criticality;
 import com.provoly.event.Event;
@@ -23,9 +21,11 @@ import com.provoly.event.dto.EventWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
-import jakarta.inject.Inject;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.ws.rs.ForbiddenException;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -71,7 +71,7 @@ public class ProcedureControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader", roles = { "event_write"})
+    @TestSecurity(user = "reader", roles = { "event_write" })
     void should_not_update_external_event_in_procedure() {
         // given
         var event = eventController

@@ -5,10 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.*;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import com.provoly.TestDataService;
 import com.provoly.action.dto.ActionWriteDto;
@@ -18,8 +16,11 @@ import com.provoly.event.Status;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.ForbiddenException;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -131,7 +132,7 @@ public class ProcedureModelControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader", roles = {"event_write"})
+    @TestSecurity(user = "reader", roles = { "event_write" })
     void should_throw_associate_procedure_model_invalid_id() {
         assertThatThrownBy(() -> procedureModelController.associateProcedureModelToEvents(666, List.of(666)))
                 .isInstanceOf(NoSuchElementException.class)
@@ -139,7 +140,7 @@ public class ProcedureModelControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader", roles = { "proc_model_write","event_write" })
+    @TestSecurity(user = "reader", roles = { "proc_model_write", "event_write" })
     void should_throw_associate_procedure_invalid_event_id() {
         // given
         var dto = new ProcedureModelWriteDto(null, "my model", "desc", "EP", "techna", List.of());

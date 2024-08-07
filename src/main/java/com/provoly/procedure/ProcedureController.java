@@ -7,8 +7,6 @@ import jakarta.ws.rs.core.MediaType;
 
 import com.provoly.user.Role;
 
-import io.quarkus.security.Authenticated;
-
 @Path("/procedures")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

@@ -60,7 +60,7 @@ public class ServiceServiceTest {
     void should_throw_when_missing_close_date_on_done_service() {
         // Given
         var service = new ServiceWriteDto("technical_id", "",
-                "A-230", Instant.now(), Instant.now(), Instant.now(), Instant.now(), null, "EP", DONE, "invalid");
+                "A-230", Instant.now(), Instant.now(), Instant.now(), Instant.now(), null, "EP", DONE, "CURA");
 
         // When
         assertThatThrownBy(() -> serviceService.saveOrUpdateServices(List.of(service)))

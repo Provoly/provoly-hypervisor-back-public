@@ -64,7 +64,7 @@ public class ServiceService {
     }
 
     private void checkStartAndEndDatePresence(ServiceWriteDto dto) {
-        if (dto.status().getPriority() > 1 && (dto.startDate() == null || dto.endDate() == null)) {
+        if (dto.startDate() == null || dto.endDate() == null) {
             throw new IllegalArgumentException(
                     "Cannot save or update service with status %s without startDate or endDate"
                             .formatted(dto.status()));
@@ -72,7 +72,7 @@ public class ServiceService {
     }
 
     private void checkCloseDatePresence(ServiceWriteDto dto) {
-        if (dto.status().getPriority() == 4 && dto.closeDate() == null) {
+        if (dto.status() == ServiceStatus.DONE && dto.closeDate() == null) {
             throw new IllegalArgumentException(
                     "Cannot save or update service with status %s without closeDate".formatted(dto.status()));
         }
