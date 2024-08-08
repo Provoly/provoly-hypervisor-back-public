@@ -8,8 +8,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import com.provoly.event.Domain;
 import com.provoly.event.Event;
 import com.provoly.event.EventMapper;
+import com.provoly.event.dto.EventReadDto;
 import com.provoly.service.Service;
 import com.provoly.service.ServiceMapper;
+import com.provoly.service.ServiceReadDto;
 
 @ApplicationScoped
 public class EquipmentMapper {
@@ -29,6 +31,19 @@ public class EquipmentMapper {
         if (equipment == null) {
             return null;
         }
+        Collection<ServiceReadDto> services = serviceMapper.mapToServiceReadDtos(equipment.getServices()
+                .stream()
+                .sorted(Comparator.comparing(s -> ((Service) s).getStatus().getPriority())
+                        .thenComparing(s -> ((Service) s).getLastModificationDate(), Comparator.reverseOrder()))
+                .limit(MAX_SIZE));
+
+        Collection<EventReadDto> events = eventMapper.mapToEventReadDto(equipment.getEvents()
+                .stream()
+                .sorted(Comparator.comparing(event -> ((Event) event).getStatus().getPriority())
+                        .thenComparing(event -> ((Event) event).getCriticality().getPriority())
+                        .thenComparing(event -> ((Event) event).getLastModificationDate(), Comparator.reverseOrder()))
+                .limit(MAX_SIZE));
+
         return new EquipmentReadDto(
                 equipment.getId(),
                 equipment.getExternalId(),
@@ -43,15 +58,8 @@ public class EquipmentMapper {
                 equipment.isDeleted(),
                 equipment.getAttributes(),
                 mapToEquipmentReadDto(equipment.getParent()),
-                serviceMapper.mapToServiceReadDtos(equipment.getServices().stream()
-                        .sorted(Comparator.comparing(Service::getStatus)
-                                .thenComparing(Service::getLastModificationDate))
-                        .limit(MAX_SIZE)),
-                eventMapper.mapToEventReadDto(equipment.getEvents().stream()
-                        .sorted(Comparator.comparing(Event::getStatus)
-                                .thenComparing(Event::getCriticality)
-                                .thenComparing(Event::getLastModificationDate))
-                        .limit(MAX_SIZE)));
+                services,
+                events);
     }
 
     public Collection<EquipmentReadDto> mapToEquipmentReadDto(Collection<Equipment> equipments) {
