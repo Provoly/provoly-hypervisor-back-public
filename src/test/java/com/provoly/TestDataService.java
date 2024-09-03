@@ -112,15 +112,14 @@ public class TestDataService {
         procedure1 = initProcedure("procedure1", List.of(asked1, asked2), List.of(associatedEvent));
         procedure3 = initProcedure("procedure3", List.of(asked6), List.of(event4, event6));
 
-        var procedureModel1 = new ProcedureModel("model", "flora", "desc", domainEP, List.of());
-        var procedureModel2 = new ProcedureModel("model1", "flora", "desc", domainVP, List.of());
+        var procedureModel1 = new ProcedureModel("c'est le MOdèl", "flora", "desc", domainEP, List.of());
+        var procedureModel2 = new ProcedureModel("ç'est le model1", "flora", "desc", domainVP, List.of());
         var procedureModel3 = new ProcedureModel("flora model2", "stella", "desc", domainEP, List.of());
 
         em.persist(procedureModel1);
         em.persist(procedureModel2);
         em.persist(procedureModel3);
 
-        procedureModel3.incrementUseCount();
         procedureModel3.incrementUseCount();
         procedureModel1.incrementUseCount();
         procedureModel1.incrementUseCount();

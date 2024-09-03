@@ -48,7 +48,7 @@ public class ProcedureModelControllerTest {
         var procedures = procedureModelController.getProceduresModel(1, 3, null, null, List.of(), null);
 
         //then
-        assertThat(procedures).extracting("name").containsExactly("flora model2", "model", "model1");
+        assertThat(procedures).extracting("name").containsExactly("c'est le MOdèl", "ç'est le model1", "flora model2");
     }
 
     @Test
@@ -58,7 +58,7 @@ public class ProcedureModelControllerTest {
         var procedures = procedureModelController.getProceduresModel(1, 3, null, null, List.of(), "flo");
 
         //then
-        assertThat(procedures).extracting("name").containsExactly("flora model2", "model", "model1");
+        assertThat(procedures).extracting("name").containsExactly("c'est le MOdèl", "ç'est le model1", "flora model2");
     }
 
     @Test
@@ -68,7 +68,7 @@ public class ProcedureModelControllerTest {
         var procedures = procedureModelController.getProceduresModel(1, 3, "id", "DESC", List.of(), "flo");
 
         //then
-        assertThat(procedures).extracting("name").containsExactly("flora model2", "model1", "model");
+        assertThat(procedures).extracting("name").containsExactly("flora model2", "ç'est le model1", "c'est le MOdèl");
     }
 
     @Test
@@ -78,7 +78,37 @@ public class ProcedureModelControllerTest {
         var procedures = procedureModelController.getProceduresModel(1, 3, null, null, List.of("EP"), "flo");
 
         //then
-        assertThat(procedures).extracting("name").containsExactly("flora model2", "model");
+        assertThat(procedures).extracting("name").containsExactly("c'est le MOdèl", "flora model2");
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "proc_model_read" })
+    void should_return_procedure_model_that_contains_model_value_without_accent() {
+        // when
+        var procedures = procedureModelController.getProceduresModel(1, 3, null, null, List.of(), "le model");
+
+        //then
+        assertThat(procedures).extracting("name").containsExactly("c'est le MOdèl", "ç'est le model1");
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "proc_model_read" })
+    void should_return_procedure_model_that_contains_model_value_with_accent() {
+        // when
+        var procedures = procedureModelController.getProceduresModel(1, 3, null, null, List.of(), "le MOdèl");
+
+        //then
+        assertThat(procedures).extracting("name").containsExactly("c'est le MOdèl", "ç'est le model1");
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "proc_model_read" })
+    void should_return_procedure_model_that_with_corresponding_id_without_zeros() {
+        // when
+        var procedures = procedureModelController.getProceduresModel(1, 3, null, null, List.of(), "00001");
+
+        //then
+        assertThat(procedures).isNotEmpty();
     }
 
     @Test

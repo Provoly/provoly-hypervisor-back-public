@@ -14,6 +14,7 @@ import com.provoly.event.Domain;
 import com.provoly.event.Domain_;
 import com.provoly.event.SortOrder;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
@@ -39,19 +40,20 @@ public class ProcedureModelDatabaseReader extends DatabaseReader {
             SortOrder order,
             List<Domain> domains,
             String search) {
-        var builder = em.getCriteriaBuilder();
-        CriteriaQuery<ProcedureModel> criteriaQuery = builder.createQuery(ProcedureModel.class);
+        var cb = em.getCriteriaBuilder();
+        CriteriaQuery<ProcedureModel> criteriaQuery = cb.createQuery(ProcedureModel.class);
         Root<ProcedureModel> root = criteriaQuery.from(ProcedureModel.class);
 
-        Predicate domain = builder.and(); // default to true
-        Predicate filters = builder.and();
+        Predicate domain = cb.and(); // default to true
+        Predicate filters = cb.and();
 
         if (search != null) {
-            search = "%" + search + "%";
             logger.debugf("filter on procedures model that contains '%s' in id, name or creator".formatted(search));
-            filters = builder.or(builder.like(root.get(ProcedureModel_.id).as(String.class), search),
-                    builder.like(root.get(ProcedureModel_.name), search),
-                    builder.like(root.get(ProcedureModel_.creator), search));
+            search = "%" + StringUtils.stripAccents(search).toLowerCase() + "%";
+            filters = cb.or(
+                    cb.like(root.get(ProcedureModel_.id).as(String.class), search.replaceFirst("^%(0*)", "%")), // trim all zeros at the beginning to match id
+                    cb.like(unaccent(cb, root.get(ProcedureModel_.name)), search),
+                    cb.like(unaccent(cb, root.get(ProcedureModel_.creator)), search));
         }
 
         if (!domains.isEmpty()) {
@@ -59,16 +61,20 @@ public class ProcedureModelDatabaseReader extends DatabaseReader {
             domain = root.get(ProcedureModel_.domain).in(domains);
         }
 
-        List<Order> orders = buildProcedureModelOrders(sort, order, builder, root);
+        List<Order> orders = buildProcedureModelOrders(sort, order, cb, root);
 
         var query = criteriaQuery.select(root)
-                .where(builder.and(filters, domain))
+                .where(cb.and(filters, domain))
                 .orderBy(orders);
 
         return em.createQuery(query)
                 .setFirstResult((page - 1) * pageSize)
                 .setMaxResults(pageSize)
                 .getResultList();
+    }
+
+    private Expression<String> unaccent(CriteriaBuilder cb, Expression<String> property) {
+        return cb.lower(cb.function("unaccent", String.class, property));
     }
 
     public void saveProcedureModel(ProcedureModel procedureModel) {
@@ -92,19 +98,19 @@ public class ProcedureModelDatabaseReader extends DatabaseReader {
 
     private List<Order> buildProcedureModelOrders(ProcedureModelSort sort,
             SortOrder order,
-            CriteriaBuilder builder,
+            CriteriaBuilder cb,
             Root<ProcedureModel> root) {
         List<Order> orders = new ArrayList<>();
         if (sort == null) {
             logger.debugf("No sort provided, use default sort: by use count and name");
-            orders.add(builder.desc(root.get(ProcedureModel_.useCount)));
-            orders.add(builder.asc(root.get(ProcedureModel_.name)));
+            orders.add(cb.desc(root.get(ProcedureModel_.useCount)));
+            orders.add(cb.asc(unaccent(cb, root.get(ProcedureModel_.name))));
             return orders;
         }
 
         logger.debugf("Sort on %s with order %s", sort, order);
         var sortProperty = getSortProperty(sort, root);
-        orders.add(order == SortOrder.DESC ? builder.desc(sortProperty) : builder.asc(sortProperty));
+        orders.add(order == SortOrder.DESC ? cb.desc(sortProperty) : cb.asc(sortProperty));
         return orders;
     }
 

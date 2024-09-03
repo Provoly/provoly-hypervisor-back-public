@@ -78,7 +78,7 @@ public class ProcedureModelServiceTest {
     @TestSecurity(user = "reader")
     void should_throw_name_already_exists_when_save_procedure_model() {
         // given
-        var procedureModelToSave = new ProcedureModelWriteDto(null, "model1", "desc", "EP", "tecna", List.of());
+        var procedureModelToSave = new ProcedureModelWriteDto(null, "flora model2", "desc", "EP", "tecna", List.of());
 
         // when
         assertThatThrownBy(() -> procedureModelService.saveProcedureModel(procedureModelToSave))
