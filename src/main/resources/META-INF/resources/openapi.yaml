@@ -349,6 +349,95 @@ paths:
       security:
         - oidc:
             - event_write
+  /events/id/{id}/comments:
+    put:
+      tags:
+        - Event Controller
+      summary: Save or update comment for an event
+      description: Comment can be edit by its creator only. It's not possible to add or update a comment on a DONE event.
+      operationId: com.provoly.event.EventController_saveOrUpdateCommentForEvent
+      parameters:
+        - name: id
+          in: path
+          description: event id
+          schema:
+            type: integer
+          example: 22
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentWriteDto'
+            examples:
+              default:
+                summary: add new comment
+                value: |
+                  {
+                    "id": "0c728960-d5fd-49ea-8fe8-f72cb9cfccca",
+                    "message": "my comment",
+                    "creator": "A.ThePower"
+                  }
+      responses:
+        "204":
+          description: Created or Updated
+        "401":
+          description: Not Authorized
+        "403":
+          description: Event is DONE or creator is not allowed
+        "404":
+          description: Event Not found
+      security:
+        - oidc:
+            - event_write
+    get:
+      tags:
+        - Event Controller
+      summary: Get all comments for an event
+      operationId: com.provoly.event.EventController_getCommentsForEvent
+      parameters:
+        - name: id
+          in: path
+          description: event id
+          schema:
+            type: integer
+          example: 22
+          required: true
+      responses:
+        "200":
+          description: Return 2 comments for event
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommentReadDto'
+              examples:
+                default:
+                  value: |
+                    [
+                      {
+                        "id": "d2915506-6ce7-47a1-9c05-7ae0de22dc09",
+                        "creator": "A.ThePower",
+                        "message": "my first comment message",
+                        "lastModificationDate": "2024-08-02T11:00:00Z",
+                        "creationDate": "2024-08-02T11:00:00Z"
+                      },
+                      {
+                        "id": "5ecb7585-8aa0-4d88-a99b-32401d1db52c",
+                        "creator": "B.Summers",
+                        "message": "This comment is great",
+                        "lastModificationDate": "2024-08-05T09:00:00Z",
+                        "creationDate": "2024-09-04T10:00:00Z"
+                      }
+                    ]
+        "401":
+          description: Not Authorized
+        "404":
+          description: Event Not found
+      security:
+        - oidc:
+            - event_read
   /events/summary:
     get:
       tags:
@@ -2625,6 +2714,37 @@ components:
         procedureProgress:
           type: number
           description: Percentage progress of the procedure
+        lastComment:
+          $ref: '#/components/schemas/CommentReadDto'
+        commentsCount:
+          type: integer
+          description: total of comments on event
+    CommentWriteDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        creator:
+          type: string
+          description: creator of the comment
+        message:
+          type: string
+          description: comment message
+    CommentReadDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        creator:
+          type: string
+          description: creator of the comment
+        message:
+          type: string
+          description: comment message
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+        creationDate:
+          $ref: '#/components/schemas/DateTime'
     ProcedureReadDto:
       type: object
       properties:

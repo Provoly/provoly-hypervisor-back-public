@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
+import com.provoly.comment.CommentMapper;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.ShortEquipmentMapper;
 import com.provoly.event.dto.EventReadDto;
@@ -20,13 +21,18 @@ public class EventMapper {
     private final EquipmentService equipmentService;
     private final EventDatabaseReader databaseReader;
     private final ShortEquipmentMapper shortEquipmentMapper;
+    private final CommentMapper commentMapper;
 
     public EventMapper(EquipmentService equipmentService,
-            ProcedureService procedureService, EventDatabaseReader databaseReader, ShortEquipmentMapper shortEquipmentMapper) {
+            ProcedureService procedureService,
+            EventDatabaseReader databaseReader,
+            ShortEquipmentMapper shortEquipmentMapper,
+            CommentMapper commentMapper) {
         this.equipmentService = equipmentService;
         this.procedureService = procedureService;
         this.databaseReader = databaseReader;
         this.shortEquipmentMapper = shortEquipmentMapper;
+        this.commentMapper = commentMapper;
     }
 
     public EventReadDto mapToEventReadDto(Event event) {
@@ -49,8 +55,9 @@ public class EventMapper {
                 mapToString(event.getDomain()),
                 event.getStartDate(),
                 event.getEndDate(),
-                event.getExternalSourceRef());
-
+                event.getExternalSourceRef(),
+                commentMapper.mapLastCommentToDto(event.getComments()),
+                event.getComments().size());
     }
 
     public EventSummaryDto mapToEventSummaryDto(Event event, int serviceCount, String serviceTitle) {

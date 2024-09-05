@@ -1,10 +1,14 @@
 package com.provoly.event;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 
 import jakarta.persistence.*;
 
+import com.provoly.comment.Comment;
 import com.provoly.equipment.Equipment;
 import com.provoly.procedure.Procedure;
 
@@ -52,6 +56,10 @@ public class Event {
     private Procedure procedure;
 
     private String externalSourceRef;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable
+    private List<Comment> comments = new ArrayList<>();
 
     public Event() {
         // Only for JPA
@@ -186,6 +194,17 @@ public class Event {
 
     public void setExternalSourceRef(String externalSourceRef) {
         this.externalSourceRef = externalSourceRef;
+    }
+
+    public List<Comment> getComments() {
+        return comments
+                .stream()
+                .sorted(Comparator.comparing(Comment::getLastModificationDate, Comparator.reverseOrder()))
+                .toList();
+    }
+
+    public void addComment(Comment newComment) {
+        comments.add(newComment);
     }
 
     @Override

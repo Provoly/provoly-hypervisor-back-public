@@ -8,11 +8,13 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
 
 import com.provoly.TestDataService;
+import com.provoly.comment.CommentWriteDto;
 import com.provoly.event.dto.EventWriteDto;
 
 import io.quarkus.security.ForbiddenException;
@@ -486,4 +488,24 @@ public class EventControllerTest {
         assertThatThrownBy(() -> eventController.saveEvent(event))
                 .isInstanceOf(ForbiddenException.class);
     }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_write", "event_read" })
+    void should_increment_comment_count_and_get_last_comment_when_add_new_comment_on_event() {
+        // given
+        var eventId = dataService.getEvent1().getId();
+        var comment = new CommentWriteDto(UUID.randomUUID(), "message");
+        eventController.saveOrUpdateCommentForEvent(eventId, comment);
+
+        var comment2 = new CommentWriteDto(UUID.randomUUID(), "message2");
+
+        // when
+        eventController.saveOrUpdateCommentForEvent(eventId, comment2);
+        var eventWithComment = eventController.getEventDetails(eventId);
+
+        //then
+        assertThat(eventWithComment.getCommentCount()).isEqualTo(2);
+        assertThat(eventWithComment.getLastComment().id()).isEqualTo(comment2.id());
+    }
+
 }

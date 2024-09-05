@@ -183,3 +183,19 @@ create table event
     domain_id              bigint references domain,
     external_source_ref    varchar
 );
+
+
+create table comment
+(
+    id                     uuid primary key,
+    creator                varchar(100) not null,
+    creation_date          timestamptz default current_timestamp,
+    last_modification_date timestamptz default current_timestamp,
+    message                varchar(255) not null
+);
+
+create table event_comment
+(
+    event_id    integer not null references event,
+    comments_id uuid    not null references comment
+);

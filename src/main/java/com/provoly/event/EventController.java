@@ -11,6 +11,9 @@ import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
+import com.provoly.comment.CommentReadDto;
+import com.provoly.comment.CommentService;
+import com.provoly.comment.CommentWriteDto;
 import com.provoly.event.dto.EventReadDto;
 import com.provoly.event.dto.EventWriteDto;
 import com.provoly.event.dto.EventsSummariesByStatusDto;
@@ -26,10 +29,12 @@ import org.jboss.resteasy.reactive.RestQuery;
 public class EventController {
     private final EventService eventService;
     private final EventMapper eventMapper;
+    private final CommentService commentService;
 
-    public EventController(EventService eventService, EventMapper eventMapper) {
+    public EventController(EventService eventService, EventMapper eventMapper, CommentService commentService) {
         this.eventService = eventService;
         this.eventMapper = eventMapper;
+        this.commentService = commentService;
     }
 
     @POST
@@ -88,6 +93,20 @@ public class EventController {
             @DefaultValue("5") @Positive @RestQuery int limit,
             @RestQuery String criticality) {
         return eventService.getEventSummariesGroupByStatus(limit, criticality);
+    }
+
+    @Path("/id/{id}/comments")
+    @PUT
+    @RolesAllowed({ Role.STR_EVENT_WRITE })
+    public void saveOrUpdateCommentForEvent(Integer id, CommentWriteDto comment) {
+        commentService.saveOrUpdateCommentForEvent(id, comment);
+    }
+
+    @Path("/id/{id}/comments")
+    @GET
+    @RolesAllowed({ Role.STR_EVENT_READ })
+    public List<CommentReadDto> getCommentsForEvent(Integer id) {
+        return commentService.getCommentsForEvent(id);
     }
 
 }

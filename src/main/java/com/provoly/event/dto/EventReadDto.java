@@ -2,6 +2,7 @@ package com.provoly.event.dto;
 
 import java.time.Instant;
 
+import com.provoly.comment.CommentReadDto;
 import com.provoly.equipment.EquipmentShortDto;
 import com.provoly.event.Criticality;
 import com.provoly.event.Status;
@@ -26,6 +27,8 @@ public class EventReadDto {
     private Instant startDate;
     private Instant endDate;
     private String externalSourceRef;
+    private CommentReadDto lastComment;
+    private int commentCount;
 
     public EventReadDto(Integer id,
             String name,
@@ -44,7 +47,10 @@ public class EventReadDto {
             float procedureProgress,
             String domain,
             Instant startDate,
-            Instant endDate, String externalSourceRef) {
+            Instant endDate,
+            String externalSourceRef,
+            CommentReadDto lastComment,
+            int commentCount) {
         this.id = id;
         this.name = name;
         this.address = address;
@@ -64,28 +70,8 @@ public class EventReadDto {
         this.startDate = startDate;
         this.endDate = endDate;
         this.externalSourceRef = externalSourceRef;
-    }
-
-    public EventReadDto(EventReadDto dto) {
-        this.id = dto.getId();
-        this.name = dto.getName();
-        this.address = dto.getAddress();
-        this.description = dto.getDescription();
-        this.criticality = dto.getCriticality();
-        this.status = dto.getStatus();
-        this.lastModificationDate = dto.getLastModificationDate();
-        this.creationDate = dto.getCreationDate();
-        this.closeDate = dto.getCloseDate();
-        this.equipment = dto.getEquipment();
-        this.procedureId = dto.getProcedureId();
-        this.linkedEvents = dto.getLinkedEvents();
-        this.procedureProgress = dto.getProcedureProgress();
-        this.domain = dto.getDomain();
-        this.category = dto.getCategory();
-        this.subCategory = dto.getSubCategory();
-        this.startDate = dto.getStartDate();
-        this.endDate = dto.getEndDate();
-        this.externalSourceRef = dto.getExternalSourceRef();
+        this.lastComment = lastComment;
+        this.commentCount = commentCount;
     }
 
     public Integer getId() {
@@ -162,5 +148,13 @@ public class EventReadDto {
 
     public String getExternalSourceRef() {
         return externalSourceRef;
+    }
+
+    public int getCommentCount() {
+        return commentCount;
+    }
+
+    public CommentReadDto getLastComment() {
+        return lastComment;
     }
 }
