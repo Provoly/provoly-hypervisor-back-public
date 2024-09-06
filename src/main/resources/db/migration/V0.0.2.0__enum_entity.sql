@@ -43,6 +43,15 @@ insert into city (id,code,name) values (10,'STM', 'Saint-Memmie');
 insert into city (id,code,name) values (11,'RECY', 'Recy');
 insert into city (id,code,name) values (12,'COMPERTRIX', 'Compertrix');
 insert into city (id,code,name) values (13,'COOLUS', 'Coolus');
+insert into city (id,code,name) values (14,'BUSSY-LETT', 'Bussy-Lettrée');
+insert into city (id,code,name) values (15,'DAMP-TPL', 'Dampierre-au-Temple');
+insert into city (id,code,name) values (16,'JUVIGNY', 'Juvigny');
+insert into city (id,code,name) values (17,'MONCETZ', 'Moncetz-Longevas');
+insert into city (id,code,name) values (18,'ST-ETIENNE', 'Saint-Etienne-au-Temple');
+insert into city (id,code,name) values (19,'ST-GIBRIEN', 'Saint-Gibrien');
+insert into city (id,code,name) values (20,'ST-HILAIRE', 'Saint-Hilaire-au-Temple');
+insert into city (id,code,name) values (21,'VEUVE', 'La Veuve');
+insert into city (id,code,name) values (22,'VRAUX', 'Vraux');
 
 insert into district (id,code,name) values (1,'CH_C', 'Centre');
 insert into district (id,code,name) values (2,'CH_CD', 'Croix Dampierre');
