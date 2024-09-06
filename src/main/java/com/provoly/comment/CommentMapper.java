@@ -10,7 +10,8 @@ public class CommentMapper {
     public CommentReadDto mapToDto(Comment comment) {
         return new CommentReadDto(
                 comment.getId(),
-                comment.getCreator(),
+                comment.getUser().getSubject(),
+                comment.getUser().getUsername(),
                 comment.getMessage(),
                 comment.getCreationDate(),
                 comment.getLastModificationDate());

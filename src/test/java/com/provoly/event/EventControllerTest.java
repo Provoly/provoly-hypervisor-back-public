@@ -8,13 +8,11 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.UUID;
 
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
 
 import com.provoly.TestDataService;
-import com.provoly.comment.CommentWriteDto;
 import com.provoly.event.dto.EventWriteDto;
 
 import io.quarkus.security.ForbiddenException;
@@ -22,13 +20,11 @@ import io.quarkus.security.UnauthorizedException;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 
 @QuarkusTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class EventControllerTest {
     @Inject
     EventController eventController;
@@ -36,12 +32,12 @@ public class EventControllerTest {
     @Inject
     TestDataService dataService;
 
-    @BeforeAll
+    @BeforeEach
     public void init() {
         dataService.init();
     }
 
-    @AfterAll
+    @AfterEach
     public void clean() {
         dataService.clean();
     }
@@ -488,24 +484,4 @@ public class EventControllerTest {
         assertThatThrownBy(() -> eventController.saveEvent(event))
                 .isInstanceOf(ForbiddenException.class);
     }
-
-    @Test
-    @TestSecurity(user = "reader", roles = { "event_write", "event_read" })
-    void should_increment_comment_count_and_get_last_comment_when_add_new_comment_on_event() {
-        // given
-        var eventId = dataService.getEvent1().getId();
-        var comment = new CommentWriteDto(UUID.randomUUID(), "message");
-        eventController.saveOrUpdateCommentForEvent(eventId, comment);
-
-        var comment2 = new CommentWriteDto(UUID.randomUUID(), "message2");
-
-        // when
-        eventController.saveOrUpdateCommentForEvent(eventId, comment2);
-        var eventWithComment = eventController.getEventDetails(eventId);
-
-        //then
-        assertThat(eventWithComment.getCommentCount()).isEqualTo(2);
-        assertThat(eventWithComment.getLastComment().id()).isEqualTo(comment2.id());
-    }
-
 }

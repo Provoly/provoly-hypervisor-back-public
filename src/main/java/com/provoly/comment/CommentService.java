@@ -8,8 +8,7 @@ import jakarta.ws.rs.ForbiddenException;
 
 import com.provoly.event.EventService;
 import com.provoly.event.Status;
-
-import io.quarkus.security.identity.SecurityIdentity;
+import com.provoly.user.UserService;
 
 import org.jboss.logging.Logger;
 
@@ -19,18 +18,18 @@ public class CommentService {
     private final CommentDatabaseReader databaseReader;
     private final CommentMapper commentMapper;
     private final EventService eventService;
-    private final SecurityIdentity securityIdentity;
+    private final UserService userService;
 
     public CommentService(Logger logger,
             CommentDatabaseReader databaseReader,
             CommentMapper commentMapper,
             EventService eventService,
-            SecurityIdentity securityIdentity) {
+            UserService userService) {
         this.logger = logger;
         this.databaseReader = databaseReader;
         this.commentMapper = commentMapper;
         this.eventService = eventService;
-        this.securityIdentity = securityIdentity;
+        this.userService = userService;
     }
 
     @Transactional
@@ -43,10 +42,12 @@ public class CommentService {
         }
 
         databaseReader.getCommentById(dto.id()).ifPresentOrElse(
-                comment -> updateComment(dto, comment, getCurrentUser()),
+                comment -> updateComment(dto, comment),
                 () -> {
+                    logger.debugf("Get current user subject from database or create it");
+                    var user = userService.getUserBySubject();
                     logger.debugf("Save comment %s", dto.id());
-                    var comment = new Comment(dto.id(), dto.message(), getCurrentUser());
+                    var comment = new Comment(dto.id(), dto.message(), user);
                     event.addComment(comment);
                     databaseReader.saveComment(comment);
                 });
@@ -59,15 +60,12 @@ public class CommentService {
         return commentMapper.mapToDto(event.getComments());
     }
 
-    private void updateComment(CommentWriteDto dto, Comment comment, String currentUser) {
-        if (!comment.getCreator().equals(currentUser)) {
+    private void updateComment(CommentWriteDto dto, Comment comment) {
+        var currentUser = userService.getCurrentUserSubject();
+        if (!comment.getUser().getSubject().equals(currentUser)) {
             throw new ForbiddenException("Comment %s was created by another user.".formatted(comment.getId()));
         }
         logger.debugf("Update comment %s", dto.id());
         comment.setMessage(dto.message());
-    }
-
-    private String getCurrentUser() {
-        return securityIdentity.getPrincipal().getName();
     }
 }

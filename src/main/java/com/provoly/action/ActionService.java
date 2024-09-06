@@ -10,20 +10,20 @@ import com.provoly.event.Status;
 import com.provoly.model.ProcedureModel;
 import com.provoly.procedure.Procedure;
 import com.provoly.user.Role;
+import com.provoly.user.UserService;
 
 import io.quarkus.security.ForbiddenException;
-import io.quarkus.security.identity.SecurityIdentity;
 
 @ApplicationScoped
 public class ActionService {
     private final ActionDatabaseReader databaseReader;
     private final ActionMapper actionMapper;
-    private final SecurityIdentity securityIdentity;
+    private final UserService userService;
 
-    public ActionService(ActionDatabaseReader databaseReader, ActionMapper actionMapper, SecurityIdentity securityIdentity) {
+    public ActionService(ActionDatabaseReader databaseReader, ActionMapper actionMapper, UserService userService) {
         this.databaseReader = databaseReader;
         this.actionMapper = actionMapper;
-        this.securityIdentity = securityIdentity;
+        this.userService = userService;
     }
 
     @Transactional
@@ -47,7 +47,7 @@ public class ActionService {
         procedure.getAction(dto.getId())
                 .ifPresentOrElse(
                         action -> {
-                            if (!securityIdentity.hasRole(Role.STR_EVENT_WRITE)
+                            if (!userService.hasRole(Role.STR_EVENT_WRITE)
                                     && action.getStatus() != dto.getStatus()
                                     && dto.getStatus() == Status.DONE) {
                                 throw new ForbiddenException("Missing permission to update action status.");

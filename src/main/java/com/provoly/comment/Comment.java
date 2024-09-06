@@ -3,9 +3,9 @@ package com.provoly.comment;
 import java.time.Instant;
 import java.util.UUID;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
+import com.provoly.user.User;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -24,15 +24,16 @@ public class Comment {
 
     private String message;
 
-    private String creator;
+    @ManyToOne
+    private User user;
 
     public Comment() {
     }
 
-    public Comment(UUID id, String message, String creator) {
+    public Comment(UUID id, String message, User user) {
         this.id = id;
         this.message = message;
-        this.creator = creator;
+        this.user = user;
     }
 
     public UUID getId() {
@@ -55,11 +56,7 @@ public class Comment {
         this.message = message;
     }
 
-    public String getCreator() {
-        return creator;
-    }
-
-    public void setCreator(String creator) {
-        this.creator = creator;
+    public User getUser() {
+        return user;
     }
 }

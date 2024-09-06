@@ -56,6 +56,14 @@ create table district
     code varchar(20) unique not null
 );
 
+create table provoly_user
+(
+    id        uuid primary key,
+    subject   uuid unique  not null,
+    username  varchar(100) not null,
+    full_name varchar(100) not null
+);
+
 create table equipment
 (
     id                  uuid primary key,
@@ -184,11 +192,10 @@ create table event
     external_source_ref    varchar
 );
 
-
 create table comment
 (
     id                     uuid primary key,
-    creator                varchar(100) not null,
+    user_id                uuid         not null references provoly_user,
     creation_date          timestamptz default current_timestamp,
     last_modification_date timestamptz default current_timestamp,
     message                varchar(255) not null

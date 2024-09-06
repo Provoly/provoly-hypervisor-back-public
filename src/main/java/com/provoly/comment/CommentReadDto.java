@@ -4,7 +4,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record CommentReadDto(UUID id,
-        String creator,
+        UUID creator,
+        String creatorName,
         String message,
         Instant creationDate,
         Instant lastModificationDate) {

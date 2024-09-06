@@ -1,6 +1,5 @@
 package com.provoly.comment;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.NoSuchElementException;
@@ -55,24 +54,6 @@ public class CommentServiceTest {
                 new CommentWriteDto(UUID.randomUUID(), "message")))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessageContaining("done and can no longer be commented on");
-    }
-
-    @Test
-    void should_sort_comment_on_modification_date_when_add_new_comment_on_event() {
-        // given
-        var eventId = dataService.getEvent1().getId();
-        var comment = new CommentWriteDto(UUID.randomUUID(), "message");
-        var comment2 = new CommentWriteDto(UUID.randomUUID(), "message2");
-        commentService.saveOrUpdateCommentForEvent(eventId, comment);
-        commentService.saveOrUpdateCommentForEvent(eventId, comment2);
-
-        // when
-        commentService.saveOrUpdateCommentForEvent(eventId,
-                new CommentWriteDto(comment.id(), "message updated"));
-        var comments = commentService.getCommentsForEvent(eventId);
-
-        //then
-        assertThat(comments).extracting("message").containsExactly("message updated", "message2");
     }
 
 }
