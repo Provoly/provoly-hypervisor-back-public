@@ -28,8 +28,9 @@ public class Procedure {
     @OneToMany(mappedBy = "procedure", fetch = FetchType.EAGER)
     private List<Event> events = new ArrayList<>();
 
-    @OneToMany(mappedBy = "procedure", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @OrderBy("order ASC")
+    @JoinTable
     private List<Action> actions = new ArrayList<>();
 
     public Procedure() {
@@ -44,7 +45,6 @@ public class Procedure {
 
     public void addAction(Action action) {
         actions.add(action);
-        action.setProcedure(this);
         setProcedureProgress(calculateProgressActions());
     }
 

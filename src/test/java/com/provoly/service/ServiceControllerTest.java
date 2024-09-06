@@ -1,4 +1,4 @@
-package com.provoly.services;
+package com.provoly.service;
 
 import static com.provoly.service.ServiceStatus.ASKED;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -10,8 +10,6 @@ import java.util.NoSuchElementException;
 import jakarta.inject.Inject;
 
 import com.provoly.TestDataService;
-import com.provoly.service.ServiceController;
-import com.provoly.service.ServiceWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;

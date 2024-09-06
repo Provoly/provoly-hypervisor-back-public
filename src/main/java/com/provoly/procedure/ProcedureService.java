@@ -1,5 +1,6 @@
 package com.provoly.procedure;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -117,5 +118,10 @@ public class ProcedureService {
         var procedure = databaseReader.getProcedureById(id);
         procedure.dissociateEvents();
         databaseReader.removeProcedure(procedure);
+    }
+
+    @Transactional
+    public Procedure getProcedureFromAction(UUID actionId) {
+        return databaseReader.getProcedureForAction(actionId);
     }
 }

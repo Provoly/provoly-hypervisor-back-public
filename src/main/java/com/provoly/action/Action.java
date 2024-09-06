@@ -1,15 +1,16 @@
 package com.provoly.action;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.persistence.*;
 
+import com.provoly.comment.Comment;
 import com.provoly.event.Status;
-import com.provoly.model.ProcedureModel;
-import com.provoly.procedure.Procedure;
 
-import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
@@ -29,13 +30,9 @@ public class Action {
     @Column(name = "action_order")
     private int order;
 
-    @ManyToOne
-    @Immutable
-    private Procedure procedure;
-
-    @ManyToOne
-    @Immutable
-    private ProcedureModel procedureModel;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable
+    private List<Comment> comments = new ArrayList<>();
 
     public Action() {
         // Only for JPA
@@ -96,15 +93,14 @@ public class Action {
         this.order = order;
     }
 
-    public Procedure getProcedure() {
-        return procedure;
+    public List<Comment> getComments() {
+        return comments
+                .stream()
+                .sorted(Comparator.comparing(Comment::getLastModificationDate, Comparator.reverseOrder()))
+                .toList();
     }
 
-    public void setProcedure(Procedure procedure) {
-        this.procedure = procedure;
-    }
-
-    public void setProcedureModel(ProcedureModel procedureModel) {
-        this.procedureModel = procedureModel;
+    public void addComment(Comment comment) {
+        comments.add(comment);
     }
 }

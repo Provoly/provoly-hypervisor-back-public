@@ -2,21 +2,26 @@ package com.provoly.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
 
 import com.provoly.TestDataService;
+import com.provoly.comment.CommentWriteDto;
 import com.provoly.event.dto.EventWriteDto;
+import com.provoly.user.UserService;
 
 import io.quarkus.security.ForbiddenException;
 import io.quarkus.security.UnauthorizedException;
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 
@@ -32,9 +37,16 @@ public class EventControllerTest {
     @Inject
     TestDataService dataService;
 
+    @InjectMock
+    UserService mock;
+
     @BeforeEach
     public void init() {
         dataService.init();
+        given(mock.getCurrentUserName()).willReturn("reader");
+        given(mock.getCurrentUserFullName()).willReturn("name");
+        given(mock.getCurrentUserSubject()).willReturn(dataService.getUser().getSubject());
+        given(mock.getCurrentUser()).willReturn(dataService.getUser());
     }
 
     @AfterEach
@@ -484,4 +496,43 @@ public class EventControllerTest {
         assertThatThrownBy(() -> eventController.saveEvent(event))
                 .isInstanceOf(ForbiddenException.class);
     }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_write", "event_read" })
+    void should_increment_comment_count_and_get_last_comment_when_add_new_comment_on_event() {
+        // given
+        var eventId = dataService.getEvent1().getId();
+        var comment = new CommentWriteDto(UUID.randomUUID(), "message");
+        eventController.saveOrUpdateCommentForEvent(eventId, comment);
+
+        var comment2 = new CommentWriteDto(UUID.randomUUID(), "message2");
+
+        // when
+        eventController.saveOrUpdateCommentForEvent(eventId, comment2);
+        var eventWithComment = eventController.getEventDetails(eventId);
+
+        //then
+        assertThat(eventWithComment.getCommentCount()).isEqualTo(2);
+        assertThat(eventWithComment.getLastComment().id()).isEqualTo(comment2.id());
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_write", "event_read" })
+    void should_sort_comment_on_modification_date_when_add_new_comment_on_event() {
+        // given
+        var eventId = dataService.getEvent1().getId();
+        var comment = new CommentWriteDto(UUID.randomUUID(), "message");
+        var comment2 = new CommentWriteDto(UUID.randomUUID(), "message2");
+        eventController.saveOrUpdateCommentForEvent(eventId, comment);
+        eventController.saveOrUpdateCommentForEvent(eventId, comment2);
+
+        // when
+        eventController.saveOrUpdateCommentForEvent(eventId,
+                new CommentWriteDto(comment.id(), "message updated"));
+        var comments = eventController.getCommentsForEvent(eventId);
+
+        //then
+        assertThat(comments).extracting("message").containsExactly("message updated", "message2");
+    }
+
 }

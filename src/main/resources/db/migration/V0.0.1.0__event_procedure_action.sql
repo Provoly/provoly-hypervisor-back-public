@@ -129,15 +129,23 @@ create table procedure_model
 create table action
 (
     id                     uuid primary key,
-    procedure_id           int references procedure,
-    procedure_model_id     int references procedure_model,
     type                   varchar(20) not null,
     status                 varchar(20)          default 'NEW',
     action_order           int         not null default 0,
     last_modification_date timestamptz          default current_timestamp
-        check (procedure_id is not null or procedure_model_id is not null)
 );
 
+create table procedure_action
+(
+    procedure_id integer not null references  procedure,
+    actions_id uuid not null references action
+);
+
+create table procedure_model_action
+(
+    procedure_model_id integer not null references procedure_model,
+    actions_id uuid not null references action
+);
 
 create table asked_service
 (
@@ -204,5 +212,11 @@ create table comment
 create table event_comment
 (
     event_id    integer not null references event,
+    comments_id uuid    not null references comment
+);
+
+create table action_comment
+(
+    action_id    uuid not null references action,
     comments_id uuid    not null references comment
 );

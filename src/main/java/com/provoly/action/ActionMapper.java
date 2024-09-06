@@ -5,17 +5,26 @@ import java.util.Collection;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import com.provoly.action.dto.*;
+import com.provoly.comment.CommentMapper;
 import com.provoly.event.Status;
 
 @ApplicationScoped
 public class ActionMapper {
+
+    private final CommentMapper commentMapper;
+
+    public ActionMapper(CommentMapper commentMapper) {
+        this.commentMapper = commentMapper;
+    }
 
     public ActionReadDto mapToActionReadDto(Action action) {
         var actionDto = new ActionReadDto(
                 action.getId(),
                 action.getType(),
                 action.getStatus(),
-                action.getLastModificationDate());
+                action.getLastModificationDate(),
+                commentMapper.mapLastCommentToDto(action.getComments()),
+                action.getComments().size());
 
         return switch (action) {
             case EmailAction a -> new EmailActionReadDto(actionDto, a.getName(), a.getEmail());
@@ -59,7 +68,6 @@ public class ActionMapper {
             default -> {
             }
         }
-
     }
 
     public Action duplicateAction(Action action) {

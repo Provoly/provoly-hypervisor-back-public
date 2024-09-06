@@ -36,23 +36,19 @@ public class UserService {
         return jsonWebToken.getClaim("name");
     }
 
-    public User buildUser() {
-        return new User(getCurrentUserSubject(), getCurrentUserName(), getCurrentUserFullName());
-    }
-
     public boolean hasRole(String role) {
         return securityIdentity.hasRole(role);
     }
 
     @Transactional
-    public User getUserBySubject() {
+    public User getCurrentUser() {
         return databaseReader.getUserBySubject(getCurrentUserSubject())
-                .orElse(saveAndReturnNewUser());
+                .orElseGet(this::saveAndReturnNewUser);
     }
 
     private User saveAndReturnNewUser() {
         logger.debugf("Unknown user, save it");
-        var user = buildUser();
+        var user = new User(getCurrentUserSubject(), getCurrentUserName(), getCurrentUserFullName());
         databaseReader.saveUser(user);
         return user;
     }

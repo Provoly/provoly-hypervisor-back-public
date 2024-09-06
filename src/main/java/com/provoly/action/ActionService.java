@@ -2,6 +2,9 @@ package com.provoly.action;
 
 import static com.provoly.action.ActionType.isDefaultActionType;
 
+import java.util.NoSuchElementException;
+import java.util.UUID;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -60,6 +63,12 @@ public class ActionService {
                             databaseReader.saveAction(action);
                         });
 
+    }
+
+    @Transactional
+    public Action getActionById(UUID id) {
+        return databaseReader.getActionById(id)
+                .orElseThrow(() -> new NoSuchElementException("Action with id %s not found".formatted(id)));
     }
 
     private void checkActionType(ActionWriteDto dto) {

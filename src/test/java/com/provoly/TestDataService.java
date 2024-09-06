@@ -25,6 +25,8 @@ import com.provoly.procedure.Procedure;
 import com.provoly.service.Service;
 import com.provoly.service.ServiceCategory;
 import com.provoly.service.ServiceDatabaseReader;
+import com.provoly.user.User;
+import com.provoly.user.UserDatabaseReader;
 
 @ApplicationScoped
 public class TestDataService {
@@ -32,6 +34,7 @@ public class TestDataService {
     private EquipmentDatabaseReader equipmentDatabaseReader;
     private EventDatabaseReader eventDatabaseReader;
     private ServiceDatabaseReader serviceDatabaseReader;
+    private UserDatabaseReader userDatabaseReader;
     private Random rand = new Random();
     private Map<String, Category> categories;
     private Procedure procedure1, procedure3;
@@ -39,18 +42,22 @@ public class TestDataService {
     private Domain domainEP, domainVP;
     private ServiceCategory prev;
     private ServiceCategory cura;
+    private User user;
 
     public TestDataService(EntityManager em, EquipmentDatabaseReader equipmentDatabaseReader,
             EventDatabaseReader eventDatabaseReader,
-            ServiceDatabaseReader serviceDatabaseReader) {
+            ServiceDatabaseReader serviceDatabaseReader, UserDatabaseReader userDatabaseReader) {
         this.em = em;
         this.equipmentDatabaseReader = equipmentDatabaseReader;
         this.eventDatabaseReader = eventDatabaseReader;
         this.serviceDatabaseReader = serviceDatabaseReader;
+        this.userDatabaseReader = userDatabaseReader;
     }
 
     @Transactional
     public void init() {
+        user = new User(UUID.randomUUID(), "reader", "name");
+        userDatabaseReader.saveUser(user);
         categories = eventDatabaseReader.getCategoryOrSubCategories()
                 .stream()
                 .collect(Collectors.toMap(Category::getCode, c -> c));
@@ -133,6 +140,11 @@ public class TestDataService {
         removeEntities(Equipment.class);
         removeEntities(Procedure.class);
         removeEntities(ProcedureModel.class);
+        removeEntities(User.class);
+    }
+
+    public User getUser() {
+        return user;
     }
 
     public Procedure getProcedure1() {

@@ -1,13 +1,17 @@
 package com.provoly.comment;
 
 import java.util.List;
+import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.ForbiddenException;
 
+import com.provoly.action.ActionService;
 import com.provoly.event.EventService;
 import com.provoly.event.Status;
+import com.provoly.procedure.Procedure;
+import com.provoly.procedure.ProcedureService;
 import com.provoly.user.UserService;
 
 import org.jboss.logging.Logger;
@@ -18,17 +22,21 @@ public class CommentService {
     private final CommentDatabaseReader databaseReader;
     private final CommentMapper commentMapper;
     private final EventService eventService;
+    private final ActionService actionService;
+    private final ProcedureService procedureService;
     private final UserService userService;
 
     public CommentService(Logger logger,
             CommentDatabaseReader databaseReader,
             CommentMapper commentMapper,
-            EventService eventService,
+            EventService eventService, ActionService actionService, ProcedureService procedureService,
             UserService userService) {
         this.logger = logger;
         this.databaseReader = databaseReader;
         this.commentMapper = commentMapper;
         this.eventService = eventService;
+        this.actionService = actionService;
+        this.procedureService = procedureService;
         this.userService = userService;
     }
 
@@ -45,7 +53,7 @@ public class CommentService {
                 comment -> updateComment(dto, comment),
                 () -> {
                     logger.debugf("Get current user subject from database or create it");
-                    var user = userService.getUserBySubject();
+                    var user = userService.getCurrentUser();
                     logger.debugf("Save comment %s", dto.id());
                     var comment = new Comment(dto.id(), dto.message(), user);
                     event.addComment(comment);
@@ -58,6 +66,40 @@ public class CommentService {
         logger.debugf("Get comments for event %d", eventId);
         var event = eventService.getEventDetails(eventId);
         return commentMapper.mapToDto(event.getComments());
+    }
+
+    @Transactional
+    public void saveOrUpdateCommentForAction(UUID id, CommentWriteDto dto) {
+        logger.debugf("Save or update comment for action %s", id);
+
+        var action = actionService.getActionById(id);
+        var procedure = procedureService.getProcedureFromAction(id);
+
+        if (isProcedureDone(procedure)) {
+            throw new ForbiddenException("Procedure %s is done and can no longer be commented on".formatted(procedure.getId()));
+        }
+
+        databaseReader.getCommentById(dto.id()).ifPresentOrElse(
+                comment -> updateComment(dto, comment),
+                () -> {
+                    logger.debugf("Get current user subject from database or create it");
+                    var user = userService.getCurrentUser();
+                    logger.debugf("Save comment %s", dto.id());
+                    var comment = new Comment(dto.id(), dto.message(), user);
+                    action.addComment(comment);
+                    databaseReader.saveComment(comment);
+                });
+    }
+
+    @Transactional
+    public List<CommentReadDto> getCommentsForAction(UUID id) {
+        logger.debugf("Get comments  for action %s", id);
+        var action = actionService.getActionById(id);
+        return commentMapper.mapToDto(action.getComments());
+    }
+
+    private boolean isProcedureDone(Procedure procedure) {
+        return procedure.getEvents().stream().allMatch(event -> event.getStatus() == Status.DONE);
     }
 
     private void updateComment(CommentWriteDto dto, Comment comment) {

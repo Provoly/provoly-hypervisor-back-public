@@ -38,8 +38,9 @@ public class ProcedureModel {
     @UpdateTimestamp
     private Instant lastModificationDate;
 
-    @OneToMany(mappedBy = "procedureModel", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @OrderBy("order ASC")
+    @JoinTable
     private Collection<Action> actions = new ArrayList<>();
 
     public ProcedureModel() {
@@ -68,7 +69,6 @@ public class ProcedureModel {
 
     public void addAction(Action action) {
         actions.add(action);
-        action.setProcedureModel(this);
     }
 
     public void removeAction(Action action) {

@@ -1,4 +1,4 @@
-package com.provoly.services;
+package com.provoly.service;
 
 import static com.provoly.service.ServiceStatus.ASKED;
 import static com.provoly.service.ServiceStatus.DONE;
@@ -11,8 +11,6 @@ import jakarta.inject.Inject;
 
 import com.provoly.TestDataService;
 import com.provoly.equipment.EquipmentService;
-import com.provoly.service.ServiceService;
-import com.provoly.service.ServiceWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
 
