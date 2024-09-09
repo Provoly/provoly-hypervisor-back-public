@@ -209,7 +209,10 @@ public class EventDatabaseReader extends DatabaseReader {
             }
             case NAME -> unaccent(builder, root.get(Event_.name));
             case CRITICALITY -> getCriticalityOrder(builder, root);
-            case CATEGORY -> root.get(Event_.category);
+            case CATEGORY -> {
+                var category = root.join(Event_.category, JoinType.LEFT);
+                yield category.get(Category_.name);
+            }
         };
     }
 

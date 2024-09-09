@@ -380,6 +380,25 @@ public class EventControllerTest {
 
     @Test
     @TestSecurity(user = "reader")
+    void should_return_event_with_desc_sort_category() {
+        // when
+        var events = eventController.getEvents(
+                2,
+                3,
+                EventSort.CATEGORY.getName(),
+                SortOrder.ASC.name(),
+                null,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of());
+        //then
+        assertThat(events).extracting("category").containsExactly("OUTOFORDER", "MANIFESTATION", "MANIFESTATION");
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
     void should_throw_exception_invalid_sort() {
         // given
         String invalidSort = "invalid";
