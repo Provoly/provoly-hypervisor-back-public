@@ -207,6 +207,9 @@ public class EventDatabaseReader extends DatabaseReader {
                 var procedure = root.join(Event_.procedure, JoinType.LEFT);
                 yield builder.coalesce(procedure.get(Procedure_.procedureProgress), 0);
             }
+            case NAME -> unaccent(builder, root.get(Event_.name));
+            case CRITICALITY -> getCriticalityOrder(builder, root);
+            case CATEGORY -> root.get(Event_.category);
         };
     }
 

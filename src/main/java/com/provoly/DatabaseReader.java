@@ -6,9 +6,7 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 
 import com.provoly.equipment.EquipmentEntity;
 import com.provoly.event.Category;
@@ -29,6 +27,10 @@ public class DatabaseReader {
         this.em = em;
     }
 
+    public Expression<String> unaccent(CriteriaBuilder cb, Expression<String> property) {
+        return cb.lower(cb.function("unaccent", String.class, property));
+    }
+
     public Optional<Domain> getOptionalDomainByCode(String code) {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<Domain> criteriaQuery = builder.createQuery(Domain.class);
@@ -45,15 +47,6 @@ public class DatabaseReader {
     public Domain getDomainByCode(String code) {
         return getOptionalDomainByCode(code)
                 .orElseThrow(() -> new IllegalArgumentException("Domain %s invalid".formatted(code)));
-    }
-
-    public Collection<Domain> getDomains() {
-        var builder = em.getCriteriaBuilder();
-        CriteriaQuery<Domain> criteriaQuery = builder.createQuery(Domain.class);
-        Root<Domain> root = criteriaQuery.from(Domain.class);
-
-        return em.createQuery(criteriaQuery.select(root))
-                .getResultList();
     }
 
     public Optional<Category> getOptionalCategoryByCode(String code) {

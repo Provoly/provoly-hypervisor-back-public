@@ -6,7 +6,10 @@ public enum EventSort {
     CREATION_DATE("creationDate"),
     LAST_MODIFICATION_DATE("lastModificationDate"),
     STATUS("status"),
-    PROCEDURE_PROGRESS("procedureProgress");
+    PROCEDURE_PROGRESS("procedureProgress"),
+    NAME("name"),
+    CRITICALITY("criticality"),
+    CATEGORY("category");
 
     private final String name;
 

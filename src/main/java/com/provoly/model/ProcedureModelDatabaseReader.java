@@ -73,10 +73,6 @@ public class ProcedureModelDatabaseReader extends DatabaseReader {
                 .getResultList();
     }
 
-    private Expression<String> unaccent(CriteriaBuilder cb, Expression<String> property) {
-        return cb.lower(cb.function("unaccent", String.class, property));
-    }
-
     public void saveProcedureModel(ProcedureModel procedureModel) {
         em.persist(procedureModel);
     }

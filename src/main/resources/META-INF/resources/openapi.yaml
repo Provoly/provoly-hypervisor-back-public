@@ -2376,6 +2376,9 @@ components:
         - lastModificationDate
         - status
         - procedureProgress
+        - criticality
+        - name
+        - category
     ProcedureModelSort:
       type : string
       enum:

@@ -1,5 +1,7 @@
 package com.provoly.event;
 
+import static com.provoly.event.Criticality.LOW;
+import static com.provoly.event.Criticality.MEDIUM;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
@@ -142,13 +144,13 @@ public class EventControllerTest {
                 null,
                 null,
                 null,
-                List.of(Criticality.HIGH.name(), Criticality.LOW.name()),
+                List.of(Criticality.HIGH.name(), LOW.name()),
                 List.of(),
                 List.of(),
                 List.of(),
                 List.of());
         //then
-        assertThat(events).extracting("criticality").containsOnly(Criticality.LOW, Criticality.HIGH);
+        assertThat(events).extracting("criticality").containsOnly(LOW, Criticality.HIGH);
     }
 
     @Test
@@ -315,8 +317,8 @@ public class EventControllerTest {
         //then
         assertThat(events).extracting("status").containsExactly(Status.NEW, Status.NEW, Status.NEW, Status.IN_PROGRESS,
                 Status.IN_PROGRESS);
-        assertThat(events).extracting("criticality").containsExactly(Criticality.LOW, Criticality.LOW, Criticality.LOW,
-                Criticality.HIGH, Criticality.MEDIUM);
+        assertThat(events).extracting("criticality").containsExactly(LOW, LOW, LOW,
+                Criticality.HIGH, MEDIUM);
     }
 
     @Test
@@ -336,6 +338,44 @@ public class EventControllerTest {
                 List.of());
         //then
         assertThat(events).extracting("procedureProgress").containsExactly(100f, 100f, 0.0f);
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_return_event_with_desc_sort_name() {
+        // when
+        var events = eventController.getEvents(
+                1,
+                3,
+                EventSort.NAME.getName(),
+                SortOrder.DESC.name(),
+                null,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of());
+        //then
+        assertThat(events).extracting("name").containsExactly("report3", "report2", "report1");
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_return_event_with_desc_sort_criticality() {
+        // when
+        var events = eventController.getEvents(
+                2,
+                3,
+                EventSort.CRITICALITY.getName(),
+                SortOrder.DESC.name(),
+                null,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of());
+        //then
+        assertThat(events).extracting("criticality").containsExactly(LOW, MEDIUM, MEDIUM);
     }
 
     @Test
@@ -468,7 +508,7 @@ public class EventControllerTest {
     @TestSecurity(user = "reader", roles = { "event_write" })
     void should_throw_if_name_blank_when_create_event() {
         // given
-        var event = dataService.buildEvent("", "LIMIT", Criticality.MEDIUM, false);
+        var event = dataService.buildEvent("", "LIMIT", MEDIUM, false);
 
         // then
         assertThatThrownBy(() -> eventController.saveEvent(event))
@@ -479,7 +519,7 @@ public class EventControllerTest {
     @TestSecurity(user = "reader", roles = { "event_write" })
     void should_throw_if_category_invalid_when_create_event() {
         // given
-        var event = dataService.buildEvent("out of order", "OUTOF", Criticality.MEDIUM, false);
+        var event = dataService.buildEvent("out of order", "OUTOF", MEDIUM, false);
 
         // then
         assertThatThrownBy(() -> eventController.saveEvent(event))
@@ -490,7 +530,7 @@ public class EventControllerTest {
     @TestSecurity(user = "reader")
     void should_throw_if_role_event_write_is_missing() {
         // given
-        var event = dataService.buildEvent("out of order", "OUTOF", Criticality.MEDIUM, false);
+        var event = dataService.buildEvent("out of order", "OUTOF", MEDIUM, false);
 
         // then
         assertThatThrownBy(() -> eventController.saveEvent(event))
