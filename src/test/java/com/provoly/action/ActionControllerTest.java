@@ -143,7 +143,7 @@ public class ActionControllerTest {
                 List.of(new ActionWriteDto(actionId, "CSU", Status.NEW)));
 
         procedureController.updateProcedure(procedureId, dto);
-        procedureController.closeAllProcedureEvents(procedureId);
+        procedureController.closeAllProcedureEvents(procedureId, new CommentWriteDto(UUID.randomUUID(), "close proc"));
 
         var comment = new CommentWriteDto(UUID.randomUUID(), "message");
 

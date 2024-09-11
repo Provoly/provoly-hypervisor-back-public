@@ -48,10 +48,14 @@ public class ProcedureService {
     }
 
     @Transactional
-    public void closeAllProcedureEvents(Integer id) {
+    public void closeAllProcedureEventsById(Integer id) {
         logger.debugf("Close all procedure events with id %s", id);
-        var events = getProcedureDetails(id).getEvents();
-        events.forEach(eventService::closeEvent);
+        var procedure = getProcedureDetails(id);
+        closeAllProcedureEvent(procedure);
+    }
+
+    public void closeAllProcedureEvent(Procedure procedure) {
+        procedure.getEvents().forEach(eventService::closeEvent);
     }
 
     @Transactional

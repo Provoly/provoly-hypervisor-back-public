@@ -7,6 +7,7 @@ import java.util.Map;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -82,8 +83,8 @@ public class EventController {
     @Path("/id/{id}/close")
     @PUT
     @RolesAllowed({ Role.STR_EVENT_WRITE })
-    public void closeEvent(Integer id) {
-        eventService.closeEventById(id);
+    public void closeEvent(Integer id, @Valid CommentWriteDto dto) {
+        commentService.closeEventWithComment(id, dto);
     }
 
     @Path("/summary")
@@ -98,7 +99,7 @@ public class EventController {
     @Path("/id/{id}/comments")
     @PUT
     @RolesAllowed({ Role.STR_EVENT_WRITE })
-    public void saveOrUpdateCommentForEvent(Integer id, CommentWriteDto comment) {
+    public void saveOrUpdateCommentForEvent(Integer id, @Valid CommentWriteDto comment) {
         commentService.saveOrUpdateCommentForEvent(id, comment);
     }
 

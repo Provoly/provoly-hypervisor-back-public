@@ -13,5 +13,6 @@ public record ProcedureReadDto(
         Instant creationDate,
         Collection<ActionReadDto> actions,
         Collection<EventReadDto> events,
-        float progress) {
+        float progress,
+        String closeComment) {
 }

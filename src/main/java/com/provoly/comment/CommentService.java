@@ -41,6 +41,41 @@ public class CommentService {
     }
 
     @Transactional
+    public void closeProcedureWithComment(Integer procedureId, CommentWriteDto dto) {
+        logger.debugf("Close and comment procedure %d", procedureId);
+        var procedure = procedureService.getProcedureDetails(procedureId);
+
+        if (isProcedureDone(procedure)) {
+            throw new ForbiddenException("Procedure %s is already done".formatted(procedureId));
+        }
+
+        var user = userService.getCurrentUser();
+        var comment = new Comment(dto.id(), dto.message(), user);
+        procedure.setCloseComment(comment);
+        databaseReader.saveComment(comment);
+        procedureService.closeAllProcedureEvent(procedure);
+    }
+
+    @Transactional
+    public void closeEventWithComment(Integer eventId, CommentWriteDto dto) {
+        logger.debugf("Close and comment event %d", eventId);
+
+        var event = eventService.getEventDetails(eventId);
+        if (event.getStatus() == Status.DONE) {
+            throw new ForbiddenException("Event %s is already done".formatted(eventId));
+        }
+
+        var user = userService.getCurrentUser();
+        logger.debugf("Save closing comment %s", dto.id());
+        var comment = new Comment(dto.id(), dto.message(), user);
+        event.addComment(comment);
+        databaseReader.saveComment(comment);
+
+        logger.debugf("Close event %d", eventId);
+        eventService.closeEvent(event);
+    }
+
+    @Transactional
     public void saveOrUpdateCommentForEvent(Integer eventId, CommentWriteDto dto) {
         logger.debugf("Save or update comment for event %d", eventId);
 

@@ -105,13 +105,23 @@ create table service
     status                 varchar(20)
 );
 
+create table comment
+(
+    id                     uuid primary key,
+    user_id                uuid         not null references provoly_user,
+    creation_date          timestamptz default current_timestamp,
+    last_modification_date timestamptz default current_timestamp,
+    message                varchar(255) not null
+);
+
 create table procedure
 (
     id                 serial primary key,
     name               varchar(50)  not null,
     description        varchar(256) not null,
     creation_date      timestamptz           default current_timestamp,
-    procedure_progress float        not null default 0
+    procedure_progress float        not null default 0,
+    close_comment_id    uuid references comment
 );
 
 create table procedure_model
@@ -200,14 +210,7 @@ create table event
     external_source_ref    varchar
 );
 
-create table comment
-(
-    id                     uuid primary key,
-    user_id                uuid         not null references provoly_user,
-    creation_date          timestamptz default current_timestamp,
-    last_modification_date timestamptz default current_timestamp,
-    message                varchar(255) not null
-);
+
 
 create table event_comment
 (

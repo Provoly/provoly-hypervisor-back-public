@@ -339,6 +339,19 @@ paths:
             type: integer
           example: 22
           required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentWriteDto'
+            examples:
+              default:
+                summary: close event
+                value: |
+                  {
+                    "id": "c3b9ead7-57a5-4dd4-a8bd-36da14bf1ac1",
+                    "message":"Event is done"
+                  }
       responses:
         "204":
           description: Updated
@@ -1103,6 +1116,19 @@ paths:
             type: integer
           example: 50
           required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentWriteDto'
+            examples:
+              default:
+                summary: Close procedure
+                value: |
+                  {
+                    "id": "c3b9ead7-57a5-4dd4-a8bd-36da14bf1ac1",
+                    "message":"Procedure is done"
+                  }
       responses:
         "204":
           description: Updated

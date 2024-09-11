@@ -6,6 +6,7 @@ import java.util.*;
 import jakarta.persistence.*;
 
 import com.provoly.action.Action;
+import com.provoly.comment.Comment;
 import com.provoly.event.Event;
 import com.provoly.event.Status;
 
@@ -32,6 +33,9 @@ public class Procedure {
     @OrderBy("order ASC")
     @JoinTable
     private List<Action> actions = new ArrayList<>();
+
+    @OneToOne
+    private Comment closeComment;
 
     public Procedure() {
         // Only for JPA
@@ -116,6 +120,14 @@ public class Procedure {
 
     public void setProcedureProgress(float procedureProgress) {
         this.procedureProgress = procedureProgress;
+    }
+
+    public Comment getCloseComment() {
+        return closeComment;
+    }
+
+    public void setCloseComment(Comment closeComment) {
+        this.closeComment = closeComment;
     }
 
     private float calculateProgressActions() {

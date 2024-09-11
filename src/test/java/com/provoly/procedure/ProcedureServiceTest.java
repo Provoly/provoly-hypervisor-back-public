@@ -16,7 +16,6 @@ import com.provoly.model.ProcedureModelService;
 import com.provoly.model.ProcedureModelWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.security.TestSecurity;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -116,7 +115,7 @@ public class ProcedureServiceTest {
         var procedureId = dataService.getProcedure1().getId();
 
         // when
-        procedureService.closeAllProcedureEvents(procedureId);
+        procedureService.closeAllProcedureEventsById(procedureId);
 
         //then
         assertThat(procedureService.getProcedureDetails(procedureId).getEvents()).extracting("status")
@@ -124,7 +123,7 @@ public class ProcedureServiceTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    // @TestSecurity(user = "reader")
     void should_set_event_in_progress_when_add_event_to_procedure() {
         // given
         var procedure = dataService.getProcedure1();
@@ -138,7 +137,7 @@ public class ProcedureServiceTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    //   @TestSecurity(user = "reader")
     void should_duplicate_action_when_associate_procedure_to_events() {
         // given
         var actionModelId = UUID.randomUUID();

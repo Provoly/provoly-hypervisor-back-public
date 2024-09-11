@@ -594,4 +594,32 @@ public class EventControllerTest {
         assertThat(comments).extracting("message").containsExactly("message updated", "message2");
     }
 
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_write", "event_read" })
+    void should_close_event() {
+        // given
+        var eventId = dataService.getEvent1().getId();
+        var closedComment = new CommentWriteDto(UUID.randomUUID(), "close event");
+
+        // when
+        eventController.closeEvent(eventId, closedComment);
+        var event = eventController.getEventDetails(eventId);
+
+        //then
+        assertThat(event.getLastComment()).extracting("message").isEqualTo("close event");
+        assertThat(event.getStatus()).isEqualTo(Status.DONE);
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_write", "event_read" })
+    void should_throw_error_when_event_already_done() {
+        // given
+        var eventId = dataService.getDoneEvent().getId();
+        var closedComment = new CommentWriteDto(UUID.randomUUID(), "close event");
+
+        // when
+        assertThatThrownBy(() -> eventController.closeEvent(eventId, closedComment))
+                .isInstanceOf(jakarta.ws.rs.ForbiddenException.class);
+    }
+
 }

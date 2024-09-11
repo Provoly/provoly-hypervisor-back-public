@@ -17,6 +17,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 import com.provoly.action.AskedService;
+import com.provoly.comment.Comment;
 import com.provoly.equipment.*;
 import com.provoly.event.*;
 import com.provoly.event.dto.EventWriteDto;
@@ -140,6 +141,7 @@ public class TestDataService {
         removeEntities(Equipment.class);
         removeEntities(Procedure.class);
         removeEntities(ProcedureModel.class);
+        removeEntities(Comment.class);
         removeEntities(User.class);
     }
 

@@ -29,7 +29,8 @@ public class ProcedureMapper {
                 eventMapper.mapToEventReadDto(procedure.getEvents()
                         .stream()
                         .sorted(Comparator.comparing(Event::getCreationDate).reversed())),
-                procedure.getProcedureProgress());
+                procedure.getProcedureProgress(),
+                procedure.getCloseComment() != null ? procedure.getCloseComment().getMessage() : null);
     }
 
 }

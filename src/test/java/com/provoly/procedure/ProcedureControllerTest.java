@@ -2,6 +2,7 @@ package com.provoly.procedure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -13,22 +14,21 @@ import jakarta.ws.rs.ForbiddenException;
 
 import com.provoly.TestDataService;
 import com.provoly.action.dto.*;
+import com.provoly.comment.CommentWriteDto;
 import com.provoly.event.Criticality;
 import com.provoly.event.Event;
 import com.provoly.event.EventController;
 import com.provoly.event.Status;
 import com.provoly.event.dto.EventWriteDto;
+import com.provoly.user.UserService;
 
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 
 @QuarkusTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ProcedureControllerTest {
     @Inject
     ProcedureController procedureController;
@@ -39,12 +39,19 @@ public class ProcedureControllerTest {
     @Inject
     TestDataService dataService;
 
-    @BeforeAll
+    @InjectMock
+    UserService mock;
+
+    @BeforeEach
     public void init() {
         dataService.init();
+        given(mock.getCurrentUserName()).willReturn("reader");
+        given(mock.getCurrentUserFullName()).willReturn("name");
+        given(mock.getCurrentUserSubject()).willReturn(dataService.getUser().getSubject());
+        given(mock.getCurrentUser()).willReturn(dataService.getUser());
     }
 
-    @AfterAll
+    @AfterEach
     public void clean() {
         dataService.clean();
     }
@@ -286,6 +293,36 @@ public class ProcedureControllerTest {
         assertThatThrownBy(() -> procedureController.updateProcedure(procedure.getId(), dto))
                 .isInstanceOf(io.quarkus.security.ForbiddenException.class)
                 .hasMessageContaining("Missing permission to update action status");
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_write", "event_read" })
+    void should_close_procedure() {
+        // given
+        var procedureId = dataService.getProcedure1().getId();
+        var closedComment = new CommentWriteDto(UUID.randomUUID(), "close procedure");
+
+        // when
+        procedureController.closeAllProcedureEvents(procedureId, closedComment);
+        var procedure = procedureController.getProcedureDetails(procedureId);
+
+        // then
+        assertThat(procedure.closeComment()).isNotNull();
+        assertThat(procedure.events()).extracting("status").containsExactly(Status.DONE);
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_write" })
+    void should_throw_error_procedure_already_done() {
+        // given
+        var procedureId = dataService.getProcedure1().getId();
+        var closedComment = new CommentWriteDto(UUID.randomUUID(), "close procedure");
+
+        procedureController.closeAllProcedureEvents(procedureId, closedComment);
+
+        // then
+        assertThatThrownBy(() -> procedureController.closeAllProcedureEvents(procedureId, closedComment))
+                .isInstanceOf(jakarta.ws.rs.ForbiddenException.class);
     }
 
 }
