@@ -147,14 +147,14 @@ create table action
 
 create table procedure_action
 (
-    procedure_id integer not null references  procedure,
-    actions_id uuid not null references action
+    procedure_id integer not null references procedure,
+    actions_id   uuid    not null references action
 );
 
 create table procedure_model_action
 (
     procedure_model_id integer not null references procedure_model,
-    actions_id uuid not null references action
+    actions_id         uuid    not null references action
 );
 
 create table asked_service
@@ -220,6 +220,16 @@ create table event_comment
 
 create table action_comment
 (
-    action_id    uuid not null references action,
-    comments_id uuid    not null references comment
+    action_id   uuid not null references action,
+    comments_id uuid not null references comment
 );
+
+create table service_type
+(
+    id     bigint primary key,
+    type   varchar not null,
+    domain varchar not null,
+    gti    integer,
+    gtr    integer,
+    gtrp   integer
+)

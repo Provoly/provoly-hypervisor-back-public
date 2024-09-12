@@ -103,6 +103,14 @@ mp:
           enabled: false
           endpoint: http://localhost:4317
 
+  coswin:
+    scheme: http
+    host: coswin.host.fr
+    port: 8080
+    username: username
+    password: password
+    dataSource: datasource
+
 "%prod":
   quarkus:
     kubernetes-config:

@@ -1545,7 +1545,7 @@ paths:
   /services:
     post:
       tags:
-        - Services Controller
+        - Service Controller
       summary: Save or update services
       description: |
        `startDate` and `endDate` are required is `status` at least `ASKED` and
@@ -1647,6 +1647,115 @@ paths:
                           "activeEnergy": 70
                         },
                         "activeEnergy": 30
+                      }
+                    ]
+      security:
+        - oidc:
+            - authenticated
+  /services/external/id/{actionId}:
+    post:
+      tags:
+        - Service Controller
+      summary: Create external service for an Asked Service Action
+      description: |
+        Generate External service and send it to external service application : Coswin. 
+        It returns a service code which will be set in `serviceExternalId` property in action
+      operationId: com.provoly.equipment.ServiceController_createExternalService
+      parameters:
+        - name: actionId
+          in: path
+          schema:
+            $ref: '#/components/schemas/UUID'
+          example: 01ffde9d-30d2-4273-b61f-c6addd8747c8
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/ExternalServiceWriteDto'
+            examples:
+              default:
+                summary: Create external service with equipment
+                value: |
+                  {
+                    "name": "my external service",
+                    "equipment": "C-A001",
+                    "priority": "1-MINEUR",
+                    "type": "Luminaire - Accidente menacant de tomber",
+                    "description": "description"
+                  }
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                invalidActionType:
+                  description: Occurs when action is not of type `ASKED_SERVICE`
+                invalidPropertyValue:
+                  description: Occurs when `priority` or `type` have invalid values
+                invalidEquipment:
+                  description: Occurs when equipment not exist
+                external:
+                  description: Occurs when external application triggers an error
+                  value: |
+                    {
+                        "code": 400,
+                        "message": "Message from external application"
+                    }
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden if missing a required property
+        "404":
+          description: Action not found
+      security:
+        - oidc:
+            - authenticated
+  /serviceType:
+    get:
+      tags:
+        - ServiceType Controller
+      summary: Retrieve all service type. It's possible to filter on domain
+      operationId: com.provoly.equipment.ServiceTypeController_getServiceTypes
+      parameters:
+        - name: domain
+          in: query
+          schema:
+            type: string
+          example: EP
+      responses:
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden if page not specified
+        "200":
+          description: Returns service types details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceTypeReadDto'
+              examples:
+                default:
+                  value: |
+                    [
+                      {
+                        "type": "Armoire accidentee",
+                        "gti": 2,
+                        "gtr": 3,
+                        "gtrp": "null",
+                        "domain": "EP"
+                      },
+                      {
+                        "type": "Camera accidentee",
+                        "gti": 4,
+                        "gtr": "null",
+                        "gtrp": 18,
+                        "domain": "VP"
                       }
                     ]
       security:
@@ -2421,6 +2530,13 @@ components:
         - ASC
         - DESC
       default: ASC
+    Priority:
+      type: string
+      required: true
+      enum:
+        - 1-MINEUR
+        - 2-MAJEUR
+        - 3-BLOQUANT
     Family:
       type: object
       properties:
@@ -2501,6 +2617,30 @@ components:
           type: string
         category:
           type: string
+    ExternalServiceWriteDto:
+      type: object
+      properties:
+        name:
+          type: string
+        equipment:
+          type : string
+        priority:
+          $ref: '#/components/schemas/Priority'
+        description:
+          type: string
+    ServiceTypeReadDto:
+      type: object
+      properties:
+        type:
+          type: string
+        domain:
+          type: string
+        gti:
+          type : integer
+        gtr:
+          type: integer
+        gtrp:
+          type: integer
     EquipmentWriteDto:
       type: object
       additionalProperties: true

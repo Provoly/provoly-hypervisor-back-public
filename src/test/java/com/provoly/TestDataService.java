@@ -68,11 +68,11 @@ public class TestDataService {
         prev = serviceDatabaseReader.getServiceCategoryByCode("PREV").get();
         cura = serviceDatabaseReader.getServiceCategoryByCode("CURA").get();
 
-        var chalonsCity = equipmentDatabaseReader.getCityByCode("CH").get();
-        var chalonsDistrict = equipmentDatabaseReader.getDistrictByCode("CH_C").get();
+        var chalonsCity = equipmentDatabaseReader.getCityByCode("CHALONS").get();
+        var chalonsDistrict = equipmentDatabaseReader.getDistrictByCode("CENTRE").get();
 
-        var fagniereCity = equipmentDatabaseReader.getCityByCode("FAGN").get();
-        var fagniereDistrict = equipmentDatabaseReader.getDistrictByCode("FAGN").get();
+        var fagniereCity = equipmentDatabaseReader.getCityByCode("FAGNIERES").get();
+        var fagniereDistrict = equipmentDatabaseReader.getDistrictByCode("FAGNIERES").get();
 
         var armoire = equipmentDatabaseReader.getFamilyByCode("EP_ARMOIRE").get();
         var foyerLumineux = equipmentDatabaseReader.getFamilyByCode("EP_FOYER_LUMINEUX").get();
@@ -105,7 +105,7 @@ public class TestDataService {
 
         var asked1 = new AskedService(UUID.randomUUID(), Status.IN_PROGRESS, "service 1", 1);
         var asked2 = new AskedService(UUID.randomUUID(), Status.NEW, "service 2", 2);
-        var asked6 = new AskedService(UUID.randomUUID(), Status.DONE, "service 6", 3);
+        var asked6 = new AskedService(UUID.randomUUID(), Status.DONE, "service 6", 3, "DI1234");
 
         event1 = initEvent("operator1", categories.get("MANIFESTATION"), Criticality.LOW, Status.NEW, equip1, null);
         associatedEvent = initEvent("manfestation1", categories.get("MANIFESTATION"), Criticality.MEDIUM, Status.IN_PROGRESS,

@@ -64,6 +64,5 @@ public class ServiceMapper {
                 .orElseThrow(() -> new IllegalArgumentException("Service category %s not found".formatted(dto.category())));
 
         entity.setCategory(category);
-
     }
 }

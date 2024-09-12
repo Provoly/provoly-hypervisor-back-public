@@ -1,5 +1,6 @@
 package com.provoly.service;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -8,6 +9,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
 import com.provoly.EquipmentEnrichedProducer;
+import com.provoly.action.ActionService;
+import com.provoly.action.AskedService;
+import com.provoly.service.coswin.CoswinService;
 
 import org.jboss.logging.Logger;
 
@@ -17,13 +21,17 @@ public class ServiceService {
     private final ServiceDatabaseReader databaseReader;
     private final ServiceMapper serviceMapper;
     private final EquipmentEnrichedProducer equipmentEnrichedProducer;
+    private final CoswinService coswinService;
+    private final ActionService actionService;
 
     public ServiceService(Logger logger, ServiceDatabaseReader databaseReader, ServiceMapper serviceMapper,
-            EquipmentEnrichedProducer equipmentEnrichedProducer) {
+            EquipmentEnrichedProducer equipmentEnrichedProducer, CoswinService coswinService, ActionService actionService) {
         this.logger = logger;
         this.databaseReader = databaseReader;
         this.serviceMapper = serviceMapper;
         this.equipmentEnrichedProducer = equipmentEnrichedProducer;
+        this.coswinService = coswinService;
+        this.actionService = actionService;
     }
 
     @Transactional
@@ -87,5 +95,25 @@ public class ServiceService {
     public Service getServiceByExternalId(String externalId) {
         return databaseReader.getServiceWithExternalId(externalId)
                 .orElseThrow(() -> new IllegalArgumentException("Service with external id %s invalid".formatted(externalId)));
+    }
+
+    @Transactional
+    public String createExternalService(UUID actionId, ExternalServiceWriteDto dto) throws IOException {
+        logger.infof("Create external service for action %s", actionId);
+
+        var action = actionService.getActionById(actionId);
+        if (!(action instanceof AskedService)) {
+            throw new IllegalArgumentException("Action %s is not an asked service".formatted(actionId));
+        }
+
+        if (((AskedService) action).getServiceExternalId() != null) {
+            throw new IllegalArgumentException(
+                    "Action %s is already linked to an external service : %s".formatted(actionId,
+                            ((AskedService) action).getServiceExternalId()));
+        }
+        var serviceCode = coswinService.sendExternalService(dto);
+        logger.infof("External service created with code %s", serviceCode);
+        ((AskedService) action).setServiceExternalId(serviceCode);
+        return serviceCode;
     }
 }

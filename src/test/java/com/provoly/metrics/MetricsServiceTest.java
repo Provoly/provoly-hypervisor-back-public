@@ -96,7 +96,7 @@ public class MetricsServiceTest {
     @Test
     void should_get_equipment_with_event_metrics_filter_on_place() {
         // when
-        var result = metricsService.getEpEquipmentsWithEvent(List.of(), List.of(), List.of(), List.of("CH_C"));
+        var result = metricsService.getEpEquipmentsWithEvent(List.of(), List.of(), List.of(), List.of("CENTRE"));
 
         //then
         assertThat(result).extracting("nbEquipWithEvent_A").isEqualTo(0L);
@@ -406,7 +406,7 @@ public class MetricsServiceTest {
 
         // when
         var result = metricsService.aggregateDoneServices(DateInterval.month, Instant.parse("2024-05-20T00:00:00.00Z"), null, 3,
-                List.of(), List.of(), List.of("CH_C"));
+                List.of(), List.of(), List.of("CENTRE"));
 
         //then
         assertThat(result).hasSize(3);
@@ -666,7 +666,8 @@ public class MetricsServiceTest {
 
         var startDate = Instant.parse(LocalDate.now().atStartOfDay().plusDays(10) + ":00.000Z");
         // when
-        var result = metricsService.aggregateAnomaliesEvents(DateInterval.month, 2, "VP", startDate, List.of("FAGN"), List.of(),
+        var result = metricsService.aggregateAnomaliesEvents(DateInterval.month, 2, "VP", startDate, List.of("FAGNIERES"),
+                List.of(),
                 List.of(), List.of());
 
         //then

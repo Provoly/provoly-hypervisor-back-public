@@ -4,6 +4,7 @@ import java.util.NoSuchElementException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
@@ -33,6 +34,9 @@ public class GenericExceptionMapper implements ExceptionMapper<Exception> {
             case NoSuchElementException e -> Response
                     .status(Response.Status.NOT_FOUND)
                     .entity(new ErrorDto(Response.Status.NOT_FOUND.getStatusCode(), e.getMessage())).build();
+            case BadRequestException e -> Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(new ErrorDto(Response.Status.BAD_REQUEST.getStatusCode(), e.getMessage())).build();
             case IllegalArgumentException e -> Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity(new ErrorDto(Response.Status.BAD_REQUEST.getStatusCode(), e.getMessage())).build();
