@@ -13,7 +13,8 @@ public class ShortEquipmentMapper {
                 equipment.getId(),
                 equipment.getCode(),
                 equipment.getEntity().getCode(),
-                equipment.getFamily().getCode());
+                equipment.getFamily().getCode(),
+                equipment.getDomain().getCode());
     }
 
 }

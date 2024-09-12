@@ -99,7 +99,7 @@ public class ServiceServiceTest {
     void should_throw_when_action_not_found() {
         // Given
         var externalService = new ExternalServiceWriteDto("name", null, "1-MINEUR", "Luminaire - Accidente menacant de tomber",
-                "desc");
+                "desc", "EP");
 
         // When
         assertThatThrownBy(() -> serviceService.createExternalService(UUID.randomUUID(), externalService))
@@ -110,7 +110,7 @@ public class ServiceServiceTest {
     void should_throw_when_equipment_not_found() {
         // Given
         var externalService = new ExternalServiceWriteDto("name", "toto", "1-MINEUR",
-                "Luminaire - Accidente menacant de tomber", "desc");
+                "Luminaire - Accidente menacant de tomber", "desc", "EP");
         var proc = testDataService.getProcedure1();
         var action = proc.getActions().stream().toList().getFirst();
 
@@ -123,7 +123,7 @@ public class ServiceServiceTest {
     void should_throw_when_action_already_linked_with_external_service() {
         // Given
         var externalService = new ExternalServiceWriteDto("name", null, "1-MINEUR", "Luminaire - Accidente menacant de tomber",
-                "desc");
+                "desc", "EP");
         var proc = testDataService.getProcedure3();
         var action = (AskedService) proc.getActions().stream().toList().getFirst();
 
@@ -136,7 +136,7 @@ public class ServiceServiceTest {
     void should_throw_when_invalid_priority() {
         // Given
         var externalService = new ExternalServiceWriteDto("name", null, "toto", "Luminaire - Accidente menacant de tomber",
-                "desc");
+                "desc", "EP");
         var proc = testDataService.getProcedure1();
         var action = proc.getActions().stream().toList().getFirst();
 
@@ -148,7 +148,7 @@ public class ServiceServiceTest {
     @Test
     void should_throw_when_invalid_type() {
         // Given
-        var externalService = new ExternalServiceWriteDto("name", null, "1-MINEUR", "toto", "desc");
+        var externalService = new ExternalServiceWriteDto("name", null, "1-MINEUR", "toto", "desc", "EP");
         var proc = testDataService.getProcedure1();
         var action = proc.getActions().stream().toList().getFirst();
 
@@ -161,7 +161,7 @@ public class ServiceServiceTest {
     void should_set_external_id_in_action() throws IOException {
         // Given
         var externalService = new ExternalServiceWriteDto("name", null, "1-MINEUR", "Luminaire - Accidente menacant de tomber",
-                "desc");
+                "desc", "EP");
         var proc = testDataService.getProcedure1();
         var action = proc.getActions().stream().toList().getFirst();
 

@@ -13,7 +13,6 @@ import com.provoly.user.UserService;
 @ApplicationScoped
 public class CoswinService {
     public static final String DEFAULT_CITY = "CHALONS";
-    public static final String DEFAULT_DOMAIN = "EP";
     private final EquipmentService equipmentService;
     private final UserService userService;
     private final CoswinClient coswinClient;
@@ -51,7 +50,7 @@ public class CoswinService {
                 serviceType.getGtr(),
                 serviceType.getGtrp(),
                 equipment != null ? equipment.getCode() : null,
-                equipment != null ? equipment.getDomain().getCode() : DEFAULT_DOMAIN,
+                dto.domain(),
                 equipment != null ? equipment.getDistrict().getCode() : DEFAULT_CITY);
     }
 
