@@ -75,6 +75,7 @@ insert into district (id,code,name) values (19,'ST-MEMMIE', 'Saint-Memmie');
 insert into district (id,code,name) values (20,'RECY', 'Recy');
 insert into district (id,code,name) values (21,'COMPERTRIX', 'Compertrix');
 insert into district (id,code,name) values (22,'COOLUS', 'Coolus');
+insert into district (id,code,name) values (23,'CHALONS', 'Châlons en Champagne');
 
 
 INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (1, 'Lampe - Allumée de jour', 'EP', null, null, null);
