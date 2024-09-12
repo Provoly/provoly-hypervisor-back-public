@@ -105,17 +105,17 @@ public class ProcedureModelDatabaseReader extends DatabaseReader {
         }
 
         logger.debugf("Sort on %s with order %s", sort, order);
-        var sortProperty = getSortProperty(sort, root);
+        var sortProperty = getSortProperty(cb, sort, root);
         orders.add(order == SortOrder.DESC ? cb.desc(sortProperty) : cb.asc(sortProperty));
         return orders;
     }
 
-    private Expression<?> getSortProperty(ProcedureModelSort sort, Root<ProcedureModel> root) {
+    private Expression<?> getSortProperty(CriteriaBuilder cb, ProcedureModelSort sort, Root<ProcedureModel> root) {
         return switch (sort) {
             case ID -> root.get(ProcedureModel_.id);
             case USE_COUNT -> root.get(ProcedureModel_.useCount);
-            case NAME -> root.get(ProcedureModel_.name);
-            case CREATOR -> root.get(ProcedureModel_.creator);
+            case NAME -> unaccent(cb, root.get(ProcedureModel_.name));
+            case CREATOR -> unaccent(cb, root.get(ProcedureModel_.creator));
             case DOMAIN -> {
                 var domain = root.join(ProcedureModel_.domain, JoinType.LEFT);
                 yield domain.get(Domain_.code);
