@@ -2,19 +2,19 @@ package com.provoly.action.dto;
 
 public class AskedServiceReadDto extends ActionReadDto {
     private final String name;
-    private final String serviceId;
+    private final String serviceExternalId;
 
-    public AskedServiceReadDto(ActionReadDto dto, String name, String serviceId) {
+    public AskedServiceReadDto(ActionReadDto dto, String name, String serviceExternalId) {
         super(dto);
         this.name = name;
-        this.serviceId = serviceId;
+        this.serviceExternalId = serviceExternalId;
     }
 
     public String getName() {
         return name;
     }
 
-    public String getServiceId() {
-        return serviceId;
+    public String getServiceExternalId() {
+        return serviceExternalId;
     }
 }

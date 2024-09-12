@@ -320,6 +320,7 @@ public class EventService {
                         .filter(action -> action.getType().equals(ActionType.ASKED_SERVICE.name())
                                 && ((AskedService) action).getServiceExternalId() != null)
                         .map(action -> serviceService.getServiceByExternalId(((AskedService) action).getServiceExternalId()))
+                        .filter(Objects::nonNull)
                         .toList());
     }
 

@@ -1716,7 +1716,7 @@ paths:
       security:
         - oidc:
             - authenticated
-  /serviceType:
+  /servicesType:
     get:
       tags:
         - ServiceType Controller

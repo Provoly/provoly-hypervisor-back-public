@@ -94,7 +94,7 @@ public class ServiceService {
     @Transactional
     public Service getServiceByExternalId(String externalId) {
         return databaseReader.getServiceWithExternalId(externalId)
-                .orElseThrow(() -> new IllegalArgumentException("Service with external id %s invalid".formatted(externalId)));
+                .orElse(null);
     }
 
     @Transactional

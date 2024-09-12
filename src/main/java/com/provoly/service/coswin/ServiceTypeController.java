@@ -14,7 +14,7 @@ import io.quarkus.security.Authenticated;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestQuery;
 
-@Path("/serviceType")
+@Path("/servicesType")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ServiceTypeController {
