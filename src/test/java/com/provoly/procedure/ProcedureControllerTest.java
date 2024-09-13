@@ -84,7 +84,7 @@ public class ProcedureControllerTest {
         var event = eventController
                 .getEvents(1, 1, null, null, null, List.of(Criticality.HIGH.name()), List.of(),
                         List.of("OUTOFORDER"),
-                        List.of(), List.of())
+                        List.of(), List.of(), null)
                 .stream()
                 .toList()
                 .getFirst();
@@ -123,7 +123,7 @@ public class ProcedureControllerTest {
         var eventId = eventController
                 .getEvents(1, 1, null, null, null, List.of(Criticality.MEDIUM.name()), List.of(),
                         List.of("OUTOFORDER"),
-                        List.of(), List.of())
+                        List.of(), List.of(), null)
                 .stream()
                 .toList()
                 .getFirst()

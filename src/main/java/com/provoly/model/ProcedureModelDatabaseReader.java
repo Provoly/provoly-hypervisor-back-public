@@ -14,7 +14,6 @@ import com.provoly.event.Domain;
 import com.provoly.event.Domain_;
 import com.provoly.event.SortOrder;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
@@ -49,9 +48,11 @@ public class ProcedureModelDatabaseReader extends DatabaseReader {
 
         if (search != null) {
             logger.debugf("filter on procedures model that contains '%s' in id, name or creator".formatted(search));
-            search = "%" + StringUtils.stripAccents(search).toLowerCase() + "%";
+            var idSearch = formatId(search);
+            search = stripAccentAndAddPercents(search);
+
             filters = cb.or(
-                    cb.like(root.get(ProcedureModel_.id).as(String.class), search.replaceFirst("^%(0*)", "%")), // trim all zeros at the beginning to match id
+                    cb.like(root.get(ProcedureModel_.id).as(String.class), idSearch),
                     cb.like(unaccent(cb, root.get(ProcedureModel_.name)), search),
                     cb.like(unaccent(cb, root.get(ProcedureModel_.creator)), search));
         }

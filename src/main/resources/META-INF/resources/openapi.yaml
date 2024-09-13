@@ -15,6 +15,7 @@ paths:
         Default sort on `status` (NEW,IN_PROGRESS,DONE), `criticality` (HIGH,MEDIUM,LOW) and `lastModificationDate` (reversed). It's possible to override it by sorting on other attributes.
         If order is no provided when sort, the default is asc.
         It's possible to filter on one or more criticalities or statuses.
+        It's possible to search on event id, event name or equipment name.
       operationId: com.provoly.event.EventController_getEvents
       parameters:
         - name: page
@@ -78,6 +79,12 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/SortOrder'
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: search on event id, event name, or equipment name name
+          example: '00001'
       responses:
         "200":
           description: Return 2 events with `status` is `DONE` or `NEW` and `criticality` is `LOW` or `HIGH`

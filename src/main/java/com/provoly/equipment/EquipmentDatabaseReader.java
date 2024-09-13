@@ -8,7 +8,6 @@ import jakarta.persistence.criteria.*;
 
 import com.provoly.DatabaseReader;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
@@ -58,8 +57,7 @@ public class EquipmentDatabaseReader extends DatabaseReader {
         if (search != null) {
             logger.debugf("filter on equipment that contains '%s' in code or family name".formatted(search));
             var family = root.join(Equipment_.family, JoinType.LEFT);
-
-            search = "%" + StringUtils.stripAccents(search).toLowerCase() + "%";
+            search = stripAccentAndAddPercents(search);
 
             var filters = cb.or(
                     cb.like(unaccent(cb, root.get(Equipment_.name)), search),

@@ -14,6 +14,8 @@ import com.provoly.event.Category_;
 import com.provoly.event.Domain;
 import com.provoly.event.Domain_;
 
+import org.apache.commons.lang3.StringUtils;
+
 @ApplicationScoped
 public class DatabaseReader {
     protected EntityManager em;
@@ -80,6 +82,18 @@ public class DatabaseReader {
         Predicate[] pred = new Predicate[predicatesList.size()];
         predicatesList.toArray(pred);
         return pred;
+    }
+
+    protected String formatId(String search) {
+        try {
+            return stripAccentAndAddPercents(Integer.valueOf(search).toString());
+        } catch (NumberFormatException e) {
+            return "";
+        }
+    }
+
+    protected String stripAccentAndAddPercents(String search) {
+        return "%" + StringUtils.stripAccents(search).toLowerCase() + "%";
     }
 
 }

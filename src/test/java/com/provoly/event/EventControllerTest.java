@@ -68,7 +68,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of()))
+                List.of(), null))
                 .isInstanceOf(UnauthorizedException.class);
     }
 
@@ -86,7 +86,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of());
+                List.of(), null);
         //then
         assertThat(events).hasSize(2);
     }
@@ -105,7 +105,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of());
+                List.of(), null);
         //then
         assertThat(events).isEmpty();
     }
@@ -127,7 +127,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of());
+                List.of(), null);
         //then
         assertThat(events).hasSize(1);
         assertThat(events.stream().toList().getFirst().getCreationDate()).isAfter(creationDate);
@@ -148,7 +148,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of());
+                List.of(), null);
         //then
         assertThat(events).extracting("criticality").containsOnly(LOW, Criticality.HIGH);
     }
@@ -167,7 +167,7 @@ public class EventControllerTest {
                 List.of(Status.DONE.name(), Status.NEW.name()),
                 List.of(),
                 List.of(),
-                List.of());
+                List.of(), null);
         //then
         assertThat(events).extracting("status").containsOnly(Status.DONE, Status.NEW);
     }
@@ -186,7 +186,7 @@ public class EventControllerTest {
                 List.of(Status.IN_PROGRESS.name()),
                 List.of("MANIFESTATION", "LIMIT", "OUTOFORDER"),
                 List.of(),
-                List.of());
+                List.of(), null);
         //then
         assertThat(events).extracting("status").containsOnly(Status.IN_PROGRESS);
         assertThat(events).extracting("category").containsOnly("MANIFESTATION", "OUTOFORDER");
@@ -206,7 +206,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of("AGGLO-COMMUN"),
-                List.of());
+                List.of(), null);
         //then
         assertThat(events).extracting("equipment").extracting("entity").containsOnly("AGGLO-COMMUN");
     }
@@ -224,7 +224,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of("AGGLO-COMMUN", "invalid"),
-                List.of()))
+                List.of(), null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -242,7 +242,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of("EP_ARMOIRE"));
+                List.of("EP_ARMOIRE"), null);
         //then
         assertThat(events).extracting("equipment").extracting("family").contains("EP_ARMOIRE", "EP_ARMOIRE", "EP_ARMOIRE",
                 "EP_ARMOIRE");
@@ -261,7 +261,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of("invalid")))
+                List.of("invalid"), null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -278,7 +278,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of()))
+                List.of(), null))
                 .isInstanceOf(ConstraintViolationException.class);
     }
 
@@ -295,7 +295,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of()))
+                List.of(), null))
                 .isInstanceOf(ConstraintViolationException.class);
     }
 
@@ -313,7 +313,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of());
+                List.of(), null);
         //then
         assertThat(events).extracting("status").containsExactly(Status.NEW, Status.NEW, Status.NEW, Status.IN_PROGRESS,
                 Status.IN_PROGRESS);
@@ -335,7 +335,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of());
+                List.of(), null);
         //then
         assertThat(events).extracting("procedureProgress").containsExactly(100f, 100f, 0.0f);
     }
@@ -354,7 +354,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of());
+                List.of(), null);
         //then
         assertThat(events).extracting("name").containsExactly("report3", "report2", "report1");
     }
@@ -373,7 +373,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of());
+                List.of(), null);
         //then
         assertThat(events).extracting("name").containsExactly("limit1", "malfunction1", "report3");
     }
@@ -392,7 +392,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of());
+                List.of(), null);
         //then
         assertThat(events).extracting("externalSourceRef").containsExactly("citylinx", "Hyperviseur", "Hyperviseur",
                 "Hyperviseur", "source");
@@ -412,7 +412,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of());
+                List.of(), null);
         //then
         assertThat(events).extracting("criticality").containsExactly(LOW, MEDIUM, MEDIUM);
     }
@@ -431,7 +431,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of());
+                List.of(), null);
         //then
         assertThat(events).extracting("category").containsExactly("OUTOFORDER", "MANIFESTATION", "MANIFESTATION");
     }
@@ -453,7 +453,7 @@ public class EventControllerTest {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of()))
+                List.of(), null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining(invalidSort);
     }
@@ -520,7 +520,7 @@ public class EventControllerTest {
     @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_event_by_id() {
         var firstEventId = eventController
-                .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of())
+                .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(), null)
                 .stream()
                 .toList()
                 .getFirst()
@@ -659,6 +659,44 @@ public class EventControllerTest {
         // when
         assertThatThrownBy(() -> eventController.closeEvent(eventId, closedComment))
                 .isInstanceOf(jakarta.ws.rs.ForbiddenException.class);
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_read" })
+    void should_search_event_with_name_contains_report() {
+        // when
+        var events = eventController.getEvents(
+                1,
+                10,
+                EventSort.NAME.getName(),
+                SortOrder.ASC.name(),
+                null,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(), "report");
+        //then
+        assertThat(events).extracting("name").containsExactly("report1", "report2", "report3");
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_read" })
+    void should_search_event_with_equipment_contains_name() {
+        // when
+        var events = eventController.getEvents(
+                1,
+                10,
+                null,
+                null,
+                null,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(), "C-76");
+        //then
+        assertThat(events).extracting("equipment").extracting("name").containsExactly("C-763", "C-762", "C-762");
     }
 
 }

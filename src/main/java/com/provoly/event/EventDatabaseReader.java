@@ -38,16 +38,17 @@ public class EventDatabaseReader extends DatabaseReader {
             List<Status> status,
             List<Category> categories,
             List<EquipmentEntity> entities,
-            List<Family> families) {
-        var builder = em.getCriteriaBuilder();
-        CriteriaQuery<Event> criteriaQuery = builder.createQuery(Event.class);
+            List<Family> families,
+            String search) {
+        var cb = em.getCriteriaBuilder();
+        CriteriaQuery<Event> criteriaQuery = cb.createQuery(Event.class);
         Root<Event> root = criteriaQuery.from(Event.class);
 
         List<Predicate> predicates = new ArrayList<>();
 
         if (creationDate != null) {
             logger.debugf("filter on creation date %s", creationDate);
-            predicates.add(builder.between(root.get(Event_.creationDate),
+            predicates.add(cb.between(root.get(Event_.creationDate),
                     creationDate,
                     creationDate.plus(1, ChronoUnit.DAYS)));
         }
@@ -83,12 +84,26 @@ public class EventDatabaseReader extends DatabaseReader {
             predicates.add(root.get(Event_.category).in(categories));
         }
 
+        if (search != null) {
+            logger.debugf("filter on event that contains '%s' in id, event name or equipment name".formatted(search));
+            var equipment = root.join(Event_.equipment, JoinType.LEFT);
+
+            var idSearch = formatId(search);
+            search = stripAccentAndAddPercents(search);
+
+            var filtersSearch = cb.or(
+                    cb.like(root.get(Event_.id).as(String.class), idSearch),
+                    cb.like(unaccent(cb, root.get(Event_.name)), search),
+                    cb.like(unaccent(cb, equipment.get(Equipment_.name)), search));
+            predicates.add(filtersSearch);
+        }
+
         var filters = getPredicatesAsArray(predicates);
 
-        List<Order> orders = buildEventOrders(sort, order, builder, root);
+        List<Order> orders = buildEventOrders(sort, order, cb, root);
 
         var query = criteriaQuery.select(root)
-                .where(builder.and(filters))
+                .where(cb.and(filters))
                 .orderBy(orders);
 
         return em.createQuery(query)
