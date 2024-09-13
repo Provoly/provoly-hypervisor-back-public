@@ -1,5 +1,7 @@
 package com.provoly.event.dto;
 
+import static com.provoly.event.EventMapper.DEFAULT_SOURCE;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -147,8 +149,8 @@ public class EventWriteDto {
         return startDate;
     }
 
-    public String getExternalSourceRef() {
-        return externalSourceRef;
+    public boolean isExternalEvent() {
+        return externalSourceRef != null && !externalSourceRef.isBlank() && !externalSourceRef.equals(DEFAULT_SOURCE);
     }
 
 }

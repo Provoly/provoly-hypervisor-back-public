@@ -182,8 +182,7 @@ public class EventService {
         checkManifestationCategory(eventDto);
         checkSubCategoryCoherence(eventDto);
 
-        if ((eventDto.getExternalSourceRef() != null && !eventDto.getExternalSourceRef().isBlank())
-                && eventDto.getEquipmentId() == null) {
+        if (eventDto.isExternalEvent() && eventDto.getEquipmentId() == null) {
             throw new ForbiddenException("Events with external source must provide an equipment.");
         }
 
@@ -214,7 +213,7 @@ public class EventService {
             throw new io.quarkus.security.ForbiddenException("Missing permission to update event.");
         }
 
-        if (eventDto.getExternalSourceRef() != null
+        if (eventDto.isExternalEvent()
                 && forbiddenPropertiesAreUpdatedWhenExternalSource(eventDto, eventToUpdate)) {
             throw new ForbiddenException(
                     "It's only possible to update description, address or criticality of events with external reference");

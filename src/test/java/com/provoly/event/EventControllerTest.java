@@ -361,6 +361,45 @@ public class EventControllerTest {
 
     @Test
     @TestSecurity(user = "reader")
+    void should_return_event_with_desc_sort_id() {
+        // when
+        var events = eventController.getEvents(
+                1,
+                3,
+                EventSort.ID.getName(),
+                SortOrder.DESC.name(),
+                null,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of());
+        //then
+        assertThat(events).extracting("name").containsExactly("limit1", "malfunction1", "report3");
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
+    void should_return_event_with_asc_sort_source() {
+        // when
+        var events = eventController.getEvents(
+                1,
+                5,
+                EventSort.SOURCE.getName(),
+                null,
+                null,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of());
+        //then
+        assertThat(events).extracting("externalSourceRef").containsExactly("citylinx", "Hyperviseur", "Hyperviseur",
+                "Hyperviseur", "source");
+    }
+
+    @Test
+    @TestSecurity(user = "reader")
     void should_return_event_with_desc_sort_criticality() {
         // when
         var events = eventController.getEvents(

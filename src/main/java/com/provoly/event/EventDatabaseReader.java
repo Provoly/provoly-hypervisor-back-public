@@ -1,5 +1,7 @@
 package com.provoly.event;
 
+import static com.provoly.event.EventMapper.DEFAULT_SOURCE;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -142,21 +144,6 @@ public class EventDatabaseReader extends DatabaseReader {
         em.persist(event);
     }
 
-    public boolean isEventWithNameExists(String name) {
-        var builder = em.getCriteriaBuilder();
-        CriteriaQuery<Event> criteriaQuery = builder.createQuery(Event.class);
-        Root<Event> root = criteriaQuery.from(Event.class);
-
-        var query = criteriaQuery.select(root)
-                .where(builder.equal(root.get(Event_.name), name));
-
-        return em.createQuery(query)
-                .getResultStream()
-                .findFirst()
-                .isPresent();
-
-    }
-
     public Collection<Category> getCategoryOrSubCategories() {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<Category> criteriaQuery = builder.createQuery(Category.class);
@@ -213,6 +200,8 @@ public class EventDatabaseReader extends DatabaseReader {
                 var category = root.join(Event_.category, JoinType.LEFT);
                 yield category.get(Category_.name);
             }
+            case ID -> root.get(Event_.id);
+            case SOURCE -> builder.coalesce(root.get(Event_.externalSourceRef), DEFAULT_SOURCE);
         };
     }
 

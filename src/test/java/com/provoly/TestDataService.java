@@ -110,8 +110,9 @@ public class TestDataService {
         event1 = initEvent("operator1", categories.get("MANIFESTATION"), Criticality.LOW, Status.NEW, equip1, null);
         associatedEvent = initEvent("manfestation1", categories.get("MANIFESTATION"), Criticality.MEDIUM, Status.IN_PROGRESS,
                 equip2, null);
-        initEvent("report1", categories.get("OUTOFORDER"), Criticality.LOW, Status.NEW, equip6, "source");
-        var event4 = initEvent("report2", categories.get("OUTOFORDER"), Criticality.HIGH, Status.IN_PROGRESS, equip3, "source");
+        initEvent("report1", categories.get("OUTOFORDER"), Criticality.LOW, Status.NEW, equip6, "citylinx");
+        var event4 = initEvent("report2", categories.get("OUTOFORDER"), Criticality.HIGH, Status.IN_PROGRESS, equip3,
+                "wintics");
         doneEvent = initEvent("report3", categories.get("OUTOFORDER"), Criticality.MEDIUM, Status.DONE, equip6, null);
         var event6 = initEvent("malfunction1", categories.get("OUTOFORDER"), Criticality.LOW, Status.IN_PROGRESS, equip4,
                 "source");

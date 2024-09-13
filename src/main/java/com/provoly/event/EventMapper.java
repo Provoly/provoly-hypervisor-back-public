@@ -17,6 +17,7 @@ import com.provoly.procedure.ProcedureService;
 
 @ApplicationScoped
 public class EventMapper {
+    public static final String DEFAULT_SOURCE = "Hyperviseur";
     private final ProcedureService procedureService;
     private final EquipmentService equipmentService;
     private final EventDatabaseReader databaseReader;
@@ -55,7 +56,7 @@ public class EventMapper {
                 mapToString(event.getDomain()),
                 event.getStartDate(),
                 event.getEndDate(),
-                event.getExternalSourceRef(),
+                event.getExternalSourceRef() == null ? DEFAULT_SOURCE : event.getExternalSourceRef(),
                 commentMapper.mapLastCommentToDto(event.getComments()),
                 event.getComments().size());
     }

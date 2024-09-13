@@ -2514,6 +2514,8 @@ components:
         - criticality
         - name
         - category
+        - id
+        - source
     ProcedureModelSort:
       type : string
       enum:

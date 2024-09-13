@@ -9,7 +9,9 @@ public enum EventSort {
     PROCEDURE_PROGRESS("procedureProgress"),
     NAME("name"),
     CRITICALITY("criticality"),
-    CATEGORY("category");
+    CATEGORY("category"),
+    ID("id"),
+    SOURCE("source");
 
     private final String name;
 
