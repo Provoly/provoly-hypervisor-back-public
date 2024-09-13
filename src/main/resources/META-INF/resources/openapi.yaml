@@ -1681,7 +1681,7 @@ paths:
                 value: |
                   {
                     "name": "my external service",
-                    "equipment": "C-A001",
+                    "equipment": "e0b38641-3ff1-495e-b26c-2cb78f1d0c09",
                     "priority": "1-MINEUR",
                     "type": "Luminaire - Accidente menacant de tomber",
                     "description": "description"
@@ -2623,7 +2623,7 @@ components:
         name:
           type: string
         equipment:
-          type : string
+          type : '#/components/schemas/UUID'
         priority:
           $ref: '#/components/schemas/Priority'
         description:

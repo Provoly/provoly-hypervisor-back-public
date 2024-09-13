@@ -11,19 +11,19 @@ public class AskedServiceWriteDto extends ActionWriteDto {
     @NotNull
     @NotBlank
     private final String name;
-    private final String serviceId;
+    private final String serviceExternalId;
 
-    public AskedServiceWriteDto(UUID id, String type, Status status, String name, String serviceId) {
+    public AskedServiceWriteDto(UUID id, String type, Status status, String name, String serviceExternalId) {
         super(id, type, status);
         this.name = name;
-        this.serviceId = serviceId;
+        this.serviceExternalId = serviceExternalId;
     }
 
     public String getName() {
         return name;
     }
 
-    public String getServiceId() {
-        return serviceId;
+    public String getServiceExternalId() {
+        return serviceExternalId;
     }
 }

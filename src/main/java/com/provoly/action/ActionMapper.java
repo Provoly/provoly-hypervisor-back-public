@@ -54,7 +54,7 @@ public class ActionMapper {
             case OtherActionWriteDto dto -> ((OtherAction) action).setName(dto.getName());
             case AskedServiceWriteDto dto -> {
                 ((AskedService) action).setName(dto.getName());
-                ((AskedService) action).setServiceExternalId(dto.getServiceId());
+                ((AskedService) action).setServiceExternalId(dto.getServiceExternalId());
             }
             case PhoneActionWriteDto dto -> {
                 if (ActionType.valueOf(dto.getType()) == ActionType.SMS) {
