@@ -1,9 +1,11 @@
 package com.provoly.service;
 
+import java.util.UUID;
+
 public record ExternalServiceWriteDto(String name,
-        String equipment,
-        String priority,
-        String type,
-        String description,
-        String domain) {
+                                      UUID equipment,
+                                      String priority,
+                                      String type,
+                                      String description,
+                                      String domain) {
 }

@@ -31,7 +31,7 @@ public class CoswinService {
     public CoswinServiceWriteDto mapToCoswinService(ExternalServiceWriteDto dto) {
         Equipment equipment = null;
         if (dto.equipment() != null) {
-            equipment = equipmentService.getEquipmentByName(dto.equipment());
+            equipment = equipmentService.getEquipmentById(dto.equipment());
         }
 
         if (!Priority.priorityExists(dto.priority())) {

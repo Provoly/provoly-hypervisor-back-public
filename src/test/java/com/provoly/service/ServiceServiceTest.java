@@ -109,7 +109,7 @@ public class ServiceServiceTest {
     @Test
     void should_throw_when_equipment_not_found() {
         // Given
-        var externalService = new ExternalServiceWriteDto("name", "toto", "1-MINEUR",
+        var externalService = new ExternalServiceWriteDto("name", UUID.randomUUID(), "1-MINEUR",
                 "Luminaire - Accidente menacant de tomber", "desc", "EP");
         var proc = testDataService.getProcedure1();
         var action = proc.getActions().stream().toList().getFirst();
