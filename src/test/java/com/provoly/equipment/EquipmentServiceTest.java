@@ -92,7 +92,7 @@ public class EquipmentServiceTest {
     @Test
     void should_get_equipments_with_good_entity() {
         // when
-        var result = equipmentService.getEquipments(List.of("FAGNIERES-COMMUN"));
+        var result = equipmentService.getEquipments(List.of("FAGNIERES-COMMUN"), null, 1, 10);
 
         // then
         assertThat(result).extracting("entity").extracting("name").containsExactly("Fagnières");
@@ -101,7 +101,7 @@ public class EquipmentServiceTest {
     @Test
     void should_throw_exception_when_get_equipment_entity_not_exists() {
         // when
-        assertThatThrownBy(() -> equipmentService.getEquipments(List.of("invalid_entity")))
+        assertThatThrownBy(() -> equipmentService.getEquipments(List.of("invalid_entity"), null, 1, 10))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("entity invalid");
     }
@@ -128,13 +128,13 @@ public class EquipmentServiceTest {
         var equipment2 = new EquipmentWriteDto("new_technical_id1", 0, "name1", "code1", "invalid domain", "Armoire",
                 "FAGNIERES-COMMUN", "CHALONS", "address", "CENTRE", null, false, null);
 
-        var actualEquipmentSize = equipmentService.getEquipments(List.of()).size();
+        var actualEquipmentSize = equipmentService.getEquipments(List.of(), null, 1, 10).size();
 
         // when
         assertThatThrownBy(() -> equipmentService.saveOrUpdateEquipments(List.of(equipment1, equipment2)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("domain");
-        var sameEquipmentSize = equipmentService.getEquipments(List.of()).size();
+        var sameEquipmentSize = equipmentService.getEquipments(List.of(), null, 1, 10).size();
 
         // then
         assertThat(actualEquipmentSize).isEqualTo(sameEquipmentSize);
@@ -211,11 +211,28 @@ public class EquipmentServiceTest {
         equipmentService.saveOrUpdateEquipments(List.of(equipment));
 
         // when
-        var equipments = equipmentService.getEquipments(List.of("FAGNIERES-COMMUN"));
+        var equipments = equipmentService.getEquipments(List.of("FAGNIERES-COMMUN"), null, 1, 10);
 
         // then
         assertThat(equipments).isNotEmpty();
         assertThat(equipments).extracting("deleted").doesNotContain(true);
     }
 
+    @Test
+    void should_get_equipments_with_that_contains_code_value() {
+        // when
+        var result = equipmentService.getEquipments(List.of(), "10", 1, 10);
+
+        // then
+        assertThat(result).extracting("name").containsExactlyInAnyOrder("C-1034", "P-1000");
+    }
+
+    @Test
+    void should_get_equipments_with_that_contains_family_value() {
+        // when
+        var result = equipmentService.getEquipments(List.of(), "àrm", 1, 1);
+
+        // then
+        assertThat(result).extracting("family").extracting("name").containsExactly("Armoire");
+    }
 }

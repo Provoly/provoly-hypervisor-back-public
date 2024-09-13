@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.*;
 
 import com.provoly.DatabaseReader;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
@@ -41,23 +42,37 @@ public class EquipmentDatabaseReader extends DatabaseReader {
                 .orElseThrow(() -> new NoSuchElementException("Equipment with name %s not found".formatted(name)));
     }
 
-    public Collection<Equipment> getEquipmentsByEntities(List<EquipmentEntity> entities) {
-        var builder = em.getCriteriaBuilder();
-        CriteriaQuery<Equipment> criteriaQuery = builder.createQuery(Equipment.class);
+    public Collection<Equipment> getEquipments(List<EquipmentEntity> entities, String search, int page, int pageSize) {
+        var cb = em.getCriteriaBuilder();
+        CriteriaQuery<Equipment> criteriaQuery = cb.createQuery(Equipment.class);
         Root<Equipment> root = criteriaQuery.from(Equipment.class);
 
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(builder.isFalse(root.get(Equipment_.deleted)));
+        predicates.add(cb.isFalse(root.get(Equipment_.deleted)));
 
         if (!entities.isEmpty()) {
             logger.debugf("filter on equipment entities %s", entities);
             predicates.add(root.get(Equipment_.entity).in(entities));
         }
 
+        if (search != null) {
+            logger.debugf("filter on equipment that contains '%s' in code or family name".formatted(search));
+            var family = root.join(Equipment_.family, JoinType.LEFT);
+
+            search = "%" + StringUtils.stripAccents(search).toLowerCase() + "%";
+
+            var filters = cb.or(
+                    cb.like(unaccent(cb, root.get(Equipment_.name)), search),
+                    cb.like(unaccent(cb, family.get(Family_.name)), search));
+            predicates.add(filters);
+        }
+
         var query = criteriaQuery.select(root)
-                .where(builder.and(getPredicatesAsArray(predicates)));
+                .where(cb.and(getPredicatesAsArray(predicates)));
 
         return em.createQuery(query)
+                .setFirstResult((page - 1) * pageSize)
+                .setMaxResults(pageSize)
                 .getResultList();
     }
 

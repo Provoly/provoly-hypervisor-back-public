@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
@@ -33,8 +34,11 @@ public class EquipmentController {
 
     @GET
     @Authenticated
-    public Collection<EquipmentReadDto> getEquipments(@RestQuery List<String> entity) {
-        var equipments = equipmentService.getEquipments(entity);
+    public Collection<EquipmentReadDto> getEquipments(@RestQuery List<String> entity,
+            @RestQuery String search,
+            @DefaultValue("1") @Positive @RestQuery int page,
+            @DefaultValue("20") @Positive @RestQuery int pageSize) {
+        var equipments = equipmentService.getEquipments(entity, search, page, pageSize);
         return equipmentMapper.mapToEquipmentReadDto(equipments);
 
     }

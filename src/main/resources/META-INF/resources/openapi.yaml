@@ -1327,9 +1327,23 @@ paths:
     get:
       tags:
         - Equipment Controller
-      summary: Retrieve all equipments or only equipments with entity in param
+      summary: Retrieve all equipments with pagination
+      description: It's possible to filter on entity, or search by equipment name or family name
       operationId: com.provoly.equipment.EquipmentController_getEquipments
       parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+          example: 1
+          required: true
+          description: Page number requested, triggers an error if not specified or if 0.
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+          example: 20
+          description: Page size, returns an empty list if not specified.
         - name: entity
           in: query
           schema:
@@ -1338,6 +1352,12 @@ paths:
              type: string
           description: must match one of `EquipmentEntity` name
           example: 'FAGNIERES-COMMUN'
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: search on equipment code and family name
+          example: 'armo'
       responses:
         "401":
           description: Not Authorized

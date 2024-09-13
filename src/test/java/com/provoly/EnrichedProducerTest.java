@@ -81,7 +81,7 @@ public class EnrichedProducerTest {
         equipmentService.saveOrUpdateEquipments(List.of(equipment, equipment2)); // 2 messages
 
         // save event
-        var equipId = equipmentService.getEquipments(List.of("CHALONS-COMMUN")).stream().findFirst().get().getId();
+        var equipId = equipmentService.getEquipments(List.of("CHALONS-COMMUN"), null, 1, 10).stream().findFirst().get().getId();
         var event = new EventWriteDto(null,
                 "saved event",
                 "desc",
@@ -97,7 +97,7 @@ public class EnrichedProducerTest {
         var savedEvent = eventService.saveEvent(event); // 1 message
 
         // update event
-        var equipId2 = equipmentService.getEquipments(List.of("AGGLO-COMMUN")).stream().findFirst().get().getId();
+        var equipId2 = equipmentService.getEquipments(List.of("AGGLO-COMMUN"), null, 1, 10).stream().findFirst().get().getId();
         var eventUpdated = new EventWriteDto(savedEvent.getId(),
                 "totoooo",
                 "desc",
@@ -133,7 +133,7 @@ public class EnrichedProducerTest {
                 "address", "CENTRE", null, false, null);
         equipmentService.saveOrUpdateEquipments(List.of(equipment, equipment2)); // 2 messages
 
-        var equipId = equipmentService.getEquipments(List.of("CHALONS-COMMUN")).stream().findFirst().get().getId();
+        var equipId = equipmentService.getEquipments(List.of("CHALONS-COMMUN"), null, 1, 10).stream().findFirst().get().getId();
 
         var event = new EventWriteDto(null,
                 "toto",
