@@ -112,7 +112,7 @@ public class EventMapper {
                         getEquipment(event),
                         getLinkedEventsIds(event),
                         getProcedureProgress(event),
-                        event.getDomain().getName(),
+                        event.getDomain() == null ? null : event.getDomain().getName(),
                         event.getStartDate(),
                         event.getEndDate(),
                         event.getExternalSourceRef() == null ? DEFAULT_SOURCE : event.getExternalSourceRef(),
