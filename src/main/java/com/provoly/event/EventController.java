@@ -1,6 +1,10 @@
 package com.provoly.event;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +14,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import com.provoly.comment.CommentReadDto;
 import com.provoly.comment.CommentService;
@@ -22,6 +27,7 @@ import com.provoly.user.Role;
 import io.quarkus.security.Authenticated;
 
 import org.jboss.resteasy.reactive.RestQuery;
+import org.jboss.resteasy.reactive.RestResponse;
 
 @Path("/events")
 @Produces(MediaType.APPLICATION_JSON)
@@ -117,6 +123,25 @@ public class EventController {
     @RolesAllowed({ Role.STR_EVENT_READ })
     public List<CommentReadDto> getCommentsForEvent(Integer id) {
         return commentService.getCommentsForEvent(id);
+    }
+
+    @Path("/export")
+    @GET
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @RolesAllowed({ Role.STR_EVENT_WRITE })
+    public RestResponse<InputStream> exportEvents(@RestQuery @DefaultValue("false") boolean archived) throws IOException {
+        var output = eventService.exportEvents();
+        String filename = "Hyperviseur_Export_Journal_Evenements_%s.xlsx"
+                .formatted(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+
+        RestResponse.ResponseBuilder<InputStream> builder = RestResponse.ResponseBuilder.create(Response.Status.OK);
+
+        return builder
+                .header("Content-Disposition", "attachment;filename=" + filename)
+                .header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                .header("Accept-Ranges", "bytes")
+                .entity(output)
+                .build();
     }
 
 }

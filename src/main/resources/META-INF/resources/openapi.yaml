@@ -573,6 +573,31 @@ paths:
       security:
         - oidc:
             - authenticated
+  /events/export:
+    get:
+      tags:
+        - Event Controller
+      summary: Export all events
+      description: |
+        Export events in a .xslx file.
+        It's possible to export all events, even archived events if option is set to true. Default to false.
+      operationId: com.provoly.event.EventController_getEventSummaries
+      parameters:
+        - name: archived
+          in: query
+          schema:
+            type: boolean
+          required: false
+      responses:
+        "200":
+          description: Events are exported.
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
+      security:
+        - oidc:
+            - authenticated
   /procedures/model:
     get:
       tags:

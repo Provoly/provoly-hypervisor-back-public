@@ -180,6 +180,17 @@ public class EventDatabaseReader extends DatabaseReader {
                 .getResultStream();
     }
 
+    public List<Event> getAllEvents() {
+        var cb = em.getCriteriaBuilder();
+        CriteriaQuery<Event> criteriaQuery = cb.createQuery(Event.class);
+        Root<Event> root = criteriaQuery.from(Event.class);
+
+        var query = criteriaQuery.select(root);
+
+        return em.createQuery(query)
+                .getResultList();
+    }
+
     private List<Order> buildEventOrders(EventSort sort,
             SortOrder order,
             CriteriaBuilder builder,

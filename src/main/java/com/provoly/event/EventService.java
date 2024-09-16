@@ -3,6 +3,8 @@ package com.provoly.event;
 import static com.provoly.service.ServiceStatus.ASKED;
 import static com.provoly.service.ServiceStatus.IN_PROGRESS;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,11 +40,12 @@ public class EventService {
     private final EquipmentEnrichedProducer equipmentEnrichedProducer;
     private final Logger logger;
     private final SecurityIdentity securityIdentity;
+    private final XslxService xslxService;
 
     public EventService(EventDatabaseReader databaseReader, EventMapper eventMapper, EquipmentService equipmentService,
             ServiceService serviceService,
             EquipmentEnrichedProducer equipmentEnrichedProducer,
-            Logger logger, SecurityIdentity securityIdentity) {
+            Logger logger, SecurityIdentity securityIdentity, XslxService xslxService) {
         this.databaseReader = databaseReader;
         this.eventMapper = eventMapper;
         this.equipmentService = equipmentService;
@@ -50,6 +53,7 @@ public class EventService {
         this.equipmentEnrichedProducer = equipmentEnrichedProducer;
         this.logger = logger;
         this.securityIdentity = securityIdentity;
+        this.xslxService = xslxService;
     }
 
     @Transactional
@@ -247,6 +251,13 @@ public class EventService {
             event.setStatus(Status.DONE);
             event.setCloseDate(Instant.now());
         }
+    }
+
+    @Transactional
+    public ByteArrayInputStream exportEvents() throws IOException {
+        var events = databaseReader.getAllEvents();
+        logger.debugf("Export %s events", events.size());
+        return xslxService.generateExcelWithEvents(eventMapper.mapToExportEventDto(events));
     }
 
     private void enrichEquipmentFromUpdatedEvent(Integer eventId, UUID currentEquipmentId, UUID previousEquipmentId) {

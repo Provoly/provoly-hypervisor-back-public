@@ -2,16 +2,19 @@ package com.provoly.event;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
+import com.provoly.action.AskedService;
 import com.provoly.comment.CommentMapper;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.ShortEquipmentMapper;
 import com.provoly.event.dto.EventReadDto;
 import com.provoly.event.dto.EventSummaryDto;
 import com.provoly.event.dto.EventWriteDto;
+import com.provoly.event.dto.ExportEventDto;
 import com.provoly.procedure.Procedure;
 import com.provoly.procedure.ProcedureService;
 
@@ -90,6 +93,67 @@ public class EventMapper {
         entity.setEquipment(equipmentService.getEquipmentByIdOrNull(dto.getEquipmentId()));
         entity.setStartDate(dto.getStartDate());
         entity.setEndDate(dto.getEndDate());
+    }
+
+    public List<ExportEventDto> mapToExportEventDto(List<Event> events) {
+        return events
+                .stream()
+                .map(event -> new ExportEventDto(
+                        event.getId(),
+                        event.getName(),
+                        event.getAddress(),
+                        event.getDescription(),
+                        event.getCriticality().name(),
+                        getCategory(event),
+                        event.getStatus().name(),
+                        event.getLastModificationDate(),
+                        event.getCreationDate(),
+                        event.getCloseDate(),
+                        getEquipment(event),
+                        getLinkedEventsIds(event),
+                        getProcedureProgress(event),
+                        event.getDomain().getName(),
+                        event.getStartDate(),
+                        event.getEndDate(),
+                        event.getExternalSourceRef() == null ? DEFAULT_SOURCE : event.getExternalSourceRef(),
+                        getAskedServicesId(event)))
+                .toList();
+    }
+
+    private String getCategory(Event event) {
+        return event.getSubCategory() != null
+                ? event.getSubCategory().getName()
+                : event.getCategory().getName();
+    }
+
+    private String getEquipment(Event event) {
+        return event.getEquipment() == null ? null : event.getEquipment().getName();
+    }
+
+    private float getProcedureProgress(Event event) {
+        return event.getProcedure() == null
+                ? 0
+                : event.getProcedure().getProcedureProgress();
+    }
+
+    private List<Integer> getLinkedEventsIds(Event event) {
+        return event.getProcedure() == null
+                ? List.of()
+                : event.getProcedure().getEvents()
+                        .stream()
+                        .map(Event::getId)
+                        .toList();
+    }
+
+    private List<String> getAskedServicesId(Event event) {
+        return event.getProcedure() == null
+                ? List.of()
+                : event.getProcedure().getActions()
+                        .stream()
+                        .filter(AskedService.class::isInstance)
+                        .filter(action -> ((AskedService) action).getServiceExternalId() != null)
+                        .map(action -> ((AskedService) action).getServiceExternalId())
+                        .toList();
     }
 
     private String mapToString(Domain domain) {

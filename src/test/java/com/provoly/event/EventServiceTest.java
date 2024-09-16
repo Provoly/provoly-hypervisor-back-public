@@ -3,6 +3,10 @@ package com.provoly.event;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 
@@ -14,6 +18,8 @@ import com.provoly.event.dto.EventWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
 
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -236,4 +242,27 @@ public class EventServiceTest {
 
         init();
     }
+
+    @Test
+    void should_export_events() throws IOException {
+        // given
+        var events = eventService.getEvents(1, 100, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(),
+                null);
+
+        // when
+        var result = eventService.exportEvents();
+
+        File tempFile = File.createTempFile("events", ".xslx", null);
+        try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+            fos.write(result.readAllBytes());
+        }
+
+        FileInputStream file = new FileInputStream(tempFile);
+        Workbook book = new XSSFWorkbook(file);
+
+        // then
+        assertThat(book.getSheetAt(0).getLastRowNum()).isEqualTo(events.size());
+        tempFile.deleteOnExit();
+    }
+
 }
