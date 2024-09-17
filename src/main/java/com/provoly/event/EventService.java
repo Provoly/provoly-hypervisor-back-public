@@ -64,7 +64,6 @@ public class EventService {
         logger.debugf("Get events summary by status");
         Map<Status, List<EventSummaryDto>> eventSummaries = getEventSummariesGroupByStatus(limit,
                 Criticality.fromString(criticality))
-                .stream()
                 .collect(Collectors.groupingBy(EventSummaryDto::status));
 
         logger.debugf("Get events count by status");
@@ -82,18 +81,16 @@ public class EventService {
                         eventSummaries.getOrDefault(Status.NEW, List.of())));
     }
 
-    private List<EventSummaryDto> getEventSummariesGroupByStatus(int limit, Criticality criticality) {
+    private Stream<EventSummaryDto> getEventSummariesGroupByStatus(int limit, Criticality criticality) {
         var events = new ArrayList<>(databaseReader.getEvents(Status.NEW, limit, criticality));
         events.addAll(databaseReader.getEvents(Status.IN_PROGRESS, limit, criticality));
         events.addAll(databaseReader.getEvents(Status.DONE, limit, criticality));
 
         return events.stream()
                 .map(event -> {
-                    var allServices = getServicesFromProcedureAndEquipment(event);
-                    return eventMapper.mapToEventSummaryDto(event, allServices.size(),
-                            getLastInProgressOrAskedService(allServices));
-                })
-                .toList();
+                    var allServices = getLastUndoneServiceFromProcedureOrEquipment(event);
+                    return eventMapper.mapToEventSummaryDto(event, allServices);
+                });
     }
 
     @Transactional
@@ -304,38 +301,32 @@ public class EventService {
         }
     }
 
-    private Collection<Service> getServicesFromProcedureAndEquipment(Event event) {
-        var procedureServices = getProcedureServices(event);
+    private List<Service> getLastUndoneServiceFromProcedureOrEquipment(Event event) {
+        Stream<Service> procedureServices = getProcedureServices(event);
 
-        procedureServices.addAll(event.getEquipment() == null
-                ? List.of()
-                : event.getEquipment().getServices());
+        Stream<Service> equipmentServices = event.getEquipment() == null
+                ? Stream.of()
+                : event.getEquipment()
+                        .getServices()
+                        .stream();
 
-        return procedureServices.stream()
-                .distinct()
+        return Stream.concat(procedureServices, equipmentServices)
+                .filter(service -> service.getStatus() == ASKED || service.getStatus() == IN_PROGRESS)
+                .sorted(compareByStatusThenLastDate())
                 .toList();
     }
 
-    private String getLastInProgressOrAskedService(Collection<Service> services) {
-        return services.stream()
-                .filter(service -> service.getStatus() == ASKED || service.getStatus() == IN_PROGRESS)
-                .min(compareByStatusThenLastDate())
-                .map(Service::getExternalId)
-                .orElse(null);
-    }
-
-    private ArrayList<Service> getProcedureServices(Event event) {
+    private Stream<Service> getProcedureServices(Event event) {
         return event.getProcedure() == null
-                ? new ArrayList<>()
-                : new ArrayList<>(event
+                ? Stream.of()
+                : event
                         .getProcedure()
                         .getActions()
                         .stream()
                         .filter(action -> action.getType().equals(ActionType.ASKED_SERVICE.name())
                                 && ((AskedService) action).getServiceExternalId() != null)
                         .map(action -> serviceService.getServiceByExternalId(((AskedService) action).getServiceExternalId()))
-                        .filter(Objects::nonNull)
-                        .toList());
+                        .filter(Objects::nonNull);
     }
 
     private Comparator<Service> compareByStatusThenLastDate() {

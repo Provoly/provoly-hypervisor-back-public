@@ -23,6 +23,7 @@ import com.provoly.comment.CommentWriteDto;
 import com.provoly.event.dto.EventReadDto;
 import com.provoly.event.dto.EventWriteDto;
 import com.provoly.event.dto.EventsSummariesByStatusDto;
+import com.provoly.event.dto.JournalEventDto;
 import com.provoly.user.Role;
 
 import io.quarkus.security.Authenticated;
@@ -61,7 +62,7 @@ public class EventController {
     @GET
     @Authenticated
     @Transactional
-    public Collection<EventReadDto> getEvents(
+    public Collection<JournalEventDto> getEvents(
             @DefaultValue("1") @Positive @RestQuery int page,
             @DefaultValue("20") @Positive @RestQuery int pageSize,
             @RestQuery String sort,
@@ -84,9 +85,7 @@ public class EventController {
                 entity,
                 family,
                 search);
-        return events
-                .map(eventMapper::mapToEventReadDto)
-                .toList();
+        return eventMapper.mapToJournalEventDto(events);
     }
 
     @Path("/id/{id}")

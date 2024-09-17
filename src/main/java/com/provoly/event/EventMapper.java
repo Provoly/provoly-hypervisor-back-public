@@ -3,8 +3,10 @@ package com.provoly.event;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
+import com.provoly.equipment.EquipmentShortDto;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import com.provoly.action.AskedService;
@@ -13,6 +15,7 @@ import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.ShortEquipmentMapper;
 import com.provoly.event.dto.*;
 import com.provoly.procedure.Procedure;
+import com.provoly.service.Service;
 
 @ApplicationScoped
 public class EventMapper {
@@ -58,15 +61,15 @@ public class EventMapper {
                 event.getParent() == null ? null : new ParentReadDto(event.getParent().getId(), event.getParent().getName()));
     }
 
-    public EventSummaryDto mapToEventSummaryDto(Event event, int serviceCount, String serviceTitle) {
+    public EventSummaryDto mapToEventSummaryDto(Event event, List<Service> services) {
         return new EventSummaryDto(event.getId(),
                 event.getName(),
                 event.getCriticality(),
                 event.getStatus(),
                 event.getLastModificationDate(),
                 event.getCategory().getCode(),
-                serviceTitle,
-                (long) serviceCount,
+                services.isEmpty() ? null : services.getFirst().getExternalId(),
+                (long) services.size(),
                 event.getStartDate(),
                 event.getEndDate(),
                 event.getProcedure() == null ? null : event.getProcedure().getId());
@@ -117,6 +120,27 @@ public class EventMapper {
                         event.getExternalSourceRef() == null ? DEFAULT_SOURCE : event.getExternalSourceRef(),
                         getAskedServicesId(event),
                         event.getParent() == null ? null : event.getParent().getId()))
+                .toList();
+    }
+
+    public List<JournalEventDto> mapToJournalEventDto(Stream<Event> events) {
+        return events
+                .map(event -> new JournalEventDto(
+                        event.getId(),
+                        event.getName(),
+                        event.getAddress(),
+                        shortEquipmentMapper.mapToEquipmentShortDto(event.getEquipment()),
+                        event.getCriticality(),
+                        event.getStatus(),
+                        event.getExternalSourceRef() == null ? DEFAULT_SOURCE : event.getExternalSourceRef(),
+                        getProcedureProgress(event),
+                        event.getCategory().getCode(),
+                        event.getSubCategory() == null ? null : event.getSubCategory().getCode(),
+                        event.getCreationDate(),
+                        event.getLastModificationDate(),
+                        event.getProcedure() == null ? 0 : event.getProcedure().getEvents().size(),
+                        event.getProcedure() == null ? null : event.getProcedure().getId(),
+                        event.getDomain() == null ? null : event.getDomain().getCode()))
                 .toList();
     }
 

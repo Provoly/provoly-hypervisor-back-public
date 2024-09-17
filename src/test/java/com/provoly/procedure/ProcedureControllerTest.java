@@ -89,7 +89,7 @@ public class ProcedureControllerTest {
                 .toList()
                 .getFirst();
 
-        var reportDto = new EventWriteDto(event.getId(),
+        var reportDto = new EventWriteDto(event.id(),
                 "Maintenance ouvrage updated",
                 "description",
                 Criticality.HIGH,
@@ -127,7 +127,7 @@ public class ProcedureControllerTest {
                 .stream()
                 .toList()
                 .getFirst()
-                .getId();
+                .id();
 
         var reportDto = new EventWriteDto(eventId,
                 "Maintenance ouvrage updated",

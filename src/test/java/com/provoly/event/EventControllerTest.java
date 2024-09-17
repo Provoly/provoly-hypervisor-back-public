@@ -130,8 +130,8 @@ public class EventControllerTest {
                 List.of(), null);
         //then
         assertThat(events).hasSize(1);
-        assertThat(events.stream().toList().getFirst().getCreationDate()).isAfter(creationDate);
-        assertThat(events.stream().toList().getFirst().getCreationDate()).isBefore(creationDate.plus(1, ChronoUnit.DAYS));
+        assertThat(events.stream().toList().getFirst().creationDate()).isAfter(creationDate);
+        assertThat(events.stream().toList().getFirst().creationDate()).isBefore(creationDate.plus(1, ChronoUnit.DAYS));
     }
 
     @Test
@@ -524,7 +524,7 @@ public class EventControllerTest {
                 .stream()
                 .toList()
                 .getFirst()
-                .getId();
+                .id();
 
         // when
         var event = eventController.getEventDetails(firstEventId);
