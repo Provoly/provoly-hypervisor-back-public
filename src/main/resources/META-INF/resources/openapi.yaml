@@ -1175,6 +1175,40 @@ paths:
       security:
         - oidc:
             - event_write
+  /procedures/id/{id}/associate/event/id/{eventId}:
+    put:
+      tags:
+        - Procedure Controller
+      summary: Add new event to procedure
+      description: |
+        Add new event to a already instantiated procedure. 
+        Event must have `NEW` status, and procedure can't be done;
+      operationId: com.provoly.procedure.ProcedureController_addEventToProcedure
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          example: 50
+          required: true
+        - name: eventId
+          in: path
+          schema:
+            type: integer
+          example: 50
+          required: true
+      responses:
+        "204":
+          description: Updated
+        "400":
+          description: Event is done or procedure is done
+        "401":
+          description: Not Authorized
+        "404":
+          description: Event Not found or Procedure not Found
+      security:
+        - oidc:
+            - event_write
   /actions/id/{id}/comments:
     put:
       tags:

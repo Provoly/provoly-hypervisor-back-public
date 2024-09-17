@@ -325,4 +325,44 @@ public class ProcedureControllerTest {
                 .isInstanceOf(jakarta.ws.rs.ForbiddenException.class);
     }
 
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_write", "event_proc_write" })
+    void should_throw_error_when_add_close_event_to_procedure() {
+        // given
+        var procedureId = dataService.getProcedure1().getId();
+        var event = dataService.getDoneEvent();
+
+        // then
+        assertThatThrownBy(() -> procedureController.addEventToProcedure(procedureId, event.getId()))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_write" })
+    void should_throw_error_when_add_event_to_closed_procedure() {
+        // given
+        var procedureId = dataService.getProcedure1().getId();
+
+        // when
+        procedureController.closeAllProcedureEvents(procedureId, new CommentWriteDto(UUID.randomUUID(), "message"));
+
+        // then
+        assertThatThrownBy(() -> procedureController.addEventToProcedure(procedureId, 1))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_write", "event_read" })
+    void should_add_event_to_procedure() {
+        // given
+        var procedureId = dataService.getProcedure1().getId();
+        var event = dataService.getEvent1();
+
+        // when
+        procedureController.addEventToProcedure(procedureId, event.getId());
+
+        // then
+        var updatedProc = procedureController.getProcedureDetails(procedureId);
+        assertThat(updatedProc.events()).extracting("id").contains(event.getId());
+    }
 }

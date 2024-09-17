@@ -13,6 +13,7 @@ import com.provoly.action.ActionService;
 import com.provoly.action.dto.ActionWriteDto;
 import com.provoly.event.Event;
 import com.provoly.event.EventService;
+import com.provoly.event.Status;
 import com.provoly.model.ProcedureModel;
 import com.provoly.user.Role;
 
@@ -118,5 +119,21 @@ public class ProcedureService {
     @Transactional
     public Procedure getProcedureFromAction(UUID actionId) {
         return databaseReader.getProcedureForAction(actionId);
+    }
+
+    @Transactional
+    public void addEventToProcedure(Integer procedureId, Integer eventId) {
+        var procedure = databaseReader.getProcedureById(procedureId);
+        if (procedure.getCloseComment() != null) {
+            throw new IllegalArgumentException(
+                    "Procedure %s is closed, it's not possible to add new events".formatted(procedure.getId()));
+        }
+
+        var event = eventService.getEventDetails(eventId);
+        if (event.getStatus() != Status.NEW) {
+            throw new IllegalArgumentException(
+                    "Event status of %s is %s instead of NEW".formatted(eventId, event.getStatus()));
+        }
+        procedure.addEvent(event);
     }
 }

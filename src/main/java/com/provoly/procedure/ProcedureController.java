@@ -54,4 +54,11 @@ public class ProcedureController {
         procedureService.updateProcedure(id, dto);
     }
 
+    @Path("/id/{id}/associate/event/id/{eventId}")
+    @PUT
+    @RolesAllowed({ Role.STR_EVENT_WRITE })
+    public void addEventToProcedure(Integer id, Integer eventId) {
+        procedureService.addEventToProcedure(id, eventId);
+    }
+
 }
