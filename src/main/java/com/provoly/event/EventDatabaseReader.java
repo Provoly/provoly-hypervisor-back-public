@@ -29,7 +29,7 @@ public class EventDatabaseReader extends DatabaseReader {
         this.logger = logger;
     }
 
-    public Collection<Event> getEvents(int page,
+    public Stream<Event> getEvents(int page,
             int pageSize,
             EventSort sort,
             SortOrder order,
@@ -106,10 +106,13 @@ public class EventDatabaseReader extends DatabaseReader {
                 .where(cb.and(filters))
                 .orderBy(orders);
 
-        return em.createQuery(query)
+        var result = em.createQuery(query)
                 .setFirstResult((page - 1) * pageSize)
                 .setMaxResults(pageSize)
-                .getResultList();
+                .getResultStream();
+
+        logger.debugf("query done");
+        return result;
     }
 
     public List<Event> getEvents(Status status, int limit, Criticality criticality) {

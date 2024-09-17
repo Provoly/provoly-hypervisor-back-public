@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.List;
 
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.ForbiddenException;
 
 import com.provoly.TestDataService;
@@ -79,12 +80,12 @@ public class EventServiceTest {
     }
 
     @Test
+    @Transactional
     void should_throw_exception_update_external_event() {
         // given
         var eventAlert = eventService
                 .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of("LIMIT"), List.of(),
                         List.of(), null)
-                .stream()
                 .toList()
                 .getFirst();
 
@@ -187,12 +188,12 @@ public class EventServiceTest {
     }
 
     @Test
+    @Transactional
     void should_close_event() {
         // given
         var eventIdInProgress = eventService
                 .getEvents(1, 1, null, null, null, List.of(), List.of(Status.IN_PROGRESS.name()), List.of(), List.of(),
                         List.of(), null)
-                .stream()
                 .toList()
                 .getFirst()
                 .getId();
@@ -208,12 +209,12 @@ public class EventServiceTest {
     }
 
     @Test
+    @Transactional
     void should_not_close_already_closed_event() {
         // given
         var eventIdDone = eventService
                 .getEvents(1, 1, null, null, null, List.of(), List.of(Status.DONE.name()), List.of(), List.of(), List.of(),
                         null)
-                .stream()
                 .toList()
                 .getFirst()
                 .getId();
@@ -244,10 +245,11 @@ public class EventServiceTest {
     }
 
     @Test
+    @Transactional
     void should_export_events() throws IOException {
         // given
         var events = eventService.getEvents(1, 100, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(),
-                null);
+                null).toList();
 
         // when
         var result = eventService.exportEvents();

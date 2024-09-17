@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
@@ -59,6 +60,7 @@ public class EventController {
 
     @GET
     @Authenticated
+    @Transactional
     public Collection<EventReadDto> getEvents(
             @DefaultValue("1") @Positive @RestQuery int page,
             @DefaultValue("20") @Positive @RestQuery int pageSize,
@@ -82,7 +84,7 @@ public class EventController {
                 entity,
                 family,
                 search);
-        return events.stream()
+        return events
                 .map(eventMapper::mapToEventReadDto)
                 .toList();
     }

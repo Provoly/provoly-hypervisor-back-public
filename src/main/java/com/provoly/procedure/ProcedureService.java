@@ -59,15 +59,6 @@ public class ProcedureService {
     }
 
     @Transactional
-    public long getLinkedEventCountByProcedure(Procedure procedure) {
-        if (procedure == null) {
-            logger.debug("Procedure is null, count is 0");
-            return 0;
-        }
-        return databaseReader.getLinkedEventCountForProcedure(procedure.getId());
-    }
-
-    @Transactional
     public void updateProcedure(Integer id, ProcedureWriteDto dto) {
         logger.infof("Update procedure %s with its %s actions and %s events", String.valueOf(id), dto.actions().size(),
                 dto.events().size());

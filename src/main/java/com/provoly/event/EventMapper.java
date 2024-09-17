@@ -16,24 +16,20 @@ import com.provoly.event.dto.EventSummaryDto;
 import com.provoly.event.dto.EventWriteDto;
 import com.provoly.event.dto.ExportEventDto;
 import com.provoly.procedure.Procedure;
-import com.provoly.procedure.ProcedureService;
 
 @ApplicationScoped
 public class EventMapper {
     public static final String DEFAULT_SOURCE = "Hyperviseur";
-    private final ProcedureService procedureService;
     private final EquipmentService equipmentService;
     private final EventDatabaseReader databaseReader;
     private final ShortEquipmentMapper shortEquipmentMapper;
     private final CommentMapper commentMapper;
 
     public EventMapper(EquipmentService equipmentService,
-            ProcedureService procedureService,
             EventDatabaseReader databaseReader,
             ShortEquipmentMapper shortEquipmentMapper,
             CommentMapper commentMapper) {
         this.equipmentService = equipmentService;
-        this.procedureService = procedureService;
         this.databaseReader = databaseReader;
         this.shortEquipmentMapper = shortEquipmentMapper;
         this.commentMapper = commentMapper;
@@ -54,7 +50,7 @@ public class EventMapper {
                 event.getCloseDate(),
                 shortEquipmentMapper.mapToEquipmentShortDto(event.getEquipment()),
                 getProcedureId(event),
-                procedureService.getLinkedEventCountByProcedure(event.getProcedure()),
+                event.getProcedure() == null ? 0 : event.getProcedure().getEvents().size(),
                 getProgressActions(event.getProcedure()),
                 mapToString(event.getDomain()),
                 event.getStartDate(),

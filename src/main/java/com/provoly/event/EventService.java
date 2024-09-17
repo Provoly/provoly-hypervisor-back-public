@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -96,7 +97,7 @@ public class EventService {
     }
 
     @Transactional
-    public Collection<Event> getEvents(int page,
+    public Stream<Event> getEvents(int page,
             int pageSize,
             String sort,
             String order,
@@ -120,7 +121,7 @@ public class EventService {
                 """.formatted(page, pageSize, creationDate, criticality, status, category, entity, family, search, sort));
 
         if (oneOfFilterIsEmpty(criticality, status, category, entity, family)) {
-            return List.of();
+            return Stream.of();
         }
 
         var criticalities = criticality.stream()

@@ -9,8 +9,6 @@ import jakarta.persistence.criteria.CriteriaQuery;
 
 import com.provoly.DatabaseReader;
 import com.provoly.action.Action_;
-import com.provoly.event.Event;
-import com.provoly.event.Event_;
 
 @ApplicationScoped
 public class ProcedureDatabaseReader extends DatabaseReader {
@@ -29,19 +27,6 @@ public class ProcedureDatabaseReader extends DatabaseReader {
 
     public void saveProcedure(Procedure procedure) {
         em.persist(procedure);
-    }
-
-    public long getLinkedEventCountForProcedure(Integer id) {
-        var builder = em.getCriteriaBuilder();
-        CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
-        var root = criteriaQuery.from(Event.class);
-        var procedure = root.join(Event_.procedure);
-
-        var query = criteriaQuery.select(builder.count(root))
-                .where(builder.equal(procedure.get(Procedure_.id), id))
-                .groupBy(procedure.get(Procedure_.id));
-
-        return em.createQuery(query).getSingleResult();
     }
 
     public Procedure getProcedureForAction(UUID actionId) {
