@@ -121,7 +121,7 @@ create table procedure
     description        varchar(256) not null,
     creation_date      timestamptz           default current_timestamp,
     procedure_progress float        not null default 0,
-    close_comment_id    uuid references comment
+    close_comment_id   uuid references comment
 );
 
 create table procedure_model
@@ -207,10 +207,10 @@ create table event
     equipment_id           uuid references equipment,
     procedure_id           int references procedure,
     domain_id              bigint references domain,
-    external_source_ref    varchar
+    external_source_ref    varchar,
+    parent_id              integer,
+    constraint fk_parent foreign key (parent_id) references event (id)
 );
-
-
 
 create table event_comment
 (

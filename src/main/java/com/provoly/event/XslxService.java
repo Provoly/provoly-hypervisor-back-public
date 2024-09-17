@@ -53,6 +53,7 @@ public class XslxService {
             generateHeaderRow(header, "Progression de la procédure", headerIndex++);
             generateHeaderRow(header, "Évènements liés", headerIndex++);
             generateHeaderRow(header, "Demandes d'interventions liées", headerIndex);
+            generateHeaderRow(header, "Évènement parent", headerIndex);
 
             var columnIndex = 1;
 
@@ -79,6 +80,7 @@ public class XslxService {
                 setRow(row, rowIndex++, event.procedureProgress());
                 setRow(row, rowIndex++, event.linkedEvents().toString());
                 setRow(row, rowIndex, event.services().toString());
+                setRow(row, rowIndex, event.parent());
                 columnIndex++;
             }
 
@@ -98,6 +100,7 @@ public class XslxService {
             case String s -> cell.setCellValue(s);
             case Instant instant -> cell.setCellValue(instant.toString());
             case Float f -> cell.setCellValue(f);
+            case Integer i -> cell.setCellValue(i);
             default -> throw new IllegalStateException("Unexpected value: " + value);
         }
     }

@@ -11,10 +11,7 @@ import com.provoly.action.AskedService;
 import com.provoly.comment.CommentMapper;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.ShortEquipmentMapper;
-import com.provoly.event.dto.EventReadDto;
-import com.provoly.event.dto.EventSummaryDto;
-import com.provoly.event.dto.EventWriteDto;
-import com.provoly.event.dto.ExportEventDto;
+import com.provoly.event.dto.*;
 import com.provoly.procedure.Procedure;
 
 @ApplicationScoped
@@ -57,7 +54,8 @@ public class EventMapper {
                 event.getEndDate(),
                 event.getExternalSourceRef() == null ? DEFAULT_SOURCE : event.getExternalSourceRef(),
                 commentMapper.mapLastCommentToDto(event.getComments()),
-                event.getComments().size());
+                event.getComments().size(),
+                event.getParent() == null ? null : new ParentReadDto(event.getParent().getId(), event.getParent().getName()));
     }
 
     public EventSummaryDto mapToEventSummaryDto(Event event, int serviceCount, String serviceTitle) {
@@ -89,6 +87,11 @@ public class EventMapper {
         entity.setEquipment(equipmentService.getEquipmentByIdOrNull(dto.getEquipmentId()));
         entity.setStartDate(dto.getStartDate());
         entity.setEndDate(dto.getEndDate());
+        entity.setEndDate(dto.getEndDate());
+        if (dto.getParent() != null) {
+            var event = databaseReader.getEventById(dto.getParent());
+            entity.setParent(event);
+        }
     }
 
     public List<ExportEventDto> mapToExportEventDto(List<Event> events) {
@@ -112,7 +115,8 @@ public class EventMapper {
                         event.getStartDate(),
                         event.getEndDate(),
                         event.getExternalSourceRef() == null ? DEFAULT_SOURCE : event.getExternalSourceRef(),
-                        getAskedServicesId(event)))
+                        getAskedServicesId(event),
+                        event.getParent() == null ? null : event.getParent().getId()))
                 .toList();
     }
 

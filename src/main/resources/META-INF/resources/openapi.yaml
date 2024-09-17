@@ -117,7 +117,11 @@ paths:
                         "linkedEvents": 2,
                         "procedureProgress": 100,
                         "externalSourceRef": "citylinx_1",
-                        "category": "OUTOFORDER"
+                        "category": "OUTOFORDER",
+                        "parent": {
+                          "id": 1,
+                          "name": "Tempête"
+                        }
                       },
                       {
                         "id": 2,
@@ -2984,6 +2988,16 @@ components:
         externalSourceRef:
           type: string
           description: forbidden if category is "MANIFESTATION"
+        parent:
+          type: integer
+          description: Parent event
+    ParentReadDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
     EventReadDto:
       type: object
       properties:
@@ -3031,6 +3045,8 @@ components:
         commentsCount:
           type: integer
           description: total of comments on event
+        parent:
+          $ref: '#/components/schemas/ParentReadDto'
     CommentWriteDto:
       type: object
       properties:

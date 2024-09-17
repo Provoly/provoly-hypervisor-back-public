@@ -61,6 +61,10 @@ public class Event {
     @JoinTable
     private List<Comment> comments = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Event parent;
+
     public Event() {
         // Only for JPA
     }
@@ -194,6 +198,14 @@ public class Event {
 
     public void setExternalSourceRef(String externalSourceRef) {
         this.externalSourceRef = externalSourceRef;
+    }
+
+    public Event getParent() {
+        return parent;
+    }
+
+    public void setParent(Event parent) {
+        this.parent = parent;
     }
 
     public List<Comment> getComments() {
