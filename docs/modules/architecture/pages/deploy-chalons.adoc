@@ -75,6 +75,7 @@ Copier les icônes dans le Geoserver
 ----
 # A lancer depuis le répertoire du projet
 kubectl -n chalons-dev -c geoserver cp geoserver/icons geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
+kubectl -c geoserver exec -it geoserver-0 -- chown -R geoserveruser:geoserverusers /opt/geoserver/data_dir/workspaces/chalons/
 ----
 
 Créer un style `equipment` en utilisant le fichier `geoserver/equipment.sld`
@@ -91,9 +92,6 @@ La mise à jour du style de la couche peut se faire avec la commande suivante :
 ----
 kubectl -n chalons-dev -c geoserver cp geoserver/equipment.sld geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
 ----
-
-Faire de même avec le style `geoserver/equipment-getfeature.sld`. Pas besoin d'attacher le style à la couche, mais il doit être présent pour permettre de requêter correctement (utile pour les tooltips).
-
 
 == Reset d'un environnement
 
