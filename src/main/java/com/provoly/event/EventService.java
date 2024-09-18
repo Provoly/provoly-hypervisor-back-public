@@ -236,8 +236,8 @@ public class EventService {
         return eventDto.getEquipmentId() == null
                 || !eventDto.getEquipmentId().equals(eventToUpdate.getEquipment().getId())
                 || !eventDto.getName().equals(eventToUpdate.getName())
-                || !eventDto.getCategory().equals(eventToUpdate.getCategory().getName())
-                || !eventDto.getSubCategory().equals(eventToUpdate.getSubCategory().getName());
+                || !eventDto.getCategory().equals(eventToUpdate.getCategory().getCode())
+                || !eventDto.getSubCategory().equals(eventToUpdate.getSubCategory().getCode());
     }
 
     @Transactional
