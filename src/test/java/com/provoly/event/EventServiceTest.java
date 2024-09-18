@@ -267,4 +267,33 @@ public class EventServiceTest {
         tempFile.deleteOnExit();
     }
 
+    @Test
+    @Transactional
+    void should_throw_exception_update_external_source_event() {
+        // given
+        var event = dataService.getEvent1();
+        var eventUpdate = new EventWriteDto(event.getId(), event.getName(), event.getDescription(), event.getCriticality(),
+                "MANIFESTATION", null, event.getAddress(), null, null, Instant.now(), Instant.now(), null, "source", null);
+
+        // then
+        assertThatThrownBy(() -> eventService.updateEvent(event.getId(), eventUpdate))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining(
+                        "External source reference can't be updated");
+    }
+
+    @Test
+    @Transactional
+    void should_throw_exception_update_external_source_event_2() {
+        // given
+        var event = dataService.getExternalEvent();
+        var eventUpdate = new EventWriteDto(event.getId(), event.getName(), event.getDescription(), event.getCriticality(),
+                "OUTOFORDER", null, event.getAddress(), null, null, null, null, null, null, null);
+
+        // then
+        assertThatThrownBy(() -> eventService.updateEvent(event.getId(), eventUpdate))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining(
+                        "External source reference can't be updated");
+    }
 }

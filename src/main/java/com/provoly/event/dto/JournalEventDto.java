@@ -1,7 +1,6 @@
 package com.provoly.event.dto;
 
 import java.time.Instant;
-import java.util.Map;
 
 import com.provoly.equipment.EquipmentShortDto;
 import com.provoly.event.Criticality;

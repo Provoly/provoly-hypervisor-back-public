@@ -218,6 +218,9 @@ public class EventService {
             throw new io.quarkus.security.ForbiddenException("Missing permission to update event.");
         }
 
+        if (!Objects.equals(eventToUpdate.getExternalSourceRef(), eventDto.getExternalSourceRef())) {
+            throw new ForbiddenException("External source reference can't be updated");
+        }
         if (eventDto.isExternalEvent()
                 && forbiddenPropertiesAreUpdatedWhenExternalSource(eventDto, eventToUpdate)) {
             throw new ForbiddenException(

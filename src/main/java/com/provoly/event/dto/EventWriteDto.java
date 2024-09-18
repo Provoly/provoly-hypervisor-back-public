@@ -153,6 +153,13 @@ public class EventWriteDto {
         return startDate;
     }
 
+    public String getExternalSourceRef() {
+        if (externalSourceRef != null && !externalSourceRef.isEmpty() && !externalSourceRef.equals(DEFAULT_SOURCE)) {
+            return externalSourceRef;
+        }
+        return null;
+    }
+
     public boolean isExternalEvent() {
         return externalSourceRef != null && !externalSourceRef.isBlank() && !externalSourceRef.equals(DEFAULT_SOURCE);
     }

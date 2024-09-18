@@ -93,7 +93,7 @@ public class EnrichedProducerTest {
                 "EP",
                 null,
                 null,
-                "source");
+                null);
         var savedEvent = eventService.saveEvent(event); // 1 message
 
         // update event

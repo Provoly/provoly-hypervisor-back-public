@@ -3,10 +3,8 @@ package com.provoly.event;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
-import com.provoly.equipment.EquipmentShortDto;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import com.provoly.action.AskedService;
@@ -95,6 +93,7 @@ public class EventMapper {
             var event = databaseReader.getEventById(dto.getParent());
             entity.setParent(event);
         }
+        entity.setExternalSourceRef(dto.getExternalSourceRef());
     }
 
     public List<ExportEventDto> mapToExportEventDto(List<Event> events) {

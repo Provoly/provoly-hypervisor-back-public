@@ -39,7 +39,7 @@ public class TestDataService {
     private Random rand = new Random();
     private Map<String, Category> categories;
     private Procedure procedure1, procedure3;
-    private Event event1, doneEvent, associatedEvent;
+    private Event event1, doneEvent, associatedEvent, externalEvent;
     private Domain domainEP, domainVP;
     private ServiceCategory prev;
     private ServiceCategory cura;
@@ -111,7 +111,7 @@ public class TestDataService {
         associatedEvent = initEvent("manfestation1", categories.get("MANIFESTATION"), Criticality.MEDIUM, Status.IN_PROGRESS,
                 equip2, null);
         initEvent("report1", categories.get("OUTOFORDER"), Criticality.LOW, Status.NEW, equip6, "citylinx");
-        var event4 = initEvent("report2", categories.get("OUTOFORDER"), Criticality.HIGH, Status.IN_PROGRESS, equip3,
+        externalEvent = initEvent("report2", categories.get("OUTOFORDER"), Criticality.HIGH, Status.IN_PROGRESS, equip3,
                 "wintics");
         doneEvent = initEvent("report3", categories.get("OUTOFORDER"), Criticality.MEDIUM, Status.DONE, equip6, null);
         var event6 = initEvent("malfunction1", categories.get("OUTOFORDER"), Criticality.LOW, Status.IN_PROGRESS, equip4,
@@ -119,7 +119,7 @@ public class TestDataService {
         initEvent("limit1", categories.get("LIMIT"), Criticality.LOW, Status.NEW, equip7, "source");
 
         procedure1 = initProcedure("procedure1", List.of(asked1, asked2), List.of(associatedEvent));
-        procedure3 = initProcedure("procedure3", List.of(asked6), List.of(event4, event6));
+        procedure3 = initProcedure("procedure3", List.of(asked6), List.of(externalEvent, event6));
 
         var procedureModel1 = new ProcedureModel("c'est le MOdèl", "flora", "desc", domainEP, List.of());
         var procedureModel2 = new ProcedureModel("ç'est le model1", "flora", "desc", domainVP, List.of());
@@ -172,6 +172,10 @@ public class TestDataService {
 
     public Event getAssociatedEvent() {
         return associatedEvent;
+    }
+
+    public Event getExternalEvent() {
+        return externalEvent;
     }
 
     public EventWriteDto buildEvent(String name, String category, Criticality criticality, boolean isWithDate) {
