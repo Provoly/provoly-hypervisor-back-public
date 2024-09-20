@@ -233,11 +233,13 @@ public class EventService {
     }
 
     private boolean forbiddenPropertiesAreUpdatedWhenExternalSource(EventWriteDto eventDto, Event eventToUpdate) {
+        var subCode = eventToUpdate.getSubCategory() == null ? null : eventToUpdate.getSubCategory().getCode();
+
         return eventDto.getEquipmentId() == null
                 || !eventDto.getEquipmentId().equals(eventToUpdate.getEquipment().getId())
                 || !eventDto.getName().equals(eventToUpdate.getName())
                 || !eventDto.getCategory().equals(eventToUpdate.getCategory().getCode())
-                || !eventDto.getSubCategory().equals(eventToUpdate.getSubCategory().getCode());
+                || !Objects.equals(eventDto.getSubCategory(), subCode);
     }
 
     @Transactional

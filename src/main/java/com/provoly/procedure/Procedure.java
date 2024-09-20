@@ -49,12 +49,12 @@ public class Procedure {
 
     public void addAction(Action action) {
         actions.add(action);
-        setProcedureProgress(calculateProgressActions());
+        calculateProgressActions();
     }
 
     public void removeAction(Action action) {
         actions.remove(action);
-        setProcedureProgress(calculateProgressActions());
+        calculateProgressActions();
     }
 
     public void addEvent(Event event) {
@@ -130,11 +130,13 @@ public class Procedure {
         this.closeComment = closeComment;
     }
 
-    private float calculateProgressActions() {
+    public void calculateProgressActions() {
         if (actions.isEmpty()) {
-            return 0L;
+            setProcedureProgress(0);
+            return;
         }
         double doneActions = actions.stream().filter(action -> action.getStatus() == Status.DONE).count();
-        return Math.round((doneActions / actions.size()) * 100);
+        var result = Math.round((doneActions / actions.size()) * 100);
+        setProcedureProgress(result);
     }
 }

@@ -92,6 +92,8 @@ public class ProcedureService {
             actionService.saveActionForInstance(actionDto, procedure, index++);
         }
 
+        procedure.calculateProgressActions();
+
         logger.debugf("Procedure %s is updated".formatted(procedure.getId()));
     }
 
