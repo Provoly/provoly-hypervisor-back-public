@@ -33,10 +33,6 @@ public class XslxService {
             Sheet sheet = workbook.createSheet("Evènements");
             Row header = sheet.createRow(0);
 
-            // set format for procedure progress in percent
-            style = workbook.createCellStyle();
-            style.setDataFormat(workbook.createDataFormat().getFormat("0.00%"));
-
             logger.debugf("Generate header");
             int headerIndex = 0;
             generateHeaderRow(header, "Identifiant", headerIndex++);
@@ -117,8 +113,7 @@ public class XslxService {
             case String s -> cell.setCellValue(s);
             case Instant instant -> cell.setCellValue(instant.toString());
             case Float f -> {
-                cell.setCellStyle(style);
-                DecimalFormat df = new DecimalFormat("#,###.##");
+                DecimalFormat df = new DecimalFormat("#,###.##%");
                 cell.setCellValue((df.format(f)));
             }
             case Integer i -> cell.setCellValue(i);
