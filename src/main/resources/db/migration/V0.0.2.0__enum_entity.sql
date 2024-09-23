@@ -79,7 +79,7 @@ insert into district (id,code,name) values (23,'CHALONS', 'Châlons en Champagne
 
 
 INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (1, 'Lampe - Allumée de jour', 'EP', null, null, null);
-INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (2, 'Lampe - Décroc e', 'EP', 72, 72, null);
+INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (2, 'Lampe - Décroche', 'EP', 72, 72, null);
 INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (3, 'Lampe - Éteinte', 'EP', 72, 72, null);
 INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (4, 'Lampe - Clignote', 'EP', 72, 72, null);
 INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (5, 'Armoire - Accidentee / Vandalisee', 'EP', 1, 120, 48);
@@ -128,7 +128,7 @@ INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (47, 'Serveur
 INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (48, 'Boite épissure défectueuse fibre (BPE)', 'RT', 6 , 8 , null);
 INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (49, 'Défaut fibre principale (144 à 48 FO)', 'RT', 6 , 8 , null);
 INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (50, 'Défaut fibre secondaire (24 à 6 FO)', 'RT', 6 , 8 , null);
-INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (51, 'Défaut C ambre / regard fibre', 'RT', null, null, null);
+INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (51, 'Défaut Chambre / regard fibre', 'RT', null, null, null);
 INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (52, 'Feux clignotants', 'SLT', 24 , 24 , null);
 INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (53, 'Feu Orange ne fonctionne plus', 'SLT',  24 , 24 , null);
 INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (54, 'Feu Rouge ne fonctionne plus', 'SLT',  24 ,  24 , null);

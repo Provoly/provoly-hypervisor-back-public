@@ -166,7 +166,7 @@ public class ServiceServiceTest {
         var action = proc.getActions().stream().toList().getFirst();
 
         // When
-        var id = serviceService.createExternalService(action.getId(), externalService);
+        var id = serviceService.createExternalService(action.getId(), externalService).get("id");
 
         // Then
         var updatedAction = (AskedService) procedureService.getProcedureDetails(proc.getId()).getActions().stream().toList()

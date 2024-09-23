@@ -2,6 +2,7 @@ package com.provoly.service;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -98,7 +99,7 @@ public class ServiceService {
     }
 
     @Transactional
-    public String createExternalService(UUID actionId, ExternalServiceWriteDto dto) throws IOException {
+    public Map<String, String> createExternalService(UUID actionId, ExternalServiceWriteDto dto) throws IOException {
         logger.infof("Create external service for action %s", actionId);
 
         var action = actionService.getActionById(actionId);
@@ -114,6 +115,6 @@ public class ServiceService {
         var serviceCode = coswinService.sendExternalService(dto);
         logger.infof("External service created with code %s", serviceCode);
         ((AskedService) action).setServiceExternalId(serviceCode);
-        return serviceCode;
+        return Map.of("id", serviceCode);
     }
 }

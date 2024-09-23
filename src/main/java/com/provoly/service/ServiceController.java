@@ -2,6 +2,7 @@ package com.provoly.service;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 
 import jakarta.transaction.Transactional;
@@ -33,7 +34,7 @@ public class ServiceController {
     @POST
     @Path("/external/id/{actionId}")
     @Authenticated
-    public String createExternalService(UUID actionId, @Valid ExternalServiceWriteDto dto) throws IOException {
+    public Map<String, String> createExternalService(UUID actionId, @Valid ExternalServiceWriteDto dto) throws IOException {
         return serviceService.createExternalService(actionId, dto);
     }
 
