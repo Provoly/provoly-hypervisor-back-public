@@ -15,9 +15,9 @@ insert into category (id,name,code, parent_id) values (1,'Manifestation','MANIFE
 insert into category (id,name,code, parent_id) values (2,'Hors Service','OUTOFORDER',null);
 insert into category (id,name,code, parent_id) values (3,'Seuil','LIMIT',null);
 insert into category (id,name,code, parent_id) values (4,'Anomalie','ANOMALY',null);
-insert into category (id,name,code, parent_id) values (5,'Affluence anormal de personne','UNUSUAL_FLOW',4);
-insert into category (id,name,code, parent_id) values (6,'Congestion de vehicule','TRAFFIC_CONGESTION',4);
-insert into category (id,name,code, parent_id) values (7,'Dépôt Sauvage','WILD_STORAGE',4);
+insert into category (id,name,code, parent_id) values (5,'Affluence anormale de personnes','UNUSUAL_FLOW',4);
+insert into category (id,name,code, parent_id) values (6,'Congestion de véhicules','TRAFFIC_CONGESTION',4);
+insert into category (id,name,code, parent_id) values (7,'Dépôts Sauvages','WILD_STORAGE',4);
 
 insert into service_category (id,name,code) values (1,'Préventive','PREV');
 insert into service_category (id,name,code) values (2,'Curative','CURA');
