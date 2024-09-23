@@ -79,12 +79,24 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/SortOrder'
-        - name: search
+        - name: name
           in: query
           schema:
             type: string
-          description: search on event id, event name, or equipment name name
+          description: search on event name
           example: '00001'
+        - name: id
+          in: query
+          schema:
+            type: string
+          description: search on event id
+          example: '00001'
+        - name: equipment
+          in: query
+          schema:
+            type: string
+          description: search on equipment name of event
+          example: 'c-A'
       responses:
         "200":
           description: Return 2 events with `status` is `DONE` or `NEW` and `criticality` is `LOW` or `HIGH`

@@ -39,7 +39,9 @@ public class EventDatabaseReader extends DatabaseReader {
             List<Category> categories,
             List<EquipmentEntity> entities,
             List<Family> families,
-            String search) {
+            String name,
+            String id,
+            String equipment) {
         var cb = em.getCriteriaBuilder();
         CriteriaQuery<Event> criteriaQuery = cb.createQuery(Event.class);
         Root<Event> root = criteriaQuery.from(Event.class);
@@ -65,14 +67,14 @@ public class EventDatabaseReader extends DatabaseReader {
 
         if (!entities.isEmpty()) {
             logger.debugf("filter on equipment entity %s", entities);
-            var equipment = root.join(Event_.equipment, JoinType.LEFT);
-            predicates.add(equipment.get(Equipment_.entity).in(entities));
+            var equipmentRoot = root.join(Event_.equipment, JoinType.LEFT);
+            predicates.add(equipmentRoot.get(Equipment_.entity).in(entities));
         }
 
         if (!families.isEmpty()) {
             logger.debugf("filter on equipment families %s", families);
-            var equipment = root.join(Event_.equipment, JoinType.LEFT);
-            predicates.add(equipment.get(Equipment_.family).in(families));
+            var equipmentRoot = root.join(Event_.equipment, JoinType.LEFT);
+            predicates.add(equipmentRoot.get(Equipment_.family).in(families));
         }
 
         if (!categories.isEmpty()) {
@@ -84,20 +86,29 @@ public class EventDatabaseReader extends DatabaseReader {
             predicates.add(root.get(Event_.category).in(categories));
         }
 
-        if (search != null) {
-            logger.debugf("filter on event that contains '%s' in id, event name or equipment name".formatted(search));
-            var equipment = root.join(Event_.equipment, JoinType.LEFT);
-
-            var idSearch = formatId(search);
-            search = stripAccentAndAddPercents(search);
-
-            var filtersSearch = cb.or(
-                    cb.like(root.get(Event_.id).as(String.class), idSearch),
-                    cb.like(unaccent(cb, root.get(Event_.name)), search),
-                    cb.like(unaccent(cb, equipment.get(Equipment_.name)), search));
-            predicates.add(filtersSearch);
+        List<Predicate> searchFilters = new ArrayList<>();
+        if (name != null) {
+            logger.debugf("filter on event that contains '%s' in name".formatted(name));
+            name = stripAccentAndAddPercents(name);
+            searchFilters.add(cb.like(unaccent(cb, root.get(Event_.name)), name));
         }
 
+        if (id != null) {
+            logger.debugf("filter on event that contains '%s' in id".formatted(id));
+            var idSearch = formatId(id);
+            searchFilters.add(cb.like(root.get(Event_.id).as(String.class), idSearch));
+        }
+
+        if (equipment != null) {
+            logger.debugf("filter on event that contains '%s' in equipment reference".formatted(name));
+            var equipmentRoot = root.join(Event_.equipment, JoinType.LEFT);
+            equipment = stripAccentAndAddPercents(equipment);
+            searchFilters.add(cb.like(unaccent(cb, equipmentRoot.get(Equipment_.name)), equipment));
+        }
+
+        if (!searchFilters.isEmpty()) {
+            predicates.add(cb.or(getPredicatesAsArray(searchFilters)));
+        }
         var filters = getPredicatesAsArray(predicates);
 
         List<Order> orders = buildEventOrders(sort, order, cb, root);

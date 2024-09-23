@@ -85,7 +85,7 @@ public class EventServiceTest {
         // given
         var eventAlert = eventService
                 .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of("LIMIT"), List.of(),
-                        List.of(), null)
+                        List.of(), null, null, null)
                 .toList()
                 .getFirst();
 
@@ -193,7 +193,7 @@ public class EventServiceTest {
         // given
         var eventIdInProgress = eventService
                 .getEvents(1, 1, null, null, null, List.of(), List.of(Status.IN_PROGRESS.name()), List.of(), List.of(),
-                        List.of(), null)
+                        List.of(), null, null, null)
                 .toList()
                 .getFirst()
                 .getId();
@@ -214,7 +214,7 @@ public class EventServiceTest {
         // given
         var eventIdDone = eventService
                 .getEvents(1, 1, null, null, null, List.of(), List.of(Status.DONE.name()), List.of(), List.of(), List.of(),
-                        null)
+                        null, null, null)
                 .toList()
                 .getFirst()
                 .getId();
@@ -249,7 +249,7 @@ public class EventServiceTest {
     void should_export_events() throws IOException {
         // given
         var events = eventService.getEvents(1, 100, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(),
-                null).toList();
+                null, null, null).toList();
 
         // when
         var result = eventService.exportEvents();

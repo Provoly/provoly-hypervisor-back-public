@@ -104,7 +104,9 @@ public class EventService {
             List<String> category,
             List<String> entity,
             List<String> family,
-            String search) {
+            String name,
+            String id,
+            String equipment) {
         logger.infof("""
                 Get events with from page %s and size %s with :
                 creation date : %s
@@ -113,9 +115,10 @@ public class EventService {
                 category : %s,
                 equipment entity : %s,
                 equipment family : %s
-                with search: %s
+                with search: %s/%s/%s
                 sort by %s
-                """.formatted(page, pageSize, creationDate, criticality, status, category, entity, family, search, sort));
+                """.formatted(page, pageSize, creationDate, criticality, status, category, entity, family, name, id, equipment,
+                sort));
 
         if (oneOfFilterIsEmpty(criticality, status, category, entity, family)) {
             return Stream.of();
@@ -149,7 +152,9 @@ public class EventService {
                 categories,
                 entities,
                 families,
-                search);
+                name,
+                id,
+                equipment);
     }
 
     private boolean oneOfFilterIsEmpty(List<String> criticality, List<String> status, List<String> category,

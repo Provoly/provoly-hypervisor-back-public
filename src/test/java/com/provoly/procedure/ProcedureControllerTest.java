@@ -81,10 +81,11 @@ public class ProcedureControllerTest {
     @TestSecurity(user = "reader", roles = { "event_write" })
     void should_not_update_external_event_in_procedure() {
         // given
+        var param = new EventController.EventParameters();
+        param.criticality = List.of(Criticality.HIGH.name());
+        param.category = List.of("OUTOFORDER");
         var event = eventController
-                .getEvents(1, 1, null, null, null, List.of(Criticality.HIGH.name()), List.of(),
-                        List.of("OUTOFORDER"),
-                        List.of(), List.of(), null)
+                .getEvents(1, 1, null, null, param)
                 .stream()
                 .toList()
                 .getFirst();
@@ -120,10 +121,11 @@ public class ProcedureControllerTest {
     @TestSecurity(user = "reader", roles = { "event_write", "event_read" })
     void should_update_event_in_procedure() {
         // given
+        var param = new EventController.EventParameters();
+        param.criticality = List.of(Criticality.MEDIUM.name());
+        param.category = List.of("OUTOFORDER");
         var eventId = eventController
-                .getEvents(1, 1, null, null, null, List.of(Criticality.MEDIUM.name()), List.of(),
-                        List.of("OUTOFORDER"),
-                        List.of(), List.of(), null)
+                .getEvents(1, 1, null, null, param)
                 .stream()
                 .toList()
                 .getFirst()

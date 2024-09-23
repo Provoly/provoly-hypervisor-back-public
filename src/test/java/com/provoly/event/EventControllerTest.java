@@ -63,12 +63,7 @@ public class EventControllerTest {
                 0,
                 null,
                 null,
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), null))
+                null))
                 .isInstanceOf(UnauthorizedException.class);
     }
 
@@ -81,12 +76,7 @@ public class EventControllerTest {
                 2,
                 null,
                 null,
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), null);
+                new EventController.EventParameters());
         //then
         assertThat(events).hasSize(2);
     }
@@ -94,18 +84,16 @@ public class EventControllerTest {
     @Test
     @TestSecurity(user = "reader")
     void should_return_empty_event_when_at_least_criticality_status_category_has_empty_values() {
+        // given
+        var param = new EventController.EventParameters();
+        param.category = List.of("");
         // when
         var events = eventController.getEvents(
                 1,
                 20,
                 null,
                 null,
-                null,
-                List.of(""),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), null);
+                param);
         //then
         assertThat(events).isEmpty();
     }
@@ -114,20 +102,16 @@ public class EventControllerTest {
     @TestSecurity(user = "reader")
     void should_return_event_created_on_corresponding_date() {
         // given
+        var param = new EventController.EventParameters();
         var creationDate = Instant.parse(LocalDate.now().atStartOfDay() + ":00.000Z");
-
+        param.creationDate = creationDate;
         // when
         var events = eventController.getEvents(
                 1,
                 1,
                 null,
                 null,
-                creationDate,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), null);
+                param);
         //then
         assertThat(events).hasSize(1);
         assertThat(events.stream().toList().getFirst().creationDate()).isAfter(creationDate);
@@ -137,18 +121,16 @@ public class EventControllerTest {
     @Test
     @TestSecurity(user = "reader")
     void should_return_event_high_and_low_criticality_when_get_events() {
+        // given
+        var param = new EventController.EventParameters();
+        param.criticality = List.of(Criticality.HIGH.name(), LOW.name());
         // when
         var events = eventController.getEvents(
                 1,
                 20,
                 null,
                 null,
-                null,
-                List.of(Criticality.HIGH.name(), LOW.name()),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), null);
+                param);
         //then
         assertThat(events).extracting("criticality").containsOnly(LOW, Criticality.HIGH);
     }
@@ -156,18 +138,16 @@ public class EventControllerTest {
     @Test
     @TestSecurity(user = "reader")
     void should_return_event_new_and_done_status_when_get_events() {
+        // given
+        var param = new EventController.EventParameters();
+        param.status = List.of(Status.DONE.name(), Status.NEW.name());
         // when
         var events = eventController.getEvents(
                 1,
                 20,
                 null,
                 null,
-                null,
-                List.of(),
-                List.of(Status.DONE.name(), Status.NEW.name()),
-                List.of(),
-                List.of(),
-                List.of(), null);
+                param);
         //then
         assertThat(events).extracting("status").containsOnly(Status.DONE, Status.NEW);
     }
@@ -175,18 +155,18 @@ public class EventControllerTest {
     @Test
     @TestSecurity(user = "reader")
     void should_return_event_manifestation_or_limit_and_in_progress_status_when_get_events() {
+        // given
+        var param = new EventController.EventParameters();
+        param.status = List.of(Status.IN_PROGRESS.name());
+        param.category = List.of("MANIFESTATION", "LIMIT", "OUTOFORDER");
+
         // when
         var events = eventController.getEvents(
                 1,
                 20,
                 null,
                 null,
-                null,
-                List.of(),
-                List.of(Status.IN_PROGRESS.name()),
-                List.of("MANIFESTATION", "LIMIT", "OUTOFORDER"),
-                List.of(),
-                List.of(), null);
+                param);
         //then
         assertThat(events).extracting("status").containsOnly(Status.IN_PROGRESS);
         assertThat(events).extracting("category").containsOnly("MANIFESTATION", "OUTOFORDER");
@@ -195,18 +175,17 @@ public class EventControllerTest {
     @Test
     @TestSecurity(user = "reader")
     void should_return_event_with_corresponding_equipment_entity() {
+        // given
+        var param = new EventController.EventParameters();
+        param.entity = List.of("AGGLO-COMMUN");
+
         // when
         var events = eventController.getEvents(
                 1,
                 20,
                 null,
                 null,
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of("AGGLO-COMMUN"),
-                List.of(), null);
+                param);
         //then
         assertThat(events).extracting("equipment").extracting("entity").containsOnly("AGGLO-COMMUN");
     }
@@ -214,35 +193,33 @@ public class EventControllerTest {
     @Test
     @TestSecurity(user = "reader")
     void should_throw_invalid_equipment_entity() {
+        // given
+        var param = new EventController.EventParameters();
+        param.entity = List.of("AGGLO-COMMUN", "invalid");
+
         assertThatThrownBy(() -> eventController.getEvents(
                 1,
                 20,
                 null,
                 null,
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of("AGGLO-COMMUN", "invalid"),
-                List.of(), null))
+                param))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @TestSecurity(user = "reader")
     void should_return_event_with_corresponding_family() {
+        // given
+        var param = new EventController.EventParameters();
+        param.family = List.of("EP_ARMOIRE");
+
         // when
         var events = eventController.getEvents(
                 1,
                 20,
                 null,
                 null,
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of("EP_ARMOIRE"), null);
+                param);
         //then
         assertThat(events).extracting("equipment").extracting("family").contains("EP_ARMOIRE", "EP_ARMOIRE", "EP_ARMOIRE",
                 "EP_ARMOIRE");
@@ -251,17 +228,16 @@ public class EventControllerTest {
     @Test
     @TestSecurity(user = "reader")
     void should_throw_invalid_family() {
+        // given
+        var param = new EventController.EventParameters();
+        param.family = List.of("invalid");
+
         assertThatThrownBy(() -> eventController.getEvents(
                 1,
                 20,
                 null,
                 null,
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of("invalid"), null))
+                param))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -273,12 +249,7 @@ public class EventControllerTest {
                 2,
                 null,
                 null,
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), null))
+                new EventController.EventParameters()))
                 .isInstanceOf(ConstraintViolationException.class);
     }
 
@@ -290,12 +261,7 @@ public class EventControllerTest {
                 0,
                 null,
                 null,
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), null))
+                new EventController.EventParameters()))
                 .isInstanceOf(ConstraintViolationException.class);
     }
 
@@ -308,12 +274,7 @@ public class EventControllerTest {
                 5,
                 null,
                 null,
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), null);
+                new EventController.EventParameters());
         //then
         assertThat(events).extracting("status").containsExactly(Status.NEW, Status.NEW, Status.NEW, Status.IN_PROGRESS,
                 Status.IN_PROGRESS);
@@ -330,12 +291,7 @@ public class EventControllerTest {
                 3,
                 EventSort.PROCEDURE_PROGRESS.getName(),
                 SortOrder.DESC.name(),
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), null);
+                new EventController.EventParameters());
         //then
         assertThat(events).extracting("procedureProgress").containsExactly(100f, 100f, 0.0f);
     }
@@ -349,12 +305,7 @@ public class EventControllerTest {
                 3,
                 EventSort.NAME.getName(),
                 SortOrder.DESC.name(),
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), null);
+                new EventController.EventParameters());
         //then
         assertThat(events).extracting("name").containsExactly("report3", "report2", "report1");
     }
@@ -368,12 +319,7 @@ public class EventControllerTest {
                 3,
                 EventSort.ID.getName(),
                 SortOrder.DESC.name(),
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), null);
+                new EventController.EventParameters());
         //then
         assertThat(events).extracting("name").containsExactly("limit1", "malfunction1", "report3");
     }
@@ -387,12 +333,7 @@ public class EventControllerTest {
                 5,
                 EventSort.SOURCE.getName(),
                 null,
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), null);
+                new EventController.EventParameters());
         //then
         assertThat(events).extracting("externalSourceRef").containsExactly("citylinx", "Hyperviseur", "Hyperviseur",
                 "Hyperviseur", "source");
@@ -407,12 +348,7 @@ public class EventControllerTest {
                 3,
                 EventSort.CRITICALITY.getName(),
                 SortOrder.DESC.name(),
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), null);
+                new EventController.EventParameters());
         //then
         assertThat(events).extracting("criticality").containsExactly(LOW, MEDIUM, MEDIUM);
     }
@@ -426,12 +362,7 @@ public class EventControllerTest {
                 3,
                 EventSort.CATEGORY.getName(),
                 SortOrder.ASC.name(),
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), null);
+                new EventController.EventParameters());
         //then
         assertThat(events).extracting("category").containsExactly("OUTOFORDER", "MANIFESTATION", "MANIFESTATION");
     }
@@ -448,12 +379,7 @@ public class EventControllerTest {
                 1,
                 invalidSort,
                 null,
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), null))
+                new EventController.EventParameters()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining(invalidSort);
     }
@@ -520,7 +446,7 @@ public class EventControllerTest {
     @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_event_by_id() {
         var firstEventId = eventController
-                .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(), null)
+                .getEvents(1, 1, null, null, new EventController.EventParameters())
                 .stream()
                 .toList()
                 .getFirst()
@@ -664,18 +590,17 @@ public class EventControllerTest {
     @Test
     @TestSecurity(user = "reader", roles = { "event_read" })
     void should_search_event_with_name_contains_report() {
+        // given
+        var param = new EventController.EventParameters();
+        param.name = "report";
+        param.id = "report";
         // when
         var events = eventController.getEvents(
                 1,
                 10,
                 EventSort.NAME.getName(),
                 SortOrder.ASC.name(),
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), "report");
+                param);
         //then
         assertThat(events).extracting("name").containsExactly("report1", "report2", "report3");
     }
@@ -683,18 +608,17 @@ public class EventControllerTest {
     @Test
     @TestSecurity(user = "reader", roles = { "event_read" })
     void should_search_event_with_equipment_contains_name() {
+        // given
+        var param = new EventController.EventParameters();
+        param.equipment = "C-76";
+        param.name = "C-76";
         // when
         var events = eventController.getEvents(
                 1,
                 10,
                 null,
                 null,
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(), "C-76");
+                param);
         //then
         assertThat(events).extracting("equipment").extracting("name").containsExactly("C-763", "C-762", "C-762");
     }

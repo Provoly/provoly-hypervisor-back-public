@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,27 @@ public class EventController {
         eventService.updateEvent(id, eventDto);
     }
 
+    public static class EventParameters {
+        @RestQuery
+        public Instant creationDate;
+        @RestQuery
+        public List<String> criticality = new ArrayList<>();
+        @RestQuery
+        public List<String> status = new ArrayList<>();
+        @RestQuery
+        public List<String> category = new ArrayList<>();
+        @RestQuery
+        public List<String> entity = new ArrayList<>();
+        @RestQuery
+        public List<String> family = new ArrayList<>();
+        @RestQuery
+        public String name;
+        @RestQuery
+        public String id;
+        @RestQuery
+        public String equipment;
+    }
+
     @GET
     @Authenticated
     @Transactional
@@ -67,24 +89,20 @@ public class EventController {
             @DefaultValue("20") @Positive @RestQuery int pageSize,
             @RestQuery String sort,
             @DefaultValue("ASC") @RestQuery String order,
-            @RestQuery Instant creationDate,
-            @RestQuery List<String> criticality,
-            @RestQuery List<String> status,
-            @RestQuery List<String> category,
-            @RestQuery List<String> entity,
-            @RestQuery List<String> family,
-            @RestQuery String search) {
+            @BeanParam EventParameters params) {
         var events = eventService.getEvents(page,
                 pageSize,
                 sort,
                 order,
-                creationDate,
-                criticality,
-                status,
-                category,
-                entity,
-                family,
-                search);
+                params.creationDate,
+                params.criticality,
+                params.status,
+                params.category,
+                params.entity,
+                params.family,
+                params.name,
+                params.id,
+                params.equipment);
         return eventMapper.mapToJournalEventDto(events);
     }
 
