@@ -73,8 +73,9 @@ Les objets de configuration geoserver son stockées dans le https://github.com/c
 Copier les icônes dans le Geoserver
 
 ----
-# A lancer depuis le répertoire du projet
-kubectl -n chalons-dev -c geoserver cp geoserver/icons geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
+# A lancer depuis le répertoire du projet, s'assurer d'être sur le bon namespace
+
+kubectl -c geoserver cp geoserver/icons geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
 kubectl -c geoserver exec -it geoserver-0 -- chown -R geoserveruser:geoserverusers /opt/geoserver/data_dir/workspaces/chalons/
 ----
 
@@ -87,6 +88,14 @@ Publier la couche "xxxxxx_equipement-enrichi-mesure"
 Cocher la case "Personnaliser les attributs" en attendant la correction du bug https://github.com/Provoly/provoly-geoserver-datastore/issues/46
 
 Dans l'onglet "Publication" de la couche, choisir le style "equipment" par défaut
+
+Une fois le style de l'équipement paramétré, il faut de nouveau importer les icônes (?)
+
+[source,bash]
+----
+kubectl -c geoserver cp geoserver/icons geoserver-0:/opt/geoserver/data_dir/workspaces/chalons/styles
+kubectl -c geoserver exec -it geoserver-0 -- chown -R geoserveruser:geoserverusers /opt/geoserver/data_dir/workspaces/chalons/
+----
 
 La mise à jour du style de la couche peut se faire avec la commande suivante :
 ----
