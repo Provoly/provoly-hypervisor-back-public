@@ -44,7 +44,7 @@ public class XslxService {
             generateHeaderRow(header, "Métier", headerIndex++);
             generateHeaderRow(header, "Description", headerIndex++);
             generateHeaderRow(header, "Adresse", headerIndex++);
-            generateHeaderRow(header, "Équipement", headerIndex++);
+            generateHeaderRow(header, "Équipement lié", headerIndex++);
             generateHeaderRow(header, "Demande(s) d'intervention liée(s)", headerIndex++);
             generateHeaderRow(header, "Date de début", headerIndex++);
             generateHeaderRow(header, "Date de fin", headerIndex++);
@@ -79,7 +79,7 @@ public class XslxService {
                 setRow(row, rowIndex++, event.lastModificationDate());
                 setRow(row, rowIndex++, event.closeDate());
                 setRow(row, rowIndex++, event.procedureProgress() / 100.0f);
-                setRow(row, rowIndex++, formatIdsListWithZeros(event.linkedEvents()));
+                setRow(row, rowIndex++, removeCurrentIdFromLinkedEvent(event.linkedEvents(), event.id()));
                 setRow(row, rowIndex, event.parent() == null ? null : formatIdWithZeros(event.parent().toString()));
                 columnIndex++;
             }
@@ -91,15 +91,18 @@ public class XslxService {
         return new ByteArrayInputStream(outputStream.toByteArray());
     }
 
-    private static String formatIdsListWithZeros(List<Integer> eventIds) {
-        return eventIds.stream().map(e -> formatIdWithZeros(e.toString())).toList().toString();
+    private static String removeCurrentIdFromLinkedEvent(List<Integer> eventIds, Integer currentId) {
+        return eventIds
+                .stream()
+                .filter(id -> !id.equals(currentId))
+                .map(e -> formatIdWithZeros(e.toString())).toList().toString();
     }
 
     private static String formatIdWithZeros(String formattedId) {
-        var currentIdSize = formattedId.toCharArray().length;
+        var currentIdSize = formattedId.length();
         while (currentIdSize != ID_SIZE) {
             formattedId = "0%s".formatted(formattedId);
-            currentIdSize = formattedId.toCharArray().length;
+            currentIdSize = formattedId.length();
         }
         return formattedId;
     }
