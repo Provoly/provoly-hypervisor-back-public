@@ -51,7 +51,7 @@ public class XslxService {
             generateHeaderRow(header, "Date de création", headerIndex++);
             generateHeaderRow(header, "Date de dernière modification", headerIndex++);
             generateHeaderRow(header, "Date de clôture", headerIndex++);
-            generateHeaderRow(header, "Progression de la procédure", headerIndex++);
+            generateHeaderRow(header, "Avancement de la procédure", headerIndex++);
             generateHeaderRow(header, "Événement(s) lié(s)", headerIndex++);
             generateHeaderRow(header, "Événement parent", headerIndex);
 
