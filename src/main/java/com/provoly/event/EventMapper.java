@@ -89,10 +89,11 @@ public class EventMapper {
         entity.setStartDate(dto.getStartDate());
         entity.setEndDate(dto.getEndDate());
         entity.setEndDate(dto.getEndDate());
+        Event event = null;
         if (dto.getParent() != null) {
-            var event = databaseReader.getEventById(dto.getParent());
-            entity.setParent(event);
+            event = databaseReader.getEventById(dto.getParent());
         }
+        entity.setParent(event);
         entity.setExternalSourceRef(dto.getExternalSourceRef());
     }
 
