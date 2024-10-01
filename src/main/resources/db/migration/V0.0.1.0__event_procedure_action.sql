@@ -209,6 +209,7 @@ create table event
     domain_id              bigint references domain,
     external_source_ref    varchar,
     parent_id              integer,
+    external_id            varchar,
     constraint fk_parent foreign key (parent_id) references event (id)
 );
 

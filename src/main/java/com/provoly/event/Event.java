@@ -20,6 +20,7 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    private String externalId;
     private String name;
     private String address;
     private String description;
@@ -69,8 +70,16 @@ public class Event {
         // Only for JPA
     }
 
+    public Event(String externalId) {
+        this.externalId = externalId;
+    }
+
     public Integer getId() {
         return id;
+    }
+
+    public String getExternalId() {
+        return externalId;
     }
 
     public String getName() {

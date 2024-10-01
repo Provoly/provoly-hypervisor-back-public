@@ -44,6 +44,7 @@ public class EventWriteDto {
     private final Instant creationDate;
 
     private final String externalSourceRef;
+    private final String externalId;
     private final Integer parent;
 
     @JsonCreator
@@ -60,6 +61,7 @@ public class EventWriteDto {
             Instant endDate,
             Instant creationDate,
             String externalSourceRef,
+            String externalId,
             Integer parent) {
         this.id = id;
         this.name = name;
@@ -74,6 +76,7 @@ public class EventWriteDto {
         this.endDate = endDate;
         this.externalSourceRef = externalSourceRef;
         this.creationDate = creationDate;
+        this.externalId = externalId;
         this.parent = parent;
     }
 
@@ -101,12 +104,17 @@ public class EventWriteDto {
         this.startDate = startDate;
         this.endDate = endDate;
         this.externalSourceRef = externalSourceRef;
+        this.externalId = null;
         this.parent = null;
         this.creationDate = null;
     }
 
     public Integer getId() {
         return id;
+    }
+
+    public String getExternalId() {
+        return externalId;
     }
 
     public String getName() {

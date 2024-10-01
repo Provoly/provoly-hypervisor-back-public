@@ -15,19 +15,18 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.ForbiddenException;
 
 import com.provoly.TestDataService;
+import com.provoly.equipment.EquipmentService;
 import com.provoly.event.dto.EventWriteDto;
 
 import io.quarkus.test.junit.QuarkusTest;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 
 @QuarkusTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class EventServiceTest {
 
     @Inject
@@ -36,12 +35,15 @@ public class EventServiceTest {
     @Inject
     TestDataService dataService;
 
-    @BeforeAll
+    @Inject
+    EquipmentService equipmentService;
+
+    @BeforeEach
     public void init() {
         dataService.init();
     }
 
-    @AfterAll
+    @AfterEach
     public void clean() {
         dataService.clean();
     }
@@ -273,7 +275,8 @@ public class EventServiceTest {
         // given
         var event = dataService.getEvent1();
         var eventUpdate = new EventWriteDto(event.getId(), event.getName(), event.getDescription(), event.getCriticality(),
-                "MANIFESTATION", null, event.getAddress(), null, null, Instant.now(), Instant.now(), null, "source", null);
+                "MANIFESTATION", null, event.getAddress(), null, null, Instant.now(), Instant.now(), null, "source", null,
+                null);
 
         // then
         assertThatThrownBy(() -> eventService.updateEvent(event.getId(), eventUpdate))
@@ -288,12 +291,43 @@ public class EventServiceTest {
         // given
         var event = dataService.getExternalEvent();
         var eventUpdate = new EventWriteDto(event.getId(), event.getName(), event.getDescription(), event.getCriticality(),
-                "OUTOFORDER", null, event.getAddress(), null, null, null, null, null, null, null);
+                "OUTOFORDER", null, event.getAddress(), null, null, null, null, null, null, null, null);
 
         // then
         assertThatThrownBy(() -> eventService.updateEvent(event.getId(), eventUpdate))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessageContaining(
                         "External source reference can't be updated");
+    }
+
+    @Test
+    @Transactional
+    void should_update_event_with_external_id_when_already_exists_when_save_event() {
+        // given
+        var equipment = equipmentService.getEquipmentByName("A-230").getId();
+        var event = new EventWriteDto(null,
+                "new event",
+                "desc",
+                Criticality.HIGH,
+                "MANIFESTATION",
+                null,
+                null,
+                equipment,
+                null,
+                Instant.now(),
+                Instant.now(),
+                Instant.now(),
+                "external_source",
+                "external_id",
+                null);
+        var saved = eventService.saveEvent(event);
+
+        // when
+        var updated = eventService.saveEvent(event);
+
+        //then
+        var events = eventService.getEvents(1, 10, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(),
+                "new event", null, "A-230");
+        assertThat(events.toList().size()).isEqualTo(1);
     }
 }
