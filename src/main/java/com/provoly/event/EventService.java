@@ -203,7 +203,7 @@ public class EventService {
             return null;
         }
 
-        Event event = new Event(eventDto.getExternalSourceRef());
+        Event event = new Event(eventDto.getExternalId());
         eventMapper.updateEvent(eventDto, event);
         databaseReader.saveEvent(event);
         enrichEquipmentFromUpdatedEvent(event.getId(), eventDto.getEquipmentId(), null);
