@@ -196,14 +196,17 @@ public class EventService {
             throw new ForbiddenException("Events with external source must provide an equipment.");
         }
 
+        Event event = new Event();
         if (eventDto.isExternalEvent() && eventDto.getExternalId() != null) {
             logger.infof("External event has an external id %s, update it if already exists", eventDto.getExternalId());
-            databaseReader.getEventByExternalId(eventDto.getExternalId())
-                    .ifPresent(event -> updateEvent(event.getId(), eventDto));
-            return null;
+            var existingEvent = databaseReader.getEventByExternalId(eventDto.getExternalId());
+            if (existingEvent.isPresent()) {
+                updateEvent(existingEvent.get().getId(), eventDto);
+                return existingEvent.get();
+            }
+            event = new Event(eventDto.getExternalId());
         }
 
-        Event event = new Event(eventDto.getExternalId());
         eventMapper.updateEvent(eventDto, event);
         databaseReader.saveEvent(event);
         enrichEquipmentFromUpdatedEvent(event.getId(), eventDto.getEquipmentId(), null);

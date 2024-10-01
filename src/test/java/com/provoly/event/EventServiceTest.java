@@ -327,7 +327,7 @@ public class EventServiceTest {
 
         //then
         var events = eventService.getEvents(1, 10, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(),
-                "new event", null, "A-230");
-        assertThat(events.toList().size()).isEqualTo(1);
+                "new event", null, null).toList();
+        assertThat(events.size()).isEqualTo(1);
     }
 }
