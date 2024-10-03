@@ -2,6 +2,7 @@ package com.provoly;
 
 import static com.provoly.service.ServiceStatus.ASKED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -16,8 +17,10 @@ import com.provoly.event.EventService;
 import com.provoly.event.dto.EventWriteDto;
 import com.provoly.service.ServiceService;
 import com.provoly.service.ServiceWriteDto;
+import com.provoly.user.UserService;
 
 import io.quarkus.kafka.client.serialization.ObjectMapperSerde;
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.kafka.InjectKafkaCompanion;
@@ -26,6 +29,7 @@ import io.smallrye.reactive.messaging.kafka.companion.KafkaCompanion;
 
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
@@ -42,6 +46,21 @@ public class EnrichedProducerTest {
 
     @Inject
     ServiceService serviceService;
+
+    @InjectMock
+    UserService mock;
+
+    @Inject
+    TestDataService dataService;
+
+    @BeforeEach
+    public void init() {
+        dataService.initUser();
+        given(mock.getCurrentUserName()).willReturn("reader");
+        given(mock.getCurrentUserFullName()).willReturn("name");
+        given(mock.getCurrentUserSubject()).willReturn(dataService.getUser().getSubject());
+        given(mock.getCurrentUser()).willReturn(dataService.getUser());
+    }
 
     @AfterEach
     public void cleanTopic() {

@@ -56,9 +56,14 @@ public class TestDataService {
     }
 
     @Transactional
-    public void init() {
+    public void initUser() {
         user = new User(UUID.randomUUID(), "reader", "name");
         userDatabaseReader.saveUser(user);
+    }
+
+    @Transactional
+    public void init() {
+        initUser();
         categories = eventDatabaseReader.getCategoryOrSubCategories()
                 .stream()
                 .collect(Collectors.toMap(Category::getCode, c -> c));

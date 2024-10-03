@@ -23,6 +23,7 @@ import com.provoly.equipment.EquipmentService;
 import com.provoly.event.dto.EventSummaryDto;
 import com.provoly.event.dto.EventWriteDto;
 import com.provoly.event.dto.EventsSummariesByStatusDto;
+import com.provoly.notification.NotificationProducer;
 import com.provoly.service.Service;
 import com.provoly.service.ServiceService;
 import com.provoly.user.Role;
@@ -39,19 +40,21 @@ public class EventService {
     private final EquipmentService equipmentService;
     private final ServiceService serviceService;
     private final EquipmentEnrichedProducer equipmentEnrichedProducer;
+    private final NotificationProducer notificationProducer;
     private final Logger logger;
     private final SecurityIdentity securityIdentity;
     private final XslxService xslxService;
 
     public EventService(EventDatabaseReader databaseReader, EventMapper eventMapper, EquipmentService equipmentService,
             ServiceService serviceService,
-            EquipmentEnrichedProducer equipmentEnrichedProducer,
+            EquipmentEnrichedProducer equipmentEnrichedProducer, NotificationProducer notificationProducer,
             Logger logger, SecurityIdentity securityIdentity, XslxService xslxService) {
         this.databaseReader = databaseReader;
         this.eventMapper = eventMapper;
         this.equipmentService = equipmentService;
         this.serviceService = serviceService;
         this.equipmentEnrichedProducer = equipmentEnrichedProducer;
+        this.notificationProducer = notificationProducer;
         this.logger = logger;
         this.securityIdentity = securityIdentity;
         this.xslxService = xslxService;
@@ -206,7 +209,10 @@ public class EventService {
 
         eventMapper.updateEvent(eventDto, event);
         databaseReader.saveEvent(event);
+
         enrichEquipmentFromUpdatedEvent(event.getId(), eventDto.getEquipmentId(), null);
+        notificationProducer.sendNotificationFor(event);
+
         logger.debugf("Event %s is created".formatted(event.getId()));
         return event;
     }

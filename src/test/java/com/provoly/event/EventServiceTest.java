@@ -2,6 +2,7 @@ package com.provoly.event;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.BDDMockito.given;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,7 +18,9 @@ import jakarta.ws.rs.ForbiddenException;
 import com.provoly.TestDataService;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.event.dto.EventWriteDto;
+import com.provoly.user.UserService;
 
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 
 import org.apache.poi.ss.usermodel.Workbook;
@@ -38,9 +41,16 @@ public class EventServiceTest {
     @Inject
     EquipmentService equipmentService;
 
+    @InjectMock
+    UserService mock;
+
     @BeforeEach
     public void init() {
         dataService.init();
+        given(mock.getCurrentUserName()).willReturn("reader");
+        given(mock.getCurrentUserFullName()).willReturn("name");
+        given(mock.getCurrentUserSubject()).willReturn(dataService.getUser().getSubject());
+        given(mock.getCurrentUser()).willReturn(dataService.getUser());
     }
 
     @AfterEach

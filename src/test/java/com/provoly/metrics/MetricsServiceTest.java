@@ -1,6 +1,7 @@
 package com.provoly.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -14,7 +15,9 @@ import com.provoly.equipment.EquipmentService;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventService;
 import com.provoly.event.dto.EventWriteDto;
+import com.provoly.user.UserService;
 
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 
 import org.junit.jupiter.api.AfterEach;
@@ -36,9 +39,16 @@ public class MetricsServiceTest {
     @Inject
     TestDataService dataService;
 
+    @InjectMock
+    UserService mock;
+
     @BeforeEach
     public void init() {
         dataService.init();
+        given(mock.getCurrentUserName()).willReturn("reader");
+        given(mock.getCurrentUserFullName()).willReturn("name");
+        given(mock.getCurrentUserSubject()).willReturn(dataService.getUser().getSubject());
+        given(mock.getCurrentUser()).willReturn(dataService.getUser());
     }
 
     @AfterEach
