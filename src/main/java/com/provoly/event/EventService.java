@@ -192,14 +192,11 @@ public class EventService {
         checkManifestationCategory(eventDto);
         checkSubCategoryCoherence(eventDto);
 
-        if (eventDto.isExternalEvent() && eventDto.getEquipmentId() == null) {
-            throw new ForbiddenException("Events with external source must provide an equipment.");
-        }
-
         Event event = new Event();
         if (eventDto.isExternalEvent() && eventDto.getExternalId() != null) {
             logger.infof("External event has an external id %s, update it if already exists", eventDto.getExternalId());
-            var existingEvent = databaseReader.getEventByExternalId(eventDto.getExternalId());
+            var existingEvent = databaseReader.getEventByExternalIdAndSource(eventDto.getExternalId(),
+                    eventDto.getExternalSourceRef());
             if (existingEvent.isPresent()) {
                 updateEvent(existingEvent.get().getId(), eventDto);
                 return existingEvent.get();
@@ -236,10 +233,12 @@ public class EventService {
         if (!Objects.equals(eventToUpdate.getExternalSourceRef(), eventDto.getExternalSourceRef())) {
             throw new ForbiddenException("External source reference can't be updated");
         }
+
         if (eventDto.isExternalEvent()
                 && forbiddenPropertiesAreUpdatedWhenExternalSource(eventDto, eventToUpdate)) {
             throw new ForbiddenException(
-                    "It's only possible to update description, address or criticality of events with external reference");
+                    "It's not possible to update externalId, name, category or subCategory for event %s with external source."
+                            .formatted(eventDto.getId()));
         }
 
         eventMapper.updateEvent(eventDto, eventToUpdate);
@@ -250,9 +249,7 @@ public class EventService {
     private boolean forbiddenPropertiesAreUpdatedWhenExternalSource(EventWriteDto eventDto, Event eventToUpdate) {
         var subCode = eventToUpdate.getSubCategory() == null ? null : eventToUpdate.getSubCategory().getCode();
 
-        return eventDto.getEquipmentId() == null
-                || !Objects.equals(eventDto.getExternalId(), eventToUpdate.getExternalId())
-                || !eventDto.getEquipmentId().equals(eventToUpdate.getEquipment().getId())
+        return !Objects.equals(eventDto.getExternalId(), eventToUpdate.getExternalId())
                 || !eventDto.getName().equals(eventToUpdate.getName())
                 || !eventDto.getCategory().equals(eventToUpdate.getCategory().getCode())
                 || !Objects.equals(eventDto.getSubCategory(), subCode);

@@ -71,17 +71,6 @@ public class EventServiceTest {
     }
 
     @Test
-    void should_throw_exception_create_external_event_missing_equipment_id() {
-        // given
-        var event = dataService.buildExternalEvent("alert", "LIMIT", Criticality.HIGH, false, null);
-
-        // then
-        assertThatThrownBy(() -> eventService.saveEvent(event))
-                .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("must provide an equipment.");
-    }
-
-    @Test
     @Transactional
     void should_throw_exception_update_external_event() {
         // given
@@ -96,9 +85,7 @@ public class EventServiceTest {
 
         // then
         assertThatThrownBy(() -> eventService.updateEvent(eventAlert.getId(), event))
-                .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining(
-                        "It's only possible to update description, address or criticality of events with external reference");
+                .isInstanceOf(ForbiddenException.class);
     }
 
     @Test
@@ -165,28 +152,6 @@ public class EventServiceTest {
         assertThatThrownBy(() -> eventService.saveEvent(event))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessageContaining("No subcategories are avalaible for");
-    }
-
-    @Test
-    void should_throw_exception_create_event_external_source_without_equipment() {
-        // given
-        var event = new EventWriteDto(null,
-                "new event",
-                "desc",
-                Criticality.HIGH,
-                "LIMIT",
-                null,
-                null,
-                null,
-                null,
-                Instant.now(),
-                Instant.now(),
-                "source");
-
-        // then
-        assertThatThrownBy(() -> eventService.saveEvent(event))
-                .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("Events with external source must provide an equipment");
     }
 
     @Test
@@ -302,7 +267,7 @@ public class EventServiceTest {
 
     @Test
     @Transactional
-    void should_update_event_with_external_id_when_already_exists_when_save_event() {
+    void should_update_event_with_same_external_id_and_source_when_save_event() {
         // given
         var equipment = equipmentService.getEquipmentByName("A-230").getId();
         var event = new EventWriteDto(null,
@@ -320,14 +285,60 @@ public class EventServiceTest {
                 "external_source",
                 "external_id",
                 null);
-        var saved = eventService.saveEvent(event);
+        eventService.saveEvent(event);
 
         // when
-        var updated = eventService.saveEvent(event);
+        eventService.saveEvent(event);
 
         //then
         var events = eventService.getEvents(1, 10, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(),
                 "new event", null, null).toList();
         assertThat(events.size()).isEqualTo(1);
+    }
+
+    @Test
+    @Transactional
+    void should_save_event_with_same_external_id_but_different_source_when_save_event() {
+        // given
+        var equipment = equipmentService.getEquipmentByName("A-230").getId();
+        var event = new EventWriteDto(null,
+                "new event",
+                "desc",
+                Criticality.HIGH,
+                "MANIFESTATION",
+                null,
+                null,
+                equipment,
+                null,
+                Instant.now(),
+                Instant.now(),
+                Instant.now(),
+                "external_source",
+                "external_id",
+                null);
+        eventService.saveEvent(event);
+
+        // when
+        var eventSameExternalId = new EventWriteDto(null,
+                "new event",
+                "desc",
+                Criticality.HIGH,
+                "MANIFESTATION",
+                null,
+                null,
+                equipment,
+                null,
+                Instant.now(),
+                Instant.now(),
+                Instant.now(),
+                "external_source_2",
+                "external_id",
+                null);
+        eventService.saveEvent(eventSameExternalId);
+
+        //then
+        var events = eventService.getEvents(1, 10, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(),
+                "new event", null, null).toList();
+        assertThat(events.size()).isEqualTo(2);
     }
 }

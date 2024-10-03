@@ -169,13 +169,15 @@ public class EventDatabaseReader extends DatabaseReader {
         return event;
     }
 
-    public Optional<Event> getEventByExternalId(String id) {
+    public Optional<Event> getEventByExternalIdAndSource(String id, String source) {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<Event> criteriaQuery = builder.createQuery(Event.class);
         Root<Event> root = criteriaQuery.from(Event.class);
 
         var query = criteriaQuery.select(root)
-                .where(builder.equal(root.get(Event_.externalId), id));
+                .where(builder.and(
+                        builder.equal(root.get(Event_.externalId), id),
+                        builder.equal(root.get(Event_.externalSourceRef), source)));
 
         return em.createQuery(query)
                 .getResultStream()
