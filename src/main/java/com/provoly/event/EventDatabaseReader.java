@@ -18,6 +18,7 @@ import com.provoly.equipment.Equipment_;
 import com.provoly.equipment.Family;
 import com.provoly.procedure.Procedure_;
 
+import org.hibernate.query.criteria.JpaExpression;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
@@ -96,7 +97,7 @@ public class EventDatabaseReader extends DatabaseReader {
         if (id != null) {
             logger.debugf("filter on event that contains '%s' in id".formatted(id));
             var idSearch = formatId(id);
-            searchFilters.add(cb.like(root.get(Event_.id).as(String.class), idSearch));
+            searchFilters.add(cb.like(((JpaExpression<Integer>) root.get(Event_.id)).cast(String.class), idSearch));
         }
 
         if (equipment != null) {

@@ -201,7 +201,7 @@ public class EnrichedProducerTest {
                 .withOffsetReset(OffsetResetStrategy.EARLIEST)
                 .fromTopics("equipment").awaitRecords(2, Duration.ofSeconds(5));
 
-        assertThat(result.getFirstRecord().value().getNbServicesAskedInProgress()).isEqualTo(1);
-        assertThat(result.getFirstRecord().value().getServices()).extracting("category").containsExactly("CURA");
+        assertThat(result.getLastRecord().value().getNbServicesAskedInProgress()).isEqualTo(1);
+        assertThat(result.getLastRecord().value().getServices()).extracting("category").containsExactly("CURA");
     }
 }

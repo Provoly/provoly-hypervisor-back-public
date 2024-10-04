@@ -1,9 +1,6 @@
 package com.provoly.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -14,6 +11,7 @@ import com.provoly.event.Domain;
 import com.provoly.event.Domain_;
 import com.provoly.event.SortOrder;
 
+import org.hibernate.query.criteria.JpaExpression;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
@@ -52,7 +50,7 @@ public class ProcedureModelDatabaseReader extends DatabaseReader {
             search = stripAccentAndAddPercents(search);
 
             filters = cb.or(
-                    cb.like(root.get(ProcedureModel_.id).as(String.class), idSearch),
+                    cb.like(((JpaExpression<Integer>) root.get(ProcedureModel_.id)).cast(String.class), idSearch),
                     cb.like(unaccent(cb, root.get(ProcedureModel_.name)), search),
                     cb.like(unaccent(cb, root.get(ProcedureModel_.creator)), search));
         }
