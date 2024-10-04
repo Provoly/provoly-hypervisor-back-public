@@ -15,6 +15,7 @@ import org.jboss.logging.Logger;
 @ApplicationScoped
 public class NotificationProducer {
 
+    public static final int MAX_NOTIFICATION_SIZE = 200;
     private final Logger log;
 
     private final UserService userService;
@@ -32,7 +33,7 @@ public class NotificationProducer {
         var user = userService.getCurrentUser();
         log.debugf("Send notification for event %s created by %s", event.getId(), user.getUsername());
         var notification = new ProvolyNotification(
-                new ProvolyNotificationMessage(event.getName(), event.getDescription()),
+                new ProvolyNotificationMessage(event.getName(), truncateDescription(event.getDescription())),
                 "/journal/%s".formatted(event.getId().toString()),
                 event.getCreationDate(),
                 user.getSubject().toString());
@@ -41,5 +42,9 @@ public class NotificationProducer {
 
     public void send(ProvolyNotification notification) {
         notificationEmitter.send(KafkaRecord.of(notification.creationDate().toString(), notification));
+    }
+
+    private static String truncateDescription(String description) {
+        return description.substring(0, Math.min(description.length(), MAX_NOTIFICATION_SIZE));
     }
 }
