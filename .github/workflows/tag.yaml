@@ -50,7 +50,7 @@ jobs:
 
       - name: Tag
         id: push-tag
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} -pl provoly-hypervisor-back -Dquarkus.container-image.tag=${{ github.ref_name }} -Dquarkus.container-image.labels.\"git-ref\"=${{ github.sha }} -DskipTests verify -am -Pdocker-image
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} -Dquarkus.container-image.tag=${{ github.ref_name }} -Dquarkus.container-image.labels.\"git-ref\"=${{ github.sha }} -DskipTests verify -Pdocker-image
         env:
           CI_REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
           CI_REGISTRY_SERVER: ${{ vars.REGISTRY_URL }}
