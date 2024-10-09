@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import com.provoly.equipment.Equipment;
 import com.provoly.event.Event;
+import com.provoly.event.Status;
 import com.provoly.service.Service;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -40,6 +41,7 @@ public class EquipmentEnriched {
         this.events = equipment
                 .getEvents()
                 .stream()
+                .filter(event -> event.getStatus() != Status.DONE)
                 .map(this::condensedEvent)
                 .toList();
         this.nbServicesAskedInProgress = equipment

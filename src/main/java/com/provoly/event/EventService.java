@@ -273,6 +273,7 @@ public class EventService {
             event.setStatus(Status.DONE);
             event.setCloseDate(Instant.now());
         }
+        equipmentEnrichedProducer.updateFor(event);
     }
 
     @Transactional

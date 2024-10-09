@@ -88,7 +88,6 @@ public class EventMapper {
         entity.setEquipment(equipmentService.getEquipmentByIdOrNull(dto.getEquipmentId()));
         entity.setStartDate(dto.getStartDate());
         entity.setEndDate(dto.getEndDate());
-        entity.setEndDate(dto.getEndDate());
         Event event = null;
         if (dto.getParent() != null) {
             event = databaseReader.getEventById(dto.getParent());

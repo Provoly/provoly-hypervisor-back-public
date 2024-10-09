@@ -65,6 +65,7 @@ public class EnrichedProducerTest {
     @AfterEach
     public void cleanTopic() {
         companion.topics().delete("equipment");
+        dataService.clean();
     }
 
     @Test
@@ -203,5 +204,40 @@ public class EnrichedProducerTest {
 
         assertThat(result.getLastRecord().value().getNbServicesAskedInProgress()).isEqualTo(1);
         assertThat(result.getLastRecord().value().getServices()).extracting("category").containsExactly("CURA");
+    }
+
+    @Test
+    public void should_remove_closed_event_on_enriched_equipment_when_event_is_closed() {
+        // given
+        companion.registerSerde(EquipmentEnriched.class, new ObjectMapperSerde<>(EquipmentEnriched.class));
+        var equipment = new EquipmentWriteDto("technical_id", 0, "306", "306", "EP", "Armoire", "CHALONS-COMMUN", "CHALONS",
+                "address", "CENTRE", null, false, null);
+        equipmentService.saveOrUpdateEquipments(List.of(equipment)); // 1 messages
+
+        var equipId = equipmentService.getEquipments(List.of("CHALONS-COMMUN"), null, 1, 10).stream().findFirst().get().getId();
+
+        var event = new EventWriteDto(null,
+                "toto",
+                "desc",
+                Criticality.HIGH,
+                "OUTOFORDER",
+                null,
+                "adress",
+                equipId,
+                "EP",
+                null,
+                null,
+                "source");
+        var savedEvent = eventService.saveEvent(event); // 1 messages
+
+        // when
+        eventService.closeEvent(savedEvent); // 1 message
+
+        var result = companion.consume(EquipmentEnriched.class)
+                .withOffsetReset(OffsetResetStrategy.EARLIEST)
+                .fromTopics("equipment").awaitRecords(3, Duration.ofSeconds(5));
+
+        assertThat(result.getRecords().get(1).value().getEvents()).hasSize(1);
+        assertThat(result.getLastRecord().value().getEvents()).isEmpty();
     }
 }

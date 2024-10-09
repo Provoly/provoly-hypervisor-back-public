@@ -118,7 +118,7 @@ public class MockController {
     }
 
     private Instant randomCreationDate() {
-        var start = Instant.now().minus(4 * 365, ChronoUnit.DAYS);
+        var start = Instant.now().minus(4L * 365, ChronoUnit.DAYS);
         var end = Instant.now();
         var durationNbSeconds = Duration.between(start, end).toSeconds();
         var durationFromStart = Duration.of(rand.nextLong(durationNbSeconds), ChronoUnit.SECONDS);
@@ -143,7 +143,7 @@ public class MockController {
     private void setCloseDate(Event event) {
         if (event.getStatus() == Status.DONE) {
             var start = event.getCreationDate();
-            var duration = Duration.ofHours(rand.nextLong(5, 24 * 10));
+            var duration = Duration.ofHours(rand.nextLong(5, 24L * 10L));
             event.setCloseDate(start.plus(duration));
         }
     }
