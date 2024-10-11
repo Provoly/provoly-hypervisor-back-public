@@ -623,4 +623,90 @@ public class EventControllerTest {
         assertThat(events).extracting("equipment").extracting("name").containsExactly("C-763", "C-762", "C-762");
     }
 
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_read" })
+    void should_search_events_with_hyperviseur_source() {
+        // given
+        var param = new EventController.EventParameters();
+        param.source = List.of("Hyperviseur");
+        // when
+        var events = eventController.getEvents(
+                1,
+                10,
+                null,
+                null,
+                param);
+        //then
+        assertThat(events).extracting("externalSourceRef").containsExactly("Hyperviseur", "Hyperviseur", "Hyperviseur");
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_read" })
+    void should_search_events_with_known_source() {
+        // given
+        var param = new EventController.EventParameters();
+        param.source = List.of("citylinx");
+        // when
+        var events = eventController.getEvents(
+                1,
+                10,
+                null,
+                null,
+                param);
+        //then
+        assertThat(events).extracting("externalSourceRef").containsExactly("citylinx");
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_read" })
+    void should_search_events_with_unknown_source() {
+        // given
+        var param = new EventController.EventParameters();
+        param.source = List.of("unknown");
+        // when
+        var events = eventController.getEvents(
+                1,
+                10,
+                null,
+                null,
+                param);
+        //then
+        assertThat(events).isEmpty();
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_read" })
+    void should_search_events_with_hyperviseur_known_source() {
+        // given
+        var param = new EventController.EventParameters();
+        param.source = List.of("Hyperviseur", "citylinx");
+        // when
+        var events = eventController.getEvents(
+                1,
+                10,
+                null,
+                null,
+                param);
+        //then
+        assertThat(events).extracting("externalSourceRef").containsExactly("citylinx", "Hyperviseur", "Hyperviseur",
+                "Hyperviseur");
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_read" })
+    void should_search_events_with_hyperviseur_unknown_source() {
+        // given
+        var param = new EventController.EventParameters();
+        param.source = List.of("Hyperviseur", "unknown");
+        // when
+        var events = eventController.getEvents(
+                1,
+                10,
+                null,
+                null,
+                param);
+        //then
+        assertThat(events).extracting("externalSourceRef").containsExactly("Hyperviseur", "Hyperviseur", "Hyperviseur");
+    }
+
 }

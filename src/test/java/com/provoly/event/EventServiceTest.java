@@ -25,6 +25,7 @@ import io.quarkus.test.junit.QuarkusTest;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,7 +86,7 @@ public class EventServiceTest {
     void should_throw_exception_update_external_event() {
         // given
         var eventAlert = eventService
-                .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of("LIMIT"), List.of(),
+                .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of("LIMIT"), List.of(), List.of(),
                         List.of(), null, null, null)
                 .toList()
                 .getFirst();
@@ -170,6 +171,7 @@ public class EventServiceTest {
         // given
         var eventIdInProgress = eventService
                 .getEvents(1, 1, null, null, null, List.of(), List.of(Status.IN_PROGRESS.name()), List.of(), List.of(),
+                        List.of(),
                         List.of(), null, null, null)
                 .toList()
                 .getFirst()
@@ -191,6 +193,7 @@ public class EventServiceTest {
         // given
         var eventIdDone = eventService
                 .getEvents(1, 1, null, null, null, List.of(), List.of(Status.DONE.name()), List.of(), List.of(), List.of(),
+                        List.of(),
                         null, null, null)
                 .toList()
                 .getFirst()
@@ -225,8 +228,10 @@ public class EventServiceTest {
     @Transactional
     void should_export_events() throws IOException {
         // given
-        var events = eventService.getEvents(1, 100, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(),
-                null, null, null).toList();
+        var events = eventService
+                .getEvents(1, 100, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
+                        null, null, null)
+                .toList();
 
         // when
         var result = eventService.exportEvents();
@@ -301,9 +306,11 @@ public class EventServiceTest {
         eventService.saveEvent(event);
 
         //then
-        var events = eventService.getEvents(1, 10, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(),
-                "new event", null, null).toList();
-        assertThat(events.size()).isEqualTo(1);
+        var events = eventService
+                .getEvents(1, 10, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
+                        "new event", null, null)
+                .toList();
+        Assertions.assertThat(events).hasSize(1);
     }
 
     @Test
@@ -347,8 +354,10 @@ public class EventServiceTest {
         eventService.saveEvent(eventSameExternalId);
 
         //then
-        var events = eventService.getEvents(1, 10, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(),
-                "new event", null, null).toList();
-        assertThat(events.size()).isEqualTo(2);
+        var events = eventService
+                .getEvents(1, 10, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
+                        "new event", null, null)
+                .toList();
+        Assertions.assertThat(events).hasSize(2);
     }
 }

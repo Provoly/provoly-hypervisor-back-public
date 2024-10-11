@@ -105,6 +105,7 @@ public class EventService {
             List<String> criticality,
             List<String> status,
             List<String> category,
+            List<String> source,
             List<String> entity,
             List<String> family,
             String name,
@@ -116,14 +117,16 @@ public class EventService {
                 criticality : %s,
                 status : %s,
                 category : %s,
+                source: %s,
                 equipment entity : %s,
                 equipment family : %s
                 with search: %s/%s/%s
                 sort by %s
-                """.formatted(page, pageSize, creationDate, criticality, status, category, entity, family, name, id, equipment,
+                """.formatted(page, pageSize, creationDate, criticality, status, category, source, entity, family, name, id,
+                equipment,
                 sort));
 
-        if (oneOfFilterIsEmpty(criticality, status, category, entity, family)) {
+        if (oneOfFilterIsEmpty(criticality, status, category, source, entity, family)) {
             return Stream.of();
         }
 
@@ -153,6 +156,7 @@ public class EventService {
                 criticalities,
                 statuses,
                 categories,
+                source,
                 entities,
                 families,
                 name,
@@ -161,10 +165,11 @@ public class EventService {
     }
 
     private boolean oneOfFilterIsEmpty(List<String> criticality, List<String> status, List<String> category,
-            List<String> entity, List<String> type) {
+            List<String> source, List<String> entity, List<String> type) {
         return criticality.stream().anyMatch(String::isEmpty) ||
                 status.stream().anyMatch(String::isEmpty) ||
                 category.stream().anyMatch(String::isEmpty) ||
+                source.stream().anyMatch(String::isEmpty) ||
                 entity.stream().anyMatch(String::isEmpty) ||
                 type.stream().anyMatch(String::isEmpty);
     }

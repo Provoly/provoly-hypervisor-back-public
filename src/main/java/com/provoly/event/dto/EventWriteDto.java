@@ -162,10 +162,7 @@ public class EventWriteDto {
     }
 
     public String getExternalSourceRef() {
-        if (externalSourceRef != null && !externalSourceRef.isEmpty() && !externalSourceRef.equals(DEFAULT_SOURCE)) {
-            return externalSourceRef;
-        }
-        return null;
+        return externalSourceRef == null || externalSourceRef.isBlank() ? DEFAULT_SOURCE : externalSourceRef;
     }
 
     public boolean isExternalEvent() {

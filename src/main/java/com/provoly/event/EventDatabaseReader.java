@@ -1,7 +1,5 @@
 package com.provoly.event;
 
-import static com.provoly.event.EventMapper.DEFAULT_SOURCE;
-
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -38,6 +36,7 @@ public class EventDatabaseReader extends DatabaseReader {
             List<Criticality> criticalities,
             List<Status> status,
             List<Category> categories,
+            List<String> sources,
             List<EquipmentEntity> entities,
             List<Family> families,
             String name,
@@ -85,6 +84,11 @@ public class EventDatabaseReader extends DatabaseReader {
                     .flatMap(Collection::stream)
                     .toList();
             predicates.add(root.get(Event_.category).in(categories));
+        }
+
+        if (!sources.isEmpty()) {
+            logger.debugf("filter on source event %s", sources);
+            predicates.add(root.get(Event_.externalSourceRef).in(sources));
         }
 
         List<Predicate> searchFilters = new ArrayList<>();
@@ -257,7 +261,7 @@ public class EventDatabaseReader extends DatabaseReader {
                 yield category.get(Category_.name);
             }
             case ID -> root.get(Event_.id);
-            case SOURCE -> builder.coalesce(root.get(Event_.externalSourceRef), DEFAULT_SOURCE);
+            case SOURCE -> root.get(Event_.externalSourceRef);
         };
     }
 

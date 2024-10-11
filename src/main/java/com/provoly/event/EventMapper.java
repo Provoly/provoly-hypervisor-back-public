@@ -53,7 +53,7 @@ public class EventMapper {
                 mapToString(event.getDomain()),
                 event.getStartDate(),
                 event.getEndDate(),
-                event.getExternalSourceRef() == null ? DEFAULT_SOURCE : event.getExternalSourceRef(),
+                event.getExternalSourceRef(),
                 commentMapper.mapLastCommentToDto(event.getComments()),
                 event.getComments().size(),
                 event.getParent() == null ? null : new ParentReadDto(event.getParent().getId(), event.getParent().getName()));
@@ -116,7 +116,7 @@ public class EventMapper {
                         event.getDomain() == null ? null : event.getDomain().getName(),
                         event.getStartDate(),
                         event.getEndDate(),
-                        event.getExternalSourceRef() == null ? DEFAULT_SOURCE : event.getExternalSourceRef(),
+                        event.getExternalSourceRef(),
                         getAskedServicesId(event),
                         event.getParent() == null ? null : event.getParent().getId()))
                 .toList();
@@ -131,7 +131,7 @@ public class EventMapper {
                         shortEquipmentMapper.mapToEquipmentShortDto(event.getEquipment()),
                         event.getCriticality(),
                         event.getStatus(),
-                        event.getExternalSourceRef() == null ? DEFAULT_SOURCE : event.getExternalSourceRef(),
+                        event.getExternalSourceRef(),
                         getProcedureProgress(event),
                         event.getCategory().getCode(),
                         event.getSubCategory() == null ? null : event.getSubCategory().getCode(),

@@ -1,5 +1,6 @@
 package com.provoly;
 
+import static com.provoly.event.EventMapper.DEFAULT_SOURCE;
 import static com.provoly.service.ServiceStatus.ASKED;
 import static com.provoly.service.ServiceStatus.DONE;
 import static com.provoly.service.ServiceStatus.IN_PROGRESS;
@@ -266,9 +267,9 @@ public class TestDataService {
         if (category.getCode().equals("MANIFESTATION")) {
             event.setStartDate(Instant.now());
             event.setEndDate(Instant.now());
-        } else {
-            event.setExternalSourceRef(externalRef);
         }
+        event.setExternalSourceRef(externalRef == null ? DEFAULT_SOURCE : externalRef);
+
         em.persist(event);
         return event;
     }

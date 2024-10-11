@@ -74,6 +74,8 @@ public class EventController {
         @RestQuery
         public List<String> family = new ArrayList<>();
         @RestQuery
+        public List<String> source = new ArrayList<>();
+        @RestQuery
         public String name;
         @RestQuery
         public String id;
@@ -98,6 +100,7 @@ public class EventController {
                 params.criticality,
                 params.status,
                 params.category,
+                params.source,
                 params.entity,
                 params.family,
                 params.name,
