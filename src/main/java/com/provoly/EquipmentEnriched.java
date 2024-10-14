@@ -22,6 +22,7 @@ public class EquipmentEnriched {
     private final String entity;
     private final String family;
     private final String place;
+    private final boolean deleted;
     private final Map<String, Object> attributes;
     private final EquipmentEnriched parent;
     private final List<CondensedEvent> events;
@@ -37,6 +38,7 @@ public class EquipmentEnriched {
         this.family = equipment.getFamily().getCode();
         this.attributes = equipment.getAttributes();
         this.place = equipment.getDistrict().getCode();
+        this.deleted = equipment.isDeleted();
         this.parent = equipment.getParent() == null ? null : new EquipmentEnriched(equipment.getParent());
         this.events = equipment
                 .getEvents()
@@ -57,7 +59,8 @@ public class EquipmentEnriched {
     }
 
     public EquipmentEnriched(UUID id, String externalId, String name, String code, String domain, String entity, String family,
-            String place, Map<String, Object> attributes, EquipmentEnriched parent, List<CondensedEvent> events,
+            String place, boolean deleted, Map<String, Object> attributes, EquipmentEnriched parent,
+            List<CondensedEvent> events,
             long nbServicesAskedInProgress, List<CondensedService> services) {
         this.id = id;
         this.name = name;
@@ -66,6 +69,7 @@ public class EquipmentEnriched {
         this.entity = entity;
         this.family = family;
         this.place = place;
+        this.deleted = deleted;
         this.attributes = attributes;
         this.parent = parent;
         this.events = events;
@@ -99,6 +103,10 @@ public class EquipmentEnriched {
 
     public String getPlace() {
         return place;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
     }
 
     @JsonAnyGetter
