@@ -62,6 +62,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
 
         var predicates = new ArrayList<Predicate>();
         predicates.add(builder.notEqual(event.get(Event_.status), Status.DONE));
+        predicates.add(builder.isFalse(equipment.get(Equipment_.deleted)));
 
         filterOnDomain(domainEntity, predicates, builder, equipment);
         filterOnCriticality(criticalities, predicates, event);
@@ -133,6 +134,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
                 .where(builder.and(
                         builder.isFalse(equipment.get(Equipment_.deleted)),
                         familyPredicate,
+                        builder.isFalse(equipment.get(Equipment_.deleted)),
                         builder.equal(equipment.get(Equipment_.domain), domain)))
                 .groupBy(entity.get(EquipmentEntity_.code), managed);
 
@@ -157,7 +159,9 @@ public class MetricsDatabaseReader extends DatabaseReader {
                         family.get(Family_.code),
                         managed,
                         builder.count(equipment))
-                .where(builder.equal(domain.get(Domain_.code), "EP"))
+                .where(builder.and(
+                        builder.equal(domain.get(Domain_.code), "EP"),
+                        builder.isFalse(equipment.get(Equipment_.deleted))))
                 .groupBy(family.get(Family_.code), managed);
 
         var result = em.createQuery(query)
@@ -174,7 +178,9 @@ public class MetricsDatabaseReader extends DatabaseReader {
 
         var query = criteriaQuery
                 .select(builder.count(equipment))
-                .where(builder.equal(domain.get(Domain_.code), "VP"));
+                .where(builder.and(
+                        builder.equal(domain.get(Domain_.code), "VP"),
+                        builder.isFalse(equipment.get(Equipment_.deleted))));
 
         return em.createQuery(query).getSingleResult();
     }
@@ -224,6 +230,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
         var city = equipment.join(Equipment_.city, JoinType.LEFT);
 
         var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
+        predicates.add(builder.isFalse(equipment.get(Equipment_.deleted)));
 
         if (eventCategory != null) {
             var subcategory = getSubCategories(eventCategory).toList();
@@ -323,6 +330,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
         var subcategory = getAnomalySubCategoriesCode();
 
         var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
+        predicates.add(builder.isFalse(equipment.get(Equipment_.deleted)));
 
         filterOnDomain(domain, predicates, builder, equipment);
         filterOn(entities, predicates, builder, equipment, Equipment_.entity);
@@ -375,6 +383,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
 
         var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
         predicates.add(category.get(Category_.code).in(subcategoryCodes));
+        predicates.add(builder.isFalse(equipment.get(Equipment_.deleted)));
 
         filterOnDomain(domain, predicates, builder, equipment);
 

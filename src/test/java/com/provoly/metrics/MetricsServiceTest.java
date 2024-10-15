@@ -7,11 +7,13 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.inject.Inject;
 
 import com.provoly.TestDataService;
 import com.provoly.equipment.EquipmentService;
+import com.provoly.equipment.EquipmentWriteDto;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventService;
 import com.provoly.event.dto.EventWriteDto;
@@ -56,6 +58,18 @@ public class MetricsServiceTest {
         dataService.clean();
     }
 
+    private void saveDeletedEPEquipment() {
+        var equipment = new EquipmentWriteDto(Map.of("id", "id"), 0, "deleted", "deleted", "EP", "Armoire", "FAGNIERES-COMMUN",
+                "CHALONS", "adr", "CENTRE", null, true, Map.of("managed", 1));
+        equipmentService.saveOrUpdateEquipments(List.of(equipment));
+    }
+
+    private void saveDeletedVPEquipment() {
+        var equipment = new EquipmentWriteDto(Map.of("id", "id"), 0, "deleted_VP", "deleted_VP", "VP", "Camera", "AGGLO-COMMUN",
+                "CHALONS", "adr", "CENTRE", null, true, Map.of("managed", 1));
+        equipmentService.saveOrUpdateEquipments(List.of(equipment));
+    }
+
     @Test
     void should_get_equipment_with_event_metrics() {
         // when
@@ -76,6 +90,22 @@ public class MetricsServiceTest {
         assertThat(result).extracting("totalEquipWithEvent_unmanaged").isEqualTo(4L);
         assertThat(result).extracting("nbServiceTodoWithEquip_unmanaged").isEqualTo(1L);
         assertThat(result).extracting("nbServiceInProgressWithEquip_unmanaged").isEqualTo(0L);
+    }
+
+    @Test
+    void should_get_equipment_with_event_metrics_ignore_deleted_equipment() {
+        // given
+        saveDeletedEPEquipment();
+        var equipmentId = equipmentService.getEquipmentByName("deleted").getId();
+        var event = new EventWriteDto(null, "deleted", "desc", Criticality.LOW, "LIMIT", null, "address", equipmentId, "EP",
+                null, null, null, null, null, null);
+        eventService.saveEvent(event);
+        // when
+        var result = metricsService.getEpEquipmentsWithEvent(List.of(), List.of(), List.of(), List.of());
+
+        //then
+        assertThat(result).extracting("nbEquipWithEvent_A").isEqualTo(0L);
+        assertThat(result).extracting("totalEquipWithEvent_A").isEqualTo(1L);
     }
 
     @Test
@@ -222,6 +252,25 @@ public class MetricsServiceTest {
 
     @Test
     void should_get_equipment_A_by_entities() {
+        // when
+        var result = metricsService.getTotalEpEquipmentsByEntity("EP_ARMOIRE");
+
+        //then
+        assertThat(result).extracting("aggloManaged").isEqualTo(0L);
+        assertThat(result).extracting("aggloUnmanaged").isEqualTo(1L);
+        assertThat(result).extracting("chManaged").isEqualTo(0L);
+        assertThat(result).extracting("chUnmanaged").isEqualTo(0L);
+
+        assertThat(result).extracting("fagnManaged").isEqualTo(0L);
+        assertThat(result).extracting("fagnUnmanaged").isEqualTo(0L);
+        assertThat(result).extracting("smpManaged").isEqualTo(1L);
+        assertThat(result).extracting("smpUnmanaged").isEqualTo(0L);
+    }
+
+    @Test
+    void should_get_equipment_A_by_entities_ignore_deleted_equipment() {
+        //given
+        saveDeletedEPEquipment();
         // when
         var result = metricsService.getTotalEpEquipmentsByEntity("EP_ARMOIRE");
 
@@ -428,7 +477,26 @@ public class MetricsServiceTest {
     }
 
     @Test
-    void should_get_vp_equipment_from_agglo_with_event_metrics_with_criticality_low_medium_and_category_alert() {
+    void should_get_vp_equipment_from_agglo_with_event_metrics() {
+        // when
+        var result = metricsService.getVpEquipmentsWithEvent(List.of(), List.of(), List.of(), List.of());
+
+        //then
+        assertThat(result).extracting("nbEquipWithEvent_C").isEqualTo(0L);
+        assertThat(result).extracting("totalEquipWithEvent_C").isEqualTo(2L);
+        assertThat(result).extracting("nbServiceTodoWithEquip_C").isEqualTo(0L);
+        assertThat(result).extracting("nbServiceInProgressWithEquip_C").isEqualTo(0L);
+    }
+
+    @Test
+    void should_get_vp_equipment_from_agglo_with_event_metrics_ignore_deleted_equipments() {
+        //given
+        saveDeletedVPEquipment();
+        var equipmentId = equipmentService.getEquipmentByName("deleted_VP").getId();
+        var event = new EventWriteDto(null, "deleted", "desc", Criticality.LOW, "LIMIT", null, "address", equipmentId, "EP",
+                null, null, null, null, null, null);
+        eventService.saveEvent(event);
+
         // when
         var result = metricsService.getVpEquipmentsWithEvent(List.of(), List.of(), List.of(), List.of());
 
@@ -513,6 +581,37 @@ public class MetricsServiceTest {
     }
 
     @Test
+    void should_get_equipment_vp_anomalies_number_grouped_by_subcategories_ignore_deleted_equipments() {
+        // given
+        saveDeletedVPEquipment();
+        var vpEquipment = equipmentService.getEquipmentByName("deleted_VP");
+
+        eventService.saveEvent(new EventWriteDto(null,
+                "new anomaly event",
+                "description",
+                Criticality.LOW,
+                "ANOMALY",
+                "TRAFFIC_CONGESTION",
+                "address",
+                vpEquipment.getId(),
+                "VP",
+                null,
+                null,
+                null));
+
+        var creationDate = Instant.parse(LocalDate.now().atStartOfDay() + ":00.000Z");
+
+        // when
+        var result = metricsService.getAnomalyEventsBySubCategories("VP", creationDate, null, List.of(), List.of(),
+                List.of(), List.of(), null);
+
+        //then
+        assertThat(result).extracting("TRAFFIC_CONGESTION").isEqualTo(0L);
+        assertThat(result).extracting("WILD_STORAGE").isEqualTo(0L);
+        assertThat(result).extracting("UNUSUAL_FLOW").isEqualTo(0L);
+    }
+
+    @Test
     void should_get_equipment_vp_anomalies_number_grouped_by_subcategories_for_specific_equipment() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
@@ -574,32 +673,6 @@ public class MetricsServiceTest {
     }
 
     @Test
-    void should_get_all_anomalies_number_grouped_by_subcategories_because_done() {
-        // given
-        eventService.saveEvent(new EventWriteDto(null,
-                "new anomaly event",
-                "description",
-                Criticality.LOW,
-                "ANOMALY",
-                "TRAFFIC_CONGESTION",
-                "address",
-                null,
-                "VP",
-                null,
-                null,
-                null));
-
-        // when
-        var result = metricsService.getAnomalyEventsBySubCategories(null, null, null, List.of(), List.of(), List.of(),
-                List.of(), null);
-
-        //then
-        assertThat(result).extracting("TRAFFIC_CONGESTION").isEqualTo(1L);
-        assertThat(result).extracting("WILD_STORAGE").isEqualTo(0L);
-        assertThat(result).extracting("UNUSUAL_FLOW").isEqualTo(0L);
-    }
-
-    @Test
     void should_get_all_anomalies_number_grouped_by_subcategories_and_equipment_entities() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
@@ -626,6 +699,36 @@ public class MetricsServiceTest {
                 .extracting("count")
                 .first()
                 .isEqualTo(1L);
+    }
+
+    @Test
+    void should_get_all_anomalies_number_grouped_by_subcategories_and_equipment_entities_ignore_deleted_equipment() {
+        // given
+        saveDeletedVPEquipment();
+        var vpEquipment = equipmentService.getEquipmentByName("deleted_VP");
+        eventService.saveEvent(new EventWriteDto(null,
+                "new anomaly event",
+                "description",
+                Criticality.LOW,
+                "ANOMALY",
+                "TRAFFIC_CONGESTION",
+                "address",
+                vpEquipment.getId(),
+                "VP",
+                null,
+                null,
+                null));
+
+        // when
+        var creationDate = Instant.parse(LocalDate.now().atStartOfDay().minusDays(3) + ":00.000Z");
+        var result = metricsService.getAnomalyEventsGroupedBySubCategoriesAndEntities("VP", creationDate);
+
+        //then
+        assertThat(result)
+                .filteredOn(r -> r.entity().equals("AGGLO-COMMUN") && r.subCategory().equals("TRAFFIC_CONGESTION"))
+                .extracting("count")
+                .first()
+                .isEqualTo(0L);
     }
 
     @Test
