@@ -32,7 +32,7 @@ workspace {
                     provoly-dashboard = component "provoly-dashboard"
                     chalons-hyperviseur = component "chalons-hyperviseur"
                 }
-                hypervisorBack = container "Hypervisor service" {
+                hypervisorBack = container "Hypervisor back" {
                     technology "Quarkus"
                 }
                 db = container "Hypervisor database" "Holds : \n -events\n -equipments\n -Services""Postgres" "db"

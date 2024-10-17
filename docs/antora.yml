@@ -7,3 +7,11 @@ nav:
 asciidoc:
   attributes:
     kroki-plantuml-include-paths: './modules/architecture/partials/diagrams'
+ext:
+  collector:
+    - run:
+        - command: npx @redocly/cli@latest build-docs --output=generated/provoly-hypervisor-back.html src/main/resources/META-INF/openapi.yaml
+    - scan:
+        dir: generated/
+        files: "**/*.html"
+        into: modules/API/attachments

@@ -2,16 +2,12 @@
 
 == Déploiement
 
-
-=== Générer des équipements dans l'hyperviseur
-Pour associer et enrichir des équipements, il faut les générer à l'aide de la requête `create/update equipments` dans le dossier `provoly/hypervisor` de Postman.
-
 === Configurer et insérer les données dans Kuzzle
 Il existe deux possibilités :
 
 ==== NodeRed
-Le NodeRed déployé est configuré pour récupérer les mesures directement de Citylinks et les envoyer à Kuzzle.
-Pour cela, il faut lancer les différents flux à l'adresse https://nodered.chalons-dev.provoly.net :
+Le NodeRed déployé est configuré pour récupérer les équipements directement de Coswin et les envoyer à Kuzzle ainsi qu'à l'hyperviseur.
+Pour cela, il faut lancer les différents flux à l'adresse https://nodered.chalons-{environnement}.provoly.net :
 
 * `creation tenant`
 * `integration armoire`
@@ -25,9 +21,12 @@ Pour des données de tests, il est possible d'utiliser les requêtes dans le dos
 * `Create asset/device`
 * `Mesures`
 
-NB: il faut s'assurer que le nom du tenant présent dans toutes les urls correspond bien à celui configuré dans provoly.
-Pour l'environnement "chalons-dev", il faut que le tenant se nomme `connect-chalons`.
+Ainsi que la requête `create/update equipments` du dossier  `provoly/hypervisor`.
 
+[NOTE]
+--
+il faut s'assurer que le nom du tenant présent dans toutes les urls kuzzle correspond bien à celui configuré dans provoly. Le tenant par défaut se nomme `*connect-chalons*`.
+--
 
 
 === Créer les classes et les jeux de données
@@ -83,13 +82,16 @@ Créer un style `equipment` en utilisant le fichier `geoserver/equipment.sld`
 
 Note: il faut sélectionner le fichier, cliquer sur "Charger" (en face) et re-sélectionner le fichier. Ensuite cliquer sur "Valider".
 
-Publier la couche "xxxxxx_equipement-enrichi-mesure"
+Publier la couche *`xxxxxx_equipement-enrichi-mesure`*
 
-Cocher la case "Personnaliser les attributs" en attendant la correction du bug https://github.com/Provoly/provoly-geoserver-datastore/issues/46
+Cocher la case *`Personnaliser les attributs`* en attendant la correction du bug https://github.com/Provoly/provoly-geoserver-datastore/issues/46
 
-Dans l'onglet "Publication" de la couche, choisir le style "equipment" par défaut
+Dans l'onglet *`Publication`* de la couche, choisir le style `equipment` par défaut
 
+[WARNING]
+--
 Une fois le style de l'équipement paramétré, il faut de nouveau importer les icônes (?)
+--
 
 [source,bash]
 ----

@@ -1,0 +1,36 @@
+= Hypervisor Architecture
+
+== High level domain model
+
+The following diagram contains the hypervisor domain concepts.
+Its only purpose is to display the concepts with their relations.
+
+[plantuml]
+----
+include::partial$diagrams/mcd.puml[]
+----
+
+
+== Hypervisor interaction
+This diagram shows hypervisor interactions with other components :
+
+[plantuml]
+----
+include::partial$diagrams/interaction.puml[]
+----
+
+The model is stored in a postgresql database, and messages are sent to kafka via two separate queues :
+
+* `*notifications*`: used to send a notification to the provoly's notification service to generate one with information from the hypervisor. In our case, we want to notify users that a new event has been created.
+
+* `*equipment*`: used to send created/updated equipment to an equipment enrichment service in `*provoly-stream*`.The enriched equipment is then inserted into a provoly dataset.
+An enriched equipment contains information on associated events, as well as its *measurements*. Measurements are retrieved directly in provoly-stream. For more information, see the provoly-stream documentation. +
+Here are the rules for sending equipment in this topic:
+
+** equipment is created
+** equipment is updated
+** event with equipment is created
+** event with equipment is updated
+** event with equipment is closed
+
+

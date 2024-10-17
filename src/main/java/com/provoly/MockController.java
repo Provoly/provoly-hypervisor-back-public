@@ -79,7 +79,7 @@ public class MockController {
         for (int i = 0; i < eventNumber; i++) {
             Event event = new Event();
             event.setCategory(randomCategory(categories));
-            event.setName("MOCK: Evenement %s %s".formatted(event.getCategory().name, suffix(UUID.randomUUID())));
+            event.setName("MOCK: Evenement %s %s".formatted(event.getCategory().getName(), suffix(UUID.randomUUID())));
             event.setCreationDate(randomCreationDate());
 
             if (event.getCategory().getCode().equals("MANIFESTATION")) {

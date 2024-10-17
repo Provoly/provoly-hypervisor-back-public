@@ -1,0 +1,45 @@
+@startuml
+
+title Provoly Hypervisor Back interactions
+
+database database [
+database
+[postgresql]
+]
+
+component hyperviseur [
+provoly-hypervisor-back
+[quarkus]
+]
+
+queue equipment [
+equipment
+[kafka]
+]
+queue notifications [
+notifications
+[kafka]
+]
+
+component provoly {
+component ref [
+data-ref
+[quarkus]
+]
+}
+
+component provoly-stream {
+component enriched [
+stream-equipment-enriched
+[quarkus]
+]
+}
+
+database <- hyperviseur
+hyperviseur -d-> equipment : create/update equipments
+hyperviseur -> notifications : new event is created
+
+enriched .> equipment : enrich enquipment for provoly insertion
+ref .> notifications : notification service
+
+@enduml

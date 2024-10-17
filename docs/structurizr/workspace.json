@@ -2,10 +2,9 @@
   "id" : 1,
   "name" : "Name",
   "description" : "Description",
-  "lastModifiedDate" : "2024-03-18T09:38:37Z",
-  "lastModifiedAgent" : "structurizr-javascript",
+  "lastModifiedDate" : "2024-10-15T12:58:28Z",
   "properties" : {
-    "structurizr.dsl" : "d29ya3NwYWNlIHsKCiAgICBtb2RlbCB7CiAgICAgICAgdXNlciA9IHBlcnNvbiAiTW1lIE1pY2h1IiAiUHVibGljIHVzZXIiCiAgICAgICAgYWRtaW4gPSBwZXJzb24gIkJvYiBEb3VnbGFzIiAiUGxhdGVmb3JtIGFkbWluIgogICAgICAgIGdyb3VwIENow6Jsb25zIHsKICAgICAgICAgICAgZ21hbyA9IHNvZnR3YXJlU3lzdGVtICJHTUFPIgogICAgICAgICAgICBpb3QgPSBzb2Z0d2FyZVN5c3RlbSAiQ2l0eWxpbngiCiAgICAgICAgICAgIGh5cGVydmlzb3JzID0gc29mdHdhcmVTeXN0ZW0gIkh5cGVydmlzb3IiCiAgICAgICAgICAgIG5vZGVyZWQgPSBzb2Z0d2FyZVN5c3RlbSAiTm9kZVJFRCIKICAgICAgICAgICAgaWRwID0gc29mdHdhcmVTeXN0ZW0gIk9BdXRoMiBwcm92aWRlciIgIkFjdGl2ZSBEaXJlY3RvcnkiCiAgICAgICAgICAgIGdtYW8gLT4gbm9kZXJlZCAiIgogICAgICAgICAgICBoeXBlcnZpc29ycyAtPiBub2RlcmVkICIiCiAgICAgICAgICAgIGlvdCAtPiBub2RlcmVkICIiCiAgICAgICAgfQoKCgogICAgICAgIHByb3ZvbHkgPSBzb2Z0d2FyZVN5c3RlbSAiUHJvdm9seSIgewoKICAgICAgICAgICAgZ3JvdXAgRGVwZW5kZW5jaWVzIHsKICAgICAgICAgICAgICAgIGthZmthID0gY29udGFpbmVyICJFdmVudHMiICIiICJLYWZrYSIgInF1ZXVlIgogICAgICAgICAgICAgICAgaXRlbUlvdERCID0gY29udGFpbmVyICJJdGVtcyBmcm9tIElPVCBEQiIgIiIgIkt1enpsZSIgImRiIgogICAgICAgICAgICAgICAgZ2Vvc2VydmVyID0gY29udGFpbmVyICJHZW9zZXJ2ZXIiCiAgICAgICAgICAgIH0KCgogICAgICAgICAgICBncm91cCBIeXBlcnZpc29yIHsKICAgICAgICAgICAgICAgIGZyb250ID0gY29udGFpbmVyICJIeXBlcnZpc29yIGRhc2hib2FyZCIgewogICAgICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIkFuZ3VsYXIiCiAgICAgICAgICAgICAgICAgICAgdGFncyBzcGEKICAgICAgICAgICAgICAgICAgICBwcm92b2x5LWRhc2hib2FyZCA9IGNvbXBvbmVudCAicHJvdm9seS1kYXNoYm9hcmQiCiAgICAgICAgICAgICAgICAgICAgY2hhbG9ucy1oeXBlcnZpc2V1ciA9IGNvbXBvbmVudCAiY2hhbG9ucy1oeXBlcnZpc2V1ciIKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIGh5cGVydmlzb3JCYWNrID0gY29udGFpbmVyICJIeXBlcnZpc29yIHNlcnZpY2UiIHsKICAgICAgICAgICAgICAgICAgICB0ZWNobm9sb2d5ICJRdWFya3VzIgogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgZGIgPSBjb250YWluZXIgIkh5cGVydmlzb3IgZGF0YWJhc2UiICJIb2xkcyA6IFxuIC1ldmVudHNcbiAtZXF1aXBtZW50c1xuIC1TZXJ2aWNlcyIiUG9zdGdyZXMiICJkYiIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZGF0YXZpcnQgPSBjb250YWluZXIgImRhdGEtdmlydCIgewogICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiUXVhcmt1cyIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgdXNlciAtPiBmcm9udCAiVXNlcyIKICAgICAgICAgICAgYWRtaW4gLT4gZnJvbnQgIlVzZXMiCgogICAgICAgICAgICAvKiBmcm9udCByZWxhdGlvbnMgKi8KICAgICAgICAgICAgcHJvdm9seS1kYXNoYm9hcmQgLT4gaWRwICJVc2VzIGZvciB1c2VyIGF1dGhlbnRpY2F0aW9uIGFuZCBhdXRob3Jpc2F0aW9uIgogICAgICAgICAgICBwcm92b2x5LWRhc2hib2FyZCAtPiBnZW9zZXJ2ZXIgIlJlYWRzIGZyb20iCiAgICAgICAgICAgIHByb3ZvbHktZGFzaGJvYXJkIC0+IGRhdGF2aXJ0ICJSZWFkcyBmcm9tIgogICAgICAgICAgICBjaGFsb25zLWh5cGVydmlzZXVyIC0+IGh5cGVydmlzb3JCYWNrICJSZWFkcyBmcm9tIGFuZCBXcml0ZXMgdG8iCgogICAgICAgICAgICAvKiBiYWNrIHJlbGF0aW9ucyAqLwogICAgICAgICAgICBoeXBlcnZpc29yQmFjayAtPiBpZHAgIlVzZXJzIGFuZCBzeXN0ZW1zIGF1dGhlbnRpY2F0aW9uIGFuZCBhdXRob3Jpc2F0aW9uIgogICAgICAgICAgICBoeXBlcnZpc29yQmFjayAtPiBLYWZrYSAiUmVhZHMgZnJvbSBhbmQgV3JpdGVzIHRvIiAiIiAiYXN5bmMiCiAgICAgICAgICAgIGh5cGVydmlzb3JCYWNrIC0+IGRiICJSZWFkcyBmcm9tIGFuZCBXcml0ZXMgdG8iCiAgICAgICAgICAgIGh5cGVydmlzb3JCYWNrIC0+IGl0ZW1Jb3REQiAiUmVhZHMgZnJvbSBhbmQgV3JpdGVzIHRvIgogICAgICAgICAgICBLYWZrYSAtPiBkYXRhdmlydCAiUmVhZHMgZnJvbSIgIiIgImFzeW5jIgogICAgICAgICAgICBnZW9zZXJ2ZXIgLT4gZGF0YXZpcnQgIlJlYWRzIGZyb20iCiAgICAgICAgICAgIGRhdGF2aXJ0IC0+IGl0ZW1Jb3REQiAiUmVhZHMgZnJvbSIKCiAgICAgICAgfQoKICAgICAgICBub2RlcmVkIC0+IGl0ZW1Jb3REQiAiV3JpdGVzIHRvXG4iICItZXF1aXBtZW50c1xuIC1TZXJ2aWNlcyIKICAgICAgICBub2RlcmVkIC0+IGh5cGVydmlzb3JCYWNrICJXcml0ZXMgdG9cbiIgIi1lcXVpcG1lbnRzXG4gLVNlcnZpY2VzIgogICAgfQoKICAgICFzY3JpcHQgZ3Jvb3Z5IHsKICAgICAgICB3b3Jrc3BhY2UubW9kZWwuZWxlbWVudHMuZmluZEFsbCB7IGl0IGluc3RhbmNlb2YgY29tLnN0cnVjdHVyaXpyLm1vZGVsLkNvbnRhaW5lciB9LmVhY2ggeyBpdC5hZGRUYWdzKGl0LnRlY2hub2xvZ3kpIH0KICAgIH0KCiAgICB2aWV3cyB7CgogICAgICAgIHN5c3RlbWxhbmRzY2FwZSAiU3lzdGVtTGFuZHNjYXBlIiB7CiAgICAgICAgICAgIGluY2x1ZGUgKgogICAgICAgIH0KCiAgICAgICAgY29udGFpbmVyIHByb3ZvbHkgYWxsICJKdXN0IGV2ZXJ5dGhpbmciIHsKICAgICAgICAgICAgaW5jbHVkZSAqCiAgICAgICAgfQoKICAgICAgICBjb21wb25lbnQgZnJvbnQgdG8tYW5kLWZyb20tZnJvbnQgIlRvIGFuZCBmcm9tIHVpIiB7CiAgICAgICAgICAgIGluY2x1ZGUgKgogICAgICAgIH0KCiAgICAgICAgc3R5bGVzIHsKICAgICAgICAgICAgZWxlbWVudCAiRWxlbWVudCIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjMTE2OGJkCiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHJlbGF0aW9uc2hpcCAiUmVsYXRpb25zaGlwIiB7CiAgICAgICAgICAgICAgICBzdHlsZSBzb2xpZAogICAgICAgICAgICB9CgogICAgICAgICAgICByZWxhdGlvbnNoaXAgImFzeW5jIiB7CiAgICAgICAgICAgICAgICBzdHlsZSBkb3R0ZWQKICAgICAgICAgICAgICAgIGNvbG9yICMxMWJkYmQKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCAiUGVyc29uIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBQZXJzb24KICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCAic3BhIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBXZWJCcm93c2VyCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGVsZW1lbnQgZGIgewogICAgICAgICAgICAgICAgc2hhcGUgQ3lsaW5kZXIKICAgICAgICAgICAgICAgICB3aWR0aCAzNTAKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCBxdWV1ZSB7CiAgICAgICAgICAgICAgICBzaGFwZSBQaXBlCiAgICAgICAgICAgICAgICB3aWR0aCAzNTAKICAgICAgICAgICAgfQogICAgICAgIH0KICAgIH0KfQo="
+    "structurizr.dsl" : "d29ya3NwYWNlIHsKCiAgICBtb2RlbCB7CiAgICAgICAgdXNlciA9IHBlcnNvbiAiTW1lIE1pY2h1IiAiUHVibGljIHVzZXIiCiAgICAgICAgYWRtaW4gPSBwZXJzb24gIkJvYiBEb3VnbGFzIiAiUGxhdGVmb3JtIGFkbWluIgogICAgICAgIGdyb3VwIENow6Jsb25zIHsKICAgICAgICAgICAgZ21hbyA9IHNvZnR3YXJlU3lzdGVtICJHTUFPIgogICAgICAgICAgICBpb3QgPSBzb2Z0d2FyZVN5c3RlbSAiQ2l0eWxpbngiCiAgICAgICAgICAgIGh5cGVydmlzb3JzID0gc29mdHdhcmVTeXN0ZW0gIkh5cGVydmlzb3IiCiAgICAgICAgICAgIG5vZGVyZWQgPSBzb2Z0d2FyZVN5c3RlbSAiTm9kZVJFRCIKICAgICAgICAgICAgaWRwID0gc29mdHdhcmVTeXN0ZW0gIk9BdXRoMiBwcm92aWRlciIgIkFjdGl2ZSBEaXJlY3RvcnkiCiAgICAgICAgICAgIGdtYW8gLT4gbm9kZXJlZCAiIgogICAgICAgICAgICBoeXBlcnZpc29ycyAtPiBub2RlcmVkICIiCiAgICAgICAgICAgIGlvdCAtPiBub2RlcmVkICIiCiAgICAgICAgfQoKCgogICAgICAgIHByb3ZvbHkgPSBzb2Z0d2FyZVN5c3RlbSAiUHJvdm9seSIgewoKICAgICAgICAgICAgZ3JvdXAgRGVwZW5kZW5jaWVzIHsKICAgICAgICAgICAgICAgIGthZmthID0gY29udGFpbmVyICJFdmVudHMiICIiICJLYWZrYSIgInF1ZXVlIgogICAgICAgICAgICAgICAgaXRlbUlvdERCID0gY29udGFpbmVyICJJdGVtcyBmcm9tIElPVCBEQiIgIiIgIkt1enpsZSIgImRiIgogICAgICAgICAgICAgICAgZ2Vvc2VydmVyID0gY29udGFpbmVyICJHZW9zZXJ2ZXIiCiAgICAgICAgICAgIH0KCgogICAgICAgICAgICBncm91cCBIeXBlcnZpc29yIHsKICAgICAgICAgICAgICAgIGZyb250ID0gY29udGFpbmVyICJIeXBlcnZpc29yIGRhc2hib2FyZCIgewogICAgICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIkFuZ3VsYXIiCiAgICAgICAgICAgICAgICAgICAgdGFncyBzcGEKICAgICAgICAgICAgICAgICAgICBwcm92b2x5LWRhc2hib2FyZCA9IGNvbXBvbmVudCAicHJvdm9seS1kYXNoYm9hcmQiCiAgICAgICAgICAgICAgICAgICAgY2hhbG9ucy1oeXBlcnZpc2V1ciA9IGNvbXBvbmVudCAiY2hhbG9ucy1oeXBlcnZpc2V1ciIKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIGh5cGVydmlzb3JCYWNrID0gY29udGFpbmVyICJIeXBlcnZpc29yIGJhY2siIHsKICAgICAgICAgICAgICAgICAgICB0ZWNobm9sb2d5ICJRdWFya3VzIgogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgZGIgPSBjb250YWluZXIgIkh5cGVydmlzb3IgZGF0YWJhc2UiICJIb2xkcyA6IFxuIC1ldmVudHNcbiAtZXF1aXBtZW50c1xuIC1TZXJ2aWNlcyIiUG9zdGdyZXMiICJkYiIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZGF0YXZpcnQgPSBjb250YWluZXIgImRhdGEtdmlydCIgewogICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiUXVhcmt1cyIKICAgICAgICAgICAgfQoKICAgICAgICAgICAgdXNlciAtPiBmcm9udCAiVXNlcyIKICAgICAgICAgICAgYWRtaW4gLT4gZnJvbnQgIlVzZXMiCgogICAgICAgICAgICAvKiBmcm9udCByZWxhdGlvbnMgKi8KICAgICAgICAgICAgcHJvdm9seS1kYXNoYm9hcmQgLT4gaWRwICJVc2VzIGZvciB1c2VyIGF1dGhlbnRpY2F0aW9uIGFuZCBhdXRob3Jpc2F0aW9uIgogICAgICAgICAgICBwcm92b2x5LWRhc2hib2FyZCAtPiBnZW9zZXJ2ZXIgIlJlYWRzIGZyb20iCiAgICAgICAgICAgIHByb3ZvbHktZGFzaGJvYXJkIC0+IGRhdGF2aXJ0ICJSZWFkcyBmcm9tIgogICAgICAgICAgICBjaGFsb25zLWh5cGVydmlzZXVyIC0+IGh5cGVydmlzb3JCYWNrICJSZWFkcyBmcm9tIGFuZCBXcml0ZXMgdG8iCgogICAgICAgICAgICAvKiBiYWNrIHJlbGF0aW9ucyAqLwogICAgICAgICAgICBoeXBlcnZpc29yQmFjayAtPiBpZHAgIlVzZXJzIGFuZCBzeXN0ZW1zIGF1dGhlbnRpY2F0aW9uIGFuZCBhdXRob3Jpc2F0aW9uIgogICAgICAgICAgICBoeXBlcnZpc29yQmFjayAtPiBLYWZrYSAiUmVhZHMgZnJvbSBhbmQgV3JpdGVzIHRvIiAiIiAiYXN5bmMiCiAgICAgICAgICAgIGh5cGVydmlzb3JCYWNrIC0+IGRiICJSZWFkcyBmcm9tIGFuZCBXcml0ZXMgdG8iCiAgICAgICAgICAgIGh5cGVydmlzb3JCYWNrIC0+IGl0ZW1Jb3REQiAiUmVhZHMgZnJvbSBhbmQgV3JpdGVzIHRvIgogICAgICAgICAgICBLYWZrYSAtPiBkYXRhdmlydCAiUmVhZHMgZnJvbSIgIiIgImFzeW5jIgogICAgICAgICAgICBnZW9zZXJ2ZXIgLT4gZGF0YXZpcnQgIlJlYWRzIGZyb20iCiAgICAgICAgICAgIGRhdGF2aXJ0IC0+IGl0ZW1Jb3REQiAiUmVhZHMgZnJvbSIKCiAgICAgICAgfQoKICAgICAgICBub2RlcmVkIC0+IGl0ZW1Jb3REQiAiV3JpdGVzIHRvXG4iICItZXF1aXBtZW50c1xuIC1TZXJ2aWNlcyIKICAgICAgICBub2RlcmVkIC0+IGh5cGVydmlzb3JCYWNrICJXcml0ZXMgdG9cbiIgIi1lcXVpcG1lbnRzXG4gLVNlcnZpY2VzIgogICAgfQoKICAgICFzY3JpcHQgZ3Jvb3Z5IHsKICAgICAgICB3b3Jrc3BhY2UubW9kZWwuZWxlbWVudHMuZmluZEFsbCB7IGl0IGluc3RhbmNlb2YgY29tLnN0cnVjdHVyaXpyLm1vZGVsLkNvbnRhaW5lciB9LmVhY2ggeyBpdC5hZGRUYWdzKGl0LnRlY2hub2xvZ3kpIH0KICAgIH0KCiAgICB2aWV3cyB7CgogICAgICAgIHN5c3RlbWxhbmRzY2FwZSAiU3lzdGVtTGFuZHNjYXBlIiB7CiAgICAgICAgICAgIGluY2x1ZGUgKgogICAgICAgIH0KCiAgICAgICAgY29udGFpbmVyIHByb3ZvbHkgYWxsICJKdXN0IGV2ZXJ5dGhpbmciIHsKICAgICAgICAgICAgaW5jbHVkZSAqCiAgICAgICAgfQoKICAgICAgICBjb21wb25lbnQgZnJvbnQgdG8tYW5kLWZyb20tZnJvbnQgIlRvIGFuZCBmcm9tIHVpIiB7CiAgICAgICAgICAgIGluY2x1ZGUgKgogICAgICAgIH0KCiAgICAgICAgc3R5bGVzIHsKICAgICAgICAgICAgZWxlbWVudCAiRWxlbWVudCIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjMTE2OGJkCiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHJlbGF0aW9uc2hpcCAiUmVsYXRpb25zaGlwIiB7CiAgICAgICAgICAgICAgICBzdHlsZSBzb2xpZAogICAgICAgICAgICB9CgogICAgICAgICAgICByZWxhdGlvbnNoaXAgImFzeW5jIiB7CiAgICAgICAgICAgICAgICBzdHlsZSBkb3R0ZWQKICAgICAgICAgICAgICAgIGNvbG9yICMxMWJkYmQKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCAiUGVyc29uIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBQZXJzb24KICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCAic3BhIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBXZWJCcm93c2VyCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGVsZW1lbnQgZGIgewogICAgICAgICAgICAgICAgc2hhcGUgQ3lsaW5kZXIKICAgICAgICAgICAgICAgICB3aWR0aCAzNTAKICAgICAgICAgICAgfQoKICAgICAgICAgICAgZWxlbWVudCBxdWV1ZSB7CiAgICAgICAgICAgICAgICBzaGFwZSBQaXBlCiAgICAgICAgICAgICAgICB3aWR0aCAzNTAKICAgICAgICAgICAgfQogICAgICAgIH0KICAgIH0KfQo="
   },
   "configuration" : { },
   "model" : {
@@ -21,7 +20,7 @@
         "id" : "21",
         "tags" : "Relationship",
         "properties" : {
-          "structurizr.dsl.identifier" : "88a59b52-bd36-4325-9580-e02fe678adf2"
+          "structurizr.dsl.identifier" : "715cdcf2-f9a7-4b4e-9386-4c8cdee4c4e2"
         },
         "sourceId" : "1",
         "destinationId" : "15",
@@ -43,62 +42,24 @@
       "name" : "Bob Douglas",
       "description" : "Plateform admin",
       "relationships" : [ {
+        "id" : "23",
+        "tags" : "Relationship",
+        "properties" : {
+          "structurizr.dsl.identifier" : "1e7d666a-82dd-4a3c-8528-8a37ddcb944d"
+        },
+        "sourceId" : "2",
+        "destinationId" : "15",
+        "description" : "Uses"
+      }, {
         "id" : "24",
         "sourceId" : "2",
         "destinationId" : "11",
         "description" : "Uses",
         "linkedRelationshipId" : "23"
-      }, {
-        "id" : "23",
-        "tags" : "Relationship",
-        "properties" : {
-          "structurizr.dsl.identifier" : "cacd328a-e7e8-4d81-8179-07b8ebd4f2f8"
-        },
-        "sourceId" : "2",
-        "destinationId" : "15",
-        "description" : "Uses"
       } ],
       "location" : "Unspecified"
     } ],
     "softwareSystems" : [ {
-      "id" : "6",
-      "tags" : "Element,Software System",
-      "properties" : {
-        "structurizr.dsl.identifier" : "nodered"
-      },
-      "name" : "NodeRED",
-      "relationships" : [ {
-        "id" : "42",
-        "sourceId" : "6",
-        "destinationId" : "11",
-        "description" : "Writes to\n",
-        "technology" : "-equipments\n -Services",
-        "linkedRelationshipId" : "41"
-      }, {
-        "id" : "41",
-        "tags" : "Relationship",
-        "properties" : {
-          "structurizr.dsl.identifier" : "79f9873b-3c70-4f14-bb82-677ae2e687c0"
-        },
-        "sourceId" : "6",
-        "destinationId" : "13",
-        "description" : "Writes to\n",
-        "technology" : "-equipments\n -Services"
-      }, {
-        "id" : "43",
-        "tags" : "Relationship",
-        "properties" : {
-          "structurizr.dsl.identifier" : "f6cac5dc-0fe7-44b4-ac94-2013f1b83884"
-        },
-        "sourceId" : "6",
-        "destinationId" : "18",
-        "description" : "Writes to\n",
-        "technology" : "-equipments\n -Services"
-      } ],
-      "group" : "Châlons",
-      "location" : "Unspecified",
-      "documentation" : { }
-    }, {
       "id" : "3",
       "tags" : "Element,Software System",
       "properties" : {
@@ -109,28 +70,9 @@
         "id" : "8",
         "tags" : "Relationship",
         "properties" : {
-          "structurizr.dsl.identifier" : "f9660e18-23bb-4bdf-9745-68a4133d10bf"
+          "structurizr.dsl.identifier" : "0e771a9b-9aec-4a3b-9232-c1fb0f23f042"
         },
         "sourceId" : "3",
-        "destinationId" : "6"
-      } ],
-      "group" : "Châlons",
-      "location" : "Unspecified",
-      "documentation" : { }
-    }, {
-      "id" : "5",
-      "tags" : "Element,Software System",
-      "properties" : {
-        "structurizr.dsl.identifier" : "hypervisors"
-      },
-      "name" : "Hypervisor",
-      "relationships" : [ {
-        "id" : "9",
-        "tags" : "Relationship",
-        "properties" : {
-          "structurizr.dsl.identifier" : "fc6f6a06-1fe7-4880-b7da-c5241434218f"
-        },
-        "sourceId" : "5",
         "destinationId" : "6"
       } ],
       "group" : "Châlons",
@@ -147,11 +89,79 @@
         "id" : "10",
         "tags" : "Relationship",
         "properties" : {
-          "structurizr.dsl.identifier" : "d229334d-4ffc-4842-98d3-c8f4169535c6"
+          "structurizr.dsl.identifier" : "0fe431f5-fae1-48c5-89e3-8ca32be0c5b5"
         },
         "sourceId" : "4",
         "destinationId" : "6"
       } ],
+      "group" : "Châlons",
+      "location" : "Unspecified",
+      "documentation" : { }
+    }, {
+      "id" : "5",
+      "tags" : "Element,Software System",
+      "properties" : {
+        "structurizr.dsl.identifier" : "hypervisors"
+      },
+      "name" : "Hypervisor",
+      "relationships" : [ {
+        "id" : "9",
+        "tags" : "Relationship",
+        "properties" : {
+          "structurizr.dsl.identifier" : "62635dec-96e6-4b76-a7eb-24f261ce4866"
+        },
+        "sourceId" : "5",
+        "destinationId" : "6"
+      } ],
+      "group" : "Châlons",
+      "location" : "Unspecified",
+      "documentation" : { }
+    }, {
+      "id" : "6",
+      "tags" : "Element,Software System",
+      "properties" : {
+        "structurizr.dsl.identifier" : "nodered"
+      },
+      "name" : "NodeRED",
+      "relationships" : [ {
+        "id" : "41",
+        "tags" : "Relationship",
+        "properties" : {
+          "structurizr.dsl.identifier" : "f23ceabb-a07f-4533-94e6-d1ce3df2d401"
+        },
+        "sourceId" : "6",
+        "destinationId" : "13",
+        "description" : "Writes to\n",
+        "technology" : "-equipments\n -Services"
+      }, {
+        "id" : "42",
+        "sourceId" : "6",
+        "destinationId" : "11",
+        "description" : "Writes to\n",
+        "technology" : "-equipments\n -Services",
+        "linkedRelationshipId" : "41"
+      }, {
+        "id" : "43",
+        "tags" : "Relationship",
+        "properties" : {
+          "structurizr.dsl.identifier" : "961657ff-845c-46d7-b49f-75d90c06ab12"
+        },
+        "sourceId" : "6",
+        "destinationId" : "18",
+        "description" : "Writes to\n",
+        "technology" : "-equipments\n -Services"
+      } ],
+      "group" : "Châlons",
+      "location" : "Unspecified",
+      "documentation" : { }
+    }, {
+      "id" : "7",
+      "tags" : "Element,Software System",
+      "properties" : {
+        "structurizr.dsl.identifier" : "idp"
+      },
+      "name" : "OAuth2 provider",
+      "description" : "Active Directory",
       "group" : "Châlons",
       "location" : "Unspecified",
       "documentation" : { }
@@ -171,34 +181,34 @@
       } ],
       "location" : "Unspecified",
       "containers" : [ {
-        "id" : "12",
-        "tags" : "Element,Container,queue,Kafka",
+        "id" : "14",
+        "tags" : "Element,Container,",
         "properties" : {
-          "structurizr.dsl.identifier" : "kafka"
+          "structurizr.dsl.identifier" : "geoserver"
         },
-        "name" : "Events",
+        "name" : "Geoserver",
         "relationships" : [ {
-          "id" : "38",
-          "tags" : "Relationship,async",
+          "id" : "39",
+          "tags" : "Relationship",
           "properties" : {
-            "structurizr.dsl.identifier" : "b550bd53-4640-4934-8f53-697d33d05051"
+            "structurizr.dsl.identifier" : "fb7f3376-0c17-4afe-9ba4-d37715ef6262"
           },
-          "sourceId" : "12",
+          "sourceId" : "14",
           "destinationId" : "20",
           "description" : "Reads from"
         } ],
         "group" : "Dependencies",
-        "technology" : "Kafka",
         "documentation" : { }
       }, {
-        "id" : "13",
-        "tags" : "Element,Container,db,Kuzzle",
+        "id" : "19",
+        "tags" : "Element,Container,db,Postgres",
         "properties" : {
-          "structurizr.dsl.identifier" : "itemiotdb"
+          "structurizr.dsl.identifier" : "db"
         },
-        "name" : "Items from IOT DB",
-        "group" : "Dependencies",
-        "technology" : "Kuzzle",
+        "name" : "Hypervisor database",
+        "description" : "Holds : \n -events\n -equipments\n -Services",
+        "group" : "Hypervisor",
+        "technology" : "Postgres",
         "documentation" : { }
       }, {
         "id" : "20",
@@ -211,24 +221,13 @@
           "id" : "40",
           "tags" : "Relationship",
           "properties" : {
-            "structurizr.dsl.identifier" : "fe61b294-cfbe-4a3d-8b3f-de36b40066b5"
+            "structurizr.dsl.identifier" : "dcc1dbb7-1cf1-4ee6-938d-a58b3da09e2e"
           },
           "sourceId" : "20",
           "destinationId" : "13",
           "description" : "Reads from"
         } ],
         "technology" : "Quarkus",
-        "documentation" : { }
-      }, {
-        "id" : "19",
-        "tags" : "Element,Container,db,Postgres",
-        "properties" : {
-          "structurizr.dsl.identifier" : "db"
-        },
-        "name" : "Hypervisor database",
-        "description" : "Holds : \n -events\n -equipments\n -Services",
-        "group" : "Hypervisor",
-        "technology" : "Postgres",
         "documentation" : { }
       }, {
         "id" : "15",
@@ -275,7 +274,7 @@
             "id" : "32",
             "tags" : "Relationship",
             "properties" : {
-              "structurizr.dsl.identifier" : "05f1f5cc-2478-4c1b-8d53-90b57f26924d"
+              "structurizr.dsl.identifier" : "23404a4a-48b8-438c-b7c9-fb2536c1c2d0"
             },
             "sourceId" : "17",
             "destinationId" : "18",
@@ -290,28 +289,28 @@
           },
           "name" : "provoly-dashboard",
           "relationships" : [ {
-            "id" : "28",
-            "tags" : "Relationship",
-            "properties" : {
-              "structurizr.dsl.identifier" : "35e502ac-3fc8-4077-9f93-ea6ea9a2576e"
-            },
-            "sourceId" : "16",
-            "destinationId" : "14",
-            "description" : "Reads from"
-          }, {
             "id" : "25",
             "tags" : "Relationship",
             "properties" : {
-              "structurizr.dsl.identifier" : "84ee9237-939f-4914-b6a1-e69806847964"
+              "structurizr.dsl.identifier" : "54d67e2f-a07e-4e59-94e3-93bc87a5dbaa"
             },
             "sourceId" : "16",
             "destinationId" : "7",
             "description" : "Uses for user authentication and authorisation"
           }, {
+            "id" : "28",
+            "tags" : "Relationship",
+            "properties" : {
+              "structurizr.dsl.identifier" : "d1de6e7d-fd40-429a-b0a6-9b3fdc934e46"
+            },
+            "sourceId" : "16",
+            "destinationId" : "14",
+            "description" : "Reads from"
+          }, {
             "id" : "30",
             "tags" : "Relationship",
             "properties" : {
-              "structurizr.dsl.identifier" : "bfc9a0fc-0ba5-4b95-a4a5-ac53dd6c08a2"
+              "structurizr.dsl.identifier" : "c308962e-0293-4eb5-ba61-48d3565ff827"
             },
             "sourceId" : "16",
             "destinationId" : "20",
@@ -326,12 +325,21 @@
         "properties" : {
           "structurizr.dsl.identifier" : "hypervisorback"
         },
-        "name" : "Hypervisor service",
+        "name" : "Hypervisor back",
         "relationships" : [ {
+          "id" : "34",
+          "tags" : "Relationship",
+          "properties" : {
+            "structurizr.dsl.identifier" : "363d8075-1e12-4943-9d0f-7ea4d0191ac9"
+          },
+          "sourceId" : "18",
+          "destinationId" : "7",
+          "description" : "Users and systems authentication and authorisation"
+        }, {
           "id" : "35",
           "tags" : "Relationship,async",
           "properties" : {
-            "structurizr.dsl.identifier" : "6e3d558a-74c1-4f6c-aa59-04b34f8f30c3"
+            "structurizr.dsl.identifier" : "b0c6c029-9458-4360-b9ef-fc064420c5ee"
           },
           "sourceId" : "18",
           "destinationId" : "12",
@@ -340,7 +348,7 @@
           "id" : "36",
           "tags" : "Relationship",
           "properties" : {
-            "structurizr.dsl.identifier" : "d161f6aa-0a1f-4312-8cb5-412bbe5214cf"
+            "structurizr.dsl.identifier" : "051d6a2c-89cc-4031-a440-cc674ddc8c1e"
           },
           "sourceId" : "18",
           "destinationId" : "19",
@@ -349,55 +357,46 @@
           "id" : "37",
           "tags" : "Relationship",
           "properties" : {
-            "structurizr.dsl.identifier" : "c5a897c6-c148-4247-9613-336eb46a0602"
+            "structurizr.dsl.identifier" : "f337ddc5-25c4-4849-9ee9-af1ab9caf248"
           },
           "sourceId" : "18",
           "destinationId" : "13",
           "description" : "Reads from and Writes to"
-        }, {
-          "id" : "34",
-          "tags" : "Relationship",
-          "properties" : {
-            "structurizr.dsl.identifier" : "f7acadad-4975-4e9a-a893-7679808ffd4a"
-          },
-          "sourceId" : "18",
-          "destinationId" : "7",
-          "description" : "Users and systems authentication and authorisation"
         } ],
         "group" : "Hypervisor",
         "technology" : "Quarkus",
         "documentation" : { }
       }, {
-        "id" : "14",
-        "tags" : "Element,Container",
+        "id" : "13",
+        "tags" : "Element,Container,db,Kuzzle",
         "properties" : {
-          "structurizr.dsl.identifier" : "geoserver"
+          "structurizr.dsl.identifier" : "itemiotdb"
         },
-        "name" : "Geoserver",
+        "name" : "Items from IOT DB",
+        "group" : "Dependencies",
+        "technology" : "Kuzzle",
+        "documentation" : { }
+      }, {
+        "id" : "12",
+        "tags" : "Element,Container,queue,Kafka",
+        "properties" : {
+          "structurizr.dsl.identifier" : "kafka"
+        },
+        "name" : "Events",
         "relationships" : [ {
-          "id" : "39",
-          "tags" : "Relationship",
+          "id" : "38",
+          "tags" : "Relationship,async",
           "properties" : {
-            "structurizr.dsl.identifier" : "4728ae51-a60f-4718-bc41-d01f1f75455e"
+            "structurizr.dsl.identifier" : "d0ae5f52-e4aa-4e11-a635-6dac49cb2133"
           },
-          "sourceId" : "14",
+          "sourceId" : "12",
           "destinationId" : "20",
           "description" : "Reads from"
         } ],
         "group" : "Dependencies",
+        "technology" : "Kafka",
         "documentation" : { }
       } ],
-      "documentation" : { }
-    }, {
-      "id" : "7",
-      "tags" : "Element,Software System",
-      "properties" : {
-        "structurizr.dsl.identifier" : "idp"
-      },
-      "name" : "OAuth2 provider",
-      "description" : "Active Directory",
-      "group" : "Châlons",
-      "location" : "Unspecified",
       "documentation" : { }
     } ]
   },
@@ -407,48 +406,48 @@
       "key" : "SystemLandscape",
       "order" : 1,
       "dimensions" : {
-        "width" : 2330,
-        "height" : 2697
+        "width" : 2090,
+        "height" : 2379
       },
       "enterpriseBoundaryVisible" : true,
       "elements" : [ {
         "id" : "11",
-        "x" : 1200,
-        "y" : 925
+        "x" : 824,
+        "y" : 779
       }, {
         "id" : "1",
-        "x" : 880,
-        "y" : 365
+        "x" : 504,
+        "y" : 219
       }, {
         "id" : "2",
-        "x" : 1515,
-        "y" : 345
+        "x" : 1139,
+        "y" : 199
       }, {
         "id" : "3",
-        "x" : 1220,
-        "y" : 1950
+        "x" : 844,
+        "y" : 1804
       }, {
         "id" : "4",
-        "x" : 1795,
-        "y" : 1945
+        "x" : 1419,
+        "y" : 1799
       }, {
         "id" : "5",
-        "x" : 595,
-        "y" : 1950
+        "x" : 219,
+        "y" : 1804
       }, {
         "id" : "6",
-        "x" : 1220,
-        "y" : 1445
+        "x" : 844,
+        "y" : 1299
       }, {
         "id" : "7",
-        "x" : 600,
-        "y" : 1445
+        "x" : 224,
+        "y" : 1299
       } ],
       "relationships" : [ {
         "id" : "27",
         "vertices" : [ {
-          "x" : 830,
-          "y" : 1075
+          "x" : 454,
+          "y" : 929
         } ]
       }, {
         "id" : "24"
@@ -459,9 +458,9 @@
       }, {
         "id" : "8"
       }, {
-        "id" : "10"
-      }, {
         "id" : "9"
+      }, {
+        "id" : "10"
       } ]
     } ],
     "containerViews" : [ {
@@ -469,123 +468,122 @@
       "order" : 2,
       "description" : "Just everything",
       "softwareSystemId" : "11",
-      "paperSize" : "A3_Landscape",
       "dimensions" : {
-        "width" : 4120,
-        "height" : 2825
+        "width" : 3475,
+        "height" : 2955
       },
       "externalSoftwareSystemBoundariesVisible" : true,
       "elements" : [ {
-        "id" : "12",
-        "x" : 1440,
-        "y" : 1260
-      }, {
         "id" : "1",
-        "x" : 1510,
-        "y" : 55
+        "x" : 1085,
+        "y" : 210
       }, {
-        "id" : "13",
-        "x" : 1160,
-        "y" : 1695
+        "id" : "12",
+        "x" : 995,
+        "y" : 1390
       }, {
         "id" : "2",
-        "x" : 2495,
-        "y" : 45
+        "x" : 2070,
+        "y" : 200
+      }, {
+        "id" : "13",
+        "x" : 735,
+        "y" : 1850
       }, {
         "id" : "14",
-        "x" : 665,
-        "y" : 725
+        "x" : 240,
+        "y" : 880
       }, {
         "id" : "15",
-        "x" : 2050,
-        "y" : 715
+        "x" : 1625,
+        "y" : 870
       }, {
         "id" : "6",
-        "x" : 1540,
-        "y" : 2300
+        "x" : 1115,
+        "y" : 2455
       }, {
         "id" : "7",
-        "x" : 3250,
-        "y" : 715
+        "x" : 2825,
+        "y" : 870
       }, {
         "id" : "18",
-        "x" : 2040,
-        "y" : 1270
+        "x" : 1615,
+        "y" : 1425
       }, {
         "id" : "19",
-        "x" : 2640,
-        "y" : 1690
+        "x" : 2215,
+        "y" : 1845
       }, {
         "id" : "20",
-        "x" : 675,
-        "y" : 1250
+        "x" : 240,
+        "y" : 1355
       } ],
       "relationships" : [ {
         "id" : "40",
         "vertices" : [ {
-          "x" : 900,
-          "y" : 1845
+          "x" : 475,
+          "y" : 2000
         } ]
       }, {
         "id" : "41",
         "vertices" : [ {
-          "x" : 1765,
-          "y" : 2185
-        }, {
           "x" : 1340,
-          "y" : 2185
+          "y" : 2340
+        }, {
+          "x" : 915,
+          "y" : 2340
         } ]
       }, {
         "id" : "43",
         "vertices" : [ {
-          "x" : 1765,
-          "y" : 2185
+          "x" : 1340,
+          "y" : 2340
         }, {
-          "x" : 2270,
-          "y" : 2185
+          "x" : 1845,
+          "y" : 2340
         } ]
       }, {
         "id" : "21"
       }, {
         "id" : "31",
         "vertices" : [ {
-          "x" : 1250,
-          "y" : 865
+          "x" : 825,
+          "y" : 1020
         }, {
-          "x" : 1250,
-          "y" : 1305
+          "x" : 825,
+          "y" : 1460
         }, {
-          "x" : 1165,
-          "y" : 1305
+          "x" : 740,
+          "y" : 1460
         } ]
       }, {
         "id" : "29",
         "vertices" : [ {
-          "x" : 2050,
-          "y" : 820
+          "x" : 1625,
+          "y" : 975
         }, {
-          "x" : 1155,
-          "y" : 825
+          "x" : 730,
+          "y" : 980
         } ]
       }, {
         "id" : "26"
       }, {
         "id" : "37",
         "vertices" : [ {
-          "x" : 2040,
-          "y" : 1485
+          "x" : 1615,
+          "y" : 1640
         }, {
-          "x" : 1935,
-          "y" : 1485
+          "x" : 1510,
+          "y" : 1640
         }, {
-          "x" : 1935,
-          "y" : 1840
+          "x" : 1510,
+          "y" : 1995
         } ]
       }, {
         "id" : "36",
         "vertices" : [ {
-          "x" : 2810,
-          "y" : 1420
+          "x" : 2385,
+          "y" : 1575
         } ]
       }, {
         "id" : "35"
@@ -594,11 +592,11 @@
       }, {
         "id" : "34",
         "vertices" : [ {
-          "x" : 2490,
-          "y" : 1325
+          "x" : 2065,
+          "y" : 1480
         }, {
-          "x" : 3485,
-          "y" : 1320
+          "x" : 3060,
+          "y" : 1475
         } ]
       }, {
         "id" : "33"
@@ -612,75 +610,74 @@
       "key" : "to-and-from-front",
       "order" : 3,
       "description" : "To and from ui",
-      "paperSize" : "A4_Landscape",
       "dimensions" : {
-        "width" : 2833,
-        "height" : 2054
+        "width" : 2270,
+        "height" : 1696
       },
       "containerId" : "15",
       "externalContainerBoundariesVisible" : true,
       "elements" : [ {
         "id" : "14",
-        "x" : 430,
-        "y" : 900
+        "x" : 200,
+        "y" : 790
       }, {
         "id" : "16",
-        "x" : 1154,
-        "y" : 329
+        "x" : 924,
+        "y" : 219
       }, {
         "id" : "17",
-        "x" : 1830,
-        "y" : 330
-      }, {
-        "id" : "7",
-        "x" : 1395,
-        "y" : 1305
+        "x" : 1600,
+        "y" : 220
       }, {
         "id" : "18",
-        "x" : 1840,
-        "y" : 880
+        "x" : 1610,
+        "y" : 770
+      }, {
+        "id" : "7",
+        "x" : 1165,
+        "y" : 1195
       }, {
         "id" : "20",
-        "x" : 895,
-        "y" : 1305
+        "x" : 665,
+        "y" : 1195
       } ],
       "relationships" : [ {
         "id" : "28",
         "vertices" : [ {
-          "x" : 660,
-          "y" : 480
+          "x" : 430,
+          "y" : 370
         } ]
       }, {
         "id" : "25",
         "vertices" : [ {
-          "x" : 1390,
-          "y" : 945
+          "x" : 1160,
+          "y" : 835
         }, {
-          "x" : 1615,
-          "y" : 945
+          "x" : 1385,
+          "y" : 835
         } ]
       }, {
         "id" : "34",
         "vertices" : [ {
-          "x" : 2070,
-          "y" : 1450
+          "x" : 1840,
+          "y" : 1340
         } ]
       }, {
         "id" : "32"
       }, {
         "id" : "30",
         "vertices" : [ {
-          "x" : 1390,
-          "y" : 945
+          "x" : 1160,
+          "y" : 835
         }, {
-          "x" : 1120,
-          "y" : 950
+          "x" : 890,
+          "y" : 840
         } ]
       }, {
         "id" : "39",
         "vertices" : [ {
-          "x" : 650,
-          "y" : 1455
+          "x" : 420,
+          "y" : 1345
         } ]
       } ]
     } ],
@@ -716,7 +713,6 @@
         } ]
       },
       "terminology" : { },
-      "metadataSymbols" : "SquareBrackets",
       "lastSavedView" : "all"
     }
   }

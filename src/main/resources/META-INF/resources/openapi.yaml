@@ -14,7 +14,7 @@ paths:
       description: |
         Default sort on `status` (NEW,IN_PROGRESS,DONE), `criticality` (HIGH,MEDIUM,LOW) and `lastModificationDate` (reversed). It's possible to override it by sorting on other attributes.
         If order is no provided when sort, the default is asc.
-        It's possible to filter on one or more criticalities or statuses.
+        It's possible to filter on one or more criticalities, statuses, categories, sources, equipment entities or equipment families.
         It's possible to search on event id, event name or equipment name.
       operationId: com.provoly.event.EventController_getEvents
       parameters:
@@ -181,6 +181,12 @@ paths:
       tags:
         - Event Controller
       summary: Save an Event
+      description: |
+        Events may come from the hypervisor, or from an external source. In this case, the `externalSourceRef` property must be filled in. 
+        By default, the source is “Hypervisor”. 
+        It's possible to set an `externalId`, in order to update event if already exists instead of save it (used for nodered flows). 
+        `MANIFESTATION` category, `startDate` and `endDate` properties are necessary. `enDate` can't be before `startDate`.
+        `ANOMALY` category requires sub categories.
       operationId: com.provoly.event.EventController_saveEvent
       requestBody:
         content:
@@ -189,16 +195,29 @@ paths:
               $ref: '#/components/schemas/EventWriteDto'
             examples:
               default:
-                summary: Create "alert" event
+                summary: Create "outoforder" event
                 value: |
                   {
                     "name":"event alert",
                     "description": "desc",
                     "address": "1 rue simone veil",
                     "criticality": "HIGH",
-                    "category":"LIMIT",
+                    "category":"OUTOFORDER",
                     "equipmentId":"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd",
                     "externalSourceRef": "source"
+                  }
+              event_with_subcategory:
+                summary: Create "anomaly" event
+                value: |
+                  {
+                    "name": "Traffic congestion anomaly",
+                    "address": "14 rue de Chalons",
+                    "description": "description",
+                    "criticality": "MEDIUM",
+                    "domain": "EP",
+                    "category": "ANOMALY",
+                    "subCategory":"TRAFFIC_CONGESTION",
+                    "equipmentId": "f7eea8e4-bc10-4551-b866-94fb8ea2dc47"
                   }
       responses:
         "201":
@@ -212,13 +231,6 @@ paths:
           content:
             application/json:
               examples:
-                invalidName:
-                  description: Occurs when name already exists
-                  value: |
-                    {
-                        "code": 400,
-                        "message": "Event with name 'event alert' already exists"
-                    }
                 invalidEquipment:
                   description: Occurs when equipmentId not exist
                   value: |
@@ -288,8 +300,8 @@ paths:
         - Event Controller
       summary: Update an Event
       description: |
-        Update an event which is not an Alert event.
-        Also, it's not possible to update external source reference of Report events.
+        It's possible to update any events, but events with an external source have non-modifiable properties:
+        `category`, `subCategory`, `name` and `externalId`.
       operationId: com.provoly.event.EventController_updateEvent
       parameters:
         - name: id
@@ -305,7 +317,7 @@ paths:
               $ref: '#/components/schemas/EventWriteDto'
             examples:
               default:
-                summary: Update "report" event
+                summary: Update "limit" event
                 value: |
                   {
                     "id": 1,
@@ -325,13 +337,6 @@ paths:
           content:
             application/json:
               examples:
-                invalidName:
-                  description: Occurs when name already exists
-                  value: |
-                    {
-                        "code": 400,
-                        "message": "Event with name 'event report updated' already exists"
-                    }
                 invalidEquipment:
                   description: Occurs when equipmentId not exist
                   value: |
@@ -352,8 +357,10 @@ paths:
     put:
       tags:
         - Event Controller
-      summary: Close event by id and update close date
-      description: Set status to DONE. Close date is not updated if event is already closed
+      summary: Close event by id
+      description: |
+        Set status to DONE and update `closeDate` property. 
+        Close date is not updated if event is already closed.
       operationId: com.provoly.event.EventController_closeEvent
       parameters:
         - name: id
@@ -390,7 +397,7 @@ paths:
       tags:
         - Event Controller
       summary: Save or update comment for an event
-      description: Comment can be edit by its creator only. It's not possible to add or update a comment on a DONE event.
+      description: Comment can be edited by its creator only. It's not possible to add or update a comment on a DONE event.
       operationId: com.provoly.event.EventController_saveOrUpdateCommentForEvent
       parameters:
         - name: id
@@ -479,7 +486,9 @@ paths:
       tags:
         - Event Controller
       summary: Retrieve summary events grouped by status
-      description: Returns the last n summary events, sorted by last modification date and status. It is possible to sort these summary events by criticality
+      description: |
+        Returns the last n summary events, sorted by last modification date and status. 
+        It is possible to sort these summary events by criticality
       operationId: com.provoly.event.EventController_getEventSummaries
       parameters:
         - name: limit
@@ -973,6 +982,7 @@ paths:
       tags:
         - Procedure Controller
       summary: Retrieve procedure by id
+      description: Return procedure detail and its linked events.
       operationId: com.provoly.procedure.ProcedureController_getProcedureDetails
       parameters:
         - name: id
@@ -1193,7 +1203,7 @@ paths:
         - Procedure Controller
       summary: Add new event to procedure
       description: |
-        Add new event to a already instantiated procedure. 
+        Add new event to an already instantiated procedure. 
         Event must have `NEW` status, and procedure can't be done;
       operationId: com.provoly.procedure.ProcedureController_addEventToProcedure
       parameters:
@@ -1226,7 +1236,7 @@ paths:
       tags:
         - Action Controller
       summary: Save or update comment for an action
-      description: Comment can be edit by its creator only. It's not possible to add or update a comment on a DONE procedure.
+      description: Comment can be edited by its creator only. It's not possible to add or update a comment on a DONE procedure.
       operationId: com.provoly.event.ActionController_saveOrUpdateCommentForAction
       parameters:
         - name: id
@@ -1315,7 +1325,7 @@ paths:
       tags:
         - Equipment Controller
       summary: Save or update equipments
-      description: if one of external id entry exists, update equipment, else create it
+      description: If one of external id entry exists, update equipment, else create it
       operationId: com.provoly.equipment.EquipmentController_saveOrUpdateEquipments
       requestBody:
         content:
@@ -1410,7 +1420,9 @@ paths:
       tags:
         - Equipment Controller
       summary: Retrieve all equipments with pagination
-      description: It's possible to filter on entity, or search by equipment name or family name
+      description: |
+        Returns all equipments without `deleted` property.
+        It's possible to filter on entity, or search by equipment name or family name.
       operationId: com.provoly.equipment.EquipmentController_getEquipments
       parameters:
         - name: page
@@ -1761,7 +1773,7 @@ paths:
       summary: Create external service for an Asked Service Action
       description: |
         Generate External service and send it to external service application : Coswin. 
-        It returns a service code which will be set in `serviceExternalId` property in action
+        It returns a service code which will be set in `serviceExternalId` property in action.
       operationId: com.provoly.equipment.ServiceController_createExternalService
       parameters:
         - name: actionId
@@ -1872,6 +1884,7 @@ paths:
         Returns the number of cabinets, light fittings and unmanaged equipment connected to 
         at least one event that has not been closed, the number of services requested for this equipment, 
         and the number of services in progress.
+        Filter on equipments without `deleted` property.
       operationId: com.provoly.metrics.MetricsController_getEpEquipmentWithEvent
       parameters:
         - name: entity
@@ -1936,6 +1949,7 @@ paths:
       summary: Retrieve equipments from EP domain with event metrics
       description: |
         Similar to the endpoint `/metrics/equipments-with-events/EP` but the number of events is grouped by category and includes the "MANIFESTATION" category.
+        Filter on equipments without `deleted` property.
       operationId: com.provoly.metrics.MetricsController_getEpEquipmentWithEventDetailed
       responses:
         "401":
@@ -1996,6 +2010,7 @@ paths:
         Returns the number of Cameras connected to at least one event that has not been closed, 
         the number of services requested for this equipment,
         and the number of services in progress.
+        Filter on equipments without `deleted` property.
       operationId: com.provoly.metrics.MetricsController_getVpEquipmentWithEvent
       parameters:
         - name: entity
@@ -2052,6 +2067,7 @@ paths:
       summary: Retrieve equipments from VP domain with event metrics
       description: |
         Similar to the endpoint `/metrics/equipments-with-events/VP` but the number of events is grouped by category and includes the "MANIFESTATION" category.
+        Filter on equipments without `deleted` property.
       operationId: com.provoly.metrics.MetricsController_getVpEquipmentWithEventDetailed
       responses:
         "401":
@@ -2094,6 +2110,7 @@ paths:
       description: |
         Returns the number of equipments for `EP` domain in a given family grouped by entity. 
         The number of managed equipments is separated from the number of unmanaged equipments.
+        Filter on equipments without `deleted` property.
       operationId: com.provoly.metrics.MetricsController_getTotalEquipmentsByEntity
       parameters:
         - name: family
@@ -2133,6 +2150,7 @@ paths:
       summary: Retrieve first n events count by equipments
       description: |
         It's possible to filter on category, domain, and count events that was created after a specific date. Limit is set to 10 but it can be changed.
+        Filter on equipments without `deleted` property.
       operationId: com.provoly.metrics.MetricsController_getTotalEquipmentsByEntity
       parameters:
         - name: domain
@@ -2299,6 +2317,7 @@ paths:
       description: |
         It's possible to filter on event creation date, event status. If creation date is set, then ignore Done events.
         If a domain filter is set, count all events linked to a equipment with this domain.
+        Filter on equipments without `deleted` property.
       operationId: com.provoly.metrics.MetricsController_getAnomalyEventsGroupedBySubCategories
       parameters:
         - name: date
@@ -2377,6 +2396,7 @@ paths:
         Count events linked by equipment grouped by anomaly's subcategories and equipment entities
       description: |
         It's possible to filter on equipment domain and set start date to filter on events created from this date.
+        Filter on equipments without `deleted` property.
       operationId: com.provoly.metrics.MetricsController_getAnomalyEventsGroupedBySubCategoriesAndEntities
       parameters:
         - name: startDate

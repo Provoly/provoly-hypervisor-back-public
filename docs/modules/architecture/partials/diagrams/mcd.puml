@@ -1,25 +1,23 @@
 @startuml
 
-class Event {
+title Provoly Hypervisor Back model
 
+class Event {
 }
 
-
 class Equipment {
-
 }
 
 class Procedure {
-
 }
 
+class ProcedureModel {
+}
 
 class Action {
-
 }
 
 class Service {
-
 }
 
 class AskedService {
@@ -34,7 +32,6 @@ class EmailAction {
 class OtherAction {
 }
 
-
 class EquipmentEntity {
 }
 
@@ -47,21 +44,34 @@ class Domain {
 class Category {
 }
 
+class Comment {
+}
+
+class User {
+}
 
 
+
+Comment "1" -- "1" User: has
 Event "1" -- "1" Category: has
 
 Event "1" -- "1" Domain: has
 
 Event "1" -- "0..1" Equipment: Is linked to
 
+Event "1" -- "0..n" Comment: has
+
 Event "1..n" -- "0..1" Procedure: Contains
 
 Procedure "1" -- "0..n" Action: Contains
+ProcedureModel "1" -- "0..n" Action: Contains
+
 Equipment "1" -- "0..n" Service: Contains
 Equipment "1" -- "1" EquipmentEntity: has
 Equipment "1" -- "1" Family: has
 Equipment "1" -- "1" Domain: has
+
+Action "1" -r- "0..n" Comment: has
 
 Action <|-- AskedService
 Action <|-- PhoneAction

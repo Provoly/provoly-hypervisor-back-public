@@ -1,1 +1,2 @@
-* xref:index.adoc[Welcome]
+* xref:index.adoc[Installation guide]
+* xref:API:attachment$/provoly-hypervisor-back.html[Hypervisor API, window="_blank"]

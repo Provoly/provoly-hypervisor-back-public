@@ -6,44 +6,57 @@ The required languages and tools to work on the project are specified in the `.t
 
 Nonetheless, *docker* or *podman* must be available in your environment
 
-* Docker v.*20*
-
-`asdf` related documentation can be found xref:provoly-doc:processus:outils.adoc[here]
+`asdf` related documentation can be found xref:https://asdf-vm.com/guide/getting-started.html#_3-install-asdf[here].
 
 == IntelliJ Setup
 
-Open the Preferences window (or Settings depending on your edition), navigate to Plugins and install the Adapter for Eclipse Code Formatter from the Marketplace.
+=== Plugins
+Plugins to be installed are :
 
-Restart your IDE, open the Preferences (or Settings) window again and navigate to Adapter for Eclipse Code Formatter section on the left pane.
+* *Adapter for Eclispe Code Formatter*
+* *SonarLint*
+* *AsciiDoc*
+* *PlantUml Integration*
 
-Select Use Eclipse's Code Formatter, then change the Eclipse workspace/project folder or config file to point to the eclipse-format.xml file in the independent-projects/ide-config/src/main/resources directory. Make sure the Optimize Imports box is ticked. Then, select Import Order from file and make it point to the eclipse.importorder file in the ide-config/src/main/resources directory.
+==== Eclipse Code Formatter
 
-Next, disable wildcard imports: navigate to `Editor` -> `Code Style` -> `Java` -> `Imports` and set `Class count to use import with '\*'` to 5. Do the same with `Names count to use static import with '*'`.
+Open the Preferences (or Settings) window and navigate to *Adapter for Eclipse Code Formatter* section on the left pane.
 
-=== Process
+Select *`Use Eclipse's Code Formatter`*, then change the **`Eclipse workspace/project`** folder or config file to point to: +
+icon:file[] _provoly-hypervisor-back/ide-config/src/main/resources/eclipse-format.xml_.
 
-Processes are described in the xref:provoly-doc:processus:gestion_ticket.adoc[processus section].
+Make sure the *`Optimize Imports`* box is ticked. Then, select *`Import Order from file`* and make it point to directory : +
+icon:folder[] _provoly-hypervisor-back/ide-config/src/main/resources_ .
+
+Next, disable wildcard imports: navigate to `Editor` -> `Code Style` -> `Java` -> `Imports` and set `Class count to use import with '\*'` to 5.
+
+Do the same with `Names count to use static import with '*'`.
+
+==== SonarLint
+Extension which finds and fixes coding issues in real-time.
 
 
-=== AsciiDoc
+==== AsciiDoc
 
 Our technical documentation uses the plain text markup language *AsciiDoc*.
-
-In order to visualize your changes in the documentation, you will require the `AsciiDoc` plugin from the marketplace.
 
 After that, you have to enable *soft wraps* for the asciiDoc files : `general` -> `editor` -> `softwrap` -> *.adoc
 
 
-=== SonarLint
-Extension which finds and fixes coding issues in real-time.
-
 === Run the formatter manually
 
-The following command must be run in the root folder.
+The following command must be run in the root folder before committing on repository :
 
 [source,bash]
 ----
 mvn compile
+----
+
+or
+
+[source,bash]
+----
+mvn spotless:apply
 ----
 
 When submitting a merge request the CI build will fail if the code isn't properly formatted, so it is recommended that you always run a full Maven build before submitting a pull request.
@@ -54,7 +67,7 @@ The architecture documentation uses https://docs.structurizr.com/[Structurizr].
 
 An extended documentation can be found https://docs.structurizr.com/dsl/cookbook/[here].
 
-Simply run :
+Simply run in root directory:
 
 [source,bash]
 ----
@@ -65,25 +78,35 @@ As of now, exporting as svg is done as described https://docs.structurizr.com/ui
 
 
 == Running locally
+Hypervisor is configured to launch multi devservices at start:
 
+=== Keycloak
 The hypervisor leverages the keycloak devservice, with a custom realm settings for its oidc provider.
 
 Access http://localhost:9000/admin/master/console/[the admin console] with the user `admin:admin`
 
-The application's realm is *_hypervisor_*, it has two user:
+The application's realm is *_hypervisor_*, it has three users:
 
-* admin:mysecretpassword
-* reader:letmein
+* iamsuperadmin:password // every roles
+* iamadmin:password // every roles
+* reader:letmein // reader roles
 
-As of now, no roles are specified, but this is subject to change in the future.
+=== Postgresql
+No configuration is provided, so xref:https://quarkus.io/guides/databases-dev-services#connect-to-database-run-as-a-dev-service[the default quarkus configuration] is used.
+
+By default, all devservices are stopped when application stops, and no data are kept. To use same containers accorss restarts, see xref:https://quarkus.io/guides/databases-dev-services#reuse-across-executions[here].
+
+=== Kafka
+It's possible to manage kafka topics thanks to the xref:https://quarkus.io/guides/kafka-dev-ui[Quarkus dev ui].
 
 
 == Check list
 
-. If your feature modifies the API. You have to mirror the impacts the icon:folder[]`src/main/resources/META-INF/resources/openapi.yaml` file.
+. If your feature modifies the API. You have to mirror the impacts the icon:file[]_src/main/resources/META-INF/resources/openapi.yaml_ file.
 
-. If your feature impacts the database model, you changes must be placed under the icon:folder[] `src/main/resources/db/migration` folder.
-You also have to mirror the impacts on the diagram (`docs/modules/architecture/partials/diagrams/mcd.puml`). We aim to keep it simple (stupid), just the concepts relations.
+. If your feature impacts the database model, you changes must be placed under the icon:folder[] _src/main/resources/db/migration_ folder.
+You also have to mirror the impacts on the diagram in
+icon:file[] _docs/modules/architecture/partials/diagrams/mcd.puml_. We aim to keep it simple (stupid), just the concepts relations.
 
-. If your feature adds or removes user roles, you have to mirror those changes in the realm *json* file the icon:folder[]`src/main/resources/META-INF/resources/openapi.yaml` file.
+. If your feature adds or removes user roles, you have to mirror those changes in the realm *json* file the icon:file[] _renovate.json_ file.
 
