@@ -200,7 +200,7 @@ public class TestDataService {
     }
 
     public EventWriteDto buildExternalEvent(String name, String category, Criticality criticality, boolean isWithDate,
-            UUID equipmentId) {
+            UUID equipmentId, String source) {
         return new EventWriteDto(null,
                 name,
                 "desc",
@@ -212,7 +212,7 @@ public class TestDataService {
                 null,
                 isWithDate ? Instant.now() : null,
                 isWithDate ? Instant.now().minusMillis(1000) : null,
-                "source");
+                source);
     }
 
     @Transactional
@@ -247,7 +247,12 @@ public class TestDataService {
             Equipment equipment,
             String externalRef) {
 
-        var event = new Event();
+        Event event;
+        if (externalRef != null) {
+            event = new Event(UUID.randomUUID().toString());
+        } else {
+            event = new Event();
+        }
 
         event.setName(name);
         event.setAddress("event address");
@@ -269,7 +274,7 @@ public class TestDataService {
             event.setEndDate(Instant.now());
         }
         event.setExternalSourceRef(externalRef == null ? DEFAULT_SOURCE : externalRef);
-
+        ;
         em.persist(event);
         return event;
     }

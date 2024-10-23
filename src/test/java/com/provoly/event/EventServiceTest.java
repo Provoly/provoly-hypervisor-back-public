@@ -18,6 +18,7 @@ import jakarta.ws.rs.ForbiddenException;
 import com.provoly.TestDataService;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.event.dto.EventWriteDto;
+import com.provoly.user.Role;
 import com.provoly.user.UserService;
 
 import io.quarkus.test.InjectMock;
@@ -52,6 +53,7 @@ public class EventServiceTest {
         given(mock.getCurrentUserFullName()).willReturn("name");
         given(mock.getCurrentUserSubject()).willReturn(dataService.getUser().getSubject());
         given(mock.getCurrentUser()).willReturn(dataService.getUser());
+        given(mock.hasRole(Role.STR_EVENT_WRITE)).willReturn(true);
     }
 
     @AfterEach
@@ -83,7 +85,7 @@ public class EventServiceTest {
 
     @Test
     @Transactional
-    void should_throw_exception_update_external_event() {
+    void should_throw_exception_update_external_property_of_event() {
         // given
         var eventAlert = eventService
                 .getEvents(1, 1, null, null, null, List.of(), List.of(), List.of("LIMIT"), List.of(), List.of(),
@@ -92,7 +94,7 @@ public class EventServiceTest {
                 .getFirst();
 
         var event = dataService.buildExternalEvent("tutu", "OUTOFORDER", Criticality.HIGH, false,
-                eventAlert.getEquipment().getId());
+                eventAlert.getEquipment().getId(), "toto");
 
         // then
         assertThatThrownBy(() -> eventService.updateEvent(eventAlert.getId(), event))
@@ -262,7 +264,7 @@ public class EventServiceTest {
         assertThatThrownBy(() -> eventService.updateEvent(event.getId(), eventUpdate))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessageContaining(
-                        "External source reference can't be updated");
+                        "External id and source reference can't be updated");
     }
 
     @Test
@@ -277,40 +279,7 @@ public class EventServiceTest {
         assertThatThrownBy(() -> eventService.updateEvent(event.getId(), eventUpdate))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessageContaining(
-                        "External source reference can't be updated");
-    }
-
-    @Test
-    @Transactional
-    void should_update_event_with_same_external_id_and_source_when_save_event() {
-        // given
-        var equipment = equipmentService.getEquipmentByName("A-230").getId();
-        var event = new EventWriteDto(null,
-                "new event",
-                "desc",
-                Criticality.HIGH,
-                "MANIFESTATION",
-                null,
-                null,
-                equipment,
-                null,
-                Instant.now(),
-                Instant.now(),
-                Instant.now(),
-                "external_source",
-                "external_id",
-                null);
-        eventService.saveEvent(event);
-
-        // when
-        eventService.saveEvent(event);
-
-        //then
-        var events = eventService
-                .getEvents(1, 10, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
-                        "new event", null, null)
-                .toList();
-        Assertions.assertThat(events).hasSize(1);
+                        "External id and source reference can't be updated");
     }
 
     @Test

@@ -18,6 +18,7 @@ import com.provoly.event.Status;
 import com.provoly.event.dto.EventWriteDto;
 import com.provoly.procedure.ProcedureController;
 import com.provoly.procedure.ProcedureWriteDto;
+import com.provoly.user.Role;
 import com.provoly.user.UserService;
 
 import io.quarkus.test.InjectMock;
@@ -49,6 +50,7 @@ public class ActionControllerTest {
         given(mock.getCurrentUserFullName()).willReturn("name");
         given(mock.getCurrentUserSubject()).willReturn(dataService.getUser().getSubject());
         given(mock.getCurrentUser()).willReturn(dataService.getUser());
+        given(mock.hasRole(Role.STR_EVENT_WRITE)).willReturn(true);
     }
 
     @AfterEach

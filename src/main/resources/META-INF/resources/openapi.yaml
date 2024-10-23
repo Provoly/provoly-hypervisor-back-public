@@ -353,6 +353,120 @@ paths:
       security:
         - oidc:
             - event_write
+  /events/{source}/id/{id}:
+    get:
+      tags:
+        - Event Controller
+      summary: Retrieve event by it's source and external id
+      operationId: com.provoly.event.EventController_getEventDetailsBySourceAndExternalId
+      parameters:
+        - name: source
+          in: path
+          schema:
+            type: string
+          example: Citylinx
+          required: true
+        - name: id
+          in: path
+          schema:
+            type: string
+          example: 21ad9
+          required: true
+      responses:
+        "200":
+          description: Returns Event Details by it's source and external id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventReadDto'
+              examples:
+                default:
+                  value: |
+                    {
+                      "id": 21,
+                      "name": "Defaillance lampe",
+                      "address": null,
+                      "description": null,
+                      "criticality": "LOW",
+                      "status": "DONE",
+                      "lastModificationDate": "2024-02-23T12:56:00.802501Z",
+                      "creationDate": "2024-02-23T12:56:00.802501Z",
+                      "category": "LIMIT",
+                      "equipment": {
+                        "id": "12a64ae7-70ca-4d12-bcd9-9f1c75f23915",
+                        "name": "C-1034",
+                        "type": "Ouvrage",
+                        "entity": "Châlons Agglo"
+                      },
+                      "externalSourceRef": "citylinx_1"
+                    }
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden if page not specified
+        "404":
+          description: Event Not found
+      security:
+        - oidc:
+            - event_read
+    put:
+      tags:
+        - Event Controller
+      summary: Update an Event
+      description: |
+        It's possible to update any events, but events with an external source have non-modifiable properties:
+        `category`, `subCategory`, `name` and `externalId`.
+      operationId: com.provoly.event.EventController_updateEvent
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          example: 1
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventWriteDto'
+            examples:
+              default:
+                summary: Update "limit" event
+                value: |
+                  {
+                    "id": 1,
+                    "name":"event report updated",
+                    "description": "desc",
+                    "address": "2 rue virgina woolf",
+                    "criticality": "HIGH",
+                    "category":"LIMIT",
+                    "equipmentId":"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd",
+                    "externalSourceRef": "source"
+                  }
+      responses:
+        "204":
+          description: Updated
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                invalidEquipment:
+                  description: Occurs when equipmentId not exist
+                  value: |
+                    {
+                        "code": 400,
+                        "message": "Equipment with id '0c728960-d5fd-49ea-8fe8-f72cb9cfcccd' not exists"
+                    }
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden if missing a required property
+        "404":
+          description: Event not Found
+      security:
+        - oidc:
+            - event_write
   /events/id/{id}/close:
     put:
       tags:

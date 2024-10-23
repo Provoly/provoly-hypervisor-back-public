@@ -709,4 +709,16 @@ public class EventControllerTest {
         assertThat(events).extracting("externalSourceRef").containsExactly("Hyperviseur", "Hyperviseur", "Hyperviseur");
     }
 
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_read" })
+    void should_get_event_by_source_and_external_id() {
+        // given
+        var externalEvent = dataService.getExternalEvent();
+        // when
+        var event = eventController.getEventDetailsBySourceAndExternalId(externalEvent.getExternalSourceRef(),
+                externalEvent.getExternalId());
+        //then
+        assertThat(event).isNotNull();
+    }
+
 }

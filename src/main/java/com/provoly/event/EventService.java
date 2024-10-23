@@ -27,8 +27,7 @@ import com.provoly.notification.NotificationProducer;
 import com.provoly.service.Service;
 import com.provoly.service.ServiceService;
 import com.provoly.user.Role;
-
-import io.quarkus.security.identity.SecurityIdentity;
+import com.provoly.user.UserService;
 
 import org.jboss.logging.Logger;
 
@@ -42,13 +41,13 @@ public class EventService {
     private final EquipmentEnrichedProducer equipmentEnrichedProducer;
     private final NotificationProducer notificationProducer;
     private final Logger logger;
-    private final SecurityIdentity securityIdentity;
+    private final UserService userService;
     private final XslxService xslxService;
 
     public EventService(EventDatabaseReader databaseReader, EventMapper eventMapper, EquipmentService equipmentService,
             ServiceService serviceService,
             EquipmentEnrichedProducer equipmentEnrichedProducer, NotificationProducer notificationProducer,
-            Logger logger, SecurityIdentity securityIdentity, XslxService xslxService) {
+            Logger logger, UserService userService, XslxService xslxService) {
         this.databaseReader = databaseReader;
         this.eventMapper = eventMapper;
         this.equipmentService = equipmentService;
@@ -56,7 +55,7 @@ public class EventService {
         this.equipmentEnrichedProducer = equipmentEnrichedProducer;
         this.notificationProducer = notificationProducer;
         this.logger = logger;
-        this.securityIdentity = securityIdentity;
+        this.userService = userService;
         this.xslxService = xslxService;
     }
 
@@ -195,22 +194,20 @@ public class EventService {
     }
 
     @Transactional
+    public Event getEventDetailsBySourceAndExternalId(String source, String id) {
+        logger.infof("Get event details with source %s and external id  %s".formatted(source, id));
+        return databaseReader.getEventDetailsBySourceAndExternalId(source, id)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Event with source %s and external id %s not found".formatted(source, id)));
+    }
+
+    @Transactional
     public Event saveEvent(EventWriteDto eventDto) {
         logger.infof("Create %s event with name %s".formatted(eventDto.getCategory(), eventDto.getName()));
         checkManifestationCategory(eventDto);
         checkSubCategoryCoherence(eventDto);
 
         Event event = new Event();
-        if (eventDto.isExternalEvent() && eventDto.getExternalId() != null) {
-            logger.infof("External event has an external id %s, update it if already exists", eventDto.getExternalId());
-            var existingEvent = databaseReader.getEventByExternalIdAndSource(eventDto.getExternalId(),
-                    eventDto.getExternalSourceRef());
-            if (existingEvent.isPresent()) {
-                updateEvent(existingEvent.get().getId(), eventDto);
-                return existingEvent.get();
-            }
-            event = new Event(eventDto.getExternalId());
-        }
 
         eventMapper.updateEvent(eventDto, event);
         databaseReader.saveEvent(event);
@@ -229,41 +226,20 @@ public class EventService {
         checkSubCategoryCoherence(eventDto);
 
         Event eventToUpdate = databaseReader.getEventById(id);
-
         var previousEquipmentId = eventToUpdate.getEquipment() != null ? eventToUpdate.getEquipment().getId() : null;
 
-        if (!securityIdentity.hasRole(Role.STR_EVENT_WRITE)
-                && forbiddenPropertiesAreUpdatedWhenExternalSource(eventDto, eventToUpdate)
-                && !eventDto.getDescription().equals(eventToUpdate.getDescription())
-                && (eventDto.getAddress() != null && !eventDto.getAddress().equals(eventToUpdate.getAddress()))
-                && !eventDto.getCriticality().equals(eventToUpdate.getCriticality())
-                && !eventDto.getDomain().equals(eventToUpdate.getDomain().getCode())) {
+        if (externalPropertiesAreUpdated(eventDto, eventToUpdate)) {
+            throw new ForbiddenException("External id and source reference can't be updated");
+        }
+
+        if (!userService.hasRole(Role.STR_EVENT_WRITE)
+                && propertiesAreUpdated(eventDto, eventToUpdate)) {
             throw new io.quarkus.security.ForbiddenException("Missing permission to update event.");
-        }
-
-        if (!Objects.equals(eventToUpdate.getExternalSourceRef(), eventDto.getExternalSourceRef())) {
-            throw new ForbiddenException("External source reference can't be updated");
-        }
-
-        if (eventDto.isExternalEvent()
-                && forbiddenPropertiesAreUpdatedWhenExternalSource(eventDto, eventToUpdate)) {
-            throw new ForbiddenException(
-                    "It's not possible to update externalId, name, category or subCategory for event %s with external source."
-                            .formatted(eventDto.getId()));
         }
 
         eventMapper.updateEvent(eventDto, eventToUpdate);
         logger.debugf("Event %s is updated".formatted(id));
         enrichEquipmentFromUpdatedEvent(id, eventDto.getEquipmentId(), previousEquipmentId);
-    }
-
-    private boolean forbiddenPropertiesAreUpdatedWhenExternalSource(EventWriteDto eventDto, Event eventToUpdate) {
-        var subCode = eventToUpdate.getSubCategory() == null ? null : eventToUpdate.getSubCategory().getCode();
-
-        return !Objects.equals(eventDto.getExternalId(), eventToUpdate.getExternalId())
-                || !eventDto.getName().equals(eventToUpdate.getName())
-                || !eventDto.getCategory().equals(eventToUpdate.getCategory().getCode())
-                || !Objects.equals(eventDto.getSubCategory(), subCode);
     }
 
     @Transactional
@@ -286,6 +262,23 @@ public class EventService {
         var events = databaseReader.getAllEvents();
         logger.debugf("Export %s events", events.size());
         return xslxService.generateExcelWithEvents(eventMapper.mapToExportEventDto(events));
+    }
+
+    private boolean externalPropertiesAreUpdated(EventWriteDto eventDto, Event eventToUpdate) {
+        return !Objects.equals(eventToUpdate.getExternalSourceRef(), eventDto.getExternalSourceRef())
+                || !Objects.equals(eventDto.getExternalId(), eventToUpdate.getExternalId());
+    }
+
+    private boolean propertiesAreUpdated(EventWriteDto eventDto, Event eventToUpdate) {
+        var subCode = eventToUpdate.getSubCategory() == null ? null : eventToUpdate.getSubCategory().getCode();
+        return !eventDto.getDescription().equals(eventToUpdate.getDescription())
+                || (eventDto.getAddress() != null && !eventDto.getAddress().equals(eventToUpdate.getAddress()))
+                || !eventDto.getCriticality().equals(eventToUpdate.getCriticality())
+                || !Objects.equals(eventDto.getDomain(),
+                        eventToUpdate.getDomain() == null ? null : eventToUpdate.getDomain().getCode())
+                || !eventDto.getName().equals(eventToUpdate.getName())
+                || !eventDto.getCategory().equals(eventToUpdate.getCategory().getCode())
+                || !Objects.equals(eventDto.getSubCategory(), subCode);
     }
 
     private void enrichEquipmentFromUpdatedEvent(Integer eventId, UUID currentEquipmentId, UUID previousEquipmentId) {

@@ -20,6 +20,7 @@ import com.provoly.event.Event;
 import com.provoly.event.EventController;
 import com.provoly.event.Status;
 import com.provoly.event.dto.EventWriteDto;
+import com.provoly.user.Role;
 import com.provoly.user.UserService;
 
 import io.quarkus.test.InjectMock;
@@ -49,6 +50,7 @@ public class ProcedureControllerTest {
         given(mock.getCurrentUserFullName()).willReturn("name");
         given(mock.getCurrentUserSubject()).willReturn(dataService.getUser().getSubject());
         given(mock.getCurrentUser()).willReturn(dataService.getUser());
+        given(mock.hasRole(Role.STR_EVENT_WRITE)).willReturn(true);
     }
 
     @AfterEach
@@ -278,6 +280,7 @@ public class ProcedureControllerTest {
     @TestSecurity(user = "reader", roles = { "event_proc_write" })
     void should_throw_forbiden_when_terminate_action_from_procedure_without_event_proc_write() {
         // given
+        given(mock.hasRole(Role.STR_EVENT_WRITE)).willReturn(false);
         var procedure = dataService.getProcedure1();
         List<ActionWriteDto> actionWrite = procedure.getActions()
                 .stream()

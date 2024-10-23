@@ -117,6 +117,14 @@ public class EventController {
         return eventMapper.mapToEventReadDto(event);
     }
 
+    @Path("{source}/id/{id}")
+    @GET
+    @RolesAllowed({ Role.STR_EVENT_READ })
+    public EventReadDto getEventDetailsBySourceAndExternalId(String source, String id) {
+        var event = eventService.getEventDetailsBySourceAndExternalId(source, id);
+        return eventMapper.mapToEventReadDto(event);
+    }
+
     @Path("/id/{id}/close")
     @PUT
     @RolesAllowed({ Role.STR_EVENT_WRITE })

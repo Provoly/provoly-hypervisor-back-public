@@ -17,6 +17,7 @@ import com.provoly.event.EventService;
 import com.provoly.event.dto.EventWriteDto;
 import com.provoly.service.ServiceService;
 import com.provoly.service.ServiceWriteDto;
+import com.provoly.user.Role;
 import com.provoly.user.UserService;
 
 import io.quarkus.kafka.client.serialization.ObjectMapperSerde;
@@ -60,6 +61,7 @@ public class EnrichedProducerTest {
         given(mock.getCurrentUserFullName()).willReturn("name");
         given(mock.getCurrentUserSubject()).willReturn(dataService.getUser().getSubject());
         given(mock.getCurrentUser()).willReturn(dataService.getUser());
+        given(mock.hasRole(Role.STR_EVENT_WRITE)).willReturn(true);
     }
 
     @AfterEach
