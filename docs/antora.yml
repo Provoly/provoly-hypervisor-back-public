@@ -10,7 +10,7 @@ asciidoc:
 ext:
   collector:
     - run:
-        - command: npx @redocly/cli@latest build-docs --output=generated/provoly-hypervisor-back.html src/main/resources/META-INF/openapi.yaml
+        - command: npx @redocly/cli@latest build-docs --output=generated/provoly-hypervisor-back.html src/main/resources/META-INF/resources/openapi.yaml
     - scan:
         dir: generated/
         files: "**/*.html"
