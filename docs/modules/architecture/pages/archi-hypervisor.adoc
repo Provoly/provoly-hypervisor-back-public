@@ -23,9 +23,8 @@ The model is stored in a postgresql database, and messages are sent to kafka via
 
 * `*notifications*`: used to send a notification to the provoly's notification service to generate one with information from the hypervisor. In our case, we want to notify users that a new event has been created.
 
-* `*equipment*`: used to send created/updated equipment to an equipment enrichment service in `*provoly-stream*`.The enriched equipment is then inserted into a provoly dataset.
-An enriched equipment contains information on associated events, as well as its *measurements*. Measurements are retrieved directly in provoly-stream. For more information, see the provoly-stream documentation. +
-Here are the rules for sending equipment in this topic:
+* `*equipment*`: used to send created/updated equipments to the various services present in `*provoly-streams*`, which carry out operations with equipments received and their `*measurements*` to produce new datasets. For more information, see the provoly-stream documentation. +
+Here are the rules for sending equipments in this topic:
 
 ** equipment is created
 ** equipment is updated

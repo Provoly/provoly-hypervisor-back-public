@@ -29,8 +29,8 @@ data-ref
 }
 
 component provoly-stream {
-component enriched [
-stream-equipment-enriched
+component stream [
+stream-*
 [quarkus]
 ]
 }
@@ -39,7 +39,7 @@ database <- hyperviseur
 hyperviseur -d-> equipment : create/update equipments
 hyperviseur -> notifications : new event is created
 
-enriched .> equipment : enrich enquipment for provoly insertion
+stream .> equipment : enrich enquipment for provoly insertion
 ref .> notifications : notification service
 
 @enduml

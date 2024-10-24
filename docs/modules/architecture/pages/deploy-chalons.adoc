@@ -86,6 +86,12 @@ Publier la couche *`xxxxxx_equipement-enrichi-mesure`*
 
 Cocher la case *`Personnaliser les attributs`* en attendant la correction du bug https://github.com/Provoly/provoly-geoserver-datastore/issues/46
 
+[NOTE]
+Si un nouvel attribut est ajouté dans la classe des équipements enrichis, il faut :
+* Décocher la case *`Personnaliser les attributs`*
+* Cliquer sur *`Recharger le type de l'objet`*
+* Cocher à nouveau  *`Personnaliser les attributs`*
+
 Dans l'onglet *`Publication`* de la couche, choisir le style `equipment` par défaut
 
 [WARNING]
