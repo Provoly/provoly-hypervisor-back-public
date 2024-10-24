@@ -266,7 +266,7 @@ public class EventService {
 
     private boolean externalPropertiesAreUpdated(EventWriteDto eventDto, Event eventToUpdate) {
         return !Objects.equals(eventToUpdate.getExternalSourceRef(), eventDto.getExternalSourceRef())
-                || !Objects.equals(eventDto.getExternalId(), eventToUpdate.getExternalId());
+                || (eventDto.getExternalId() != null && eventDto.getExternalId().equals(eventToUpdate.getExternalId()));
     }
 
     private boolean propertiesAreUpdated(EventWriteDto eventDto, Event eventToUpdate) {
