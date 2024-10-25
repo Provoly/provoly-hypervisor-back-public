@@ -1970,7 +1970,6 @@ components:
           $ref: '#/components/schemas/UUID'
         creator:
           $ref: '#/components/schemas/UUID'
-          description: creator subject
         message:
           type: string
           description: comment message
@@ -2265,8 +2264,7 @@ components:
           required: true
         description:
           type: string
-          required:
-            -
+          required: true
         domain:
           type: string
           example: "EP"
@@ -2283,8 +2281,7 @@ components:
         equipment:
           $ref: '#/components/schemas/EquipmentShortDto'
         creationDate:
-          type:
-            $ref: '#/components/schemas/DateTime'
+          $ref: '#/components/schemas/DateTime'
           required: true
         lastModificationDate:
           $ref: '#/components/schemas/DateTime'
@@ -2322,8 +2319,7 @@ components:
           required: true
           example: "CAM1"
         creationDate:
-          type:
-            $ref: '#/components/schemas/DateTime'
+          $ref: '#/components/schemas/DateTime'
           required: true
         lastModificationDate:
           $ref: '#/components/schemas/DateTime'
@@ -2339,8 +2335,7 @@ components:
           required: true
           example: "EP"
         status:
-          type:
-            $ref: '#/components/schemas/ServiceStatus'
+          $ref: '#/components/schemas/ServiceStatus'
           required: true
         category:
           type: string
