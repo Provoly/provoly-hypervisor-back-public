@@ -23,14 +23,13 @@ paths:
           schema:
             type: integer
           example: 1
-          required: true
-          description: Page number requested, triggers an error if not specified or if 0.
+          description: Page number requested, default to 1. Trigger an error if not specified or if 0.
         - name: pageSize
           in: query
           schema:
             type: integer
           example: 20
-          description: Page size, returns an empty list if not specified.
+          description: Page size, default to 20. Return an empty list if not specified.
         - name: creationDate
           in: query
           description: The date must be set to midnight. The filter will return all events created on that day.
@@ -55,6 +54,8 @@ paths:
             type: array
             items:
               type: string
+            example: [ 'LIMIT' ]
+          description: Event category code. It must be known to the system
         - name: entity
           in: query
           description: The equipment entity name. It must be known to the system.
@@ -70,7 +71,7 @@ paths:
             type: array
             items:
               type: string
-            example: [ 'EP_O','EP_FL','EP_A' ]
+            example: [ 'EP_ARMOIRE','VP_CAM' ]
         - name: sort
           in: query
           schema:
@@ -106,86 +107,22 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/EventReadDto'
-              examples:
-                default:
-                  value: |
-                    [
-                      {
-                        "id": 1,
-                        "name": "Defaillance lampe",
-                        "address": "112 Av. de Paris, 51000 Châlons-en-Champagne",
-                        "description": "description",
-                        "criticality": "LOW",
-                        "status": "DONE",
-                        "lastModificationDate": "2024-02-23T11:12:39.375184Z",
-                        "creationDate": "2024-01-22T11:12:39.375184Z",
-                        "equipment": {
-                          "id": "12a64ae7-70ca-4d12-bcd9-9f1c75f23915",
-                          "name": "C-1034",
-                          "type": "Ouvrage",
-                          "entity": "AGGLO-COMMUN"
-                        },
-                        "procedureId": 4,
-                        "linkedEvents": 2,
-                        "procedureProgress": 100,
-                        "externalSourceRef": "citylinx_1",
-                        "category": "OUTOFORDER",
-                        "parent": {
-                          "id": 1,
-                          "name": "Tempête"
-                        }
-                      },
-                      {
-                        "id": 2,
-                        "name": "Maintenance ouvrage2",
-                        "address": "63 Rue de Fagnières, 51000 Châlons-en-Champagne",
-                        "description": "description",
-                        "criticality": "MEDIUM",
-                        "status": "DONE",
-                        "lastModificationDate": "2024-02-22T11:12:39.375184Z",
-                        "creationDate": "2024-01-23T11:12:39.375184Z",
-                        "equipment": null,
-                        "procedureId": "4",
-                        "linkedEvents": 2,
-                        "procedureProgress": 100,
-                        "externalSourceRef": "external_source3",
-                        "category": "LIMIT"
-                      },
-                      {
-                        "id": 3,
-                        "name": "Festival Chalons",
-                        "address": "28 E Rue du Général Fery, 51000 Châlons-en-Champagne",
-                        "description": "description",
-                        "criticality": "MEDIUM",
-                        "status": "IN_PROGRESS",
-                        "lastModificationDate": "2024-02-20T11:12:39.375184Z",
-                        "creationDate": "2024-01-20T11:12:39.375184Z",
-                        "equipment": null,
-                        "procedureId": "3",
-                        "linkedEvents": 1,
-                        "procedureProgress": 0,
-                        "category": "MANIFESTATION",
-                        "startDate": "2008-01-02T23:00:00Z",
-                        "endDate": "2008-01-03T23:00:00Z"
-                      }
-                    ]
-
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden if page not specified
+          description: Forbidden
       security:
         - oidc:
             - authenticated
     post:
       tags:
         - Event Controller
-      summary: Save an Event
+      summary: Save an event
       description: |
         Events may come from the hypervisor, or from an external source. In this case, the `externalSourceRef` property must be filled in. 
         By default, the source is “Hypervisor”. 
         It's possible to set an `externalId`, in order to update event if already exists instead of save it (used for nodered flows). 
-        `MANIFESTATION` category, `startDate` and `endDate` properties are necessary. `enDate` can't be before `startDate`.
+        `MANIFESTATION` category, `startDate` and `endDate` properties are necessary. `endDate` can't be before `startDate`.
         `ANOMALY` category requires sub categories.
       operationId: com.provoly.event.EventController_saveEvent
       requestBody:
@@ -193,32 +130,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/EventWriteDto'
-            examples:
-              default:
-                summary: Create "outoforder" event
-                value: |
-                  {
-                    "name":"event alert",
-                    "description": "desc",
-                    "address": "1 rue simone veil",
-                    "criticality": "HIGH",
-                    "category":"OUTOFORDER",
-                    "equipmentId":"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd",
-                    "externalSourceRef": "source"
-                  }
-              event_with_subcategory:
-                summary: Create "anomaly" event
-                value: |
-                  {
-                    "name": "Traffic congestion anomaly",
-                    "address": "14 rue de Chalons",
-                    "description": "description",
-                    "criticality": "MEDIUM",
-                    "domain": "EP",
-                    "category": "ANOMALY",
-                    "subCategory":"TRAFFIC_CONGESTION",
-                    "equipmentId": "f7eea8e4-bc10-4551-b866-94fb8ea2dc47"
-                  }
       responses:
         "201":
           description: Created
@@ -227,21 +138,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/EventReadDto'
         "400":
-          description: Bad Request
-          content:
-            application/json:
-              examples:
-                invalidEquipment:
-                  description: Occurs when equipmentId not exist
-                  value: |
-                    {
-                        "code": 400,
-                        "message": "Equipment with id '0c728960-d5fd-49ea-8fe8-f72cb9cfcccd' not exists"
-                    }
+          description: Equipment not exists
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden if missing a required property
+          description: |
+            - Forbidden 
+            - Missing a required property
       security:
         - oidc:
             - event_write
@@ -260,36 +163,15 @@ paths:
           required: true
       responses:
         "200":
-          description: Returns Event Details by id
+          description: Return event Details by id
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EventReadDto'
-              examples:
-                default:
-                  value: |
-                    {
-                      "id": 21,
-                      "name": "Defaillance lampe",
-                      "address": null,
-                      "description": null,
-                      "criticality": "LOW",
-                      "status": "DONE",
-                      "lastModificationDate": "2024-02-23T12:56:00.802501Z",
-                      "creationDate": "2024-02-23T12:56:00.802501Z",
-                      "category": "LIMIT",
-                      "equipment": {
-                        "id": "12a64ae7-70ca-4d12-bcd9-9f1c75f23915",
-                        "name": "C-1034",
-                        "type": "Ouvrage",
-                        "entity": "Châlons Agglo"
-                      },
-                      "externalSourceRef": "citylinx_1"
-                    }
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden if page not specified
+          description: Forbidden
         "404":
           description: Event Not found
       security:
@@ -298,7 +180,7 @@ paths:
     put:
       tags:
         - Event Controller
-      summary: Update an Event
+      summary: Update an event
       description: |
         It's possible to update any events, but events with an external source have non-modifiable properties:
         `category`, `subCategory`, `name` and `externalId`.
@@ -315,39 +197,18 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/EventWriteDto'
-            examples:
-              default:
-                summary: Update "limit" event
-                value: |
-                  {
-                    "id": 1,
-                    "name":"event report updated",
-                    "description": "desc",
-                    "address": "2 rue virgina woolf",
-                    "criticality": "HIGH",
-                    "category":"LIMIT",
-                    "equipmentId":"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd",
-                    "externalSourceRef": "source"
-                  }
       responses:
         "204":
           description: Updated
         "400":
-          description: Bad Request
-          content:
-            application/json:
-              examples:
-                invalidEquipment:
-                  description: Occurs when equipmentId not exist
-                  value: |
-                    {
-                        "code": 400,
-                        "message": "Equipment with id '0c728960-d5fd-49ea-8fe8-f72cb9cfcccd' not exists"
-                    }
+          description: Equipment not exsts
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden if missing a required property
+          description: |
+            - Forbidden 
+            - Missing a required property
+            - External source can't be updated
         "404":
           description: Event not Found
       security:
@@ -379,31 +240,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EventReadDto'
-              examples:
-                default:
-                  value: |
-                    {
-                      "id": 21,
-                      "name": "Defaillance lampe",
-                      "address": null,
-                      "description": null,
-                      "criticality": "LOW",
-                      "status": "DONE",
-                      "lastModificationDate": "2024-02-23T12:56:00.802501Z",
-                      "creationDate": "2024-02-23T12:56:00.802501Z",
-                      "category": "LIMIT",
-                      "equipment": {
-                        "id": "12a64ae7-70ca-4d12-bcd9-9f1c75f23915",
-                        "name": "C-1034",
-                        "type": "Ouvrage",
-                        "entity": "Châlons Agglo"
-                      },
-                      "externalSourceRef": "citylinx_1"
-                    }
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden if page not specified
+          description: Forbidden
         "404":
           description: Event Not found
       security:
@@ -429,39 +269,17 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/EventWriteDto'
-            examples:
-              default:
-                summary: Update "limit" event
-                value: |
-                  {
-                    "id": 1,
-                    "name":"event report updated",
-                    "description": "desc",
-                    "address": "2 rue virgina woolf",
-                    "criticality": "HIGH",
-                    "category":"LIMIT",
-                    "equipmentId":"0c728960-d5fd-49ea-8fe8-f72cb9cfcccd",
-                    "externalSourceRef": "source"
-                  }
       responses:
         "204":
           description: Updated
         "400":
-          description: Bad Request
-          content:
-            application/json:
-              examples:
-                invalidEquipment:
-                  description: Occurs when equipmentId not exist
-                  value: |
-                    {
-                        "code": 400,
-                        "message": "Equipment with id '0c728960-d5fd-49ea-8fe8-f72cb9cfcccd' not exists"
-                    }
+          description: Equipment not exists
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden if missing a required property
+          description: |
+            - Forbidden 
+            - Missing a required property
         "404":
           description: Event not Found
       security:
@@ -488,14 +306,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CommentWriteDto'
-            examples:
-              default:
-                summary: close event
-                value: |
-                  {
-                    "id": "c3b9ead7-57a5-4dd4-a8bd-36da14bf1ac1",
-                    "message":"Event is done"
-                  }
       responses:
         "204":
           description: Updated
@@ -526,22 +336,15 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CommentWriteDto'
-            examples:
-              default:
-                summary: add new comment
-                value: |
-                  {
-                    "id": "0c728960-d5fd-49ea-8fe8-f72cb9cfccca",
-                    "message": "my comment",
-                    "creator": "A.ThePower"
-                  }
       responses:
         "204":
           description: Created or Updated
         "401":
           description: Not Authorized
         "403":
-          description: Event is DONE or creator is not allowed
+          description: |
+            - Forbidden 
+            - Event is DONE or creator is not allowed
         "404":
           description: Event Not found
       security:
@@ -569,27 +372,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CommentReadDto'
-              examples:
-                default:
-                  value: |
-                    [
-                      {
-                        "id": "d2915506-6ce7-47a1-9c05-7ae0de22dc09",
-                        "creator": "A.ThePower",
-                        "message": "my first comment message",
-                        "lastModificationDate": "2024-08-02T11:00:00Z",
-                        "creationDate": "2024-08-02T11:00:00Z"
-                      },
-                      {
-                        "id": "5ecb7585-8aa0-4d88-a99b-32401d1db52c",
-                        "creator": "B.Summers",
-                        "message": "This comment is great",
-                        "lastModificationDate": "2024-08-05T09:00:00Z",
-                        "creationDate": "2024-09-04T10:00:00Z"
-                      }
-                    ]
         "401":
           description: Not Authorized
+        "403":
+          description: Forbidden
         "404":
           description: Event Not found
       security:
@@ -632,83 +418,14 @@ paths:
                     $ref: '#/components/schemas/EventsSummariesByStatusDto'
                   DONE:
                     $ref: '#/components/schemas/EventsSummariesByStatusDto'
-              examples:
-                default:
-                  value: |
-                    {
-                      "IN_PROGRESS": {
-                        "count": 2,
-                        "events": [
-                          {
-                            "id": 34,
-                            "name": "Festival Chalons",
-                            "criticality": "MEDIUM",
-                            "status": "IN_PROGRESS",
-                            "lastModificationDate": "2024-02-20T10:37:33.792659Z",
-                            "category": "MANIFESTATION",
-                            "interventionRequestTitle": null,
-                            "interventionRequestCount": 1,
-                            "manifestation": {
-                              "startDate": "2008-01-02T23:00:00Z",
-                              "endDate": "2008-01-03T23:00:00Z"
-                            }
-                          }
-                        ]
-                      },
-                      "DONE": {
-                        "count": 1,
-                        "events": []
-                      },
-                      "NEW": {
-                        "count": 3,
-                        "events": [
-                          {
-                            "id": 22,
-                            "name": "Maintenance ouvrage2",
-                            "criticality": "MEDIUM",
-                            "status": "NEW",
-                            "lastModificationDate": "2024-02-20T10:37:33.792659Z",
-                            "category": "LIMIT",
-                            "interventionRequestTitle": "intervention procedure_2",
-                            "interventionRequestCount": 2,
-                            "manifestation": {}
-                          }
-                        ]
-                      }
-                    }
         "400":
-          description: Bad Request
-          content:
-            application/json:
-              examples:
-                invalidCriticality:
-                  description: Occurs when Criticality filter is invalid
-                  value: |
-                    {
-                        "code": 400,
-                        "message": "No enum constant com.provoly.event.Criticality.toto"
-                    }
-                invalidLimit:
-                  description: Occurs when limit query is invalid
-                  value: |
-                    {
-                        "code": 400,
-                        "message": "'limit' must be greater than 0"
-                    }
+          description: Criticality invalid
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden
-          content:
-            application/json:
-              examples:
-                invalidLimit:
-                  description: Occurs when limit query is invalid
-                  value: |
-                    {
-                        "code": 403,
-                        "message": "'limit' must be greater than 0"
-                    }
+          description: |
+            - Forbidden 
+            - Limit invalid
       security:
         - oidc:
             - authenticated
@@ -753,14 +470,13 @@ paths:
           schema:
             type: integer
           example: 1
-          required: true
-          description: Page number requested, triggers an error if not specified or if 0.
+          description: Page number requested, default to 1. Trigger an error if not specified or if 0.
         - name: pageSize
           in: query
           schema:
             type: integer
           example: 20
-          description: Page size, returns an empty list if not specified.
+          description: Page size, default to 20. Return an empty list if not specified.
         - name: search
           in: query
           description: Returns all procedures whose value is contained in the `name`, `creator` or `id` property
@@ -775,7 +491,6 @@ paths:
             items:
               type: string
             example: [ 'EP' ]
-
         - name: sort
           in: query
           schema:
@@ -793,54 +508,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ProcedureModelReadDto'
-              examples:
-                default:
-                  value: |
-                    [
-                      {
-                        "id": 1,
-                        "name": "laura's procedure",
-                        "description": "description",
-                        "creationDate": "2024-06-20T07:39:35.555495Z",
-                        "lastModificationDate": "2024-06-20T07:44:06.853084Z",
-                        "creator": "eliott",
-                        "domain": "EP",
-                        "useCount": 4,
-                        "actions": [
-                          {
-                            "id": "e9f9246d-7fef-4339-92f4-50335c9ca097",
-                            "type": "OTHER",
-                            "status": "NEW",
-                            "lastModificationDate": "2024-06-28T06:16:36.421040Z",
-                            "name": "other"
-                          }
-                        ]
-                      },
-                      {
-                        "id": 2,
-                        "name": "procedure model 4",
-                        "description": "description",
-                        "creationDate": "2024-06-20T07:39:35.555495Z",
-                        "lastModificationDate": "2024-06-20T07:44:06.853084Z",
-                        "creator": "laura",
-                        "domain": "EP",
-                        "useCount": 0,
-                        "actions": [
-                          {
-                            "id": "e81eebe9-599c-41f9-bb70-bb4c34a3d744",
-                            "type": "OTHER",
-                            "status": "NEW",
-                            "lastModificationDate": "2024-06-28T06:16:36.426601Z",
-                            "name": "other2"
-                          }
-                        ]
-                      }
-                    ]
-
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden if page not specified
+          description: Forbidden
       security:
         - oidc:
             - proc_model_read
@@ -857,45 +528,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ProcedureModelWriteDto'
-            examples:
-              default:
-                summary: Save procedure model
-                value: |
-                  {
-                    "name": "model de procedure test",
-                    "description": "description",
-                    "creator": "billie",
-                    "domain": "EP",
-                    "actions": [
-                      {
-                        "id": "f3a43a98-1d86-4ba5-84a8-7c3462786f63",
-                        "type": "EMAIL",
-                        "name": "toto",
-                        "email": "toto"
-                      },
-                      {
-                        "id": "28c017db-cb9a-4cc1-a1a4-f9be0a88dc94",
-                        "type": "CSU"
-                      },
-                      {
-                        "id": "e9f9246d-7fef-4339-92f4-50335c9ca097",
-                        "type": "OTHER",
-                        "name": "other action"
-                      },
-                      {
-                        "id": "5977b943-7612-46a2-a983-ac32785e9a84",
-                        "type": "PHONE",
-                        "name": "tutu",
-                        "phone": "0102030405"
-                      },
-                      {
-                        "id": "31de7845-4cce-4d2a-b001-84f534efcace",
-                        "type": "SMS",
-                        "name": "titi",
-                        "phone": "0102030405"
-                      }
-                    ]
-                  }
       responses:
         "201":
           description: Created
@@ -904,28 +536,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProcedureModelWriteDto'
         "400":
-          description: Bad Request
-          content:
-            application/json:
-              examples:
-                invalidName:
-                  description: Occurs when name already exists
-                  value: |
-                    {
-                        "code": 400,
-                        "message": "Event with name 'event alert' already exists"
-                    }
-                invalidEquipment:
-                  description: Occurs when equipmentId not exist
-                  value: |
-                    {
-                        "code": 400,
-                        "message": "Equipment with id '0c728960-d5fd-49ea-8fe8-f72cb9cfcccd' not exists"
-                    }
+          description: Name already exists or equipment id not exists
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden if missing a required property
+          description: |
+            - Forbidden 
+            - Missing a required property
       security:
         - oidc:
             - proc_model_write
@@ -946,7 +563,7 @@ paths:
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden if page not specified
+          description: Forbidden
         "404":
           description: Procedure Model Not found
         "200":
@@ -955,37 +572,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProcedureModelReadDto'
-              examples:
-                default:
-                  value: |
-                    {
-                      "id": 29,
-                      "name": "procedure model 4",
-                      "description": "description",
-                      "creationDate": "2024-06-20T07:39:35.555495Z",
-                      "lastModificationDate": "2024-06-20T07:44:06.853084Z",
-                      "creator": "Jean Dupont",
-                      "domain": "VP",
-                      "useCount": 0,
-                      "actions": [
-                        {
-                          "id": "5977b943-7612-46a2-a983-ac32785e9a84",
-                          "type": "PHONE",
-                          "status": "DONE",
-                          "lastModificationDate": "2024-06-28T06:16:36.432234Z",
-                          "name": "tutu",
-                          "phone": "0102030405"
-                        },
-                        {
-                          "id": "31de7845-4cce-4d2a-b001-84f534efcace",
-                          "type": "SMS",
-                          "status": "NEW",
-                          "lastModificationDate": "2024-06-28T06:16:36.441100Z",
-                          "name": "titi",
-                          "phone": "0102030405"
-                        }
-                      ]
-                    }
       security:
         - oidc:
             - proc_model_read
@@ -1007,29 +593,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ProcedureModelWriteDto'
-            examples:
-              default:
-                summary: Update Procedure model
-                value: |
-                  {
-                    "name": "model de procedure updated",
-                    "description": "description",
-                    "creator": "toto",
-                    "domain": "VP",
-                    "actions": [
-                        {
-                          "id": "5977b943-7612-46a2-a983-ac32785e9a84",
-                          "type": "ASKED_SERVICE",
-                          "name": "my service"
-                        },
-                        {
-                          "id": "31de7845-4cce-4d2a-b001-84f534efcace",
-                          "type": "SMS",
-                          "name": "thierry",
-                          "phone": "0000000000"
-                        }
-                      ]
-                  }
       responses:
         "204":
           description: Updated
@@ -1041,6 +604,8 @@ paths:
             - `creator` must be unchanged
         "401":
           description: Not Authorized
+        "403":
+          description: Forbidden
       security:
         - oidc:
             - proc_model_write
@@ -1085,7 +650,9 @@ paths:
         "401":
           description: Not Authorized
         "403":
-          description:  At least one event is already associated to a procedure, or closed.
+          description: |
+            - Forbidden 
+            - At least one event is already associated to a procedure, or closed.
         "404":
           description: Procedure model not found
       security:
@@ -1109,7 +676,7 @@ paths:
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden if page not specified
+          description: Forbidden
         "404":
           description: Procedure Not found
         "200":
@@ -1118,72 +685,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProcedureReadDto'
-              examples:
-                default:
-                  value: |
-                    {
-                      "id": 45,
-                      "name": "procedure maintenance",
-                      "creationDate": "2024-02-23T12:56:00.802501Z",
-                      "actions": [
-                        {
-                          "id": "f3a43a98-1d86-4ba5-84a8-7c3462786f63",
-                          "type": "EMAIL",
-                          "status": "IN_PROGRESS",
-                          "lastModificationDate": "2024-06-28T06:16:36.404574Z",
-                          "name": "toto",
-                          "email": "toto"
-                        },
-                        {
-                          "id": "f3a43a98-1d86-4ba5-84a8-7c3462786f64",
-                          "type": "PHONE",
-                          "status": "DONE",
-                          "lastModificationDate": "2024-06-28T06:16:36.404574Z",
-                          "name": "tutu",
-                          "email": "1111111111"
-                        }
-                      
-                      ],
-                      "events": [
-                        {
-                          "id": 66,
-                          "name": "Defaillance lampe",
-                          "address": null,
-                          "description": null,
-                          "criticality": "LOW",
-                          "status": "DONE",
-                          "lastModificationDate": "2024-02-23T12:56:00.802501Z",
-                          "creationDate": "2024-02-23T12:56:00.802501Z",
-                          "category": "OUTOFORDER",
-                          "equipment": {
-                            "id": "12a64ae7-70ca-4d12-bcd9-9f1c75f23915",
-                            "name": "C-1034",
-                            "type": "Ouvrage",
-                            "entity": "Châlons Agglo"
-                          },
-                          "externalSourceRef": "citylinx_1"
-                        },
-                        {
-                          "id": 37,
-                          "name": "Maintenance ouvrage2",
-                          "address": null,
-                          "description": null,
-                          "criticality": "MEDIUM",
-                          "status": "NEW",
-                          "lastModificationDate": "2024-02-23T12:56:00.802501Z",
-                          "creationDate": "2024-02-23T12:56:00.802501Z",
-                          "category": "LIMIT",
-                          "equipment": {
-                            "id": "12a64ae7-70ca-4d12-bcd9-9f1c75f23916",
-                            "name": "C-761",
-                            "type": "Ouvrage",
-                            "entity": "Châlons Agglo"
-                          },
-                          "externalSourceRef": "external_source3"
-                        }
-                      ],
-                      "progress": 50.0
-                    }
       security:
         - oidc:
             - event_read
@@ -1204,39 +705,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ProcedureWriteDto'
-            examples:
-              default:
-                summary: Update Report event from procedure
-                value: |
-                  {
-                    "id": 3,
-                    "name": "procedure_1",
-                    "actions": [
-                      {
-                        "id": "5977b943-7612-46a2-a983-ac32785e9a84",
-                        "type": "ASKED_SERVICE",
-                        "name": "my service"
-                      },
-                      {
-                        "id": "31de7845-4cce-4d2a-b001-84f534efcace",
-                        "type": "SMS",
-                        "name": "thierry",
-                        "phone": "0000000000"
-                      }
-                    ],
-                    "events": [
-                      {
-                        "id": 2,
-                        "name": "Accident voiture UPDATE",
-                        "address": "10 Rue du Camp d'Attila, 51000 Châlons-en-Champagne",
-                        "description": "description",
-                        "criticality": "HIGH",
-                        "equipmentId": "4ead3c85-f120-4144-8ca2-29ac9882ff5f",
-                        "externalSourceRef": "external_source2",
-                        "category": "LIMIT"
-                      }
-                    ]
-                  }
       responses:
         "204":
           description: Updated
@@ -1244,6 +712,8 @@ paths:
           description: Bad Request
         "401":
           description: Not Authorized
+        "403":
+          description: Forbidden
       security:
         - oidc:
             - event_proc_write
@@ -1266,7 +736,7 @@ paths:
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden if page not specified
+          description: Forbidden
         "404":
           description: Procedure Not found
         "204":
@@ -1293,19 +763,13 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CommentWriteDto'
-            examples:
-              default:
-                summary: Close procedure
-                value: |
-                  {
-                    "id": "c3b9ead7-57a5-4dd4-a8bd-36da14bf1ac1",
-                    "message":"Procedure is done"
-                  }
       responses:
         "204":
           description: Updated
         "401":
           description: Not Authorized
+        "403":
+          description: Forbidden
         "404":
           description: Event Not found
       security:
@@ -1340,6 +804,8 @@ paths:
           description: Event is done or procedure is done
         "401":
           description: Not Authorized
+        "403":
+          description: Forbidden
         "404":
           description: Event Not found or Procedure not Found
       security:
@@ -1365,22 +831,15 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CommentWriteDto'
-            examples:
-              default:
-                summary: add new comment
-                value: |
-                  {
-                    "id": "0c728960-d5fd-49ea-8fe8-f72cb9cfccca",
-                    "message": "my comment",
-                    "creator": "A.ThePower"
-                  }
       responses:
         "204":
           description: Created or Updated
         "401":
           description: Not Authorized
         "403":
-          description: Procedure of this action is DONE or creator is not allowed
+          description: | 
+            - Forbidden
+            - Procedure of this action is DONE or creator is not allowed
         "404":
           description: Action Not found
       security:
@@ -1408,27 +867,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CommentReadDto'
-              examples:
-                default:
-                  value: |
-                    [
-                      {
-                        "id": "d2915506-6ce7-47a1-9c05-7ae0de22dc09",
-                        "creator": "A.ThePower",
-                        "message": "my first comment message",
-                        "lastModificationDate": "2024-08-02T11:00:00Z",
-                        "creationDate": "2024-08-02T11:00:00Z"
-                      },
-                      {
-                        "id": "5ecb7585-8aa0-4d88-a99b-32401d1db52c",
-                        "creator": "B.Summers",
-                        "message": "This comment is great",
-                        "lastModificationDate": "2024-08-05T09:00:00Z",
-                        "creationDate": "2024-09-04T10:00:00Z"
-                      }
-                    ]
         "401":
           description: Not Authorized
+        "403":
+          description: Forbidden
         "404":
           description: Action Not found
       security:
@@ -1448,85 +890,17 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/EquipmentWriteDto'
-            examples:
-              default:
-                summary: Create equipments with parents
-                value: |
-                  [
-                    {
-                      "id": {
-                        "GMAO": "technical_unique_id"
-                      },
-                      "code":"C306",
-                      "name":"C306",
-                      "family": "Armoire",
-                      "domain": "EP",
-                      "entity": "CHALONS-COMMUN",
-                      "address":"1 rue Chalons",
-                      "city": "CH",
-                      "district": "CH_C",
-                      "activeEnergy":30,
-                      "EREQ_LEVEL": 2,
-                      "parent": "C307"
-                    },
-                    {
-                      "id":  {
-                        "GMAO": "technical_unique_id2"
-                      },
-                      "code":"C307",
-                      "name":"C307",
-                      "family": "Armoire",
-                      "domain": "EP",
-                      "entity": "CHALONS-COMMUN",
-                      "address":"132 avenue Chalons",
-                      "city": "CH",
-                      "district": "CH_CD",
-                      "activeEnergy": 70,
-                      "EREQ_LEVEL": 1,
-                      "parent": null
-                    },
-                    {
-                      "id":  {
-                        "GMAO": "technical_unique_id3"
-                      },
-                      "code":"C308",
-                      "name":"C308",
-                      "family": "Armoire",
-                      "domain": "EP",
-                      "entity": "FAGNIERES-COMMUN",
-                      "address":"97 impasse Fagniere",
-                      "city": "FAGN",
-                      "activeEnergy":null,
-                      "EREQ_LEVEL": 2,
-                      "parent": "C307"
-                    }
-                  ]
       responses:
         "204":
           description: No content
         "400":
-          description: Bad Request
-          content:
-            application/json:
-              examples:
-                invalidName:
-                  description: Occurs when name already exists
-                  value: |
-                    {
-                        "code": 400,
-                        "message": "Event with name 'event report' already exists"
-                    }
-                invalidEquipment:
-                  description: Occurs when equipment parent not exist
-                  value: |
-                    {
-                        "code": 400,
-                        "message": "Equipment with code 'C397' not exists"
-                    }
+          description: Name already exists or equipment not exists
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden if missing a required property
+          description: |
+            - Forbidden 
+            - Missing a required property
       security:
         - oidc:
             - authenticated
@@ -1544,14 +918,13 @@ paths:
           schema:
             type: integer
           example: 1
-          required: true
-          description: Page number requested, triggers an error if not specified or if 0.
+          description: Page number requested, default to 1. Trigger an error if not specified or if 0.
         - name: pageSize
           in: query
           schema:
             type: integer
           example: 20
-          description: Page size, returns an empty list if not specified.
+          description: Page size, default to 20. Return an empty list if not specified.
         - name: entity
           in: query
           schema:
@@ -1567,43 +940,16 @@ paths:
           description: search on equipment code and family name
           example: 'armo'
       responses:
-        "401":
-          description: Not Authorized
-        "403":
-          description: Forbidden if page not specified
         "200":
           description: Returns equipments details
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EquipmentReadDto'
-              examples:
-                default:
-                  value: |
-                    [
-                      {
-                        "id": "c538a660-6450-4281-9fa9-c925f340eb54",
-                        "externalId": {
-                          "GMAO": "technical_unique_id"
-                        },
-                        "name": "C306",
-                        "code": "C306",
-                        "family": "Armoire",
-                        "entity": "FAGNIERES-COMMUN",
-                        "parent": {
-                          "id": "c6cfac35-0939-4bb0-860e-fb00c6ff0ed7",
-                          "externalId": "technical_unique_id2",
-                          "name": "C307",
-                          "code": "C307",
-                          "family": "Armoire",
-                          "domain": "EP",
-                          "entity": "FAGNIERES-COMMUN",
-                          "parent": null,
-                          "activeEnergy": 70
-                        },
-                        "activeEnergy": 30
-                      }
-                    ]
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
       security:
         - oidc:
             - authenticated
@@ -1621,44 +967,18 @@ paths:
           example: 01ffde9d-30d2-4273-b61f-c6addd8747c8
           required: true
       responses:
-        "401":
-          description: Not Authorized
-        "403":
-          description: Forbidden if page not specified
-        "404":
-          description: Equipment Not found
         "200":
           description: Returns equipment Details by id
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EquipmentReadDto'
-              examples:
-                default:
-                  value: |
-                    {
-                      "id": "c538a660-6450-4281-9fa9-c925f340eb54",
-                      "externalId": {
-                        "GMAO": "technical_unique_id"
-                      },
-                      "name": "C306",
-                      "code": "C306",
-                      "family": "Armoire",
-                      "domain": "EP",
-                      "entity": "FAGNIERES-COMMUN",
-                      "parent": {
-                        "id": "c6cfac35-0939-4bb0-860e-fb00c6ff0ed7",
-                        "externalId": "technical_unique_id2",
-                        "name": "C307",
-                        "code": "C307",
-                        "family": "Armoire",
-                        "domain": "EP",
-                        "entity": "FAGNIERES-COMMUN",
-                        "parent": null,
-                        "activeEnergy": 70
-                      },
-                      "activeEnergy": 30
-                    }
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Equipment Not found
       security:
         - oidc:
             - authenticated
@@ -1676,30 +996,18 @@ paths:
           example: P-1000
           required: true
       responses:
-        "401":
-          description: Not Authorized
-        "403":
-          description: Forbidden if page not specified
-        "404":
-          description: Equipment Not found
         "200":
           description: Returns equipment Details by name
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EquipmentReadDto'
-              examples:
-                default:
-                  value: |
-                    {
-                      "id": "0c728960-d5fd-49ea-8fe8-f72cb9cfcccd",
-                      "externalId": {
-                        "GMAO": "technical_unique_id"
-                      },
-                      "name": "P-1000",
-                      "type": "Point Lumineux",
-                      "entity": "FAGNIERES"
-                    }
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Equipment Not found
       security:
         - oidc:
             - authenticated
@@ -1723,30 +1031,18 @@ paths:
           example: technical_unique_id
           required: true
       responses:
-        "401":
-          description: Not Authorized
-        "403":
-          description: Forbidden if page not specified
-        "404":
-          description: Equipment Not found
         "200":
           description: Returns equipment Details by name
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EquipmentReadDto'
-              examples:
-                default:
-                  value: |
-                    {
-                      "id": "0c728960-d5fd-49ea-8fe8-f72cb9cfcccd",
-                      "externalId": {
-                        "GMAO": "technical_unique_id"
-                      },
-                      "name": "P-1000",
-                      "type": "Point Lumineux",
-                      "entity": "FAGNIERES"
-                    }
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden if page not specified
+        "404":
+          description: Equipment Not found
       security:
         - oidc:
             - authenticated
@@ -1757,8 +1053,6 @@ paths:
       summary: Retrieve all equipment entities
       operationId: com.provoly.equipment.EquipmentController_getEquipmentEntitiesName
       responses:
-        "401":
-          description: Not Authorized
         "200":
           content:
             application/json:
@@ -1767,6 +1061,8 @@ paths:
                 items:
                   type: string
                 example: [ "FAGNIERES-COMMUN", "CHALONS_AGGLOS" ]
+        "401":
+          description: Not Authorized
       security:
         - oidc:
             - authenticated
@@ -1786,53 +1082,17 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/ServiceWriteDto'
-            examples:
-              default:
-                summary: Create services
-                value: |
-                  [
-                    {
-                      "id": "DI00001935",
-                      "equipment": "C-306",
-                      "creationDate": "2024-05-27T08:10:37.675958Z",
-                      "lastModificationDate": "2024-05-27T08:10:37.675958Z",
-                      "startDate": "2024-06-27T08:10:37.675958Z",
-                      "endDate": "2024-06-28T08:10:37.675958Z",
-                      "domain": "EP",
-                      "status": "ASKED",
-                      "category": "PREV"
-                    },
-                    {
-                      "id": "DI00001935@1234567890",
-                      "equipment": "FL-222",
-                      "creationDate": "2024-04-27T08:10:37.675958Z",
-                      "lastModificationDate": "2024-04-28T08:10:37.675958Z",
-                      "startDate": "2024-05-02T08:10:37.675958Z",
-                      "endDate": "2024-05-04T08:10:37.675958Z",
-                      "domain": "EP",
-                      "status": "DONE",
-                      "category": "CURA"
-                    }
-                  ]
       responses:
         "204":
           description: No content
         "400":
-          description: Bad Request
-          content:
-            application/json:
-              examples:
-                invalidEquipment:
-                  description: Occurs when equipment not exist
-                  value: |
-                    {
-                        "code": 400,
-                        "message": "Equipment with code 'C-306' not exists"
-                    }
+          description: Equipment not exists
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden if missing a required property
+          description: | 
+            - Forbidden
+            - Missing a required property
       security:
         - oidc:
             - authenticated
@@ -1842,41 +1102,16 @@ paths:
       summary: Retrieve all services
       operationId: com.provoly.equipment.ServiceController_getServices
       responses:
-        "401":
-          description: Not Authorized
-        "403":
-          description: Forbidden if page not specified
         "200":
           description: Returns services details
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServiceReadDto'
-              examples:
-                default:
-                  value: |
-                    [
-                      {
-                        "id": "c538a660-6450-4281-9fa9-c925f340eb54",
-                        "externalId": "technical_unique_id",
-                        "name": "C306",
-                        "code": "C306",
-                        "family": "Armoire",
-                        "entity": "FAGNIERES-COMMUN",
-                        "parent": {
-                          "id": "c6cfac35-0939-4bb0-860e-fb00c6ff0ed7",
-                          "externalId": "technical_unique_id2",
-                          "name": "C307",
-                          "code": "C307",
-                          "family": "Armoire",
-                          "domain": "EP",
-                          "entity": "FAGNIERES-COMMUN",
-                          "parent": null,
-                          "activeEnergy": 70
-                        },
-                        "activeEnergy": 30
-                      }
-                    ]
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
       security:
         - oidc:
             - authenticated
@@ -1903,42 +1138,21 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/ExternalServiceWriteDto'
-            examples:
-              default:
-                summary: Create external service with equipment
-                value: |
-                  {
-                    "name": "my external service",
-                    "equipment": "e0b38641-3ff1-495e-b26c-2cb78f1d0c09",
-                    "priority": "1-MINEUR",
-                    "type": "Luminaire - Accidente menacant de tomber",
-                    "description": "description"
-                  }
       responses:
         "204":
           description: No content
         "400":
-          description: Bad Request
-          content:
-            application/json:
-              examples:
-                invalidActionType:
-                  description: Occurs when action is not of type `ASKED_SERVICE`
-                invalidPropertyValue:
-                  description: Occurs when `priority` or `type` have invalid values
-                invalidEquipment:
-                  description: Occurs when equipment not exist
-                external:
-                  description: Occurs when external application triggers an error
-                  value: |
-                    {
-                        "code": 400,
-                        "message": "Message from external application"
-                    }
+          description: |
+            - Action is not of type `ASKED_SERVICE`
+            - Properties have invalid values
+            - Equipment not exists
+            - External application triggers an error
         "401":
           description: Not Authorized
         "403":
-          description: Forbidden if missing a required property
+          description: |
+            - Forbidden
+            - Missing a required property
         "404":
           description: Action not found
       security:
@@ -1957,35 +1171,16 @@ paths:
             type: string
           example: EP
       responses:
-        "401":
-          description: Not Authorized
-        "403":
-          description: Forbidden if page not specified
         "200":
           description: Returns service types details
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServiceTypeReadDto'
-              examples:
-                default:
-                  value: |
-                    [
-                      {
-                        "type": "Armoire accidentee",
-                        "gti": 2,
-                        "gtr": 3,
-                        "gtrp": "null",
-                        "domain": "EP"
-                      },
-                      {
-                        "type": "Camera accidentee",
-                        "gti": 4,
-                        "gtr": "null",
-                        "gtrp": 18,
-                        "domain": "VP"
-                      }
-                    ]
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden if page not specified
       security:
         - oidc:
             - authenticated
@@ -2026,33 +1221,20 @@ paths:
             items:
               type: string
       responses:
-        "400":
-          description: Entity/Criticality/Category Not found, Or place is not a valide City/District
-        "401":
-          description: Not Authorized
         "200":
           content:
             description: Returns Equipments with events
             application/json:
               schema:
                 $ref: '#/components/schemas/EpEquipmentWithEventDto'
-              examples:
-                default:
-                  value: |
-                    {
-                      "nbEquipWithEvent_A": 0,
-                      "totalEquipWithEvent_A": 2,
-                      "nbServiceTodoWithEquip_A": 0,
-                      "nbServiceInProgressWithEquip_A": 0,
-                      "nbEquipWithEvent_FL": 2,
-                      "totalEquipWithEvent_FL": 1,
-                      "nbServiceTodoWithEquip_FL": 0,
-                      "nbServiceInProgressWithEquip_FL": 0,
-                      "nbEquipWithEvent_unmanaged": 0,
-                      "totalEquipWithEvent_unmanaged": 4,
-                      "nbServiceTodoWithEquip_unmanaged": 0,
-                      "nbServiceInProgressWithEquip_unmanaged": 0
-                    }
+        "400":
+          description: |
+            - Entity/Criticality/Category not found
+            - Place is not a valid City/District
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
       security:
         - oidc:
             - authenticated
@@ -2066,52 +1248,15 @@ paths:
         Filter on equipments without `deleted` property.
       operationId: com.provoly.metrics.MetricsController_getEpEquipmentWithEventDetailed
       responses:
-        "401":
-          description: Not Authorized
         "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EpEquipmentWithEventDetailedDto'
-              examples:
-                default:
-                  value: |
-                    {
-                      "nbEquipWithEvent_A": 0,
-                      "totalEquipWithEvent_A": 4,
-                      "nbServiceTodoWithEquip_A": 0,
-                      "nbServiceInProgressWithEquip_A": 0,
-                      "nbEquipWithEvent_FL": 1,
-                      "totalEquipWithEvent_FL": 2,
-                      "nbServiceTodoWithEquip_FL": 0,
-                      "nbServiceInProgressWithEquip_FL": 0,
-                      "nbEquipWithEvent_unmanaged": 0,
-                      "totalEquipWithEvent_unmanaged": 3,
-                      "nbServiceTodoWithEquip_unmanaged": 0,
-                      "nbServiceInProgressWithEquip_unmanaged": 0,    
-                      "limit": {
-                        "nbEquipWithEvent_A": 0,
-                        "nbEquipWithEvent_FL": 1,
-                        "nbEquipWithEvent_unmanaged": 0
-                      },
-                      "anomaly": {
-                        "nbEquipWithEvent_A": 0,
-                        "nbEquipWithEvent_FL": 0,
-                        "nbEquipWithEvent_unmanaged": 0
-                      },
-                      "manifestation": {
-                        "nbEquipWithEvent_A": 0,
-                        "nbEquipWithEvent_FL": 1,
-                        "nbEquipWithEvent_unmanaged": 0
-                      },
-                      "outoforder": {
-                        "nbEquipWithEvent_A": 0,
-                        "nbEquipWithEvent_FL": 1,
-                        "nbEquipWithEvent_unmanaged": 0
-                      }
-                    }
-
-
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
       security:
         - oidc:
             - authenticated
@@ -2152,25 +1297,20 @@ paths:
             items:
               type: string
       responses:
-        "400":
-          description: Entity/Criticality/Category Not found, Or place is not a valide City/District
-        "401":
-          description: Not Authorized
         "200":
           content:
             description: Returns VP Equipments with events
             application/json:
               schema:
                 $ref: '#/components/schemas/VpEquipmentWithEventDto'
-              examples:
-                default:
-                  value: |
-                    {
-                      "nbEquipWithEvent_C": 0,
-                      "totalEquipWithEvent_C": 2,
-                      "nbServiceTodoWithEquip_C": 0,
-                      "nbServiceInProgressWithEquip_C": 0
-                    }
+        "400":
+          description: |
+            - Entity/Criticality/Category not found
+            - Place is not a valid City/District
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
       security:
         - oidc:
             - authenticated
@@ -2184,35 +1324,15 @@ paths:
         Filter on equipments without `deleted` property.
       operationId: com.provoly.metrics.MetricsController_getVpEquipmentWithEventDetailed
       responses:
-        "401":
-          description: Not Authorized
         "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/VpEquipmentWithEventDetailedDto'
-              examples:
-                default:
-                  value: |
-                    {
-                      "nbEquipWithEvent_C": 1,
-                      "totalEquipWithEvent_C": 2,
-                      "nbServiceTodoWithEquip_C": 0,
-                      "nbServiceInProgressWithEquip_C": 0,                      
-                      "limit": {
-                        "nbEquipWithEvent_C": 1
-                      },
-                      "anomaly": {
-                        "nbEquipWithEvent_C": 0
-                      },
-                      "manifestation": {
-                        "nbEquipWithEvent_C": 1
-                      },
-                      "outoforder": {
-                        "nbEquipWithEvent_C": 1
-                      }
-                    }
-
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
       security:
         - oidc:
             - authenticated
@@ -2234,26 +1354,15 @@ paths:
           example: EP_FL
           required: true
       responses:
-        "401":
-          description: Not Authorized
         "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EquipmentsByEntity'
-              examples:
-                default:
-                  value: |
-                    {
-                      "CHA_managed": 0,
-                      "CHA_unmanaged": 0,
-                      "CH_managed": 0,
-                      "CH_unmanaged": 0,
-                      "FAGN_managed": 2,
-                      "FAGN_unmanaged": 1,
-                      "SMP_managed": 0,
-                      "SMP_unmanaged": 0
-                    }
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
       security:
         - oidc:
             - authenticated
@@ -2315,24 +1424,15 @@ paths:
             items:
               type: string
       responses:
-        "401":
-          description: Not Authorized
         "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EventsByEquipment'
-              examples:
-                default:
-                  value: |
-                    [
-                      {
-                        "code": "camera1",
-                        "address": "1 rue Chalons",
-                        "city": "CH",
-                        "count": 1
-                      }
-                    ]
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
       security:
         - oidc:
             - authenticated
@@ -2389,36 +1489,17 @@ paths:
             items:
               type: string
       responses:
-        "401":
-          description: Not Authorized
-        "400":
-          description: Invalid interval, entity, family code, or city/district
         "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AggregatedService'
-              examples:
-                default:
-                  value: |
-                    [
-                      {
-                        "start": "2023-05-01T00:00:00Z",
-                        "count": 3
-                      },
-                      {
-                        "start": "2024-01-01T00:00:00Z",
-                        "count": 2
-                      },
-                      {
-                        "start": "2024-03-01T00:00:00Z",
-                        "count": 4
-                      },
-                      {
-                        "start": "2024-05-01T00:00:00Z",
-                        "count": 1
-                      }
-                    ]
+        "400":
+          description: Invalid interval, entity, family code, or city/district
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
       security:
         - oidc:
             - authenticated
@@ -2482,23 +1563,17 @@ paths:
           schema:
             type: string
       responses:
-        "401":
-          description: Not Authorized
-        "400":
-          description: Invalid domain, date, status, or other filters
         "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AnomalyCount'
-              examples:
-                default:
-                  value: |
-                    {
-                      "UNUSUAL_FLOW": 0,
-                      "WILD_STORAGE": 1,
-                      "TRAFFIC_CONGESTION": 0
-                    }
+        "400":
+          description: Invalid domain, date, status, or other filters
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
       security:
         - oidc:
             - authenticated
@@ -2525,80 +1600,17 @@ paths:
           schema:
             type: string
       responses:
-        "401":
-          description: Not Authorized
-        "400":
-          description: Invalid domain, date or other filter
         "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AnomalyQueryResult'
-              examples:
-                default:
-                  value: |
-                    [
-                      {
-                        "entity": "AGGLO-COMMUN",
-                        "subCategory": "UNUSUAL_FLOW",
-                        "count": 0
-                      },
-                      {
-                        "entity": "AGGLO-COMMUN",
-                        "subCategory": "TRAFFIC_CONGESTION",
-                        "count": 0
-                      },
-                      {
-                        "entity": "AGGLO-COMMUN",
-                        "subCategory": "WILD_STORAGE",
-                        "count": 0
-                      },
-                      {
-                        "entity": "CHALONS-COMMUN",
-                        "subCategory": "UNUSUAL_FLOW",
-                        "count": 0
-                      },
-                      {
-                        "entity": "CHALONS-COMMUN",
-                        "subCategory": "TRAFFIC_CONGESTION",
-                        "count": 0
-                      },
-                      {
-                        "entity": "CHALONS-COMMUN",
-                        "subCategory": "WILD_STORAGE",
-                        "count": 0
-                      },
-                      {
-                        "entity": "FAGNIERES-COMMUN",
-                        "subCategory": "UNUSUAL_FLOW",
-                        "count": 0
-                      },
-                      {
-                        "entity": "FAGNIERES-COMMUN",
-                        "subCategory": "TRAFFIC_CONGESTION",
-                        "count": 0
-                      },
-                      {
-                        "entity": "FAGNIERES-COMMUN",
-                        "subCategory": "WILD_STORAGE",
-                        "count": 0
-                      },
-                      {
-                        "entity": "SAINT-MARTIN-COMMUN",
-                        "subCategory": "UNUSUAL_FLOW",
-                        "count": 0
-                      },
-                      {
-                        "entity": "SAINT-MARTIN-COMMUN",
-                        "subCategory": "TRAFFIC_CONGESTION",
-                        "count": 0
-                      },
-                      {
-                        "entity": "SAINT-MARTIN-COMMUN",
-                        "subCategory": "WILD_STORAGE",
-                        "count": 0
-                      }
-                    ]
+        "400":
+          description: Invalid domain, date or other filter
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
       security:
         - oidc:
             - authenticated
@@ -2663,40 +1675,17 @@ paths:
             items:
               type: string
       responses:
-        "401":
-          description: Not Authorized
-        "400":
-          description: Invalid interval, domain, bucket or startDate
         "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AggregatedService'
-              examples:
-                default:
-                  value: |
-                    [
-                      {
-                        "start": "2023-05-01T00:00:00Z",
-                        "code": "UNUSUAL_FLOW",
-                        "count": 3
-                      },
-                      {
-                        "start": "2024-01-01T00:00:00Z",
-                        "code": "UNUSUAL_FLOW",
-                        "count": 2
-                      },
-                      {
-                        "start": "2024-03-01T00:00:00Z",
-                        "code": "WILD_STORAGE",
-                        "count": 4
-                      },
-                      {
-                        "start": "2024-05-01T00:00:00Z",
-                        "code": "TRAFFIC_CONGESTION",
-                        "count": 1
-                      }
-                    ]
+        "400":
+          description: Invalid interval, domain, bucket or startDate
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
       security:
         - oidc:
             - authenticated
@@ -2707,6 +1696,7 @@ components:
       description: Authentication
       openIdConnectUrl: https://auth/realms/provoly/.well-known/openid-configuration
   schemas:
+    # Utils
     UUID:
       format: uuid
       pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
@@ -2716,30 +1706,26 @@ components:
     DateTime:
       format: date-time
       type: string
-      example: "2024-02-20T08:33:14.312632Z"
-    Criticality:
-      type: string
-      required: true
-      enum:
-        - LOW
-        - MEDIUM
-        - HIGH
-    Status:
-      type: string
-      required: true
-      enum:
-        - NEW
-        - IN_PROGRESS
-        - DONE
+      example: "2024-02-20T08:30:00.00Z"
+    # Enum
     ActionType:
       type: string
       required: true
+      example: EMAIL
       enum:
         - SMS
         - PHONE
         - EMAIL
         - ASKED_SERVICE
         - ORDER
+    Criticality:
+      type: string
+      required: true
+      example: LOW
+      enum:
+        - LOW
+        - MEDIUM
+        - HIGH
     EventSort:
       type: string
       enum:
@@ -2752,6 +1738,30 @@ components:
         - category
         - id
         - source
+    Priority:
+      type: string
+      required: true
+      enum:
+        - 1-MINEUR
+        - 2-MAJEUR
+        - 3-BLOQUANT
+    Status:
+      type: string
+      required: true
+      example: NEW
+      enum:
+        - NEW
+        - IN_PROGRESS
+        - DONE
+    ServiceStatus:
+      type: string
+      required: true
+      example: ASKED
+      enum:
+        - ASKED
+        - IN_PROGRESS
+        - DONE
+        - CANCELLED
     ProcedureModelSort:
       type : string
       enum:
@@ -2768,67 +1778,498 @@ components:
         - ASC
         - DESC
       default: ASC
-    Priority:
-      type: string
-      required: true
-      enum:
-        - 1-MINEUR
-        - 2-MAJEUR
-        - 3-BLOQUANT
-    Family:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        code:
-          type: string
-    EquipmentEntity:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
+
+    # Enum Entity
     CustomActionType:
       type: object
       properties:
         id:
           type: integer
+          example: 2
         name:
           type: string
-    ServiceWriteDto:
+          example: "Levée de doute"
+    EquipmentEntity:
       type: object
       properties:
         id:
+          type: integer
+          example: 2
+        name:
+          type: string
+          example: "CHALONS-COMMUN"
+    Family:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Armoire"
+        code:
+          type: string
+          example: "EP_ARMOIRE"
+
+    # Action
+    AskedServiceReadDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        type:
+          $ref: '#/components/schemas/ActionType'
+        status:
+          $ref: '#/components/schemas/Status'
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+        name:
+          type: string
+          example: "Ma demande d'intervention"
+        externalServiceId:
+          type: string
+          example: "DI00001"
+    EmailActionReadDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        type:
+          $ref: '#/components/schemas/ActionType'
+        status:
+          $ref: '#/components/schemas/Status'
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+        name:
+          type: string
+          example: "Rory Gilmore"
+        email:
+          type: string
+          example: "r.gilmore@chalons.com"
+    OtherActionReadDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        type:
+          $ref: '#/components/schemas/ActionType'
+        status:
+          $ref: '#/components/schemas/Status'
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+        name:
+          type: string
+          example: "Mon action"
+    PhoneActionReadDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        type:
+          $ref: '#/components/schemas/ActionType'
+        status:
+          $ref: '#/components/schemas/Status'
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+        name:
+          type: string
+          example: "Luke Danes"
+        phone:
+          type: string
+          example: "0001020304"
+    AskedServiceWriteDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+          required: true
+        type:
+          $ref: '#/components/schemas/ActionType'
+          required: true
+        status:
+          $ref: '#/components/schemas/Status'
+          required: true
+        name:
           type: string
           required: true
+          example: "Ma demande d'intervention"
+        externalServiceId:
+          type: string
+          example: "DI00001"
+    EmailActionWriteDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+          required: true
+        type:
+          $ref: '#/components/schemas/ActionType'
+          required: true
+        status:
+          $ref: '#/components/schemas/Status'
+          required: true
+        name:
+          type: string
+          required: true
+          example: "Rory Gilmore"
+        email:
+          type: string
+          required: true
+          example: "r.gilmore@chalons.com"
+    OtherActionWriteDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+          required: true
+        type:
+          $ref: '#/components/schemas/ActionType'
+          required: true
+        status:
+          $ref: '#/components/schemas/Status'
+          required: true
+        name:
+          type: string
+          required: true
+          example: "Autre action"
+    PhoneActionWriteDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+          required: true
+        type:
+          $ref: '#/components/schemas/ActionType'
+          required: true
+        status:
+          $ref: '#/components/schemas/Status'
+          required: true
+        name:
+          type: string
+          required: true
+          example: "Luke Danes"
+        phone:
+          type: string
+          required: true
+          example: "0001020304"
+
+    # Comment
+    CommentWriteDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        message:
+          type: string
+          description: comment message
+          example: "Mon commentaire"
+    CommentReadDto:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        creator:
+          $ref: '#/components/schemas/UUID'
+          description: creator subject
+        message:
+          type: string
+          description: comment message
+          example: "Mon commentaire"
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+        creationDate:
+          $ref: '#/components/schemas/DateTime'
+
+    # Event
+    EventReadDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Défaillance lampe"
+        address:
+          type: string
+          example: "Av. du Président Roosevelt, 51000 Châlons-en-Champagne"
         description:
           type: string
+          example: "Défaillance au niveau de la lampe"
+        criticality:
+          $ref: '#/components/schemas/Criticality'
         equipment:
+          $ref: '#/components/schemas/EquipmentShortDto'
+        status:
+          $ref: '#/components/schemas/Status'
+        category:
+          type: string
+          example: "OUTOFORDER"
+          description: must be a known category code
+        subCategory:
+          type: string
+          description: subCategory is required only if category is `ANOMALY`. Value match one of subCategory code
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+        creationDate:
+          $ref: '#/components/schemas/DateTime'
+        closeDate:
+          $ref: '#/components/schemas/DateTime'
+        endDate:
+          $ref: '#/components/schemas/DateTime'
+        startDate:
+          $ref: '#/components/schemas/DateTime'
+        externalSourceRef:
+          type: string
+          example: Citylinx
+          description: Event source. Default to `Hyperviseur`
+        procedureId:
+          $ref: '#/components/schemas/UUID'
+        linkedEvents:
+          type: number
+          description: Number of events that have the same procedure as the current event
+        procedureProgress:
+          type: number
+          description: Percentage progress of the procedure
+        lastComment:
+          $ref: '#/components/schemas/CommentReadDto'
+        commentsCount:
+          type: integer
+          description: total of comments on event
+        parent:
+          $ref: '#/components/schemas/ParentReadDto'
+    EventWriteDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 2
+        name:
           type: string
           required: true
-        creationDate:
-          type: date
+          example: "Dépôt sauvage"
+        address:
+          type: string
           required: true
-        lastModificationDate:
-          type: date
+          example: "3 rue de Châlons"
+        description:
+          type: string
           required: true
-        startDate:
-          type: date
+          example: "Il y a un dépôt sauvage ici"
+        criticality:
+          $ref: '#/components/schemas/Criticality'
+        category:
+          type: string
+          description: Value match one of category code
+          example: "ANOMALY"
+          required: true
+        subCategory:
+          type: string
+          description: required only if `ANOMALY` is set on `cateogry` property. Value match one of subCategory code.
+          example: "WILD_STORAGE"
+        equipmentId:
+          $ref: '#/components/schemas/UUID'
         endDate:
-          type: date
-        closeDate:
-          type: date
+          $ref: '#/components/schemas/DateTime'
+          description: required if category is "MANIFESTATION"
+        startDate:
+          $ref: '#/components/schemas/DateTime'
+          description: required if category is "MANIFESTATION"
+        externalSourceRef:
+          type: string
+          description: Default to "Hyperviseur"
+          example: "Wintics"
+        parent:
+          type: integer
+          description: Parent event
+          example: 3
+    ParentReadDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 3
+        name:
+          type: string
+          example: "Manifestation en cours"
+
+    # Event Summary
+    EventSummaryDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        proocedureId:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+          example: "Accident voiture"
+        criticality:
+          $ref: '#/components/schemas/Criticality'
+        status:
+          $ref: '#/components/schemas/Status'
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+        category:
+          type: string
+          description: Value match one of category code
+          example: "Manifestation"
+        interventionRequestTitle:
+          type: string
+          description: The last in progress or new service title
+        interventionRequestCount:
+          type: integer
+          description: The total number of intervention requests linked to the procedure event
+        startDate:
+          $ref: '#/components/schemas/DateTime'
+        endDate:
+          $ref: '#/components/schemas/DateTime'
+    EventsSummariesByStatusDto:
+      type: object
+      properties:
+        counts:
+          type: integer
+          description: total count of events for status
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventSummaryDto'
+
+
+    # Procedure
+    ProcedureReadDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 5
+        name:
+          type: string
+          description: "Ma procédure"
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+        creationDate:
+          $ref: '#/components/schemas/DateTime'
+        progress:
+          type: number
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventReadDto'
+        actions:
+          type: array
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/EmailActionReadDto'
+              - $ref: '#/components/schemas/PhoneActionReadDto'
+              - $ref: '#/components/schemas/OtherActionReadDto'
+              - $ref: '#/components/schemas/AskedServiceReadDto'
+    ProcedureWriteDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 2
+        name:
+          type: string
+          example: "Ma procédure"
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventWriteDto'
+        actions:
+          type: array
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/EmailActionWriteDto'
+              - $ref: '#/components/schemas/PhoneActionWriteDto'
+              - $ref: '#/components/schemas/OtherActionWriteDto'
+              - $ref: '#/components/schemas/AskedServiceWriteDto'
+
+    # Procedure Model
+    ProcedureModelWriteDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 2
+        name:
+          type: string
+          required: true
+          example: "Ma procédure"
+        description:
+          type: string
+          required: true
+          example: "Description de ma procédure"
         domain:
           type: string
           required: true
-        status:
+          example: "EP"
+        creator:
           type: string
           required: true
-        category:
+        actions:
+          type: array
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/EmailActionWriteDto'
+              - $ref: '#/components/schemas/PhoneActionWriteDto'
+              - $ref: '#/components/schemas/OtherActionWriteDto'
+              - $ref: '#/components/schemas/AskedServiceWriteDto'
+    ProcedureModelReadDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 3
+        useCount:
+          type: integer
+          example: 4
+        name:
           type: string
+          example: "Ma procédure"
+        description:
+          type: string
+          example: "Ma description"
+        domain:
+          type: string
+          example: "EP"
+        creator:
+          type: string
+          example: "Jess Mariano"
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+        creationDate:
+          $ref: '#/components/schemas/DateTime'
+        actions:
+          type: array
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/EmailActionReadDto'
+              - $ref: '#/components/schemas/PhoneActionReadDto'
+              - $ref: '#/components/schemas/OtherActionReadDto'
+              - $ref: '#/components/schemas/AskedServiceReadDto'
+
+    # Service
+    ExternalServiceWriteDto:
+      type: object
+      properties:
+        name:
+          type: string
+          required: true
+        equipment:
+          $ref: '#/components/schemas/UUID'
+        priority:
+          $ref: '#/components/schemas/Priority'
+          required: true
+        description:
+          type: string
+          required:
+            -
+        domain:
+          type: string
+          example: "EP"
           required: true
     ServiceReadDto:
       type: object
@@ -2842,91 +2283,90 @@ components:
         equipment:
           $ref: '#/components/schemas/EquipmentShortDto'
         creationDate:
-          type: date
+          type:
+            $ref: '#/components/schemas/DateTime'
+          required: true
         lastModificationDate:
-          type: date
+          $ref: '#/components/schemas/DateTime'
+          required: true
         startDate:
-          type: date
+          $ref: '#/components/schemas/DateTime'
         endDate:
-          type: date
+          $ref: '#/components/schemas/DateTime'
+        closeDate:
+          $ref: '#/components/schemas/DateTime'
         domain:
           type: string
+          required: true
+          example: "EP"
         status:
-          type: string
+          $ref: '#/components/schemas/ServiceStatus'
+          required: true
         category:
           type: string
-    ExternalServiceWriteDto:
+          required: true
+          description: Value match one of `ServiceCategory` code
+          example: "CURA"
+    ServiceWriteDto:
       type: object
       properties:
-        name:
+        id:
           type: string
-        equipment:
-          type : '#/components/schemas/UUID'
-        priority:
-          $ref: '#/components/schemas/Priority'
+          required: true
+          example: "DI00001938"
         description:
           type: string
+          example: "Demande d'intervention sur equipement camera N°1"
+        equipment:
+          type: string
+          required: true
+          example: "CAM1"
+        creationDate:
+          type:
+            $ref: '#/components/schemas/DateTime'
+          required: true
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+          required: true
+        startDate:
+          $ref: '#/components/schemas/DateTime'
+        endDate:
+          $ref: '#/components/schemas/DateTime'
+        closeDate:
+          $ref: '#/components/schemas/DateTime'
+        domain:
+          type: string
+          required: true
+          example: "EP"
+        status:
+          type:
+            $ref: '#/components/schemas/ServiceStatus'
+          required: true
+        category:
+          type: string
+          required: true
+          description: Value match one of `ServiceCategory` code
+          example: "CURA"
     ServiceTypeReadDto:
       type: object
       properties:
         type:
           type: string
+          example: "Armoire - Ouverte"
         domain:
           type: string
+          example: "EP"
         gti:
           type : integer
+          example: null
         gtr:
           type: integer
+          example: 30
         gtrp:
           type: integer
-    EquipmentWriteDto:
-      type: object
-      additionalProperties: true
-      properties:
-        id:
-          type: object
-          description: | 
-            contains a map of external ids like : {SOURCE1: id1, SOURCE2: id2}
-          required: true
-        code:
-          type: string
-          required: true
-        name:
-          type: string
-          required: true
-        family:
-          type: string
-          required: true
-          description: Value must match one of `Family` name
-        domain:
-          type: string
-          required: true
-          description: Value must match one of `Domain` name
-        entity:
-          type: string
-          required: true
-          description: Value must match one of `Equipment Entity` name
-        city:
-          type: string
-          required: true
-          description: Value must match one of `City` name
-        district:
-          type: string
-          description: Value must match one of `District` name
-        address:
-          type: string
-          required: true
-        deleted:
-          type: boolean
-          default: false
-          description: if true then the equipment will not be counted in the metrics and will not be returned
-        level:
-          type: integer
-          required: true
-          description: Corresponds to the level to determine whether it will have a parent or not. If the value is 1, then it can be referenced in children equipments and will not itself have a parent equipment.
-        parent:
-          type: string
-          description: The value must be the parent `code` property
+          example: 24
+
+    # Equipment
     EquipmentReadDto:
       type: object
       properties:
@@ -2934,27 +2374,38 @@ components:
           $ref: '#/components/schemas/UUID'
         externalId:
           type: string
+          example:
+            SOURCE1: id1
+            SOURCE2: id2
         code:
           type: string
+          example: "A-001"
         name:
           type: string
+          example: "A-001"
         family:
           type: string
-          description: Value match one of `Family` name
+          description: Value match one of `Family` code
+          example: "EP_ARMOIRE"
         domain:
           type: string
-          description: Value match one of `Domain` name
+          description: Value match one of `Domain` code
+          example: "EP"
         entity:
           type: string
-          description: Value match one of `Equipment Entity` name
+          description: Value match one of `Equipment Entity` code
+          example: "CHALONS-COMMUN"
         city:
           type: string
-          description: Value must match one of `City` name
+          description: Value must match one of `City` code
+          example: "CHALONS"
         district:
           type: string
-          description: Value must match one of `District` name
+          description: Value must match one of `District` code
+          example: "CENTRE"
         address:
           type: string
+          example: "24 rue de Châlons"
         deleted:
           type: boolean
           default: false
@@ -2974,403 +2425,114 @@ components:
           $ref: '#/components/schemas/UUID'
         code:
           type: string
+          example: "A-001"
         family:
           type: string
-          description: Value match one of `Family` name
+          description: Value match one of `Family` code
+          example: "EP_ARMOIRE"
         entity:
           type: string
-          description: Value match one of `Equipment Entity` name
-    ActionWriteDto:
+          description: Value match one of `Equipment Entity` code
+          example: "CHALONS-COMMUN"
+    EquipmentWriteDto:
       type: object
+      additionalProperties: true
       properties:
         id:
-          $ref: '#/components/schemas/UUID'
+          type: object
+          description: Map of external ids
+          example:
+            SOURCE1: id1
+            SOURCE2: id2
           required: true
-        type:
+        code:
           type: string
-          required: true
-        status:
-          $ref: '#/components/schemas/Status'
-          required: true
-    EmailActionWriteDto:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/UUID'
-          required: true
-        type:
-          type: string
-          required: true
-        status:
-          $ref: '#/components/schemas/Status'
-          required: true
+          required: true00
         name:
           type: string
           required: true
-        email:
+          example: "A-001"
+        family:
           type: string
           required: true
-    PhoneActionWriteDto:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/UUID'
-          required: true
-        type:
-          type: string
-          required: true
-        status:
-          $ref: '#/components/schemas/Status'
-          required: true
-        name:
-          type: string
-          required: true
-        phone:
-          type: string
-          required: true
-    OtherActionWriteDto:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/UUID'
-          required: true
-        type:
-          type: string
-          required: true
-        status:
-          $ref: '#/components/schemas/Status'
-          required: true
-        name:
-          type: string
-          required: true
-    AskedServiceWriteDto:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/UUID'
-          required: true
-        type:
-          type: string
-          required: true
-        status:
-          $ref: '#/components/schemas/Status'
-          required: true
-        name:
-          type: string
-          required: true
-        externalServiceId:
-          type: string
-    ActionReadDto:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/UUID'
-        type:
-          type: string
-        status:
-          $ref: '#/components/schemas/Status'
-        lastModificationDate:
-          $ref: '#/components/schemas/DateTime'
-    EmailActionReadDto:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/UUID'
-        type:
-          type: string
-        status:
-          $ref: '#/components/schemas/Status'
-        lastModificationDate:
-          $ref: '#/components/schemas/DateTime'
-        name:
-          type: string
-          required: true
-        email:
-          type: string
-          required: true
-    PhoneActionReadDto:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/UUID'
-        type:
-          type: string
-        status:
-          $ref: '#/components/schemas/Status'
-        lastModificationDate:
-          $ref: '#/components/schemas/DateTime'
-        name:
-          type: string
-          required: true
-        phone:
-          type: string
-          required: true
-    OtherActionReadDto:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/UUID'
-        type:
-          type: string
-        status:
-          $ref: '#/components/schemas/Status'
-        lastModificationDate:
-          $ref: '#/components/schemas/DateTime'
-        name:
-          type: string
-          required: true
-    AskedServiceReadDto:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/UUID'
-        type:
-          type: string
-        status:
-          $ref: '#/components/schemas/Status'
-        lastModificationDate:
-          $ref: '#/components/schemas/DateTime'
-        name:
-          type: string
-          required: true
-        externalServiceId:
-          type: string
-    EventWriteDto:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-          required: true
-        address:
-          type: string
-          required: true
-        description:
-          type: string
-          required: true
-        criticality:
-          $ref: '#/components/schemas/Criticality'
-        category:
-          type: string
-          description: must be a known category
-          required: true
-        subCategory:
-          type: string
-        equipmentId:
-          $ref: '#/components/schemas/UUID'
-        endDate:
-          $ref: '#/components/schemas/DateTime'
-          description: required if category is "MANIFESTATION"
-        startDate:
-          $ref: '#/components/schemas/DateTime'
-          description: required if category is "MANIFESTATION"
-        externalSourceRef:
-          type: string
-          description: forbidden if category is "MANIFESTATION"
-        parent:
-          type: integer
-          description: Parent event
-    ParentReadDto:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-    EventReadDto:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        address:
-          type: string
-        description:
-          type: string
-        criticality:
-          $ref: '#/components/schemas/Criticality'
-        equipment:
-          $ref: '#/components/schemas/EquipmentShortDto'
-        status:
-          $ref: '#/components/schemas/Status'
-        category:
-          type: string
-          description: must be a known category
-        subCategory:
-          type: string
-        lastModificationDate:
-          $ref: '#/components/schemas/DateTime'
-        creationDate:
-          $ref: '#/components/schemas/DateTime'
-        closeDate:
-          $ref: '#/components/schemas/DateTime'
-        endDate:
-          $ref: '#/components/schemas/DateTime'
-        startDate:
-          $ref: '#/components/schemas/DateTime'
-        externalSourceRef:
-          type: string
-        procedureId:
-          $ref: '#/components/schemas/UUID'
-        linkedEvents:
-          type: number
-          description: Number of events that have the same procedure as the current event
-        procedureProgress:
-          type: number
-          description: Percentage progress of the procedure
-        lastComment:
-          $ref: '#/components/schemas/CommentReadDto'
-        commentsCount:
-          type: integer
-          description: total of comments on event
-        parent:
-          $ref: '#/components/schemas/ParentReadDto'
-    CommentWriteDto:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/UUID'
-        creator:
-          type: string
-          description: creator of the comment
-        message:
-          type: string
-          description: comment message
-    CommentReadDto:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/UUID'
-        creator:
-          type: string
-          description: creator of the comment
-        message:
-          type: string
-          description: comment message
-        lastModificationDate:
-          $ref: '#/components/schemas/DateTime'
-        creationDate:
-          $ref: '#/components/schemas/DateTime'
-    ProcedureReadDto:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        lastModificationDate:
-          $ref: '#/components/schemas/DateTime'
-        creationDate:
-          $ref: '#/components/schemas/DateTime'
-        progress:
-          type: number
-        events:
-          type: array
-          items:
-            $ref: '#/components/schemas/EventReadDto'
-        actions:
-          type: array
-          items:
-            $ref: '#/components/schemas/ActionReadDto'
-    ProcedureWriteDto:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        events:
-          type: array
-          items:
-            $ref: '#/components/schemas/EventWriteDto'
-        actions:
-          type: array
-          items:
-            $ref: '#/components/schemas/ActionWriteDto'
-    ProcedureModelWriteDto:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-          required: true
-        description:
-          type: string
-          required: true
+          description: Value must match one of `Family` name
+          example: "Armoire"
         domain:
           type: string
           required: true
-        creator:
+          description: Value must match one of `Domain` code
+          example: "EP"
+        entity:
           type: string
           required: true
-        actions:
-          type: array
-          items:
-            $ref: '#/components/schemas/ActionWriteDto'
-    ProcedureModelReadDto:
+          description: Value must match one of `Equipment Entity` code
+          example: "CHALONS-COMMUN"
+        city:
+          type: string
+          required: true
+          description: Value must match one of `City` code
+          example: "CHALONS"
+        district:
+          type: string
+          description: Value must match one of `District` code
+          example: "CENTRE"
+        address:
+          type: string
+          required: true
+          example: "24 rue de Châlons"
+        deleted:
+          type: boolean
+          default: false
+          description: if true then the equipment will not be counted in the metrics and will not be returned
+        level:
+          type: integer
+          required: true
+          description: Corresponds to the level to determine whether it will have a parent or not. If the value is 1, then it can be referenced in children equipments and will not itself have a parent equipment.
+        parent:
+          type: string
+          description: The value must be the parent `code` property
+
+    # Metrics
+    AggregatedService:
+      type: array
+      items:
+        type: object
+        properties:
+          start:
+            $ref: '#/components/schemas/DateTime'
+          count:
+            type: integer
+    AggregatedAnomaly:
+      type: array
+      items:
+        type: object
+        properties:
+          start:
+            $ref: '#/components/schemas/DateTime'
+          subCategory:
+            type: string
+          count:
+            type: integer
+    AnomalyCount:
       type: object
       properties:
-        id:
+        UNUSUAL_FLOW:
           type: integer
-        useCount:
+        WILD_STORAGE:
           type: integer
-        name:
-          type: string
-        description:
-          type: string
-        domain:
-          type: string
-        creator:
-          type: string
-        lastModificationDate:
-          $ref: '#/components/schemas/DateTime'
-        creationDate:
-          $ref: '#/components/schemas/DateTime'
-        actions:
-          type: array
-          items:
-            $ref: '#/components/schemas/ActionReadDto'
-    EventSummaryDto:
-      type: object
-      properties:
-        id:
+        "TRAFFIC_CONGESTION":
           type: integer
-        proocedureId:
-          $ref: '#/components/schemas/UUID'
-        name:
-          type: string
-        criticality:
-          $ref: '#/components/schemas/Criticality'
-        status:
-          $ref: '#/components/schemas/Status'
-        lastModificationDate:
-          $ref: '#/components/schemas/DateTime'
-        category:
-          type: string
-          description: must be a known category
-        interventionRequestTitle:
-          type: string
-          description: The last in progress or new intervention request title
-        interventionRequestCount:
-          type: integer
-          description: The total number of intervention requests linked to the procedure event
-        startDate:
-          $ref: '#/components/schemas/DateTime'
-        endDate:
-          $ref: '#/components/schemas/DateTime'
-    EventsSummariesByStatusDto:
-      type: object
-      properties:
-        counts:
-          type: integer
-          description: total count of events for status
-        events:
-          type: array
-          items:
-            $ref: '#/components/schemas/EventSummaryDto'
+    AnomalyQueryResult:
+      type: array
+      items:
+        type: object
+        properties:
+          entity:
+            type: string
+          subCategory:
+            type: string
+          count:
+            type: integer
     EpEquipmentWithEventDto:
       type: object
       properties:
@@ -3451,46 +2613,6 @@ components:
                   type: integer
                 nbEquipWithEvent_unmanaged:
                   type: integer
-    VpEquipmentWithEventDto:
-      type: object
-      properties:
-        nbEquipWithEvent_C:
-          type: integer
-          description: Count of equipments "Camera" with at least one event not finished and that is not a "MANIFESTATION"
-        totalEquipWithEvent_C:
-          type: integer
-          description: Total count of equipments "Camera"
-        nbServiceTodoWithEquip_C:
-          type: integer
-          description: Count of requested services linked to an "Camera" equipment
-        nbServiceInProgressWithEquip_C:
-          type: integer
-          description: Count of in progress services linked to an "Camera" equipment
-    VpEquipmentWithEventDetailedDto:
-      allOf:
-        - $ref: '#/components/schemas/VpEquipmentWithEventDto'
-        - type: object
-          properties:
-            manifestation:
-              type: object
-              properties:
-                nbEquipWithEvent_C:
-                  type: integer
-            outoforder:
-              type: object
-              properties:
-                nbEquipWithEvent_C:
-                  type: integer
-            anomaly:
-              type: object
-              properties:
-                nbEquipWithEvent_C:
-                  type: integer
-            limit:
-              type: object
-              properties:
-                nbEquipWithEvent_C:
-                  type: integer
     EquipmentsByEntity:
       type: object
       properties:
@@ -3531,43 +2653,43 @@ components:
             type: string
           count:
             type: integer
-    AggregatedService:
-      type: array
-      items:
-        type: object
-        properties:
-          start:
-            $ref: '#/components/schemas/DateTime'
-          count:
-            type: integer
-    AggregatedAnomaly:
-      type: array
-      items:
-        type: object
-        properties:
-          start:
-            $ref: '#/components/schemas/DateTime'
-          subCategory:
-            type: string
-          count:
-            type: integer
-    AnomalyCount:
+    VpEquipmentWithEventDto:
       type: object
       properties:
-        UNUSUAL_FLOW:
+        nbEquipWithEvent_C:
           type: integer
-        WILD_STORAGE:
+          description: Count of equipments "Camera" with at least one event not finished and that is not a "MANIFESTATION"
+        totalEquipWithEvent_C:
           type: integer
-        "TRAFFIC_CONGESTION":
+          description: Total count of equipments "Camera"
+        nbServiceTodoWithEquip_C:
           type: integer
-    AnomalyQueryResult:
-      type: array
-      items:
-        type: object
-        properties:
-          entity:
-            type: string
-          subCategory:
-            type: string
-          count:
-            type: integer
+          description: Count of requested services linked to an "Camera" equipment
+        nbServiceInProgressWithEquip_C:
+          type: integer
+          description: Count of in progress services linked to an "Camera" equipment
+    VpEquipmentWithEventDetailedDto:
+      allOf:
+        - $ref: '#/components/schemas/VpEquipmentWithEventDto'
+        - type: object
+          properties:
+            manifestation:
+              type: object
+              properties:
+                nbEquipWithEvent_C:
+                  type: integer
+            outoforder:
+              type: object
+              properties:
+                nbEquipWithEvent_C:
+                  type: integer
+            anomaly:
+              type: object
+              properties:
+                nbEquipWithEvent_C:
+                  type: integer
+            limit:
+              type: object
+              properties:
+                nbEquipWithEvent_C:
+                  type: integer

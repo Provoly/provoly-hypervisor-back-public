@@ -1,2 +1,5 @@
 * xref:index.adoc[Installation guide]
+* Architecture
+** xref:architecture:archi-global.adoc[Global architecture]
+** xref:architecture:archi-hypervisor.adoc[Hypervisor Architecture]
 * xref:API:attachment$/provoly-hypervisor-back.html[Hypervisor API, window="_blank"]

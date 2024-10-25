@@ -2,7 +2,6 @@ name: provoly-hypervisor-backend
 title: Provoly hypervisor backend
 version: true
 nav:
-  - modules/architecture/nav.adoc
   - modules/ROOT/nav.adoc
 asciidoc:
   attributes:

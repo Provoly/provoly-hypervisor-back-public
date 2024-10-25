@@ -1,3 +1,0 @@
-* Architecture
-** xref:archi-global.adoc[Global architecture]
-** xref:archi-hypervisor.adoc[Hypervisor Architecture]
