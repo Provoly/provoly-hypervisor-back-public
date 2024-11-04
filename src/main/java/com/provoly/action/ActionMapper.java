@@ -7,14 +7,17 @@ import jakarta.enterprise.context.ApplicationScoped;
 import com.provoly.action.dto.*;
 import com.provoly.comment.CommentMapper;
 import com.provoly.event.Status;
+import com.provoly.service.ServiceService;
 
 @ApplicationScoped
 public class ActionMapper {
 
     private final CommentMapper commentMapper;
+    private final ServiceService serviceService;
 
-    public ActionMapper(CommentMapper commentMapper) {
+    public ActionMapper(CommentMapper commentMapper, ServiceService serviceService) {
         this.commentMapper = commentMapper;
+        this.serviceService = serviceService;
     }
 
     public ActionReadDto mapToActionReadDto(Action action) {
@@ -29,7 +32,7 @@ public class ActionMapper {
         return switch (action) {
             case EmailAction a -> new EmailActionReadDto(actionDto, a.getName(), a.getEmail());
             case OtherAction a -> new OtherActionReadDto(actionDto, a.getName());
-            case AskedService a -> new AskedServiceReadDto(actionDto, a.getName(), a.getServiceExternalId());
+            case AskedService a -> buildAskedServiceReadDto(a, actionDto);
             case SmsAction a -> new PhoneActionReadDto(actionDto, a.getName(), a.getNumber());
             case PhoneAction a -> new PhoneActionReadDto(actionDto, a.getName(), a.getNumber());
             default -> actionDto;
@@ -79,5 +82,11 @@ public class ActionMapper {
             case PhoneAction a -> new PhoneAction(a.getOrder(), a.getName(), a.getNumber());
             default -> new Action(action.getOrder(), action.getType());
         };
+    }
+
+    private AskedServiceReadDto buildAskedServiceReadDto(AskedService a, ActionReadDto actionDto) {
+        var service = serviceService.getServiceByExternalId(a.getServiceExternalId());
+        var status = service != null ? service.getStatus() : null;
+        return new AskedServiceReadDto(actionDto, a.getName(), a.getServiceExternalId(), status);
     }
 }

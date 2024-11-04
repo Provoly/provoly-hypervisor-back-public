@@ -1,10 +1,11 @@
 package com.provoly.service;
 
 public enum ServiceStatus {
-    ASKED(1),
-    IN_PROGRESS(2),
-    DONE(3),
-    CANCELLED(4);
+    NEW(1),
+    ASKED(2),
+    IN_PROGRESS(3),
+    DONE(4),
+    CANCELLED(5);
 
     private final int priority;
 

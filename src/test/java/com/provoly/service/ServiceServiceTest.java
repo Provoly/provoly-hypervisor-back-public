@@ -2,6 +2,7 @@ package com.provoly.service;
 
 import static com.provoly.service.ServiceStatus.ASKED;
 import static com.provoly.service.ServiceStatus.DONE;
+import static com.provoly.service.ServiceStatus.NEW;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,13 +18,15 @@ import jakarta.inject.Inject;
 
 import com.provoly.TestDataService;
 import com.provoly.action.AskedService;
+import com.provoly.action.dto.AskedServiceReadDto;
 import com.provoly.equipment.EquipmentService;
-import com.provoly.procedure.ProcedureService;
+import com.provoly.procedure.ProcedureController;
 import com.provoly.service.coswin.CoswinClient;
 import com.provoly.service.coswin.CoswinServiceWriteDto;
 
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,23 +42,23 @@ public class ServiceServiceTest {
     EquipmentService equipmentService;
 
     @Inject
-    ProcedureService procedureService;
+    ProcedureController procedureController;
 
     @InjectMock
     CoswinClient mock;
 
     @Inject
-    TestDataService testDataService;
+    TestDataService dataService;
 
     @BeforeEach
     public void init() throws IOException {
-        testDataService.init();
+        dataService.init();
         given(mock.sendExternalService(any(CoswinServiceWriteDto.class))).willReturn("externalId");
     }
 
     @AfterEach
     public void clean() {
-        testDataService.clean();
+        dataService.clean();
     }
 
     @Test
@@ -111,7 +114,7 @@ public class ServiceServiceTest {
         // Given
         var externalService = new ExternalServiceWriteDto("name", UUID.randomUUID(), "1-MINEUR",
                 "Luminaire - Accidente menacant de tomber", "desc", "EP");
-        var proc = testDataService.getProcedure1();
+        var proc = dataService.getProcedure1();
         var action = proc.getActions().stream().toList().getFirst();
 
         // When
@@ -124,7 +127,7 @@ public class ServiceServiceTest {
         // Given
         var externalService = new ExternalServiceWriteDto("name", null, "1-MINEUR", "Luminaire - Accidente menacant de tomber",
                 "desc", "EP");
-        var proc = testDataService.getProcedure3();
+        var proc = dataService.getProcedure3();
         var action = (AskedService) proc.getActions().stream().toList().getFirst();
 
         // When
@@ -137,7 +140,7 @@ public class ServiceServiceTest {
         // Given
         var externalService = new ExternalServiceWriteDto("name", null, "toto", "Luminaire - Accidente menacant de tomber",
                 "desc", "EP");
-        var proc = testDataService.getProcedure1();
+        var proc = dataService.getProcedure1();
         var action = proc.getActions().stream().toList().getFirst();
 
         // When
@@ -149,7 +152,7 @@ public class ServiceServiceTest {
     void should_throw_when_invalid_type() {
         // Given
         var externalService = new ExternalServiceWriteDto("name", null, "1-MINEUR", "toto", "desc", "EP");
-        var proc = testDataService.getProcedure1();
+        var proc = dataService.getProcedure1();
         var action = proc.getActions().stream().toList().getFirst();
 
         // When
@@ -158,19 +161,45 @@ public class ServiceServiceTest {
     }
 
     @Test
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_set_external_id_in_action() throws IOException {
         // Given
         var externalService = new ExternalServiceWriteDto("name", null, "1-MINEUR", "Luminaire - Accidente menacant de tomber",
                 "desc", "EP");
-        var proc = testDataService.getProcedure1();
+        var proc = dataService.getProcedure1();
         var action = proc.getActions().stream().toList().getFirst();
 
         // When
         var id = serviceService.createExternalService(action.getId(), externalService).get("id");
 
         // Then
-        var updatedAction = (AskedService) procedureService.getProcedureDetails(proc.getId()).getActions().stream().toList()
+        var updatedAction = (AskedServiceReadDto) procedureController.getProcedureDetails(proc.getId()).actions().stream()
+                .toList()
                 .getFirst();
         assertThat(updatedAction.getServiceExternalId()).isEqualTo(id);
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_read" })
+    void should_set_service_status_in_action_when_service_is_saved() throws IOException {
+        // Given
+        var equipment = equipmentService.getEquipmentByName("A-230");
+        var externalService = new ExternalServiceWriteDto("name", null, "1-MINEUR", "Luminaire - Accidente menacant de tomber",
+                "desc", "EP");
+        var proc = dataService.getProcedure1();
+        var action = proc.getActions().stream().toList().getFirst();
+        var id = serviceService.createExternalService(action.getId(), externalService).get("id");
+
+        // When
+        serviceService.saveOrUpdateServices(List
+                .of(new ServiceWriteDto(id, "desc", equipment.getCode(), Instant.now(), Instant.now(), Instant.now(),
+                        Instant.now(), null,
+                        "EP", NEW, "CURA")));
+
+        // Then
+        var updatedAction = (AskedServiceReadDto) procedureController.getProcedureDetails(proc.getId()).actions().stream()
+                .toList()
+                .getFirst();
+        assertThat(updatedAction.getServiceStatus()).isEqualTo(NEW);
     }
 }
