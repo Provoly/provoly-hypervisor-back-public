@@ -57,8 +57,8 @@ Créer un store de type Provoly dans le workspace "chalons"
 * sso_uri: https://sso.chalons-\{environnment}.provoly.net/auth/realms/provoly
 * client_id: provoly
 * client_secret: dummy
-* user: iamsuperadmin
-* password: password
+* user: `geoserver`
+* password: `geoserver_passsword`
 * chunkSize: 5000
 * maxItems: 5000
 * timeout: 60
