@@ -263,7 +263,7 @@ public class TestDataService {
         event.setDomain(domainEP);
         event.setCreationDate(Instant.now());
         if (status == Status.DONE) {
-            event.setCloseDate(randomInstantBetweenNowAndAMonthLater());
+            event.setCloseDate(randomInstantBetweenTomorrowAndAMonthLater());
         }
 
         if (equipment != null) {
@@ -274,7 +274,6 @@ public class TestDataService {
             event.setEndDate(Instant.now());
         }
         event.setExternalSourceRef(externalRef == null ? DEFAULT_SOURCE : externalRef);
-        ;
         em.persist(event);
         return event;
     }
@@ -296,8 +295,8 @@ public class TestDataService {
         return equipment;
     }
 
-    private Instant randomInstantBetweenNowAndAMonthLater() {
-        long date1 = Instant.now().getEpochSecond();
+    private Instant randomInstantBetweenTomorrowAndAMonthLater() {
+        long date1 = Instant.now().plus(Period.ofDays(1)).getEpochSecond();
         long date2 = Instant.now().plus(Period.ofDays(30)).getEpochSecond();
         return Instant.ofEpochSecond(rand.nextLong(date2 - date1) + date1);
     }

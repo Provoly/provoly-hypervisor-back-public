@@ -41,7 +41,8 @@ public class EventDatabaseReader extends DatabaseReader {
             List<Family> families,
             String name,
             String id,
-            String equipment) {
+            String equipment,
+            Instant closeDate) {
         var cb = em.getCriteriaBuilder();
         CriteriaQuery<Event> criteriaQuery = cb.createQuery(Event.class);
         Root<Event> root = criteriaQuery.from(Event.class);
@@ -89,6 +90,11 @@ public class EventDatabaseReader extends DatabaseReader {
         if (!sources.isEmpty()) {
             logger.debugf("filter on source event %s", sources);
             predicates.add(root.get(Event_.externalSourceRef).in(sources));
+        }
+
+        if (closeDate != null) {
+            logger.debugf("filter on close date >=,%s", closeDate);
+            predicates.add(cb.greaterThanOrEqualTo(root.get(Event_.closeDate), closeDate));
         }
 
         List<Predicate> searchFilters = new ArrayList<>();

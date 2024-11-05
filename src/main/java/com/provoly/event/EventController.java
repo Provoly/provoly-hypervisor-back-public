@@ -81,6 +81,8 @@ public class EventController {
         public String id;
         @RestQuery
         public String equipment;
+        @RestQuery
+        public Instant closeDate;
     }
 
     @GET
@@ -105,7 +107,8 @@ public class EventController {
                 params.family,
                 params.name,
                 params.id,
-                params.equipment);
+                params.equipment,
+                params.closeDate);
         return eventMapper.mapToJournalEventDto(events);
     }
 

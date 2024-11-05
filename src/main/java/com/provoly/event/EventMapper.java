@@ -139,7 +139,8 @@ public class EventMapper {
                         event.getLastModificationDate(),
                         event.getProcedure() == null ? 0 : event.getProcedure().getEvents().size(),
                         event.getProcedure() == null ? null : event.getProcedure().getId(),
-                        event.getDomain() == null ? null : event.getDomain().getCode()))
+                        event.getDomain() == null ? null : event.getDomain().getCode(),
+                        event.getCloseDate()))
                 .toList();
     }
 

@@ -20,5 +20,6 @@ public record JournalEventDto(int id,
         Instant lastModificationDate,
         long linkedEvents,
         Integer procedureId,
-        String domain) {
+        String domain,
+        Instant closeDate) {
 }

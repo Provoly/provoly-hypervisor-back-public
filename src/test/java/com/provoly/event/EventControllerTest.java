@@ -1,5 +1,6 @@
 package com.provoly.event;
 
+import static com.provoly.event.Criticality.HIGH;
 import static com.provoly.event.Criticality.LOW;
 import static com.provoly.event.Criticality.MEDIUM;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -8,6 +9,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -719,6 +721,41 @@ public class EventControllerTest {
                 externalEvent.getExternalId());
         //then
         assertThat(event).isNotNull();
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "event_read", "event_write" })
+    void should_return_event_closed_from_close_date_and_not_before() {
+        // given
+        var event = new EventWriteDto(null,
+                "closed",
+                "desc",
+                HIGH,
+                "LIMIT",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+        var createdEvent = eventController.saveEvent(event);
+        eventController.closeEvent(createdEvent.getId(), new CommentWriteDto(UUID.randomUUID(), "closed"));
+
+        var param = new EventController.EventParameters();
+        var closeDate = Instant.now().plus(Period.ofDays(1));
+        param.closeDate = closeDate;
+
+        // when
+        var events = eventController.getEvents(
+                1,
+                1,
+                null,
+                null,
+                param);
+        //then
+        assertThat(events).hasSize(1);
+        assertThat(events.stream().toList().getFirst().closeDate()).isAfter(closeDate);
     }
 
 }

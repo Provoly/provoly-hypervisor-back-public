@@ -36,6 +36,12 @@ paths:
           schema:
             type: string
             example: 2024-01-20T00:00:00Z
+        - name: closeDate
+          in: query
+          description: Filter on closed events where closeDate is greater or equal than `closeDate` in query
+          schema:
+            type: string
+            example: 2024-01-20T10:09:00Z
         - name: criticality
           in: query
           schema:
@@ -106,7 +112,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/EventReadDto'
+                  $ref: '#/components/schemas/JournalEventDto'
         "401":
           description: Not Authorized
         "403":
@@ -1896,6 +1902,8 @@ components:
         externalServiceId:
           type: string
           example: "DI00001"
+        serviceStatus:
+          $ref: '#/components/schemas/ServiceStatus'
     EmailActionWriteDto:
       type: object
       properties:
@@ -1980,6 +1988,52 @@ components:
           $ref: '#/components/schemas/DateTime'
 
     # Event
+    JournalEventDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Défaillance lampe"
+        domain:
+          type: string
+          example: "EP"
+        address:
+          type: string
+          example: "Av. du Président Roosevelt, 51000 Châlons-en-Champagne"
+        criticality:
+          $ref: '#/components/schemas/Criticality'
+        equipment:
+          $ref: '#/components/schemas/EquipmentShortDto'
+        status:
+          $ref: '#/components/schemas/Status'
+        category:
+          type: string
+          example: "OUTOFORDER"
+          description: must be a known category code
+        subCategory:
+          type: string
+          description: subCategory is required only if category is `ANOMALY`. Value match one of subCategory code
+        lastModificationDate:
+          $ref: '#/components/schemas/DateTime'
+        creationDate:
+          $ref: '#/components/schemas/DateTime'
+        closeDate:
+          $ref: '#/components/schemas/DateTime'
+        externalSourceRef:
+          type: string
+          example: Citylinx
+          description: Event source. Default to `Hyperviseur`
+        procedureId:
+          $ref: '#/components/schemas/UUID'
+        linkedEvents:
+          type: number
+          description: Number of events that have the same procedure as the current event
+        procedureProgress:
+          type: number
+          description: Percentage progress of the procedure
     EventReadDto:
       type: object
       properties:
@@ -1995,6 +2049,9 @@ components:
         description:
           type: string
           example: "Défaillance au niveau de la lampe"
+        domain:
+          type: string
+          example: "EP"
         criticality:
           $ref: '#/components/schemas/Criticality'
         equipment:
@@ -2055,6 +2112,9 @@ components:
           type: string
           required: true
           example: "Il y a un dépôt sauvage ici"
+        domain:
+          type: string
+          example: "EP"
         criticality:
           $ref: '#/components/schemas/Criticality'
         category:
