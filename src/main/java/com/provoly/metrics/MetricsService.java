@@ -14,9 +14,7 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
-import com.provoly.equipment.Equipment;
-import com.provoly.equipment.EquipmentService;
-import com.provoly.equipment.Family;
+import com.provoly.equipment.*;
 import com.provoly.event.Criticality;
 import com.provoly.event.Domain;
 import com.provoly.event.EventService;
@@ -54,12 +52,15 @@ public class MetricsService {
             Collection<String> entities,
             Collection<String> places) {
 
+        var districts = places.stream().map(equipmentService::getDistrictByCodeOrNull).toList();
+        var entitiesEntity = entities.stream().map(equipmentService::getEquipmentEntityOrNull).toList();
+
         var equipments = getEquipmentForEventsExceptManifestation("EP",
                 criticalities,
                 categories,
-                entities,
-                places);
-        return buildEpEquimentWithEvent(equipments);
+                entitiesEntity,
+                districts);
+        return buildEpEquimentWithEvent(equipments, entitiesEntity, districts);
 
     }
 
@@ -74,12 +75,14 @@ public class MetricsService {
                 List.of(),
                 List.of());
 
-        var equipmentsWithEvent = buildEpEquimentWithEvent(equipmentByCategory
+        List<Equipment> equipments = equipmentByCategory
                 .values()
                 .stream()
                 .flatMap(Collection::stream)
                 .distinct()
-                .toList());
+                .toList();
+
+        var equipmentsWithEvent = buildEpEquimentWithEvent(equipments, List.of(), List.of());
 
         var equipmentsByFamily = equipmentByCategory.entrySet()
                 .stream()
@@ -101,12 +104,16 @@ public class MetricsService {
             List<String> categories,
             List<String> entities,
             List<String> places) {
+
+        var districts = places.stream().map(equipmentService::getDistrictByCodeOrNull).toList();
+        var entitiesEntity = entities.stream().map(equipmentService::getEquipmentEntityOrNull).toList();
+
         var equipments = getEquipmentForEventsExceptManifestation("VP",
                 criticalities,
                 categories,
-                entities,
-                places);
-        return buildVpEquipmentWithEventsDto(equipments);
+                entitiesEntity,
+                districts);
+        return buildVpEquipmentWithEventsDto(equipments, districts, entitiesEntity);
     }
 
     @Transactional
@@ -116,8 +123,8 @@ public class MetricsService {
                 List.of(),
                 List.of());
 
-        var equipmentsWithEvent = buildVpEquipmentWithEventsDto(
-                equipmentByCategory.values().stream().flatMap(Collection::stream).distinct().toList());
+        List<Equipment> equipments = equipmentByCategory.values().stream().flatMap(Collection::stream).distinct().toList();
+        var equipmentsWithEvent = buildVpEquipmentWithEventsDto(equipments, List.of(), List.of());
 
         return new VpEquipmentWithEventsDetailedDto(
                 equipmentsWithEvent,
@@ -328,8 +335,8 @@ public class MetricsService {
     private Collection<Equipment> getEquipmentForEventsExceptManifestation(String domain,
             Collection<String> criticalities,
             Collection<String> categories,
-            Collection<String> entities,
-            Collection<String> places) {
+            Collection<EquipmentEntity> equipmentEntities,
+            Collection<District> districts) {
         logger.infof("""
                 Get %s equipments with events
                 filter on
@@ -337,12 +344,10 @@ public class MetricsService {
                 category : %s,
                 equipment entity : %s
                 places: %s
-                """.formatted(domain, criticalities, categories, entities, places));
+                """.formatted(domain, criticalities, categories, equipmentEntities, districts));
         var domainEntity = metricsDatabaseReader.getDomainByCode(domain);
         var eventCriticalities = getCriticalityList(criticalities);
         var eventCategories = categories.stream().map(eventService::getCategoryOrNull).toList();
-        var districts = places.stream().map(equipmentService::getDistrictByCodeOrNull).toList();
-        var equipmentEntities = entities.stream().map(equipmentService::getEquipmentEntityOrNull).toList();
 
         logger.debugf("Get all %s equipments linked with at least one undone event which is not a Manifestation", domain);
         return metricsDatabaseReader.getEquipmentsByEventCategory(
@@ -358,15 +363,15 @@ public class MetricsService {
                 .flatMap(Collection::stream)
                 .distinct()
                 .toList();
-
     }
 
-    private EpEquipmentWithEventsDto buildEpEquimentWithEvent(Collection<Equipment> equipmentWithUndoneEvents) {
+    private EpEquipmentWithEventsDto buildEpEquimentWithEvent(Collection<Equipment> equipmentWithUndoneEvents,
+            List<EquipmentEntity> entitiesEntity, List<District> districts) {
         logger.debug("grouped by familiy and managed/unmanaged");
         var equipments = metricsDatabaseReader.getEpEquipmentByFamily(equipmentWithUndoneEvents);
 
         logger.debug("Get all equipments grouped by family");
-        var totalEquipmentWithEvent = metricsDatabaseReader.getTotalEpEquipmentByFamily();
+        var totalEquipmentWithEvent = metricsDatabaseReader.getTotalEpEquipmentByFamily(entitiesEntity, districts);
 
         logger.debug("Get ep services equipments grouped by family and service status");
         var servicesByEquipments = metricsDatabaseReader.getEpServicesByStatus(equipmentWithUndoneEvents);
@@ -388,8 +393,9 @@ public class MetricsService {
                 getServicesForEquipmentAndStatus(servicesByEquipments, UNMANAGED, IN_PROGRESS));
     }
 
-    private VpEquipmentWithEventsDto buildVpEquipmentWithEventsDto(Collection<Equipment> equipmentWithUndoneEvents) {
-        var totalEquipments = metricsDatabaseReader.getTotalVpEquipments();
+    private VpEquipmentWithEventsDto buildVpEquipmentWithEventsDto(Collection<Equipment> equipmentWithUndoneEvents,
+            List<District> districts, List<EquipmentEntity> entitiesEntity) {
+        var totalEquipments = metricsDatabaseReader.getTotalVpEquipments(districts, entitiesEntity);
 
         logger.debug("Get vp services equipments grouped by family and service status");
         var servicesByEquipments = metricsDatabaseReader.getVpServicesByStatus(equipmentWithUndoneEvents);

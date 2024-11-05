@@ -150,7 +150,7 @@ public class MetricsServiceTest {
         assertThat(result).extracting("nbServiceInProgressWithEquip_FL").isEqualTo(0L);
 
         assertThat(result).extracting("nbEquipWithEvent_unmanaged").isEqualTo(1L);
-        assertThat(result).extracting("totalEquipWithEvent_unmanaged").isEqualTo(4L);
+        assertThat(result).extracting("totalEquipWithEvent_unmanaged").isEqualTo(2L);
         assertThat(result).extracting("nbServiceTodoWithEquip_unmanaged").isEqualTo(1L);
         assertThat(result).extracting("nbServiceInProgressWithEquip_unmanaged").isEqualTo(0L);
     }
@@ -163,7 +163,7 @@ public class MetricsServiceTest {
 
         //then
         assertThat(result).extracting("nbEquipWithEvent_A").isEqualTo(0L);
-        assertThat(result).extracting("totalEquipWithEvent_A").isEqualTo(1L);
+        assertThat(result).extracting("totalEquipWithEvent_A").isEqualTo(0L);
         assertThat(result).extracting("nbServiceTodoWithEquip_A").isEqualTo(0L);
         assertThat(result).extracting("nbServiceInProgressWithEquip_A").isEqualTo(0L);
 
@@ -173,7 +173,7 @@ public class MetricsServiceTest {
         assertThat(result).extracting("nbServiceInProgressWithEquip_FL").isEqualTo(0L);
 
         assertThat(result).extracting("nbEquipWithEvent_unmanaged").isEqualTo(1L);
-        assertThat(result).extracting("totalEquipWithEvent_unmanaged").isEqualTo(4L);
+        assertThat(result).extracting("totalEquipWithEvent_unmanaged").isEqualTo(2L);
         assertThat(result).extracting("nbServiceTodoWithEquip_unmanaged").isEqualTo(0L);
         assertThat(result).extracting("nbServiceInProgressWithEquip_unmanaged").isEqualTo(0L);
     }

@@ -12,7 +12,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.*;
-import jakarta.persistence.metamodel.SingularAttribute;
 import jakarta.transaction.Transactional;
 
 import com.provoly.DatabaseReader;
@@ -66,8 +65,8 @@ public class MetricsDatabaseReader extends DatabaseReader {
 
         filterOnDomain(domainEntity, predicates, builder, equipment);
         filterOnCriticality(criticalities, predicates, event);
-        filterOn(entities, predicates, builder, equipment, Equipment_.entity);
-        filterOn(districts, predicates, builder, equipment, Equipment_.district);
+        filterOn(entities, predicates, builder, equipment.get(Equipment_.entity));
+        filterOn(districts, predicates, builder, equipment.get(Equipment_.district));
 
         if (!categories.isEmpty()) {
             logger.debugf("filter on categories %s", categories);
@@ -134,7 +133,6 @@ public class MetricsDatabaseReader extends DatabaseReader {
                 .where(builder.and(
                         builder.isFalse(equipment.get(Equipment_.deleted)),
                         familyPredicate,
-                        builder.isFalse(equipment.get(Equipment_.deleted)),
                         builder.equal(equipment.get(Equipment_.domain), domain)))
                 .groupBy(entity.get(EquipmentEntity_.code), managed);
 
@@ -146,7 +144,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
 
     }
 
-    public Map<String, Long> getTotalEpEquipmentByFamily() {
+    public Map<String, Long> getTotalEpEquipmentByFamily(List<EquipmentEntity> entities, List<District> districts) {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<ManagedResult> criteriaQuery = builder.createQuery(ManagedResult.class);
         Root<Equipment> equipment = criteriaQuery.from(Equipment.class);
@@ -154,14 +152,14 @@ public class MetricsDatabaseReader extends DatabaseReader {
         var domain = equipment.join(Equipment_.domain, JoinType.LEFT);
         var managed = getManagedPath(builder, equipment.get(Equipment_.attributes));
 
+        var predicates = buildEquipmentPredicatesForDomain("EP", districts, entities, builder, domain, equipment);
+
         var query = criteriaQuery
                 .multiselect(
                         family.get(Family_.code),
                         managed,
                         builder.count(equipment))
-                .where(builder.and(
-                        builder.equal(domain.get(Domain_.code), "EP"),
-                        builder.isFalse(equipment.get(Equipment_.deleted))))
+                .where(predicates)
                 .groupBy(family.get(Family_.code), managed);
 
         var result = em.createQuery(query)
@@ -170,19 +168,34 @@ public class MetricsDatabaseReader extends DatabaseReader {
         return gatherUnmanagedEquipments(result);
     }
 
-    public Long getTotalVpEquipments() {
+    public Long getTotalVpEquipments(List<District> districts, List<EquipmentEntity> entities) {
         var builder = em.getCriteriaBuilder();
         CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
         Root<Equipment> equipment = criteriaQuery.from(Equipment.class);
         var domain = equipment.join(Equipment_.domain, JoinType.LEFT);
 
+        var predicates = buildEquipmentPredicatesForDomain("VP", districts, entities, builder, domain, equipment);
+
         var query = criteriaQuery
                 .select(builder.count(equipment))
-                .where(builder.and(
-                        builder.equal(domain.get(Domain_.code), "VP"),
-                        builder.isFalse(equipment.get(Equipment_.deleted))));
+                .where(builder.and(predicates));
 
         return em.createQuery(query).getSingleResult();
+    }
+
+    private Predicate[] buildEquipmentPredicatesForDomain(String domainCode,
+            List<District> districts,
+            List<EquipmentEntity> entities,
+            CriteriaBuilder builder,
+            Join<Equipment, Domain> domain,
+            Root<Equipment> equipment) {
+        var predicates = new ArrayList<Predicate>();
+        predicates.add(builder.equal(domain.get(Domain_.code), domainCode));
+        predicates.add(builder.isFalse(equipment.get(Equipment_.deleted)));
+
+        filterOn(entities, predicates, builder, equipment.get(Equipment_.entity));
+        filterOn(districts, predicates, builder, equipment.get(Equipment_.district));
+        return getPredicatesAsArray(predicates);
     }
 
     public Map<String, Map<ServiceStatus, Long>> getEpServicesByStatus(Collection<Equipment> equipments) {
@@ -239,9 +252,9 @@ public class MetricsDatabaseReader extends DatabaseReader {
         }
 
         filterOnDomain(domainEntity, predicates, builder, equipment);
-        filterOn(entities, predicates, builder, equipment, Equipment_.entity);
-        filterOn(districts, predicates, builder, equipment, Equipment_.district);
-        filterOn(families, predicates, builder, equipment, Equipment_.family);
+        filterOn(entities, predicates, builder, equipment.get(Equipment_.entity));
+        filterOn(districts, predicates, builder, equipment.get(Equipment_.district));
+        filterOn(families, predicates, builder, equipment.get(Equipment_.family));
         filterOnCriticality(criticalities, predicates, event);
 
         if (date != null) {
@@ -333,9 +346,9 @@ public class MetricsDatabaseReader extends DatabaseReader {
         predicates.add(builder.isFalse(equipment.get(Equipment_.deleted)));
 
         filterOnDomain(domain, predicates, builder, equipment);
-        filterOn(entities, predicates, builder, equipment, Equipment_.entity);
-        filterOn(districts, predicates, builder, equipment, Equipment_.district);
-        filterOn(families, predicates, builder, equipment, Equipment_.family);
+        filterOn(entities, predicates, builder, equipment.get(Equipment_.entity));
+        filterOn(districts, predicates, builder, equipment.get(Equipment_.district));
+        filterOn(families, predicates, builder, equipment.get(Equipment_.family));
         filterOnCriticality(criticalities, predicates, event);
 
         if (date != null) {
@@ -499,15 +512,14 @@ public class MetricsDatabaseReader extends DatabaseReader {
     private void filterOn(Collection<? extends EnumEntity> entities,
             ArrayList<Predicate> predicates,
             CriteriaBuilder builder,
-            Join<Event, Equipment> equipment,
-            SingularAttribute<Equipment, ? extends EnumEntity> attribute) {
+            Path<? extends EnumEntity> attribute) {
         if (!entities.isEmpty()) {
             if (entities.stream().noneMatch(Objects::nonNull)) {
                 logger.debugf("filter on null  %s");
-                predicates.add(builder.isNull(equipment.get(attribute)));
+                predicates.add(builder.isNull(attribute));
             } else {
                 logger.debugf("filter on  %s", entities);
-                predicates.add(equipment.get(attribute).in(entities));
+                predicates.add(attribute.in(entities));
             }
         }
     }
