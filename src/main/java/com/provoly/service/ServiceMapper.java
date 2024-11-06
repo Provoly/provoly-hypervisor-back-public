@@ -47,18 +47,14 @@ public class ServiceMapper {
     public void updateService(ServiceWriteDto dto, Service entity) {
         entity.setExternalId(dto.id());
         entity.setDescription(dto.description());
-        entity.setEquipment(equipmentService.getEquipmentByName(dto.equipment()));
+        entity.setEquipment(dto.equipment() == null ? null : equipmentService.getEquipmentByName(dto.equipment()));
         entity.setCreationDate(dto.creationDate());
         entity.setLastModificationDate(dto.lastModificationDate());
         entity.setStartDate(dto.startDate());
         entity.setEndDate(dto.endDate());
         entity.setCloseDate(dto.closeDate());
         entity.setStatus(dto.status());
-
-        var domain = databaseReader
-                .getDomainByCode(dto.domain());
-
-        entity.setDomain(domain);
+        entity.setDomain(dto.domain() == null ? null : databaseReader.getDomainByCode(dto.domain()));
 
         var category = databaseReader.getServiceCategoryByCode(dto.category())
                 .orElseThrow(() -> new IllegalArgumentException("Service category %s not found".formatted(dto.category())));

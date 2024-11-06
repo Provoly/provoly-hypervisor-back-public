@@ -50,7 +50,7 @@ public class CoswinClient {
                             coswin.scheme(),
                             coswin.host(),
                             coswin.port(),
-                            dto.jrjrRequester(),
+                            coswin.cwUser(),
                             coswin.dataSource()));
 
             var jobRequestCoswin = Map.of(

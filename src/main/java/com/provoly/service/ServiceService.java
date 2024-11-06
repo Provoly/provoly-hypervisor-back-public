@@ -48,9 +48,11 @@ public class ServiceService {
                                         logger.infof("Service with external id %s already exists, update it", dto.id());
 
                                         var previousEquipment = service.getEquipment();
-
                                         serviceMapper.updateService(dto, service);
-                                        equipmentEnrichedProducer.updateFor(service.getEquipment());
+
+                                        if (service.getEquipment() != null) {
+                                            equipmentEnrichedProducer.updateFor(service.getEquipment());
+                                        }
 
                                         if (previousEquipment != null &&
                                                 !service.getEquipment().getId().equals(previousEquipment.getId())) {
@@ -59,14 +61,26 @@ public class ServiceService {
                                                     service.getId());
                                             equipmentEnrichedProducer.updateFor(previousEquipment);
                                         }
-
                                     },
                                     () -> {
-                                        logger.infof("Service with external id %s not exists, create it", dto.id());
-                                        Service service = new Service(UUID.randomUUID());
+                                        var ids = dto.id().split("@");
+                                        Service service;
+                                        if (ids.length == 2) {
+                                            logger.infof("Initial Service must be known");
+                                            service = getServiceByExternalId(ids[0]);
+                                            if (service == null) {
+                                                throw new IllegalArgumentException(
+                                                        "Initial service with id %s not found".formatted(ids[0]));
+                                            }
+                                        } else {
+                                            logger.infof("Service with external id %s not exists, create it", dto.id());
+                                            service = new Service(UUID.randomUUID());
+                                        }
                                         serviceMapper.updateService(dto, service);
                                         databaseReader.saveService(service);
-                                        equipmentEnrichedProducer.updateFor(service.getEquipment());
+                                        if (dto.equipment() != null) {
+                                            equipmentEnrichedProducer.updateFor(service.getEquipment());
+                                        }
                                     });
                 });
 

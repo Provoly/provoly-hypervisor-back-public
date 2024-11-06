@@ -76,6 +76,15 @@ insert into district (id,code,name) values (20,'RECY', 'Recy');
 insert into district (id,code,name) values (21,'COMPERTRIX', 'Compertrix');
 insert into district (id,code,name) values (22,'COOLUS', 'Coolus');
 insert into district (id,code,name) values (23,'CHALONS', 'Châlons en Champagne');
+insert into district (id,code,name) values (24,'BUSSY-LETT', 'Bussy-Lettrée');
+insert into district (id,code,name) values (25,'DAMP-TPL', 'Dampierre-au-Temple');
+insert into district (id,code,name) values (26,'JUVIGNY', 'Juvigny');
+insert into district (id,code,name) values (27,'MONCETZ', 'Moncetz-Longevas');
+insert into district (id,code,name) values (28,'ST-ETIENNE', 'Saint-Etienne-au-Temple');
+insert into district (id,code,name) values (29,'ST-GIBRIEN', 'Saint-Gibrien');
+insert into district (id,code,name) values (30,'ST-HILAIRE', 'Saint-Hilaire-au-Temple');
+insert into district (id,code,name) values (31,'VEUVE', 'La Veuve');
+insert into district (id,code,name) values (32,'VRAUX', 'Vraux');
 
 
 INSERT INTO service_type (id, type, domain, gti, gtr, gtrp) VALUES (1, 'Lampe - Allumée de jour', 'EP', null, null, null);

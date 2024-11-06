@@ -7,13 +7,13 @@ import jakarta.validation.constraints.NotNull;
 public record ServiceWriteDto(
         @NotNull String id,
         String description,
-        @NotNull String equipment,
+        String equipment,
         @NotNull Instant creationDate,
         @NotNull Instant lastModificationDate,
         Instant startDate,
         Instant endDate,
         Instant closeDate,
-        @NotNull String domain,
+        String domain,
         @NotNull ServiceStatus status,
         @NotNull String category) {
 }

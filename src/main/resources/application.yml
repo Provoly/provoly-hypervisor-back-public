@@ -110,6 +110,7 @@ mp:
     username: username
     password: password
     dataSource: datasource
+    cwUser: cwUser
 
 "%prod":
   quarkus:

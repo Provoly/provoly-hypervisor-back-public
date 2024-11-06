@@ -23,4 +23,7 @@ public interface CoswinProperties {
 
     @WithDefault("datasource")
     String dataSource();
+
+    @WithDefault("cwUser")
+    String cwUser();
 }
