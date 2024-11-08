@@ -28,8 +28,8 @@ public class ServiceMapper {
         }
         return new ServiceReadDto(
                 service.getId(),
-                service.getAdditionalInfo(),
                 service.getExternalId(),
+                service.getAdditionalInfo(),
                 service.getDescription(),
                 shortEquipmentMapper.mapToEquipmentShortDto(service.getEquipment()),
                 service.getCreationDate(),
