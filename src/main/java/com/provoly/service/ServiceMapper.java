@@ -28,6 +28,7 @@ public class ServiceMapper {
         }
         return new ServiceReadDto(
                 service.getId(),
+                service.getAdditionalInfo(),
                 service.getExternalId(),
                 service.getDescription(),
                 shortEquipmentMapper.mapToEquipmentShortDto(service.getEquipment()),

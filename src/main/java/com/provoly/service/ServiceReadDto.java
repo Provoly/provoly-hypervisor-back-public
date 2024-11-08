@@ -8,6 +8,7 @@ import com.provoly.equipment.EquipmentShortDto;
 public record ServiceReadDto(
         UUID id,
         String externalId,
+        String additionalInfo,
         String description,
         EquipmentShortDto equipment,
         Instant creationDate,
