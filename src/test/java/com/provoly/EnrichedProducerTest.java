@@ -187,7 +187,9 @@ public class EnrichedProducerTest {
                 "address", "CENTRE", null, false, null);
         equipmentService.saveOrUpdateEquipments(List.of(equipment)); // 1 messages
 
-        var service = new ServiceWriteDto("technical_id1", "",
+        var service = new ServiceWriteDto("technical_id1",
+                null,
+                "",
                 "306",
                 Instant.now(),
                 Instant.now(),

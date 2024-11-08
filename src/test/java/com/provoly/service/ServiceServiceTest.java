@@ -64,8 +64,8 @@ public class ServiceServiceTest {
     @Test
     void should_set_service_in_equipment_when_create_service() {
         // Given
-        var service = new ServiceWriteDto("technical_id", "",
-                "A-230", Instant.now(), Instant.now(), Instant.now(), Instant.now(), null, "EP", ASKED, "CURA");
+        var service = new ServiceWriteDto("technical_id", null, "", "A-230", Instant.now(), Instant.now(), Instant.now(),
+                Instant.now(), null, "EP", ASKED, "CURA");
         serviceService.saveOrUpdateServices(List.of(service));
 
         // When
@@ -77,8 +77,8 @@ public class ServiceServiceTest {
     @Test
     void should_throw_when_missing_close_date_on_done_service() {
         // Given
-        var service = new ServiceWriteDto("technical_id", "",
-                "A-230", Instant.now(), Instant.now(), Instant.now(), Instant.now(), null, "EP", DONE, "CURA");
+        var service = new ServiceWriteDto("technical_id", null, "", "A-230", Instant.now(), Instant.now(), Instant.now(),
+                Instant.now(), null, "EP", DONE, "CURA");
 
         // When
         assertThatThrownBy(() -> serviceService.saveOrUpdateServices(List.of(service)))
@@ -89,8 +89,8 @@ public class ServiceServiceTest {
     @Test
     void should_throw_when_missing_start_date_on_asked_service() {
         // Given
-        var service = new ServiceWriteDto("technical_id", "",
-                "A-230", Instant.now(), Instant.now(), null, Instant.now(), null, "EP", ASKED, "CURA");
+        var service = new ServiceWriteDto("technical_id", null, "", "A-230", Instant.now(), Instant.now(), null, Instant.now(),
+                null, "EP", ASKED, "CURA");
 
         // When
         assertThatThrownBy(() -> serviceService.saveOrUpdateServices(List.of(service)))
@@ -192,7 +192,7 @@ public class ServiceServiceTest {
 
         // When
         serviceService.saveOrUpdateServices(List
-                .of(new ServiceWriteDto(id, "desc", equipment.getCode(), Instant.now(), Instant.now(), Instant.now(),
+                .of(new ServiceWriteDto(id, null, "desc", equipment.getCode(), Instant.now(), Instant.now(), Instant.now(),
                         Instant.now(), null,
                         "EP", NEW, "CURA")));
 

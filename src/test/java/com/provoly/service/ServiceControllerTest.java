@@ -42,7 +42,7 @@ public class ServiceControllerTest {
     @TestSecurity(user = "reader")
     void should_throw_when_invalid_equipment() {
         // Given
-        var service = new ServiceWriteDto("technical_id", "", "invalid", Instant.now(), Instant.now(), Instant.now(),
+        var service = new ServiceWriteDto("technical_id", null, "", "invalid", Instant.now(), Instant.now(), Instant.now(),
                 Instant.now(), null, "EP", ASKED, "PREV");
 
         // When
@@ -55,8 +55,8 @@ public class ServiceControllerTest {
     @TestSecurity(user = "reader")
     void should_throw_when_invalid_category() {
         // Given
-        var service = new ServiceWriteDto("technical_id", "",
-                "A-230", Instant.now(), Instant.now(), Instant.now(), Instant.now(), null, "EP", ASKED, "invalid");
+        var service = new ServiceWriteDto("technical_id", null, "", "A-230", Instant.now(), Instant.now(), Instant.now(),
+                Instant.now(), null, "EP", ASKED, "invalid");
 
         // When
         assertThatThrownBy(() -> serviceController.saveOrUpdateServices(List.of(service)))

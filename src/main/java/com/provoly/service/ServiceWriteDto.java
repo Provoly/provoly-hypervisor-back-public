@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record ServiceWriteDto(
         @NotNull String id,
+        String additionalInfo,
         String description,
         String equipment,
         @NotNull Instant creationDate,

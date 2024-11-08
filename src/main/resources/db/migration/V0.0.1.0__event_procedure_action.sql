@@ -93,8 +93,9 @@ create table service
 (
     id                     uuid primary key,
     external_id            varchar(50) unique not null,
-    equipment_id           uuid               references equipment,
-    domain_id              bigint             references domain,
+    additional_info        varchar,
+    equipment_id           uuid references equipment,
+    domain_id              bigint references domain,
     description            varchar(256),
     start_date             timestamptz,
     end_date               timestamptz,

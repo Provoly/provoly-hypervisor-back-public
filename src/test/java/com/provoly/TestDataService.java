@@ -100,11 +100,13 @@ public class TestDataService {
         initEquipment("camera1", camera, agglo, fagniereCity, fagniereDistrict, 1, domainVP);
         initEquipment("camera2", camera, chalons, chalonsCity, chalonsDistrict, 1, domainVP);
 
-        var service1 = new Service(UUID.randomUUID(), "DI1234", Instant.now(), Instant.now(), Instant.now(), Instant.now(),
+        var service1 = new Service(UUID.randomUUID(), "DI1234", null, Instant.now(), Instant.now(), Instant.now(),
+                Instant.now(),
                 Instant.now(), equip3, domainEP, ASKED, prev);
         em.persist(service1);
 
-        var service2 = new Service(UUID.randomUUID(), "DI5678@1223", Instant.now(), Instant.now(), Instant.now(), Instant.now(),
+        var service2 = new Service(UUID.randomUUID(), "DI0001", "1223", Instant.now(), Instant.now(), Instant.now(),
+                Instant.now(),
                 Instant.now(), equip5, domainEP, IN_PROGRESS, cura);
 
         em.persist(service2);
@@ -217,7 +219,8 @@ public class TestDataService {
 
     @Transactional
     public void persistDoneService(String externalId, Instant closeDate, Equipment equip, boolean isCura, boolean isVp) {
-        var service = new Service(UUID.randomUUID(), externalId, Instant.now(), Instant.now(), Instant.now(), Instant.now(),
+        var service = new Service(UUID.randomUUID(), externalId, null, Instant.now(), Instant.now(), Instant.now(),
+                Instant.now(),
                 closeDate, equip, isVp ? domainVP : domainEP, DONE, isCura ? cura : prev);
         em.persist(service);
     }

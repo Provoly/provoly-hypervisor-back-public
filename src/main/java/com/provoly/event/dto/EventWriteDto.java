@@ -165,10 +165,6 @@ public class EventWriteDto {
         return externalSourceRef == null || externalSourceRef.isBlank() ? DEFAULT_SOURCE : externalSourceRef;
     }
 
-    public boolean isExternalEvent() {
-        return externalSourceRef != null && !externalSourceRef.isBlank() && !externalSourceRef.equals(DEFAULT_SOURCE);
-    }
-
     public Integer getParent() {
         return parent;
     }

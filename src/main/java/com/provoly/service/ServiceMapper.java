@@ -45,7 +45,7 @@ public class ServiceMapper {
     }
 
     public void updateService(ServiceWriteDto dto, Service entity) {
-        entity.setExternalId(dto.id());
+        entity.setAdditionalInfo(dto.additionalInfo());
         entity.setDescription(dto.description());
         entity.setEquipment(dto.equipment() == null ? null : equipmentService.getEquipmentByName(dto.equipment()));
         entity.setCreationDate(dto.creationDate());

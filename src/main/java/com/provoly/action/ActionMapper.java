@@ -87,6 +87,7 @@ public class ActionMapper {
     private AskedServiceReadDto buildAskedServiceReadDto(AskedService a, ActionReadDto actionDto) {
         var service = serviceService.getServiceByExternalId(a.getServiceExternalId());
         var status = service != null ? service.getStatus() : null;
-        return new AskedServiceReadDto(actionDto, a.getName(), a.getServiceExternalId(), status);
+        var additionalInfo = service != null ? service.getAdditionalInfo() : null;
+        return new AskedServiceReadDto(actionDto, a.getName(), a.getServiceExternalId(), additionalInfo, status);
     }
 }

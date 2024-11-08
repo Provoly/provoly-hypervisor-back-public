@@ -1,5 +1,7 @@
 package com.provoly;
 
+import static com.provoly.event.EventMapper.DEFAULT_SOURCE;
+
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
@@ -91,6 +93,7 @@ public class MockController {
             event.setCriticality(randomCriticality());
             event.setDomain(randomDomain(List.of(epDomain, vpDomain)));
             event.setEquipment(randomEquipment(equipments));
+            event.setExternalSourceRef(DEFAULT_SOURCE);
             entityManager.persist(event);
             setStatus(event);
             setCloseDate(event);
@@ -101,6 +104,7 @@ public class MockController {
                 Instant startDate = creationDate;
                 var service = new ServiceWriteDto(
                         "Mock: service %s".formatted(serviceId),
+                        null,
                         "description of service %s".formatted(serviceId),
                         event.getEquipment().getName(),
                         creationDate,

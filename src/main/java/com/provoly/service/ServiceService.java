@@ -63,19 +63,8 @@ public class ServiceService {
                                         }
                                     },
                                     () -> {
-                                        var ids = dto.id().split("@");
-                                        Service service;
-                                        if (ids.length == 2) {
-                                            logger.infof("Initial Service must be known");
-                                            service = getServiceByExternalId(ids[0]);
-                                            if (service == null) {
-                                                throw new IllegalArgumentException(
-                                                        "Initial service with id %s not found".formatted(ids[0]));
-                                            }
-                                        } else {
-                                            logger.infof("Service with external id %s not exists, create it", dto.id());
-                                            service = new Service(UUID.randomUUID());
-                                        }
+                                        logger.infof("Service with external id %s not exists, create it", dto.id());
+                                        var service = new Service(UUID.randomUUID(), dto.id());
                                         serviceMapper.updateService(dto, service);
                                         databaseReader.saveService(service);
                                         if (dto.equipment() != null) {

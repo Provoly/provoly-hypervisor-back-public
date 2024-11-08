@@ -1835,6 +1835,11 @@ components:
         externalServiceId:
           type: string
           example: "DI00001"
+        serviceStatus:
+          $ref: '#/components/schemas/ServiceStatus'
+        serviceAdditionalInfo:
+          type: string
+          example: "88"
     EmailActionReadDto:
       type: object
       properties:
@@ -1902,8 +1907,6 @@ components:
         externalServiceId:
           type: string
           example: "DI00001"
-        serviceStatus:
-          $ref: '#/components/schemas/ServiceStatus'
     EmailActionWriteDto:
       type: object
       properties:
@@ -2334,7 +2337,9 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/UUID'
-        technical_id:
+        externalId:
+          type: string
+        additionalInfo:
           type: string
         description:
           type: string
@@ -2371,6 +2376,9 @@ components:
           type: string
           required: true
           example: "DI00001938"
+        additionalInfo:
+          type: string
+          example : "88"
         description:
           type: string
           example: "Demande d'intervention sur equipement camera N°1"

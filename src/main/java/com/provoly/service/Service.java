@@ -15,6 +15,7 @@ public class Service {
     private UUID id;
 
     private String externalId;
+    private String additionalInfo;
     private String description;
 
     @Column(updatable = false)
@@ -44,11 +45,13 @@ public class Service {
         // Only for JPA
     }
 
-    public Service(UUID id, String externalId, Instant creationDate, Instant lastModificationDate, Instant startDate,
+    public Service(UUID id, String externalId, String additionalInfo, Instant creationDate, Instant lastModificationDate,
+            Instant startDate,
             Instant endDate, Instant closeDate, Equipment equipment, Domain domain, ServiceStatus status,
             ServiceCategory category) {
         this.id = id;
         this.externalId = externalId;
+        this.additionalInfo = additionalInfo;
         this.creationDate = creationDate;
         this.lastModificationDate = lastModificationDate;
         this.startDate = startDate;
@@ -60,8 +63,9 @@ public class Service {
         this.category = category;
     }
 
-    public Service(UUID id) {
+    public Service(UUID id, String externalId) {
         this.id = id;
+        this.externalId = externalId;
     }
 
     public UUID getId() {
@@ -72,8 +76,12 @@ public class Service {
         return externalId;
     }
 
-    public void setExternalId(String externalId) {
-        this.externalId = externalId;
+    public String getAdditionalInfo() {
+        return additionalInfo;
+    }
+
+    public void setAdditionalInfo(String additionalInfo) {
+        this.additionalInfo = additionalInfo;
     }
 
     public String getDescription() {
