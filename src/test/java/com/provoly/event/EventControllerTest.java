@@ -70,7 +70,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_first_two_event_when_get_events() {
         // when
         var events = eventController.getEvents(
@@ -84,7 +84,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_empty_event_when_at_least_criticality_status_category_has_empty_values() {
         // given
         var param = new EventController.EventParameters();
@@ -101,7 +101,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_event_created_on_corresponding_date() {
         // given
         var param = new EventController.EventParameters();
@@ -121,7 +121,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_event_high_and_low_criticality_when_get_events() {
         // given
         var param = new EventController.EventParameters();
@@ -138,7 +138,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_event_new_and_done_status_when_get_events() {
         // given
         var param = new EventController.EventParameters();
@@ -155,7 +155,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_event_manifestation_or_limit_and_in_progress_status_when_get_events() {
         // given
         var param = new EventController.EventParameters();
@@ -175,7 +175,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_event_with_corresponding_equipment_entity() {
         // given
         var param = new EventController.EventParameters();
@@ -193,7 +193,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_throw_invalid_equipment_entity() {
         // given
         var param = new EventController.EventParameters();
@@ -209,7 +209,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_event_with_corresponding_family() {
         // given
         var param = new EventController.EventParameters();
@@ -228,7 +228,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_throw_invalid_family() {
         // given
         var param = new EventController.EventParameters();
@@ -244,7 +244,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_throw_forbidden_if_page_is_not_positive_when_get_events() {
         assertThatThrownBy(() -> eventController.getEvents(
                 0,
@@ -256,7 +256,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_throw_forbidden_if_pageSize_is_not_positive_when_get_events() {
         assertThatThrownBy(() -> eventController.getEvents(
                 1,
@@ -268,7 +268,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_event_with_default_sort_on_status_criticality() {
         // when
         var events = eventController.getEvents(
@@ -285,7 +285,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_event_with_desc_sort_procedure_progress() {
         // when
         var events = eventController.getEvents(
@@ -299,7 +299,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_event_with_desc_sort_name() {
         // when
         var events = eventController.getEvents(
@@ -313,7 +313,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_event_with_desc_sort_id() {
         // when
         var events = eventController.getEvents(
@@ -327,7 +327,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_event_with_asc_sort_source() {
         // when
         var events = eventController.getEvents(
@@ -342,7 +342,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_event_with_desc_sort_criticality() {
         // when
         var events = eventController.getEvents(
@@ -356,7 +356,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_event_with_desc_sort_category() {
         // when
         var events = eventController.getEvents(
@@ -370,7 +370,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_throw_exception_invalid_sort() {
         // given
         String invalidSort = "invalid";
@@ -387,7 +387,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_limited_event_summary_by_status() {
         // given
         int limit = 1;
@@ -415,7 +415,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_throw_exception_invalid_criticality_when_get_summaries() {
         // given
         String invalidCriticality = "invalid";
@@ -427,7 +427,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_return_limited_event_summary_by_status_filtered_by_criticality() {
         // given
         int limit = 1;
@@ -513,7 +513,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "event_read" })
     void should_throw_if_role_event_write_is_missing() {
         // given
         var event = dataService.buildEvent("out of order", "OUTOF", MEDIUM, false);

@@ -1,4 +1,4 @@
-package com.provoly.metrics;
+package com.provoly.metrics.dto;
 
 public record EpEquipmentByCategoryDto(
         long nbEquipWithEvent_A,

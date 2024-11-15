@@ -19,6 +19,7 @@ import com.provoly.event.Criticality;
 import com.provoly.event.Domain;
 import com.provoly.event.EventService;
 import com.provoly.event.Status;
+import com.provoly.metrics.dto.*;
 import com.provoly.service.ServiceStatus;
 
 import org.jboss.logging.Logger;

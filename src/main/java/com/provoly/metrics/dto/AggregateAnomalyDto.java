@@ -1,4 +1,4 @@
-package com.provoly.metrics;
+package com.provoly.metrics.dto;
 
 import java.time.Instant;
 

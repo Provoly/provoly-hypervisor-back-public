@@ -1,4 +1,4 @@
-package com.provoly;
+package com.provoly.equipmentEnriched;
 
 import com.provoly.event.Criticality;
 

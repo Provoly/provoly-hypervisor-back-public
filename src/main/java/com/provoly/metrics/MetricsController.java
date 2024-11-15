@@ -5,11 +5,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
-import io.quarkus.security.Authenticated;
+import com.provoly.metrics.dto.*;
+import com.provoly.user.Role;
 
 import org.jboss.resteasy.reactive.RestQuery;
 
@@ -26,7 +28,7 @@ public class MetricsController {
 
     @Path("/equipments-with-events/EP")
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_METRIC_READ})
     public EpEquipmentWithEventsDto getEpEquipmentWithEvent(@RestQuery List<String> criticality,
             @RestQuery List<String> category,
             @RestQuery List<String> entity,
@@ -37,14 +39,14 @@ public class MetricsController {
 
     @Path("/equipments-with-events/EP/detailed")
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_METRIC_READ})
     public EpEquipmentWithEventsDetailedDto getEpEquipmentWithEventDetailed() {
         return metricsService.getEpEquipmentWithEventDetailed();
     }
 
     @Path("/equipments-with-events/VP")
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_METRIC_READ})
     public VpEquipmentWithEventsDto getVpEquipmentWithEvent(@RestQuery List<String> criticality,
             @RestQuery List<String> category,
             @RestQuery List<String> entity,
@@ -55,14 +57,14 @@ public class MetricsController {
 
     @Path("/equipments-with-events/VP/detailed")
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_METRIC_READ})
     public VpEquipmentWithEventsDetailedDto getVpEquipmentWithEventDetailed() {
         return metricsService.getVpEquipmentsWithEventDetailed();
     }
 
     @Path("/events-by-equipments")
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_METRIC_READ})
     public Collection<EventsByEquipment> getEventsByEquipments(
             @RestQuery String category,
             @RestQuery String domain,
@@ -77,14 +79,14 @@ public class MetricsController {
 
     @Path("/equipments-by-entity")
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_METRIC_READ})
     public EquipmentByEntityDto getTotalEquipmentsByEntity(@RestQuery String family) {
         return metricsService.getTotalEpEquipmentsByEntity(family);
     }
 
     @Path("/services/closed/{interval}")
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_METRIC_READ})
     public Collection<AggregateServiceDto> aggregateDoneServices(DateInterval interval,
             @RestQuery Instant date,
             @RestQuery String domain,
@@ -97,7 +99,7 @@ public class MetricsController {
 
     @Path("/events/anomaly")
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_METRIC_READ})
     public Map<String, Long> getAnomalyEventsGroupedBySubCategories(
             @RestQuery String domain,
             @RestQuery Instant date,
@@ -113,7 +115,7 @@ public class MetricsController {
 
     @Path("/events/anomalies-by-entity")
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_METRIC_READ})
     public Collection<AnomalyQueryResult> getAnomalyEventsGroupedBySubCategoriesAndEntities(
             @RestQuery String domain,
             @RestQuery Instant startDate) {
@@ -122,6 +124,7 @@ public class MetricsController {
 
     @Path("/aggregate/anomalies/{interval}")
     @GET
+    @RolesAllowed({ Role.STR_METRIC_READ})
     public Collection<AggregateServiceDto> aggregateAnomaliesEvents(
             DateInterval interval,
             @RestQuery @Positive @DefaultValue("12") int buckets,

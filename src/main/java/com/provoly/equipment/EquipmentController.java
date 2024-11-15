@@ -4,12 +4,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
-import io.quarkus.security.Authenticated;
+import com.provoly.user.Role;
 
 import org.jboss.resteasy.reactive.RestQuery;
 
@@ -27,13 +28,13 @@ public class EquipmentController {
     }
 
     @POST
-    @Authenticated
+    @RolesAllowed({ Role.STR_EQUIPMENT_WRITE })
     public void saveOrUpdateEquipments(@Valid Collection<EquipmentWriteDto> equipments) {
         equipmentService.saveOrUpdateEquipments(equipments);
     }
 
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_EQUIPMENT_READ })
     public Collection<EquipmentReadDto> getEquipments(@RestQuery List<String> entity,
             @RestQuery String search,
             @DefaultValue("1") @Positive @RestQuery int page,
@@ -44,7 +45,7 @@ public class EquipmentController {
     }
 
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_EQUIPMENT_READ })
     @Path("/id/{id}")
     public EquipmentReadDto getEquipmentDetails(UUID id) {
         var equipment = equipmentService.getEquipmentById(id);
@@ -53,7 +54,7 @@ public class EquipmentController {
     }
 
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_EQUIPMENT_READ })
     @Path("/{source}/id/{id}")
     public EquipmentReadDto getEquipmentByExternalId(String source, String id) {
         var equipment = equipmentService.getEquipmentByIdExternalId(source, id);
@@ -62,7 +63,7 @@ public class EquipmentController {
     }
 
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_EQUIPMENT_READ })
     @Path("/name/{name}")
     public EquipmentReadDto getEquipmentDetails(String name) {
         var equipment = equipmentService.getEquipmentByName(name);

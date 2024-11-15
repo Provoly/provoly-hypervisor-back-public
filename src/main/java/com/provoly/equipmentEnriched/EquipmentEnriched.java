@@ -1,4 +1,4 @@
-package com.provoly;
+package com.provoly.equipmentEnriched;
 
 import static com.provoly.service.ServiceStatus.ASKED;
 import static com.provoly.service.ServiceStatus.IN_PROGRESS;

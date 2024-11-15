@@ -18,6 +18,8 @@ import com.provoly.DatabaseReader;
 import com.provoly.EnumEntity;
 import com.provoly.equipment.*;
 import com.provoly.event.*;
+import com.provoly.metrics.dto.AggregateAnomalyDto;
+import com.provoly.metrics.dto.AggregateServiceDto;
 import com.provoly.service.Service;
 import com.provoly.service.ServiceStatus;
 

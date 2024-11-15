@@ -1,4 +1,4 @@
-package com.provoly.metrics;
+package com.provoly.metrics.dto;
 
 public class EpEquipmentWithEventsDto {
     private final long nbEquipWithEvent_A;

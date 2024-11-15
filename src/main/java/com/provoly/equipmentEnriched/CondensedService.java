@@ -1,4 +1,4 @@
-package com.provoly;
+package com.provoly.equipmentEnriched;
 
 public record CondensedService(String category) {
 }

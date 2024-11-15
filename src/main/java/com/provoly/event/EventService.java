@@ -15,11 +15,11 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.ForbiddenException;
 
 import com.provoly.EnumEntity;
-import com.provoly.EquipmentEnrichedProducer;
 import com.provoly.action.ActionType;
 import com.provoly.action.AskedService;
 import com.provoly.equipment.Equipment;
 import com.provoly.equipment.EquipmentService;
+import com.provoly.equipmentEnriched.EquipmentEnrichedProducer;
 import com.provoly.event.dto.EventSummaryDto;
 import com.provoly.event.dto.EventWriteDto;
 import com.provoly.event.dto.EventsSummariesByStatusDto;

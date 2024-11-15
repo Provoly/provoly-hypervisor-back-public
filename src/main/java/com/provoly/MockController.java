@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -25,8 +26,7 @@ import com.provoly.model.ProcedureModel;
 import com.provoly.service.ServiceService;
 import com.provoly.service.ServiceStatus;
 import com.provoly.service.ServiceWriteDto;
-
-import io.quarkus.security.Authenticated;
+import com.provoly.user.Role;
 
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestQuery;
@@ -57,7 +57,7 @@ public class MockController {
     }
 
     @POST
-    @Authenticated
+    @RolesAllowed({ Role.STR_INTERNAL_DEBUG })
     @Transactional
     public void mock(@DefaultValue("30") @Positive @RestQuery int eventNumber,
             @DefaultValue("10") @PositiveOrZero @RestQuery int procedureNumber,

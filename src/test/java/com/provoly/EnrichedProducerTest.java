@@ -12,6 +12,7 @@ import jakarta.inject.Inject;
 
 import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.EquipmentWriteDto;
+import com.provoly.equipmentEnriched.EquipmentEnriched;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventService;
 import com.provoly.event.dto.EventWriteDto;

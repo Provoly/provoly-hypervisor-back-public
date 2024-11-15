@@ -5,7 +5,7 @@ import java.util.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
-import com.provoly.EquipmentEnrichedProducer;
+import com.provoly.equipmentEnriched.EquipmentEnrichedProducer;
 
 import org.jboss.logging.Logger;
 

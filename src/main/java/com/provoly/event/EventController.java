@@ -27,8 +27,6 @@ import com.provoly.event.dto.EventsSummariesByStatusDto;
 import com.provoly.event.dto.JournalEventDto;
 import com.provoly.user.Role;
 
-import io.quarkus.security.Authenticated;
-
 import org.jboss.resteasy.reactive.RestQuery;
 import org.jboss.resteasy.reactive.RestResponse;
 
@@ -86,7 +84,7 @@ public class EventController {
     }
 
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_EVENT_READ })
     @Transactional
     public Collection<JournalEventDto> getEvents(
             @DefaultValue("1") @Positive @RestQuery int page,
@@ -137,7 +135,7 @@ public class EventController {
 
     @Path("/summary")
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_EVENT_READ })
     public Map<Status, EventsSummariesByStatusDto> getEventSummaries(
             @DefaultValue("5") @Positive @RestQuery int limit,
             @RestQuery String criticality) {

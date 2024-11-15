@@ -1,4 +1,4 @@
-package com.provoly;
+package com.provoly.equipmentEnriched;
 
 import jakarta.enterprise.context.ApplicationScoped;
 

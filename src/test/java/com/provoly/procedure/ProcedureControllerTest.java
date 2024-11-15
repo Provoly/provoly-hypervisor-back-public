@@ -80,7 +80,7 @@ public class ProcedureControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader", roles = { "event_write" })
+    @TestSecurity(user = "reader", roles = { "event_read", "event_write" })
     void should_not_update_external_event_in_procedure() {
         // given
         var param = new EventController.EventParameters();

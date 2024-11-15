@@ -1,4 +1,4 @@
-package com.provoly.metrics;
+package com.provoly.metrics.dto;
 
 public class EpEquipmentWithEventsDetailedDto extends EpEquipmentWithEventsDto {
     private final EpEquipmentByCategoryDto manifestation;

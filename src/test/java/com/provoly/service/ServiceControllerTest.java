@@ -39,7 +39,7 @@ public class ServiceControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "service_write" })
     void should_throw_when_invalid_equipment() {
         // Given
         var service = new ServiceWriteDto("technical_id", null, "", "invalid", Instant.now(), Instant.now(), Instant.now(),
@@ -52,7 +52,7 @@ public class ServiceControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader")
+    @TestSecurity(user = "reader", roles = { "service_write" })
     void should_throw_when_invalid_category() {
         // Given
         var service = new ServiceWriteDto("technical_id", null, "", "A-230", Instant.now(), Instant.now(), Instant.now(),

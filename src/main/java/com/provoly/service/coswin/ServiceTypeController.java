@@ -2,6 +2,7 @@ package com.provoly.service.coswin;
 
 import java.util.Collection;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -9,7 +10,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-import io.quarkus.security.Authenticated;
+import com.provoly.user.Role;
 
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestQuery;
@@ -29,7 +30,7 @@ public class ServiceTypeController {
     }
 
     @GET
-    @Authenticated
+    @RolesAllowed({ Role.STR_SERVICE_READ })
     @Transactional
     public Collection<ServiceTypeReadDto> getServiceTypes(@RestQuery String domain) {
         logger.infof("get service types with domain %s", domain);
