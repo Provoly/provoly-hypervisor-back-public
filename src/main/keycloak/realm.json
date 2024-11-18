@@ -439,10 +439,33 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "default-roles-quarkus" ,"event_read", "event_write","proc_model_read","proc_model_write","event_proc_write","notification_read"],
+    "realmRoles" : [ "default-roles-quarkus" ,"event_read", "event_write","proc_model_read","proc_model_write","event_proc_write","notification_read","equipment_read","equipment_write","service_read","service_write","service_external_write","metric_read","internal_debug"],
     "notBefore" : 0,
     "groups" : [ ]
   },
+    {
+      "id" : "8e596fa1-1e66-4bbf-a61e-8909aa6a079c",
+      "createdTimestamp" : 1707905241705,
+      "username" : "m.pascal",
+      "enabled" : true,
+      "totp" : false,
+      "emailVerified" : true,
+      "firstName" : "Mary",
+      "lastName" : "Pascal",
+      "email" : "m.pascal@connecte-chalons.com",
+      "credentials" : [ {
+        "id" : "41346240-d372-4418-bb2a-bd4a530c55f9",
+        "type" : "password",
+        "userLabel" : "My password",
+        "createdDate" : 1707905259214,
+        "value": "password"
+      } ],
+      "disableableCredentialTypes" : [ ],
+      "requiredActions" : [ ],
+      "realmRoles" : [ "default-roles-quarkus" ,"event_read", "event_write","proc_model_read","proc_model_write","event_proc_write","notification_read","equipment_read","equipment_write","service_read","service_write","service_external_write","metric_read"],
+      "notBefore" : 0,
+      "groups" : [ ]
+    },
     {
       "id" : "8e596fa1-1e66-4bbf-a61e-8909aa6a079b",
       "createdTimestamp" : 1707905241705,

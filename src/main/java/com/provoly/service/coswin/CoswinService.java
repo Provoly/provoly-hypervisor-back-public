@@ -41,7 +41,7 @@ public class CoswinService {
         var serviceType = typeService.getServiceType(dto.type());
 
         return new CoswinServiceWriteDto(
-                "MDEBURE", // TODO: use current user
+                userService.getCurrentUserName().toUpperCase(),
                 dto.priority(),
                 dto.name(),
                 dto.type(),

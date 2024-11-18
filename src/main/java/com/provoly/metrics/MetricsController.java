@@ -28,7 +28,7 @@ public class MetricsController {
 
     @Path("/equipments-with-events/EP")
     @GET
-    @RolesAllowed({ Role.STR_METRIC_READ})
+    @RolesAllowed({ Role.STR_METRIC_READ })
     public EpEquipmentWithEventsDto getEpEquipmentWithEvent(@RestQuery List<String> criticality,
             @RestQuery List<String> category,
             @RestQuery List<String> entity,
@@ -39,14 +39,14 @@ public class MetricsController {
 
     @Path("/equipments-with-events/EP/detailed")
     @GET
-    @RolesAllowed({ Role.STR_METRIC_READ})
+    @RolesAllowed({ Role.STR_METRIC_READ })
     public EpEquipmentWithEventsDetailedDto getEpEquipmentWithEventDetailed() {
         return metricsService.getEpEquipmentWithEventDetailed();
     }
 
     @Path("/equipments-with-events/VP")
     @GET
-    @RolesAllowed({ Role.STR_METRIC_READ})
+    @RolesAllowed({ Role.STR_METRIC_READ })
     public VpEquipmentWithEventsDto getVpEquipmentWithEvent(@RestQuery List<String> criticality,
             @RestQuery List<String> category,
             @RestQuery List<String> entity,
@@ -57,14 +57,14 @@ public class MetricsController {
 
     @Path("/equipments-with-events/VP/detailed")
     @GET
-    @RolesAllowed({ Role.STR_METRIC_READ})
+    @RolesAllowed({ Role.STR_METRIC_READ })
     public VpEquipmentWithEventsDetailedDto getVpEquipmentWithEventDetailed() {
         return metricsService.getVpEquipmentsWithEventDetailed();
     }
 
     @Path("/events-by-equipments")
     @GET
-    @RolesAllowed({ Role.STR_METRIC_READ})
+    @RolesAllowed({ Role.STR_METRIC_READ })
     public Collection<EventsByEquipment> getEventsByEquipments(
             @RestQuery String category,
             @RestQuery String domain,
@@ -79,14 +79,14 @@ public class MetricsController {
 
     @Path("/equipments-by-entity")
     @GET
-    @RolesAllowed({ Role.STR_METRIC_READ})
+    @RolesAllowed({ Role.STR_METRIC_READ })
     public EquipmentByEntityDto getTotalEquipmentsByEntity(@RestQuery String family) {
         return metricsService.getTotalEpEquipmentsByEntity(family);
     }
 
     @Path("/services/closed/{interval}")
     @GET
-    @RolesAllowed({ Role.STR_METRIC_READ})
+    @RolesAllowed({ Role.STR_METRIC_READ })
     public Collection<AggregateServiceDto> aggregateDoneServices(DateInterval interval,
             @RestQuery Instant date,
             @RestQuery String domain,
@@ -99,7 +99,7 @@ public class MetricsController {
 
     @Path("/events/anomaly")
     @GET
-    @RolesAllowed({ Role.STR_METRIC_READ})
+    @RolesAllowed({ Role.STR_METRIC_READ })
     public Map<String, Long> getAnomalyEventsGroupedBySubCategories(
             @RestQuery String domain,
             @RestQuery Instant date,
@@ -115,7 +115,7 @@ public class MetricsController {
 
     @Path("/events/anomalies-by-entity")
     @GET
-    @RolesAllowed({ Role.STR_METRIC_READ})
+    @RolesAllowed({ Role.STR_METRIC_READ })
     public Collection<AnomalyQueryResult> getAnomalyEventsGroupedBySubCategoriesAndEntities(
             @RestQuery String domain,
             @RestQuery Instant startDate) {
@@ -124,7 +124,7 @@ public class MetricsController {
 
     @Path("/aggregate/anomalies/{interval}")
     @GET
-    @RolesAllowed({ Role.STR_METRIC_READ})
+    @RolesAllowed({ Role.STR_METRIC_READ })
     public Collection<AggregateServiceDto> aggregateAnomaliesEvents(
             DateInterval interval,
             @RestQuery @Positive @DefaultValue("12") int buckets,

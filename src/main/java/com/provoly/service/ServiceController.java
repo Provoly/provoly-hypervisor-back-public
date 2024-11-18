@@ -32,7 +32,7 @@ public class ServiceController {
     }
 
     @POST
-    @Path("/coswin/external/id/{actionId}")
+    @Path("/external/id/{actionId}")
     @RolesAllowed({ Role.STR_SERVICE_EXTERNAL_WRITE })
     public Map<String, String> createExternalService(UUID actionId, @Valid ExternalServiceWriteDto dto) throws IOException {
         return serviceService.createExternalService(actionId, dto);
