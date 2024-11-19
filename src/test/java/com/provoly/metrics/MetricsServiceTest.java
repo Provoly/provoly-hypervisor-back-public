@@ -116,7 +116,7 @@ public class MetricsServiceTest {
         //then
         assertThat(result.getManifestation()).extracting("nbEquipWithEvent_A").isEqualTo(1L);
 
-        assertThat(result.getAnomaly())
+        assertThat(result.getOutoforder())
                 .extracting("nbEquipWithEvent_FL").isEqualTo(1L);
 
         assertThat(result).extracting("totalEquipWithEvent_A").isEqualTo(1L);

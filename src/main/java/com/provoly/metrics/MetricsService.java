@@ -93,10 +93,9 @@ public class MetricsService {
 
         return new EpEquipmentWithEventsDetailedDto(equipmentsWithEvent,
                 buildEpEquipmentByCategory(MANIFESTATION, equipmentsByFamily),
-                buildEpEquipmentByCategory(LIMIT, equipmentsByFamily),
                 buildEpEquipmentByCategory(OUTOFORDER, equipmentsByFamily),
-                buildEpEquipmentByCategory(ANOMALY, equipmentsByFamily));
-
+                buildEpEquipmentByCategory(ANOMALY, equipmentsByFamily),
+                buildEpEquipmentByCategory(LIMIT, equipmentsByFamily));
     }
 
     @Transactional
@@ -130,9 +129,9 @@ public class MetricsService {
         return new VpEquipmentWithEventsDetailedDto(
                 equipmentsWithEvent,
                 new VpEquipmentByCategoryDto(equipmentByCategory.getOrDefault(MANIFESTATION, List.of()).size()),
-                new VpEquipmentByCategoryDto(equipmentByCategory.getOrDefault(LIMIT, List.of()).size()),
                 new VpEquipmentByCategoryDto(equipmentByCategory.getOrDefault(OUTOFORDER, List.of()).size()),
-                new VpEquipmentByCategoryDto(equipmentByCategory.getOrDefault(ANOMALY, List.of()).size()));
+                new VpEquipmentByCategoryDto(equipmentByCategory.getOrDefault(ANOMALY, List.of()).size()),
+                new VpEquipmentByCategoryDto(equipmentByCategory.getOrDefault(LIMIT, List.of()).size()));
     }
 
     @Transactional
