@@ -142,7 +142,7 @@ public class EventServiceTest {
         // then
         assertThatThrownBy(() -> eventService.saveEvent(event))
                 .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("Subcategory is required");
+                .hasMessageContaining("Invalid subcategory");
     }
 
     @Test

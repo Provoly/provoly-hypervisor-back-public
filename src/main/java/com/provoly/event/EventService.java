@@ -311,17 +311,17 @@ public class EventService {
         var category = getCategory(eventDto.getCategory());
         var subCategories = databaseReader.getSubCategories(category).map(EnumEntity::getCode).toList();
 
-        if (!subCategories.isEmpty()) {
-            logger.debugf("Category %s has subcategories", category);
-            if (eventDto.getSubCategory() == null || !subCategories.contains(eventDto.getSubCategory())) {
-                throw new ForbiddenException("Subcategory is required. Valid subcategories are %s for category %s"
-                        .formatted(subCategories, eventDto.getName()));
-            }
-        } else {
-            logger.debugf("Category %s has'nt subcategories", category);
-            if (eventDto.getSubCategory() != null) {
+        if (eventDto.getSubCategory() != null) {
+            if (subCategories.isEmpty()) {
+                logger.debugf("Category %s has'nt subcategories", category);
                 throw new ForbiddenException(
                         "No subcategories are avalaible for category %s".formatted(eventDto.getCategory()));
+            }
+
+            logger.debugf("Check if subcategory is valid");
+            if (!subCategories.contains(eventDto.getSubCategory())) {
+                throw new ForbiddenException("Invalid subcategory. Valid subcategories are %s for category %s"
+                        .formatted(subCategories, category.getCode()));
             }
         }
     }
