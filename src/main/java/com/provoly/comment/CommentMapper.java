@@ -11,7 +11,7 @@ public class CommentMapper {
         return new CommentReadDto(
                 comment.getId(),
                 comment.getUser().getSubject(),
-                comment.getUser().getUsername(),
+                comment.getUser().getFullName(),
                 comment.getMessage(),
                 comment.getCreationDate(),
                 comment.getLastModificationDate());
