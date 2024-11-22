@@ -84,6 +84,18 @@ public class EventServiceTest {
     }
 
     @Test
+    void should_throw_exception_create_operator_event_with_invalid_dates_event_its_not_manifestation() {
+        // given
+        var event = dataService.buildEvent("tutu", "LIMIT", Criticality.HIGH, true);
+
+        // then
+        assertThatThrownBy(() -> eventService.saveEvent(event))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("End date is invalid: it must be after start date");
+    }
+
+
+    @Test
     @Transactional
     void should_throw_exception_update_external_property_of_event() {
         // given

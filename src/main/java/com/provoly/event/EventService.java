@@ -206,7 +206,7 @@ public class EventService {
     @Transactional
     public Event saveEvent(EventWriteDto eventDto) {
         logger.infof("Create %s event with name %s".formatted(eventDto.getCategory(), eventDto.getName()));
-        checkManifestationCategory(eventDto);
+        checkDatesCoherence(eventDto);
         checkSubCategoryCoherence(eventDto);
 
         Event event = new Event();
@@ -224,7 +224,7 @@ public class EventService {
     @Transactional
     public void updateEvent(Integer id, EventWriteDto eventDto) {
         logger.infof("Update %s event with name %s".formatted(eventDto.getCategory(), eventDto.getName()));
-        checkManifestationCategory(eventDto);
+        checkDatesCoherence(eventDto);
         checkSubCategoryCoherence(eventDto);
 
         Event eventToUpdate = databaseReader.getEventById(id);
@@ -294,16 +294,14 @@ public class EventService {
         }
     }
 
-    private void checkManifestationCategory(EventWriteDto e) { // FIXME: il faut eviter les reference au categories propres à chalons dans le code
+    private void checkDatesCoherence(EventWriteDto e) { // FIXME: il faut eviter les reference au categories propres à chalons dans le code
+        if (e.getStartDate() != null && e.getEndDate() != null && e.getEndDate().isBefore(e.getStartDate())) {
+            throw new IllegalArgumentException("End date is invalid: it must be after start date");
+        }
         logger.debugf("Check if event %s has manifestation dates".formatted(e.getId()));
-        if (e.getCategory().equals("MANIFESTATION")) {
-            if (e.getStartDate() == null || e.getEndDate() == null) {
-                throw new IllegalArgumentException(
-                        "Properties 'startDate' and 'endDate' are required for 'MANIFESTATION' category");
-            }
-            if (e.getEndDate().isBefore(e.getStartDate())) {
-                throw new IllegalArgumentException("End date is invalid: it must be after start date");
-            }
+        if (e.getCategory().equals("MANIFESTATION") && (e.getStartDate() == null || e.getEndDate() == null)) {
+            throw new IllegalArgumentException(
+                    "Properties 'startDate' and 'endDate' are required for 'MANIFESTATION' category");
         }
     }
 

@@ -129,7 +129,7 @@ paths:
         By default, the source is “Hypervisor”. 
         It's possible to set an `externalId`, in order to update event if already exists instead of save it (used for nodered flows). 
         `MANIFESTATION` category, `startDate` and `endDate` properties are necessary. `endDate` can't be before `startDate`.
-        `ANOMALY` category requires sub categories.
+         It's possible to add a sub category for `ANOMALY` events.
       operationId: com.provoly.event.EventController_saveEvent
       requestBody:
         content:
@@ -1196,9 +1196,9 @@ paths:
         - Metrics Controller
       summary: Retrieve equipments from EP domain with event metrics
       description: |
-        Returns the number of cabinets, light fittings and unmanaged equipment connected to 
-        at least one event that has not been closed, the number of services requested for this equipment, 
-        and the number of services in progress.
+        Returns the number of _Armoires_, _Foyers lumineux_ and unmanaged equipments linked with 
+        at least one event that has not been closed, the number of services `ASKED` for this equipment, 
+        and the number of services `IN_PROGRESS`.
         Filter on equipments without `deleted` property.
       operationId: com.provoly.metrics.MetricsController_getEpEquipmentWithEvent
       parameters:
@@ -1272,9 +1272,9 @@ paths:
         - Metrics Controller
       summary: Retrieve equipments from VP domain with event metrics
       description: |
-        Returns the number of Cameras connected to at least one event that has not been closed, 
-        the number of services requested for this equipment,
-        and the number of services in progress.
+        Returns the number of Cameras linked with at least one event that has not been closed, 
+        the number of services `ASKED` for this equipment,
+        and the number of services `IN_PROGRESS`.
         Filter on equipments without `deleted` property.
       operationId: com.provoly.metrics.MetricsController_getVpEquipmentWithEvent
       parameters:
@@ -1376,11 +1376,11 @@ paths:
     get:
       tags:
         - Metrics Controller
-      summary: Retrieve first n events count by equipments
+      summary: Retrieve first n events by equipments
       description: |
-        It's possible to filter on category, domain, and count events that was created after a specific date. Limit is set to 10 but it can be changed.
+        It's possible to filter on category, domain, and count events that was created after a specific date. Limit is set to 10 by default but can be changed.
         Filter on equipments without `deleted` property.
-      operationId: com.provoly.metrics.MetricsController_getTotalEquipmentsByEntity
+      operationId: com.provoly.metrics.MetricsController_getEventsByEquipments
       parameters:
         - name: domain
           in: query
@@ -1514,7 +1514,7 @@ paths:
       tags:
         - Metrics Controller
       summary: |
-        Count open events grouped by anomaly's subcategories
+        Count opened events grouped by anomaly's subcategories
       description: |
         It's possible to filter on event creation date, event status. If creation date is set, then ignore Done events.
         If a domain filter is set, count all events linked to a equipment with this domain.
@@ -1588,7 +1588,7 @@ paths:
       tags:
         - Metrics Controller
       summary: |
-        Count events linked by equipment grouped by anomaly's subcategories and equipment entities
+        Count events linked by equipment and grouped by anomaly's subcategories and equipment entities
       description: |
         It's possible to filter on equipment domain and set start date to filter on events created from this date.
         Filter on equipments without `deleted` property.
@@ -1980,7 +1980,8 @@ components:
         id:
           $ref: '#/components/schemas/UUID'
         creator:
-          $ref: '#/components/schemas/UUID'
+          type: string
+          description: user fullname
         message:
           type: string
           description: comment message
@@ -2018,7 +2019,7 @@ components:
           description: must be a known category code
         subCategory:
           type: string
-          description: subCategory is required only if category is `ANOMALY`. Value match one of subCategory code
+          description: subCategory is possible only if category is `ANOMALY`. Value match one of subCategory code
         lastModificationDate:
           $ref: '#/components/schemas/DateTime'
         creationDate:
@@ -2067,7 +2068,7 @@ components:
           description: must be a known category code
         subCategory:
           type: string
-          description: subCategory is required only if category is `ANOMALY`. Value match one of subCategory code
+          description: subCategory is possible only if category is `ANOMALY`. Value match one of subCategory code
         lastModificationDate:
           $ref: '#/components/schemas/DateTime'
         creationDate:
@@ -2127,7 +2128,7 @@ components:
           required: true
         subCategory:
           type: string
-          description: required only if `ANOMALY` is set on `cateogry` property. Value match one of subCategory code.
+          description: possible only if `ANOMALY` is set on `cateogry` property. Value match one of subCategory code.
           example: "WILD_STORAGE"
         equipmentId:
           $ref: '#/components/schemas/UUID'
