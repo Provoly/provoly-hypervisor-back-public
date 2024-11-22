@@ -129,7 +129,7 @@ paths:
         By default, the source is “Hypervisor”. 
         It's possible to set an `externalId`, in order to update event if already exists instead of save it (used for nodered flows). 
         `MANIFESTATION` category, `startDate` and `endDate` properties are necessary. `endDate` can't be before `startDate`.
-         It's possible to add a sub category for `ANOMALY` events.
+         `ANOMALY` category requires sub categories.
       operationId: com.provoly.event.EventController_saveEvent
       requestBody:
         content:
@@ -2019,7 +2019,7 @@ components:
           description: must be a known category code
         subCategory:
           type: string
-          description: subCategory is possible only if category is `ANOMALY`. Value match one of subCategory code
+          description: subCategory is required only if category is `ANOMALY`. Value match one of subCategory code
         lastModificationDate:
           $ref: '#/components/schemas/DateTime'
         creationDate:
@@ -2068,7 +2068,7 @@ components:
           description: must be a known category code
         subCategory:
           type: string
-          description: subCategory is possible only if category is `ANOMALY`. Value match one of subCategory code
+          description: subCategory is required only if category is `ANOMALY`. Value match one of subCategory code
         lastModificationDate:
           $ref: '#/components/schemas/DateTime'
         creationDate:
@@ -2128,7 +2128,7 @@ components:
           required: true
         subCategory:
           type: string
-          description: possible only if `ANOMALY` is set on `cateogry` property. Value match one of subCategory code.
+          description: required only if `ANOMALY` is set on `cateogry` property. Value match one of subCategory code.
           example: "WILD_STORAGE"
         equipmentId:
           $ref: '#/components/schemas/UUID'

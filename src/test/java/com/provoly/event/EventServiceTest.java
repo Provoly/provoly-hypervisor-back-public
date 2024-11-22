@@ -94,7 +94,6 @@ public class EventServiceTest {
                 .hasMessageContaining("End date is invalid: it must be after start date");
     }
 
-
     @Test
     @Transactional
     void should_throw_exception_update_external_property_of_event() {
@@ -154,7 +153,7 @@ public class EventServiceTest {
         // then
         assertThatThrownBy(() -> eventService.saveEvent(event))
                 .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("Invalid subcategory");
+                .hasMessageContaining("Subcategory is required");
     }
 
     @Test
@@ -176,7 +175,7 @@ public class EventServiceTest {
         // then
         assertThatThrownBy(() -> eventService.saveEvent(event))
                 .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("No subcategories are avalaible for");
+                .hasMessageContaining("No subcategories are available for");
     }
 
     @Test

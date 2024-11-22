@@ -18,6 +18,7 @@ insert into category (id,name,code, parent_id) values (4,'Anomalie','ANOMALY',nu
 insert into category (id,name,code, parent_id) values (5,'Affluence anormale de personnes','UNUSUAL_FLOW',4);
 insert into category (id,name,code, parent_id) values (6,'Congestion de véhicules','TRAFFIC_CONGESTION',4);
 insert into category (id,name,code, parent_id) values (7,'Dépôts sauvages','WILD_STORAGE',4);
+insert into category (id,name,code, parent_id) values (8,'Aucun','NONE',4);
 
 insert into service_category (id,name,code) values (1,'Préventive','PREV');
 insert into service_category (id,name,code) values (2,'Curative','CURA');
