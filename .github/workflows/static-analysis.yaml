@@ -1,6 +1,8 @@
 name: Static analysis
 
 on:
+  pull_request:
+  push:
   schedule:
     - cron: '0 5 * * 1'
   workflow_dispatch:
@@ -16,7 +18,7 @@ env:
 jobs:
   build:
     name: Build
-    runs-on: provoly-runner
+    runs-on: provoly-arc-runner-on-rancher
     steps:
       - uses: actions/checkout@v4
       - name: Cache local Maven repository
@@ -33,12 +35,13 @@ jobs:
       - name: Run sonar analysis
         env:
           SONAR_URL: ${{ vars.SONAR_URL }}
-          SONAR_ADMIN_TOKEN: ${{ secrets.SONAR_ADMIN_TOKEN }}
+          SONAR_ADMIN_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           mvn $MAVEN_CLI_OPTS -Dmaven.test.failure.ignore=true \
             verify org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1.2184:sonar \
             -Dsonar.host.url=${{ env.SONAR_URL }}\
-            -Dsonar.token=${{ env.SONAR_ADMIN_TOKEN }}\
+            -Dsonar.token=${{ env.SONAR_TOKEN }}\
+            -Dsonar.projectKey=provoly-hypervisor-back \
             -Dsonar.dependencyCheck.jsonReportPath=${{ github.workspace }}/target/dependency-check-report.json\
             -Dsonar.dependencyCheck.htmlReportPath=${{ github.workspace }}/target/dependency-check-report.html\
             -Dsonar.coverage.jacoco.xmlReportPaths=${{ github.workspace }}/target/jacoco-report/jacoco.xml
