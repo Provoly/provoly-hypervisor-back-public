@@ -78,7 +78,7 @@ public class ProcedureModelService {
 
     @Transactional
     public ProcedureModel saveProcedureModel(ProcedureModelWriteDto dto) {
-        logger.debugf("Save procedure model with name %s and its %s actions", dto.name(), dto.actions().size());
+        logger.infof("Save procedure model with name %s and its %s actions", dto.name(), dto.actions().size());
         if (databaseReader.isProcedureModelWithNameExists(dto.name())) {
             throw new AlreadyExistsException("Procedure model with name '%s' already exists".formatted(dto.name()));
         }
@@ -94,7 +94,7 @@ public class ProcedureModelService {
 
     @Transactional
     public void updateProcedureModel(Integer id, ProcedureModelWriteDto dto) {
-        logger.debugf("Update procedure model %s and its %s actions", String.valueOf(id), dto.actions().size());
+        logger.infof("Update procedure model %s and its %s actions", String.valueOf(id), dto.actions().size());
         var model = databaseReader.getProcedureModelById(id);
         if (!dto.creator().equals(model.getCreator())) {
             throw new IllegalArgumentException(
@@ -120,7 +120,7 @@ public class ProcedureModelService {
 
     @Transactional
     public Procedure associateProcedureModelToEvents(Integer id, Collection<Integer> eventIds) {
-        logger.debugf("Associate procedure model %s to events %", String.valueOf(id), eventIds);
+        logger.infof("Associate procedure model %s to events %", String.valueOf(id), eventIds);
         var model = databaseReader.getProcedureModelById(id);
 
         logger.debugf("Retrieve events to associate them to procedure");
@@ -147,7 +147,7 @@ public class ProcedureModelService {
     }
 
     private void addActionsForModel(Collection<ActionWriteDto> actions, ProcedureModel model) {
-        logger.debugf("Save or update %s actions", actions.size());
+        logger.infof("Save or update %s actions for model %s", actions.size(), model.getId());
         int index = 0;
         for (var dtoAction : actions) {
             actionService.saveActionForModel(dtoAction, model, index++);

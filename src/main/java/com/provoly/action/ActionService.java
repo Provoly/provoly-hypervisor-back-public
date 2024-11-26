@@ -16,14 +16,17 @@ import com.provoly.user.Role;
 import com.provoly.user.UserService;
 
 import io.quarkus.security.ForbiddenException;
+import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class ActionService {
+    private final Logger logger;
     private final ActionDatabaseReader databaseReader;
     private final ActionMapper actionMapper;
     private final UserService userService;
 
-    public ActionService(ActionDatabaseReader databaseReader, ActionMapper actionMapper, UserService userService) {
+    public ActionService(Logger logger, ActionDatabaseReader databaseReader, ActionMapper actionMapper, UserService userService) {
+        this.logger = logger;
         this.databaseReader = databaseReader;
         this.actionMapper = actionMapper;
         this.userService = userService;
@@ -35,9 +38,13 @@ public class ActionService {
 
         model.getAction(dto.getId())
                 .ifPresentOrElse(
-                        action -> actionMapper.updateAction(dto, action, index),
+                        action -> {
+                            logger.debugf("Update model action %s", action.getId());
+                            actionMapper.updateAction(dto, action, index);
+                        },
                         () -> {
                             var action = buildAction(dto, index);
+                            logger.debugf("Save model action %s", action.getId());
                             model.addAction(action);
                             databaseReader.saveAction(action);
                         });
@@ -55,10 +62,12 @@ public class ActionService {
                                     && dto.getStatus() == Status.DONE) {
                                 throw new ForbiddenException("Missing permission to update action status.");
                             }
+                            logger.debugf("Update instance action %s", action.getId());
                             actionMapper.updateAction(dto, action, index);
                         },
                         () -> {
                             var action = buildAction(dto, index);
+                            logger.debugf("Save instance action %s", action.getId());
                             procedure.addAction(action);
                             databaseReader.saveAction(action);
                         });

@@ -45,14 +45,14 @@ public class EquipmentService {
                                 }));
     }
 
-    @Transactional
-    public Optional<Equipment> getOptionalEquipmentById(UUID id) {
+    private Optional<Equipment> getOptionalEquipmentById(UUID id) {
         return databaseReader.getEquipmentById(id);
     }
 
     @Transactional
     public Equipment getEquipmentById(UUID id) {
-        return databaseReader.getEquipmentById(id)
+        logger.debugf("Get equipment with id %s", id);
+        return getOptionalEquipmentById(id)
                 .orElseThrow(() -> new NoSuchElementException("Equipment with id %s not found".formatted(id)));
     }
 
@@ -75,17 +75,8 @@ public class EquipmentService {
 
     @Transactional
     public Equipment getEquipmentByName(String name) {
-        logger.debugf("Get all equipments with name %s", name);
+        logger.debugf("Get equipment with name %s", name);
         return databaseReader.getEquipmentByName(name);
-    }
-
-    @Transactional
-    public Collection<String> getEquipmentEntitiesName() {
-        logger.debugf("Get all equipments entities names");
-        return databaseReader.getEquipmentEntities()
-                .stream()
-                .map(EquipmentEntity::getName)
-                .toList();
     }
 
     @Transactional

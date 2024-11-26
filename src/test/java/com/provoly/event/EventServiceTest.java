@@ -182,18 +182,17 @@ public class EventServiceTest {
     @Transactional
     void should_close_event() {
         // given
-        var eventIdInProgress = eventService
+        var eventInProgress = eventService
                 .getEvents(1, 1, null, null, null, List.of(), List.of(Status.IN_PROGRESS.name()), List.of(), List.of(),
                         List.of(), List.of(), null, null, null, null)
                 .toList()
-                .getFirst()
-                .getId();
+                .getFirst();
 
         // when
-        eventService.closeEventById(eventIdInProgress);
+        eventService.closeEvent(eventInProgress);
 
         // then
-        var event = eventService.getEventDetails(eventIdInProgress);
+        var event = eventService.getEventDetails(eventInProgress.getId());
         assertThat(event.getCloseDate()).isNotNull();
         assertThat(event.getStatus()).isEqualTo(Status.DONE);
 
@@ -203,19 +202,19 @@ public class EventServiceTest {
     @Transactional
     void should_not_close_already_closed_event() {
         // given
-        var eventIdDone = eventService
+        var eventDone = eventService
                 .getEvents(1, 1, null, null, null, List.of(), List.of(Status.DONE.name()), List.of(), List.of(), List.of(),
                         List.of(), null, null, null, null)
                 .toList()
-                .getFirst()
-                .getId();
-        var oldEvent = eventService.getEventDetails(eventIdDone);
+                .getFirst();
+
+        var oldEvent = eventService.getEventDetails(eventDone.getId());
 
         // when
-        eventService.closeEventById(eventIdDone);
+        eventService.closeEvent(eventDone);
 
         // then
-        var event = eventService.getEventDetails(eventIdDone);
+        var event = eventService.getEventDetails(eventDone.getId());
         assertThat(event.getCloseDate()).isEqualTo(oldEvent.getCloseDate());
     }
 

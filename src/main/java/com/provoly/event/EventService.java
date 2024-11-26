@@ -245,13 +245,8 @@ public class EventService {
     }
 
     @Transactional
-    public void closeEventById(Integer id) {
-        var event = databaseReader.getEventById(id);
-        logger.debugf("Close event with id %s and set close date".formatted(id));
-        closeEvent(event);
-    }
-
     public void closeEvent(Event event) {
+        logger.infof("Close event %s", event.getId());
         if (event.getStatus() != Status.DONE) {
             event.setStatus(Status.DONE);
             event.setCloseDate(Instant.now());
@@ -262,7 +257,7 @@ public class EventService {
     @Transactional
     public ByteArrayInputStream exportEvents() throws IOException {
         var events = databaseReader.getAllEvents();
-        logger.debugf("Export %s events", events.size());
+        logger.infof("Export %s events", events.size());
         return xslxService.generateExcelWithEvents(eventMapper.mapToExportEventDto(events));
     }
 

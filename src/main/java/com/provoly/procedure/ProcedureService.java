@@ -44,13 +44,13 @@ public class ProcedureService {
 
     @Transactional
     public Procedure getProcedureDetails(Integer id) {
-        logger.debugf("Get procedure detail with id %s", id);
+        logger.infof("Get procedure detail with id %s", id);
         return databaseReader.getProcedureById(id);
     }
 
     @Transactional
     public void closeAllProcedureEventsById(Integer id) {
-        logger.debugf("Close all procedure events with id %s", id);
+        logger.infof("Close all procedure events with id %s", id);
         var procedure = getProcedureDetails(id);
         closeAllProcedureEvent(procedure);
     }
@@ -107,12 +107,13 @@ public class ProcedureService {
         model.getActions().forEach(action -> procedure.addAction(actionMapper.duplicateAction(action)));
 
         databaseReader.saveProcedure(procedure);
-        logger.debugf("Procedure %s is instantiated".formatted(procedure.getId()));
+        logger.infof("Procedure %s is instantiated".formatted(procedure.getId()));
         return procedure;
     }
 
     @Transactional
     public void deleteProcedure(Integer id) {
+        logger.infof("Delete procedure %s and dissociate its events", id);
         var procedure = databaseReader.getProcedureById(id);
         procedure.dissociateEvents();
         databaseReader.removeProcedure(procedure);
@@ -120,11 +121,13 @@ public class ProcedureService {
 
     @Transactional
     public Procedure getProcedureFromAction(UUID actionId) {
+        logger.debugf("Get procedure with action %s", actionId);
         return databaseReader.getProcedureForAction(actionId);
     }
 
     @Transactional
     public void addEventToProcedure(Integer procedureId, Integer eventId) {
+        logger.infof("Add event ¨%s to procedure %s", eventId, procedureId);
         var procedure = databaseReader.getProcedureById(procedureId);
         if (procedure.getCloseComment() != null) {
             throw new IllegalArgumentException(

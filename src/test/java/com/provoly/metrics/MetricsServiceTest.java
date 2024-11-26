@@ -22,6 +22,7 @@ import com.provoly.user.UserService;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -642,6 +643,7 @@ public class MetricsServiceTest {
     }
 
     @Test
+    @Transactional
     void should_get_0_equipment_vp_anomalies_number_grouped_by_subcategories_because_done() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
@@ -660,7 +662,7 @@ public class MetricsServiceTest {
                 null));
 
         var creationDate = Instant.parse(LocalDate.now().atStartOfDay() + ":00.000Z");
-        eventService.closeEventById(savedEvent.getId());
+        eventService.closeEvent(savedEvent);
 
         // when
         var result = metricsService.getAnomalyEventsBySubCategories("VP", creationDate, null, List.of(), List.of(),

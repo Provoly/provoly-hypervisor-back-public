@@ -98,14 +98,14 @@ public class CommentService {
 
     @Transactional
     public List<CommentReadDto> getCommentsForEvent(Integer eventId) {
-        logger.debugf("Get comments for event %d", eventId);
+        logger.infof("Get comments for event %d", eventId);
         var event = eventService.getEventDetails(eventId);
         return commentMapper.mapToDto(event.getComments());
     }
 
     @Transactional
     public void saveOrUpdateCommentForAction(UUID id, CommentWriteDto dto) {
-        logger.debugf("Save or update comment for action %s", id);
+        logger.infof("Save or update comment for action %s", id);
 
         var action = actionService.getActionById(id);
         var procedure = procedureService.getProcedureFromAction(id);
@@ -128,7 +128,7 @@ public class CommentService {
 
     @Transactional
     public List<CommentReadDto> getCommentsForAction(UUID id) {
-        logger.debugf("Get comments for action %s", id);
+        logger.infof("Get comments for action %s", id);
         var action = actionService.getActionById(id);
         return commentMapper.mapToDto(action.getComments());
     }
