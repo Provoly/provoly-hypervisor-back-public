@@ -439,7 +439,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "default-roles-quarkus" ,"event_read", "event_write","proc_model_read","proc_model_write","event_proc_write","notification_read","equipment_read","equipment_write","service_read","service_write","service_external_write","metric_read","internal_debug"],
+    "realmRoles" : [ "default-roles-quarkus" ,"event_read", "event_write","proc_model_read","proc_model_write","event_proc_comment_write","event_proc_write","notification_read","equipment_read","equipment_write","service_read","service_write","service_external_write","metric_read","internal_debug"],
     "notBefore" : 0,
     "groups" : [ ]
   },
@@ -462,7 +462,7 @@
       } ],
       "disableableCredentialTypes" : [ ],
       "requiredActions" : [ ],
-      "realmRoles" : [ "default-roles-quarkus" ,"event_read", "event_write","proc_model_read","proc_model_write","event_proc_write","notification_read","equipment_read","equipment_write","service_read","service_write","service_external_write","metric_read"],
+      "realmRoles" : [ "default-roles-quarkus" ,"event_read", "event_write","proc_model_read","proc_model_write","event_proc_write","event_proc_comment_write","notification_read","equipment_read","equipment_write","service_read","service_write","service_external_write","metric_read"],
       "notBefore" : 0,
       "groups" : [ ]
     },
@@ -485,7 +485,7 @@
       } ],
       "disableableCredentialTypes" : [ ],
       "requiredActions" : [ ],
-      "realmRoles" : [ "default-roles-quarkus" ,"event_read", "event_write","proc_model_read","proc_model_write","event_proc_write","notification_read"],
+      "realmRoles" : [ "default-roles-quarkus" ,"event_read", "event_write","proc_model_read","proc_model_write","event_proc_comment_write","event_proc_write","notification_read"],
       "notBefore" : 0,
       "groups" : [ ]
     },

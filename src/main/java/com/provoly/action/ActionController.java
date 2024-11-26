@@ -25,7 +25,7 @@ public class ActionController {
 
     @Path("/id/{id}/comments")
     @PUT
-    @RolesAllowed({ Role.STR_EVENT_PROC_WRITE })
+    @RolesAllowed({ Role.STR_EVENT_PROC_COMMENT_WRITE })
     public void saveOrUpdateCommentForAction(UUID id, CommentWriteDto comment) {
         commentService.saveOrUpdateCommentForAction(id, comment);
     }

@@ -59,7 +59,7 @@ public class ActionControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader", roles = { "event_write", "event_read", "event_proc_write" })
+    @TestSecurity(user = "reader", roles = { "event_write", "event_read", "event_proc_write", "event_proc_comment_write" })
     void should_increment_comment_count_and_get_last_comment_when_add_new_comment_on_event() {
         // given
         Integer procedureId = dataService.getProcedure3().getId();
@@ -88,7 +88,7 @@ public class ActionControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader", roles = { "event_write", "event_read", "event_proc_write" })
+    @TestSecurity(user = "reader", roles = { "event_write", "event_read", "event_proc_write", "event_proc_comment_write" })
     void should_sort_comment_on_modification_date_when_add_new_comment_on_event() {
         // given
         Integer procedureId = dataService.getProcedure3().getId();
@@ -116,7 +116,7 @@ public class ActionControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "reader", roles = { "event_write", "event_read", "event_proc_write" })
+    @TestSecurity(user = "reader", roles = { "event_write", "event_read", "event_proc_write", "event_proc_comment_write" })
     void should_throw_error_when_comment_done_procedure() {
         // given
         var procedure = dataService.getProcedure3();

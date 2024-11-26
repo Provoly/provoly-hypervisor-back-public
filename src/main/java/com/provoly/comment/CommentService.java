@@ -128,7 +128,7 @@ public class CommentService {
 
     @Transactional
     public List<CommentReadDto> getCommentsForAction(UUID id) {
-        logger.debugf("Get comments  for action %s", id);
+        logger.debugf("Get comments for action %s", id);
         var action = actionService.getActionById(id);
         return commentMapper.mapToDto(action.getComments());
     }

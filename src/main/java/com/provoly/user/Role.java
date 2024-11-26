@@ -4,6 +4,7 @@ public enum Role {
     EVENT_WRITE,
     EVENT_READ,
     EVENT_PROC_WRITE,
+    EVENT_PROC_COMMENT_WRITE,
     PROC_MODEL_READ,
     PROC_MODEL_WRITE,
     EQUIPMENT_WRITE,
@@ -17,6 +18,7 @@ public enum Role {
     public static final String STR_EVENT_WRITE = "event_write";
     public static final String STR_EVENT_READ = "event_read";
     public static final String STR_EVENT_PROC_WRITE = "event_proc_write";
+    public static final String STR_EVENT_PROC_COMMENT_WRITE = "event_proc_comment_write";
     public static final String STR_PROC_MODEL_READ = "proc_model_read";
     public static final String STR_PROC_MODEL_WRITE = "proc_model_write";
     public static final String STR_EQUIPMENT_WRITE = "equipment_write";

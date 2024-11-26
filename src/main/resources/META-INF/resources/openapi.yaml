@@ -850,7 +850,7 @@ paths:
           description: Action Not found
       security:
         - oidc:
-            - event_proc_write
+            - event_proc_comment_write
     get:
       tags:
         - Action Controller
