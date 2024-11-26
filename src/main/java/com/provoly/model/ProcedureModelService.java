@@ -13,6 +13,7 @@ import jakarta.ws.rs.ForbiddenException;
 import com.provoly.action.Action;
 import com.provoly.action.ActionService;
 import com.provoly.action.dto.ActionWriteDto;
+import com.provoly.error.AlreadyExistsException;
 import com.provoly.event.Event;
 import com.provoly.event.EventService;
 import com.provoly.event.SortOrder;
@@ -79,7 +80,7 @@ public class ProcedureModelService {
     public ProcedureModel saveProcedureModel(ProcedureModelWriteDto dto) {
         logger.debugf("Save procedure model with name %s and its %s actions", dto.name(), dto.actions().size());
         if (databaseReader.isProcedureModelWithNameExists(dto.name())) {
-            throw new IllegalArgumentException("Procedure model with name '%s' already exists".formatted(dto.name()));
+            throw new AlreadyExistsException("Procedure model with name '%s' already exists".formatted(dto.name()));
         }
         var model = new ProcedureModel(dto.creator());
         procedureModelMapper.updateProcedureModel(model, dto);

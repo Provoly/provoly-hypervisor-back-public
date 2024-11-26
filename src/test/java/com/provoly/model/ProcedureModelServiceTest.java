@@ -13,6 +13,7 @@ import jakarta.ws.rs.ForbiddenException;
 import com.provoly.TestDataService;
 import com.provoly.action.dto.AskedServiceWriteDto;
 import com.provoly.action.dto.OtherActionWriteDto;
+import com.provoly.error.AlreadyExistsException;
 import com.provoly.event.Status;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -82,7 +83,7 @@ public class ProcedureModelServiceTest {
 
         // when
         assertThatThrownBy(() -> procedureModelService.saveProcedureModel(procedureModelToSave))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(AlreadyExistsException.class)
                 .hasMessageContaining("already exist");
     }
 

@@ -25,6 +25,9 @@ public class GenericExceptionMapper implements ExceptionMapper<Exception> {
         log.error("Error :", exception);
 
         return switch (exception) {
+            case AlreadyExistsException e -> Response
+                    .status(Response.Status.CONFLICT)
+                    .entity(new ErrorDto(Response.Status.CONFLICT.getStatusCode(), e.getMessage())).build();
             case ForbiddenException e -> Response
                     .status(Response.Status.FORBIDDEN)
                     .entity(new ErrorDto(Response.Status.FORBIDDEN.getStatusCode(), e.getMessage())).build();
