@@ -20,9 +20,7 @@ import com.provoly.action.AskedService;
 import com.provoly.equipment.Equipment;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.equipmentEnriched.EquipmentEnrichedProducer;
-import com.provoly.event.dto.EventSummaryDto;
-import com.provoly.event.dto.EventWriteDto;
-import com.provoly.event.dto.EventsSummariesByStatusDto;
+import com.provoly.event.dto.*;
 import com.provoly.notification.NotificationProducer;
 import com.provoly.service.Service;
 import com.provoly.service.ServiceService;
@@ -209,7 +207,10 @@ public class EventService {
         checkDatesCoherence(eventDto);
         checkSubCategoryCoherence(eventDto);
 
-        Event event = new Event();
+        Event event = switch (eventDto) {
+            case ExternalEventWriteDto e -> new Event(e.getExternalId(), e.getExternalSourceRef());
+            case InternalEventWriteDto e -> new Event(e.getCreator());
+        };
 
         eventMapper.updateEvent(eventDto, event);
         databaseReader.saveEvent(event);
@@ -230,8 +231,17 @@ public class EventService {
         Event eventToUpdate = databaseReader.getEventById(id);
         var previousEquipmentId = eventToUpdate.getEquipment() != null ? eventToUpdate.getEquipment().getId() : null;
 
-        if (externalPropertiesAreUpdated(eventDto, eventToUpdate)) {
-            throw new ForbiddenException("External id and source reference can't be updated");
+        switch (eventDto) {
+            case ExternalEventWriteDto e -> {
+                if (externalPropertiesAreUpdated(e, eventToUpdate)) {
+                    throw new ForbiddenException("External id and source reference can't be updated");
+                }
+            }
+            case InternalEventWriteDto e -> {
+                if (!e.getCreator().equals(eventToUpdate.getCreator())) {
+                    throw new ForbiddenException("Creator can't be updated");
+                }
+            }
         }
 
         if (!userService.hasRole(Role.STR_EVENT_WRITE)
@@ -261,7 +271,7 @@ public class EventService {
         return xslxService.generateExcelWithEvents(eventMapper.mapToExportEventDto(events));
     }
 
-    private boolean externalPropertiesAreUpdated(EventWriteDto eventDto, Event eventToUpdate) {
+    private boolean externalPropertiesAreUpdated(ExternalEventWriteDto eventDto, Event eventToUpdate) {
         return !Objects.equals(eventToUpdate.getExternalSourceRef(), eventDto.getExternalSourceRef())
                 || (eventDto.getExternalId() != null && eventDto.getExternalId().equals(eventToUpdate.getExternalId()));
     }

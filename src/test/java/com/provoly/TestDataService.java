@@ -1,6 +1,5 @@
 package com.provoly;
 
-import static com.provoly.event.EventMapper.DEFAULT_SOURCE;
 import static com.provoly.service.ServiceStatus.ASKED;
 import static com.provoly.service.ServiceStatus.DONE;
 import static com.provoly.service.ServiceStatus.IN_PROGRESS;
@@ -22,6 +21,8 @@ import com.provoly.comment.Comment;
 import com.provoly.equipment.*;
 import com.provoly.event.*;
 import com.provoly.event.dto.EventWriteDto;
+import com.provoly.event.dto.ExternalEventWriteDto;
+import com.provoly.event.dto.InternalEventWriteDto;
 import com.provoly.model.ProcedureModel;
 import com.provoly.procedure.Procedure;
 import com.provoly.service.Service;
@@ -187,7 +188,7 @@ public class TestDataService {
     }
 
     public EventWriteDto buildEvent(String name, String category, Criticality criticality, boolean isWithDate) {
-        return new EventWriteDto(null,
+        return new InternalEventWriteDto(null,
                 name,
                 "desc",
                 criticality,
@@ -198,12 +199,14 @@ public class TestDataService {
                 null,
                 isWithDate ? Instant.now() : null,
                 isWithDate ? Instant.now().minusMillis(1000) : null,
-                null);
+                null,
+                null,
+                "toto");
     }
 
     public EventWriteDto buildExternalEvent(String name, String category, Criticality criticality, boolean isWithDate,
             UUID equipmentId, String source) {
-        return new EventWriteDto(null,
+        return new ExternalEventWriteDto(null,
                 name,
                 "desc",
                 criticality,
@@ -214,7 +217,10 @@ public class TestDataService {
                 null,
                 isWithDate ? Instant.now() : null,
                 isWithDate ? Instant.now().minusMillis(1000) : null,
-                source);
+                null,
+                null,
+                source,
+                null);
     }
 
     @Transactional
@@ -252,9 +258,10 @@ public class TestDataService {
 
         Event event;
         if (externalRef != null) {
-            event = new Event(UUID.randomUUID().toString());
+
+            event = new Event(UUID.randomUUID().toString(), externalRef);
         } else {
-            event = new Event();
+            event = new Event("creator");
         }
 
         event.setName(name);
@@ -276,7 +283,6 @@ public class TestDataService {
             event.setStartDate(Instant.now());
             event.setEndDate(Instant.now());
         }
-        event.setExternalSourceRef(externalRef == null ? DEFAULT_SOURCE : externalRef);
         em.persist(event);
         return event;
     }

@@ -1,5 +1,7 @@
 package com.provoly.event;
 
+import static com.provoly.event.EventMapper.DEFAULT_SOURCE;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -66,12 +68,20 @@ public class Event {
     @JoinColumn(name = "parent_id")
     private Event parent;
 
+    private String creator;
+
     public Event() {
         // Only for JPA
     }
 
-    public Event(String externalId) {
+    public Event(String creator) {
+        this.creator = creator;
+        this.externalSourceRef = DEFAULT_SOURCE;
+    }
+
+    public Event(String externalId, String externalSourceRef) {
         this.externalId = externalId;
+        this.externalSourceRef = externalSourceRef;
     }
 
     public Integer getId() {
@@ -205,10 +215,6 @@ public class Event {
         return externalSourceRef;
     }
 
-    public void setExternalSourceRef(String externalSourceRef) {
-        this.externalSourceRef = externalSourceRef;
-    }
-
     public Event getParent() {
         return parent;
     }
@@ -226,6 +232,10 @@ public class Event {
 
     public void addComment(Comment newComment) {
         comments.add(newComment);
+    }
+
+    public String getCreator() {
+        return creator;
     }
 
     @Override

@@ -19,7 +19,8 @@ import com.provoly.event.Criticality;
 import com.provoly.event.Event;
 import com.provoly.event.EventController;
 import com.provoly.event.Status;
-import com.provoly.event.dto.EventWriteDto;
+import com.provoly.event.dto.ExternalEventWriteDto;
+import com.provoly.event.dto.InternalEventWriteDto;
 import com.provoly.user.Role;
 import com.provoly.user.UserService;
 
@@ -92,7 +93,7 @@ public class ProcedureControllerTest {
                 .toList()
                 .getFirst();
 
-        var reportDto = new EventWriteDto(event.id(),
+        var reportDto = new ExternalEventWriteDto(event.id(),
                 "Maintenance ouvrage updated",
                 "description",
                 Criticality.HIGH,
@@ -103,7 +104,10 @@ public class ProcedureControllerTest {
                 null,
                 null,
                 null,
-                "external_source_ref");
+                null,
+                null,
+                "external_source_ref",
+                null);
 
         Integer procedureId = dataService.getProcedure3().getId();
         ProcedureWriteDto dto = new ProcedureWriteDto(
@@ -133,7 +137,7 @@ public class ProcedureControllerTest {
                 .getFirst()
                 .id();
 
-        var reportDto = new EventWriteDto(eventId,
+        var reportDto = new InternalEventWriteDto(eventId,
                 "Maintenance ouvrage updated",
                 "description",
                 Criticality.HIGH,
@@ -144,7 +148,9 @@ public class ProcedureControllerTest {
                 null,
                 null,
                 null,
-                null);
+                null,
+                null,
+                "creator");
 
         var procedure = dataService.getProcedure1();
 

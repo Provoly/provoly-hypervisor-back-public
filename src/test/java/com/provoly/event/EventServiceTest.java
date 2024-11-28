@@ -17,7 +17,8 @@ import jakarta.ws.rs.ForbiddenException;
 
 import com.provoly.TestDataService;
 import com.provoly.equipment.EquipmentService;
-import com.provoly.event.dto.EventWriteDto;
+import com.provoly.event.dto.ExternalEventWriteDto;
+import com.provoly.event.dto.InternalEventWriteDto;
 import com.provoly.user.Role;
 import com.provoly.user.UserService;
 
@@ -115,7 +116,7 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_create_event_with_invalid_domain() {
         // given
-        var event = new EventWriteDto(null,
+        var event = new InternalEventWriteDto(null,
                 "new event",
                 "desc",
                 Criticality.HIGH,
@@ -124,6 +125,8 @@ public class EventServiceTest {
                 null,
                 null,
                 "invalid_domain",
+                null,
+                null,
                 null,
                 null,
                 null);
@@ -137,7 +140,7 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_create_event_with_invalid_sub_category() {
         // given
-        var event = new EventWriteDto(null,
+        var event = new InternalEventWriteDto(null,
                 "new event",
                 "desc",
                 Criticality.HIGH,
@@ -148,7 +151,9 @@ public class EventServiceTest {
                 null,
                 null,
                 null,
-                null);
+                null,
+                null,
+                "creator");
 
         // then
         assertThatThrownBy(() -> eventService.saveEvent(event))
@@ -159,7 +164,7 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_create_event_category_without_kwnown_sub_category() {
         // given
-        var event = new EventWriteDto(null,
+        var event = new InternalEventWriteDto(null,
                 "new event",
                 "desc",
                 Criticality.HIGH,
@@ -170,7 +175,9 @@ public class EventServiceTest {
                 null,
                 Instant.now(),
                 Instant.now(),
-                null);
+                null,
+                null,
+                "creator");
 
         // then
         assertThatThrownBy(() -> eventService.saveEvent(event))
@@ -264,8 +271,20 @@ public class EventServiceTest {
     void should_throw_exception_update_external_source_event() {
         // given
         var event = dataService.getEvent1();
-        var eventUpdate = new EventWriteDto(event.getId(), event.getName(), event.getDescription(), event.getCriticality(),
-                "MANIFESTATION", null, event.getAddress(), null, null, Instant.now(), Instant.now(), null, "source", null,
+        var eventUpdate = new ExternalEventWriteDto(event.getId(),
+                event.getName(),
+                event.getDescription(),
+                event.getCriticality(),
+                "MANIFESTATION",
+                null,
+                event.getAddress(),
+                null,
+                null,
+                Instant.now(),
+                Instant.now(),
+                null,
+                null,
+                "source",
                 null);
 
         // then
@@ -277,11 +296,52 @@ public class EventServiceTest {
 
     @Test
     @Transactional
+    void should_throw_exception_update_creator_event() {
+        // given
+        var event = dataService.getEvent1();
+        var eventUpdate = new InternalEventWriteDto(event.getId(),
+                event.getName(),
+                event.getDescription(),
+                event.getCriticality(),
+                event.getCategory().getCode(),
+                null,
+                event.getAddress(),
+                null,
+                null,
+                Instant.now(),
+                Instant.now(),
+                null,
+                null,
+                "hello");
+
+        // then
+        assertThatThrownBy(() -> eventService.updateEvent(event.getId(), eventUpdate))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining(
+                        "Creator can't be updated");
+    }
+
+    @Test
+    @Transactional
     void should_throw_exception_update_external_source_event_2() {
         // given
         var event = dataService.getExternalEvent();
-        var eventUpdate = new EventWriteDto(event.getId(), event.getName(), event.getDescription(), event.getCriticality(),
-                "OUTOFORDER", null, event.getAddress(), null, null, null, null, null, null, null, null);
+        var eventUpdate = new ExternalEventWriteDto(
+                event.getId(),
+                event.getName(),
+                event.getDescription(),
+                event.getCriticality(),
+                "OUTOFORDER",
+                null,
+                event.getAddress(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
 
         // then
         assertThatThrownBy(() -> eventService.updateEvent(event.getId(), eventUpdate))
@@ -295,7 +355,7 @@ public class EventServiceTest {
     void should_save_event_with_same_external_id_but_different_source_when_save_event() {
         // given
         var equipment = equipmentService.getEquipmentByName("A-230").getId();
-        var event = new EventWriteDto(null,
+        var event = new ExternalEventWriteDto(null,
                 "new event",
                 "desc",
                 Criticality.HIGH,
@@ -307,13 +367,13 @@ public class EventServiceTest {
                 Instant.now(),
                 Instant.now(),
                 Instant.now(),
+                null,
                 "external_source",
-                "external_id",
-                null);
+                "external_id");
         eventService.saveEvent(event);
 
         // when
-        var eventSameExternalId = new EventWriteDto(null,
+        var eventSameExternalId = new ExternalEventWriteDto(null,
                 "new event",
                 "desc",
                 Criticality.HIGH,
@@ -325,9 +385,9 @@ public class EventServiceTest {
                 Instant.now(),
                 Instant.now(),
                 Instant.now(),
+                null,
                 "external_source_2",
-                "external_id",
-                null);
+                "external_id");
         eventService.saveEvent(eventSameExternalId);
 
         //then

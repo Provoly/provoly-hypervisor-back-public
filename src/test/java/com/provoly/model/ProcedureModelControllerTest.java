@@ -105,7 +105,7 @@ public class ProcedureModelControllerTest {
     @TestSecurity(user = "reader", roles = { "proc_model_read" })
     void should_return_procedure_model_that_with_corresponding_id_without_zeros() {
         // when
-        var procedures = procedureModelController.getProceduresModel(1, 3, null, null, List.of(), "00002");
+        var procedures = procedureModelController.getProceduresModel(1, 3, null, null, List.of(), "00003");
 
         //then
         assertThat(procedures).isNotEmpty();

@@ -211,6 +211,7 @@ create table event
     external_source_ref    varchar,
     parent_id              integer,
     external_id            varchar,
+    creator                varchar,
     constraint fk_parent foreign key (parent_id) references event (id)
 );
 

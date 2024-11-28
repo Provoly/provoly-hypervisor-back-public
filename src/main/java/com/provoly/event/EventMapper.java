@@ -56,7 +56,8 @@ public class EventMapper {
                 event.getExternalSourceRef(),
                 commentMapper.mapLastCommentToDto(event.getComments()),
                 event.getComments().size(),
-                event.getParent() == null ? null : new ParentReadDto(event.getParent().getId(), event.getParent().getName()));
+                event.getParent() == null ? null : new ParentReadDto(event.getParent().getId(), event.getParent().getName()),
+                event.getCreator());
     }
 
     public EventSummaryDto mapToEventSummaryDto(Event event, List<Service> services) {
@@ -93,7 +94,6 @@ public class EventMapper {
             event = databaseReader.getEventById(dto.getParent());
         }
         entity.setParent(event);
-        entity.setExternalSourceRef(dto.getExternalSourceRef());
     }
 
     public List<ExportEventDto> mapToExportEventDto(List<Event> events) {
@@ -118,7 +118,8 @@ public class EventMapper {
                         event.getEndDate(),
                         event.getExternalSourceRef(),
                         getAskedServicesId(event),
-                        event.getParent() == null ? null : event.getParent().getId()))
+                        event.getParent() == null ? null : event.getParent().getId(),
+                        event.getCreator()))
                 .toList();
     }
 

@@ -16,7 +16,7 @@ import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.EquipmentWriteDto;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventService;
-import com.provoly.event.dto.EventWriteDto;
+import com.provoly.event.dto.InternalEventWriteDto;
 import com.provoly.user.UserService;
 
 import io.quarkus.test.InjectMock;
@@ -98,8 +98,20 @@ public class MetricsServiceTest {
         // given
         saveDeletedEPEquipment();
         var equipmentId = equipmentService.getEquipmentByName("deleted").getId();
-        var event = new EventWriteDto(null, "deleted", "desc", Criticality.LOW, "LIMIT", null, "address", equipmentId, "EP",
-                null, null, null, null, null, null);
+        var event = new InternalEventWriteDto(null,
+                "deleted",
+                "desc",
+                Criticality.LOW,
+                "LIMIT",
+                null,
+                "address",
+                equipmentId,
+                "EP",
+                null,
+                null,
+                null,
+                null,
+                null);
         eventService.saveEvent(event);
         // when
         var result = metricsService.getEpEquipmentsWithEvent(List.of(), List.of(), List.of(), List.of());
@@ -188,7 +200,7 @@ public class MetricsServiceTest {
         // when adding a new event for an unmanaged equipment
         var equipUnmanaged = equipmentService.getEquipmentByName("C-762");
 
-        eventService.saveEvent(new EventWriteDto(null,
+        eventService.saveEvent(new InternalEventWriteDto(null,
                 "new report event",
                 "description",
                 Criticality.LOW,
@@ -199,7 +211,9 @@ public class MetricsServiceTest {
                 "EP",
                 null,
                 null,
-                null));
+                null,
+                null,
+                "creator"));
 
         var resultUpdated = metricsService.getEpEquipmentsWithEvent(List.of(), List.of(), List.of(), List.of());
 
@@ -494,8 +508,20 @@ public class MetricsServiceTest {
         //given
         saveDeletedVPEquipment();
         var equipmentId = equipmentService.getEquipmentByName("deleted_VP").getId();
-        var event = new EventWriteDto(null, "deleted", "desc", Criticality.LOW, "LIMIT", null, "address", equipmentId, "EP",
-                null, null, null, null, null, null);
+        var event = new InternalEventWriteDto(null,
+                "deleted",
+                "desc",
+                Criticality.LOW,
+                "LIMIT",
+                null,
+                "address",
+                equipmentId,
+                "EP",
+                null,
+                null,
+                null,
+                null,
+                "creator");
         eventService.saveEvent(event);
 
         // when
@@ -556,7 +582,7 @@ public class MetricsServiceTest {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
 
-        eventService.saveEvent(new EventWriteDto(null,
+        eventService.saveEvent(new InternalEventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -567,7 +593,9 @@ public class MetricsServiceTest {
                 "VP",
                 null,
                 null,
-                null));
+                null,
+                null,
+                "creator"));
 
         var creationDate = Instant.parse(LocalDate.now().atStartOfDay() + ":00.000Z");
 
@@ -587,7 +615,7 @@ public class MetricsServiceTest {
         saveDeletedVPEquipment();
         var vpEquipment = equipmentService.getEquipmentByName("deleted_VP");
 
-        eventService.saveEvent(new EventWriteDto(null,
+        eventService.saveEvent(new InternalEventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -598,7 +626,9 @@ public class MetricsServiceTest {
                 "VP",
                 null,
                 null,
-                null));
+                null,
+                null,
+                "creator"));
 
         var creationDate = Instant.parse(LocalDate.now().atStartOfDay() + ":00.000Z");
 
@@ -617,7 +647,7 @@ public class MetricsServiceTest {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
 
-        eventService.saveEvent(new EventWriteDto(null,
+        eventService.saveEvent(new InternalEventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -628,7 +658,9 @@ public class MetricsServiceTest {
                 "VP",
                 null,
                 null,
-                null));
+                null,
+                null,
+                "creator"));
 
         var creationDate = Instant.parse(LocalDate.now().atStartOfDay() + ":00.000Z");
 
@@ -648,7 +680,7 @@ public class MetricsServiceTest {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
 
-        var savedEvent = eventService.saveEvent(new EventWriteDto(null,
+        var savedEvent = eventService.saveEvent(new InternalEventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -659,7 +691,9 @@ public class MetricsServiceTest {
                 "VP",
                 null,
                 null,
-                null));
+                null,
+                null,
+                "creator"));
 
         var creationDate = Instant.parse(LocalDate.now().atStartOfDay() + ":00.000Z");
         eventService.closeEvent(savedEvent);
@@ -678,7 +712,7 @@ public class MetricsServiceTest {
     void should_get_all_anomalies_number_grouped_by_subcategories_and_equipment_entities() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
-        eventService.saveEvent(new EventWriteDto(null,
+        eventService.saveEvent(new InternalEventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -689,7 +723,9 @@ public class MetricsServiceTest {
                 "VP",
                 null,
                 null,
-                null));
+                null,
+                null,
+                "creator"));
 
         // when
         var creationDate = Instant.parse(LocalDate.now().atStartOfDay().minusDays(3) + ":00.000Z");
@@ -708,7 +744,7 @@ public class MetricsServiceTest {
         // given
         saveDeletedVPEquipment();
         var vpEquipment = equipmentService.getEquipmentByName("deleted_VP");
-        eventService.saveEvent(new EventWriteDto(null,
+        eventService.saveEvent(new InternalEventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -719,7 +755,9 @@ public class MetricsServiceTest {
                 "VP",
                 null,
                 null,
-                null));
+                null,
+                null,
+                "creator"));
 
         // when
         var creationDate = Instant.parse(LocalDate.now().atStartOfDay().minusDays(3) + ":00.000Z");
@@ -737,7 +775,7 @@ public class MetricsServiceTest {
     void should_get_anomaly_event_for_last_2_months() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
-        eventService.saveEvent(new EventWriteDto(null,
+        eventService.saveEvent(new InternalEventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -748,7 +786,9 @@ public class MetricsServiceTest {
                 "VP",
                 null,
                 null,
-                null));
+                null,
+                null,
+                "creator"));
 
         var startDate = Instant.parse(LocalDate.now().atStartOfDay().plusDays(10) + ":00.000Z");
         // when
@@ -766,7 +806,7 @@ public class MetricsServiceTest {
     void should_get_anomaly_event_for_last_2_months_for_fagniere_place() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
-        eventService.saveEvent(new EventWriteDto(null,
+        eventService.saveEvent(new InternalEventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -777,7 +817,9 @@ public class MetricsServiceTest {
                 "VP",
                 null,
                 null,
-                null));
+                null,
+                null,
+                "creator"));
 
         var startDate = Instant.parse(LocalDate.now().atStartOfDay().plusDays(10) + ":00.000Z");
         // when
@@ -796,7 +838,7 @@ public class MetricsServiceTest {
     void should_get_anomaly_event_for_last_2_months_for_entity_SMP() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
-        eventService.saveEvent(new EventWriteDto(null,
+        eventService.saveEvent(new InternalEventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -807,7 +849,9 @@ public class MetricsServiceTest {
                 "VP",
                 null,
                 null,
-                null));
+                null,
+                null,
+                "creator"));
 
         var startDate = Instant.parse(LocalDate.now().atStartOfDay().plusDays(10) + ":00.000Z");
         // when
@@ -823,7 +867,7 @@ public class MetricsServiceTest {
     void should_get_anomaly_event_for_last_2_months_for_all_domains() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
-        eventService.saveEvent(new EventWriteDto(null,
+        eventService.saveEvent(new InternalEventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -834,7 +878,9 @@ public class MetricsServiceTest {
                 "VP",
                 null,
                 null,
-                null));
+                null,
+                null,
+                "creator"));
 
         var startDate = Instant.parse(LocalDate.now().atStartOfDay().plusDays(10) + ":00.000Z");
         // when
@@ -852,7 +898,7 @@ public class MetricsServiceTest {
     void should_get_anomaly_event_for_last_2_months_with_null_criticality() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
-        eventService.saveEvent(new EventWriteDto(null,
+        eventService.saveEvent(new InternalEventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -863,7 +909,9 @@ public class MetricsServiceTest {
                 "VP",
                 null,
                 null,
-                null));
+                null,
+                null,
+                "creator"));
 
         var startDate = Instant.parse(LocalDate.now().atStartOfDay().plusDays(10) + ":00.000Z");
         var criticalities = new ArrayList<String>();
@@ -880,7 +928,7 @@ public class MetricsServiceTest {
     void should_get_anomaly_events_count_for_vp_equipments() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
-        eventService.saveEvent(new EventWriteDto(null,
+        eventService.saveEvent(new InternalEventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -891,7 +939,9 @@ public class MetricsServiceTest {
                 "VP",
                 null,
                 null,
-                null));
+                null,
+                null,
+                "creator"));
 
         var startDate = Instant.parse(LocalDate.now().atStartOfDay().minusDays(1) + ":00.000Z");
         // when
@@ -907,7 +957,7 @@ public class MetricsServiceTest {
     void should_not_get_anomaly_events_count_for_vp_equipments_date_is_too_late() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
-        eventService.saveEvent(new EventWriteDto(null,
+        eventService.saveEvent(new InternalEventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -918,7 +968,9 @@ public class MetricsServiceTest {
                 "VP",
                 null,
                 null,
-                null));
+                null,
+                null,
+                "creator"));
 
         var startDate = Instant.parse(LocalDate.now().atStartOfDay().plusDays(1) + ":00.000Z");
         // when

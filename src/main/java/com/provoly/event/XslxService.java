@@ -48,6 +48,7 @@ public class XslxService {
             generateHeaderRow(header, "Demande(s) d'intervention liée(s)", headerIndex++);
             generateHeaderRow(header, "Date de début", headerIndex++);
             generateHeaderRow(header, "Date de fin", headerIndex++);
+            generateHeaderRow(header, "Créateur", headerIndex++);
             generateHeaderRow(header, "Date de création", headerIndex++);
             generateHeaderRow(header, "Date de dernière modification", headerIndex++);
             generateHeaderRow(header, "Date de clôture", headerIndex++);
@@ -75,6 +76,7 @@ public class XslxService {
                 setRow(row, rowIndex++, event.services().toString());
                 setRow(row, rowIndex++, event.startDate());
                 setRow(row, rowIndex++, event.endDate());
+                setRow(row, rowIndex++, event.creator());
                 setRow(row, rowIndex++, event.creationDate());
                 setRow(row, rowIndex++, event.lastModificationDate());
                 setRow(row, rowIndex++, event.closeDate());

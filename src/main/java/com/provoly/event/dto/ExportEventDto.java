@@ -21,5 +21,6 @@ public record ExportEventDto(Integer id,
         Instant endDate,
         String externalSourceRef,
         List<String> services,
-        Integer parent) {
+        Integer parent,
+        String creator) {
 }

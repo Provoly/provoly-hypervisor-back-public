@@ -125,9 +125,12 @@ paths:
         - Event Controller
       summary: Save an event
       description: |
-        Events may come from the hypervisor, or from an external source. In this case, the `externalSourceRef` property must be filled in. 
-        By default, the source is “Hypervisor”. 
-        It's possible to set an `externalId`, in order to update event if already exists instead of save it (used for nodered flows). 
+        Events may come from the Hypervisor (internal event), or from an external source (external event). 
+        Internal events must have a `creator`, and it's source is automatically 'Hyperviseur'.
+        External events must have an `externalSourceRef`.
+        by default, InternalEventWriteDto is deserialized. If creator and externalSourceRef are presents, then the source is ignored, 
+        and if none of these properties are present, then an error is raised, saying that the creator is missing.
+        It's possible to set an `externalId` for external events, in order to update event if already exists instead of save it (used for nodered flows). 
         `MANIFESTATION` category, `startDate` and `endDate` properties are necessary. `endDate` can't be before `startDate`.
          `ANOMALY` category requires sub categories.
       operationId: com.provoly.event.EventController_saveEvent
@@ -135,7 +138,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EventWriteDto'
+              OneOf:
+                - $ref: '#/components/schemas/ExternalEventWriteDto'
+                - $ref: '#/components/schemas/InternalEventWriteDto'
       responses:
         "201":
           description: Created
@@ -1708,7 +1713,6 @@ components:
       pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
       type: string
       example: "ebbfbbd1-b8de-467c-8a9b-88443a49f807"
-      required: true
     DateTime:
       format: date-time
       type: string
@@ -1716,7 +1720,6 @@ components:
     # Enum
     ActionType:
       type: string
-      required: true
       example: EMAIL
       enum:
         - SMS
@@ -1726,7 +1729,6 @@ components:
         - ORDER
     Criticality:
       type: string
-      required: true
       example: LOW
       enum:
         - LOW
@@ -1746,14 +1748,12 @@ components:
         - source
     Priority:
       type: string
-      required: true
       enum:
         - 1-MINEUR
         - 2-MAJEUR
         - 3-BLOQUANT
     Status:
       type: string
-      required: true
       example: NEW
       enum:
         - NEW
@@ -1761,7 +1761,6 @@ components:
         - DONE
     ServiceStatus:
       type: string
-      required: true
       example: ASKED
       enum:
         - ASKED
@@ -1787,6 +1786,9 @@ components:
 
     # Enum Entity
     CustomActionType:
+      required:
+        - id
+        - name
       type: object
       properties:
         id:
@@ -1796,6 +1798,9 @@ components:
           type: string
           example: "Levée de doute"
     EquipmentEntity:
+      required:
+        - id
+        - name
       type: object
       properties:
         id:
@@ -1805,6 +1810,10 @@ components:
           type: string
           example: "CHALONS-COMMUN"
     Family:
+      required:
+        - id
+        - name
+        - code
       type: object
       properties:
         id:
@@ -1889,83 +1898,86 @@ components:
           type: string
           example: "0001020304"
     AskedServiceWriteDto:
+      required:
+        - id
+        - name
+        - status
       type: object
       properties:
         id:
           $ref: '#/components/schemas/UUID'
-          required: true
         type:
           $ref: '#/components/schemas/ActionType'
-          required: true
         status:
           $ref: '#/components/schemas/Status'
-          required: true
         name:
           type: string
-          required: true
           example: "Ma demande d'intervention"
         externalServiceId:
           type: string
           example: "DI00001"
     EmailActionWriteDto:
+      required:
+        - id
+        - name
+        - status
+        - email
       type: object
       properties:
         id:
           $ref: '#/components/schemas/UUID'
-          required: true
         type:
           $ref: '#/components/schemas/ActionType'
-          required: true
         status:
           $ref: '#/components/schemas/Status'
-          required: true
         name:
           type: string
-          required: true
           example: "Rory Gilmore"
         email:
           type: string
-          required: true
           example: "r.gilmore@chalons.com"
     OtherActionWriteDto:
+      required:
+        - id
+        - name
+        - status
       type: object
       properties:
         id:
           $ref: '#/components/schemas/UUID'
-          required: true
         type:
           $ref: '#/components/schemas/ActionType'
-          required: true
         status:
           $ref: '#/components/schemas/Status'
-          required: true
         name:
           type: string
-          required: true
           example: "Autre action"
     PhoneActionWriteDto:
+      required:
+        - id
+        - name
+        - status
+        - phone
       type: object
       properties:
         id:
           $ref: '#/components/schemas/UUID'
-          required: true
         type:
           $ref: '#/components/schemas/ActionType'
-          required: true
         status:
           $ref: '#/components/schemas/Status'
-          required: true
         name:
           type: string
-          required: true
           example: "Luke Danes"
         phone:
           type: string
-          required: true
           example: "0001020304"
 
     # Comment
     CommentWriteDto:
+      required:
+        - id
+        - message
       type: object
       properties:
         id:
@@ -2099,6 +2111,12 @@ components:
         parent:
           $ref: '#/components/schemas/ParentReadDto'
     EventWriteDto:
+      required:
+        - id
+        - name
+        - description
+        - criticality
+        - category
       type: object
       properties:
         id:
@@ -2106,15 +2124,12 @@ components:
           example: 2
         name:
           type: string
-          required: true
           example: "Dépôt sauvage"
         address:
           type: string
-          required: true
           example: "3 rue de Châlons"
         description:
           type: string
-          required: true
           example: "Il y a un dépôt sauvage ici"
         domain:
           type: string
@@ -2125,7 +2140,6 @@ components:
           type: string
           description: Value match one of category code
           example: "ANOMALY"
-          required: true
         subCategory:
           type: string
           description: required only if `ANOMALY` is set on `cateogry` property. Value match one of subCategory code.
@@ -2138,14 +2152,30 @@ components:
         startDate:
           $ref: '#/components/schemas/DateTime'
           description: required if category is "MANIFESTATION"
-        externalSourceRef:
-          type: string
-          description: Default to "Hyperviseur"
-          example: "Wintics"
         parent:
           type: integer
           description: Parent event
           example: 3
+    ExternalEventWriteDto:
+      allOf:
+        - $ref: '#/components/schemas/EventWriteDto'
+        - type : object
+          required:
+            - creator
+          properties:
+            creator:
+              type: string
+    InternalEventWriteDto:
+      allOf:
+        - $ref: '#/components/schemas/EventWriteDto'
+        - type: object
+          required:
+            - externalSourceRef
+          properties:
+            externalSourceRef:
+              type: string
+            externalId:
+              type: string
     ParentReadDto:
       type: object
       properties:
@@ -2229,6 +2259,10 @@ components:
               - $ref: '#/components/schemas/OtherActionReadDto'
               - $ref: '#/components/schemas/AskedServiceReadDto'
     ProcedureWriteDto:
+      required:
+        - id
+        - name
+        - events
       type: object
       properties:
         id:
@@ -2252,6 +2286,11 @@ components:
 
     # Procedure Model
     ProcedureModelWriteDto:
+      required:
+        - id
+        - name
+        - description
+        - creator
       type: object
       properties:
         id:
@@ -2259,19 +2298,15 @@ components:
           example: 2
         name:
           type: string
-          required: true
           example: "Ma procédure"
         description:
           type: string
-          required: true
           example: "Description de ma procédure"
         domain:
           type: string
-          required: true
           example: "EP"
         creator:
           type: string
-          required: true
         actions:
           type: array
           items:
@@ -2316,23 +2351,24 @@ components:
 
     # Service
     ExternalServiceWriteDto:
+      required:
+        - name
+        - priority
+        - description
+        - domain
       type: object
       properties:
         name:
           type: string
-          required: true
         equipment:
           $ref: '#/components/schemas/UUID'
         priority:
           $ref: '#/components/schemas/Priority'
-          required: true
         description:
           type: string
-          required: true
         domain:
           type: string
           example: "EP"
-          required: true
     ServiceReadDto:
       type: object
       properties:
@@ -2348,10 +2384,8 @@ components:
           $ref: '#/components/schemas/EquipmentShortDto'
         creationDate:
           $ref: '#/components/schemas/DateTime'
-          required: true
         lastModificationDate:
           $ref: '#/components/schemas/DateTime'
-          required: true
         startDate:
           $ref: '#/components/schemas/DateTime'
         endDate:
@@ -2360,22 +2394,26 @@ components:
           $ref: '#/components/schemas/DateTime'
         domain:
           type: string
-          required: true
           example: "EP"
         status:
           $ref: '#/components/schemas/ServiceStatus'
-          required: true
         category:
           type: string
-          required: true
           description: Value match one of `ServiceCategory` code
           example: "CURA"
     ServiceWriteDto:
+      required:
+        - id
+        - name
+        - status
+        - description
+        - creationDate
+        - lastModificationDate
+        - category
       type: object
       properties:
         id:
           type: string
-          required: true
           example: "DI00001938"
         additionalInfo:
           type: string
@@ -2385,14 +2423,11 @@ components:
           example: "Demande d'intervention sur equipement camera N°1"
         equipment:
           type: string
-          required: true
           example: "CAM1"
         creationDate:
           $ref: '#/components/schemas/DateTime'
-          required: true
         lastModificationDate:
           $ref: '#/components/schemas/DateTime'
-          required: true
         startDate:
           $ref: '#/components/schemas/DateTime'
         endDate:
@@ -2401,14 +2436,11 @@ components:
           $ref: '#/components/schemas/DateTime'
         domain:
           type: string
-          required: true
           example: "EP"
         status:
           $ref: '#/components/schemas/ServiceStatus'
-          required: true
         category:
           type: string
-          required: true
           description: Value match one of `ServiceCategory` code
           example: "CURA"
     ServiceTypeReadDto:
@@ -2499,6 +2531,16 @@ components:
           description: Value match one of `Equipment Entity` code
           example: "CHALONS-COMMUN"
     EquipmentWriteDto:
+      required:
+        - id
+        - code
+        - name
+        - family
+        - domain
+        - entity
+        - city
+        - address
+        - level
       type: object
       additionalProperties: true
       properties:
@@ -2508,32 +2550,25 @@ components:
           example:
             SOURCE1: id1
             SOURCE2: id2
-          required: true
         code:
           type: string
-          required: true00
         name:
           type: string
-          required: true
           example: "A-001"
         family:
           type: string
-          required: true
           description: Value must match one of `Family` name
           example: "Armoire"
         domain:
           type: string
-          required: true
           description: Value must match one of `Domain` code
           example: "EP"
         entity:
           type: string
-          required: true
           description: Value must match one of `Equipment Entity` code
           example: "CHALONS-COMMUN"
         city:
           type: string
-          required: true
           description: Value must match one of `City` code
           example: "CHALONS"
         district:
@@ -2542,7 +2577,6 @@ components:
           example: "CENTRE"
         address:
           type: string
-          required: true
           example: "24 rue de Châlons"
         deleted:
           type: boolean
@@ -2550,7 +2584,6 @@ components:
           description: if true then the equipment will not be counted in the metrics and will not be returned
         level:
           type: integer
-          required: true
           description: Corresponds to the level to determine whether it will have a parent or not. If the value is 1, then it can be referenced in children equipments and will not itself have a parent equipment.
         parent:
           type: string

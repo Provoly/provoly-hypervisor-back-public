@@ -30,6 +30,7 @@ public class EventReadDto {
     private CommentReadDto lastComment;
     private int commentCount;
     private ParentReadDto parent;
+    private String creator;
 
     public EventReadDto(Integer id,
             String name,
@@ -52,7 +53,8 @@ public class EventReadDto {
             String externalSourceRef,
             CommentReadDto lastComment,
             int commentCount,
-            ParentReadDto parent) {
+            ParentReadDto parent,
+            String creator) {
         this.id = id;
         this.name = name;
         this.address = address;
@@ -75,6 +77,7 @@ public class EventReadDto {
         this.lastComment = lastComment;
         this.commentCount = commentCount;
         this.parent = parent;
+        this.creator = creator;
     }
 
     public Integer getId() {
@@ -163,5 +166,9 @@ public class EventReadDto {
 
     public CommentReadDto getLastComment() {
         return lastComment;
+    }
+
+    public String getCreator() {
+        return creator;
     }
 }

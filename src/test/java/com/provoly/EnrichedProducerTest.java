@@ -15,7 +15,8 @@ import com.provoly.equipment.EquipmentWriteDto;
 import com.provoly.equipmentEnriched.EquipmentEnriched;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventService;
-import com.provoly.event.dto.EventWriteDto;
+import com.provoly.event.dto.ExternalEventWriteDto;
+import com.provoly.event.dto.InternalEventWriteDto;
 import com.provoly.service.ServiceService;
 import com.provoly.service.ServiceWriteDto;
 import com.provoly.user.Role;
@@ -105,7 +106,7 @@ public class EnrichedProducerTest {
 
         // save event
         var equipId = equipmentService.getEquipments(List.of("CHALONS-COMMUN"), null, 1, 10).stream().findFirst().get().getId();
-        var event = new EventWriteDto(null,
+        var event = new InternalEventWriteDto(null,
                 "saved event",
                 "desc",
                 Criticality.HIGH,
@@ -116,12 +117,14 @@ public class EnrichedProducerTest {
                 "EP",
                 null,
                 null,
-                null);
+                null,
+                null,
+                "creator");
         var savedEvent = eventService.saveEvent(event); // 1 message
 
         // update event
         var equipId2 = equipmentService.getEquipments(List.of("AGGLO-COMMUN"), null, 1, 10).stream().findFirst().get().getId();
-        var eventUpdated = new EventWriteDto(savedEvent.getId(),
+        var eventUpdated = new InternalEventWriteDto(savedEvent.getId(),
                 "totoooo",
                 "desc",
                 Criticality.HIGH,
@@ -132,7 +135,9 @@ public class EnrichedProducerTest {
                 "EP",
                 null,
                 null,
-                null);
+                null,
+                null,
+                "creator");
         eventService.updateEvent(savedEvent.getId(), eventUpdated); // 2 messages : one for updated event and one for previous equipment
 
         // when
@@ -158,7 +163,7 @@ public class EnrichedProducerTest {
 
         var equipId = equipmentService.getEquipments(List.of("CHALONS-COMMUN"), null, 1, 10).stream().findFirst().get().getId();
 
-        var event = new EventWriteDto(null,
+        var event = new ExternalEventWriteDto(null,
                 "toto",
                 "desc",
                 Criticality.HIGH,
@@ -169,7 +174,10 @@ public class EnrichedProducerTest {
                 "EP",
                 null,
                 null,
-                "source");
+                null,
+                null,
+                "source",
+                null);
         eventService.saveEvent(event); // 1 messages
 
         // when
@@ -221,7 +229,7 @@ public class EnrichedProducerTest {
 
         var equipId = equipmentService.getEquipments(List.of("CHALONS-COMMUN"), null, 1, 10).stream().findFirst().get().getId();
 
-        var event = new EventWriteDto(null,
+        var event = new ExternalEventWriteDto(null,
                 "toto",
                 "desc",
                 Criticality.HIGH,
@@ -232,7 +240,10 @@ public class EnrichedProducerTest {
                 "EP",
                 null,
                 null,
-                "source");
+                null,
+                null,
+                "source",
+                null);
         var savedEvent = eventService.saveEvent(event); // 1 messages
 
         // when

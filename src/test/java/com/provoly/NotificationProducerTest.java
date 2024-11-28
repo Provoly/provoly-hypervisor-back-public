@@ -9,7 +9,7 @@ import jakarta.inject.Inject;
 
 import com.provoly.event.Criticality;
 import com.provoly.event.EventService;
-import com.provoly.event.dto.EventWriteDto;
+import com.provoly.event.dto.InternalEventWriteDto;
 import com.provoly.notification.ProvolyNotification;
 import com.provoly.user.UserService;
 
@@ -60,7 +60,7 @@ public class NotificationProducerTest {
         // given
         companion.registerSerde(ProvolyNotification.class, new ObjectMapperSerde<>(ProvolyNotification.class));
 
-        var event = new EventWriteDto(null,
+        var event = new InternalEventWriteDto(null,
                 "toto",
                 "desc",
                 Criticality.HIGH,
@@ -71,7 +71,9 @@ public class NotificationProducerTest {
                 "EP",
                 null,
                 null,
-                null);
+                null,
+                null,
+                "creator");
         eventService.saveEvent(event); // 1 message
         eventService.saveEvent(event); // 1 message
 

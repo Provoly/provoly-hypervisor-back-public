@@ -1,7 +1,5 @@
 package com.provoly;
 
-import static com.provoly.event.EventMapper.DEFAULT_SOURCE;
-
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
@@ -79,7 +77,7 @@ public class MockController {
         }
 
         for (int i = 0; i < eventNumber; i++) {
-            Event event = new Event();
+            Event event = new Event("toto");
             event.setCategory(randomCategory(categories));
             event.setName("MOCK: Evenement %s %s".formatted(event.getCategory().getName(), suffix(UUID.randomUUID())));
             event.setCreationDate(randomCreationDate());
@@ -93,7 +91,6 @@ public class MockController {
             event.setCriticality(randomCriticality());
             event.setDomain(randomDomain(List.of(epDomain, vpDomain)));
             event.setEquipment(randomEquipment(equipments));
-            event.setExternalSourceRef(DEFAULT_SOURCE);
             entityManager.persist(event);
             setStatus(event);
             setCloseDate(event);

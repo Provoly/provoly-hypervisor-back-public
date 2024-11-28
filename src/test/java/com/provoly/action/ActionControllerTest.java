@@ -15,7 +15,7 @@ import com.provoly.action.dto.ActionWriteDto;
 import com.provoly.comment.CommentWriteDto;
 import com.provoly.event.Criticality;
 import com.provoly.event.Status;
-import com.provoly.event.dto.EventWriteDto;
+import com.provoly.event.dto.InternalEventWriteDto;
 import com.provoly.procedure.ProcedureController;
 import com.provoly.procedure.ProcedureWriteDto;
 import com.provoly.user.Role;
@@ -124,7 +124,7 @@ public class ActionControllerTest {
         var event = dataService.getEvent1();
         UUID actionId = UUID.randomUUID();
 
-        var reportDto = new EventWriteDto(event.getId(),
+        var reportDto = new InternalEventWriteDto(event.getId(),
                 event.getName(),
                 "description",
                 Criticality.HIGH,
@@ -135,7 +135,9 @@ public class ActionControllerTest {
                 null,
                 event.getStartDate(),
                 event.getEndDate(),
-                event.getExternalSourceRef());
+                event.getCreationDate(),
+                null,
+                event.getCreator());
 
         ProcedureWriteDto dto = new ProcedureWriteDto(
                 procedureId,
