@@ -17,8 +17,7 @@ import jakarta.ws.rs.ForbiddenException;
 
 import com.provoly.TestDataService;
 import com.provoly.equipment.EquipmentService;
-import com.provoly.event.dto.ExternalEventWriteDto;
-import com.provoly.event.dto.InternalEventWriteDto;
+import com.provoly.event.dto.EventWriteDto;
 import com.provoly.user.Role;
 import com.provoly.user.UserService;
 
@@ -116,7 +115,7 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_create_event_with_invalid_domain() {
         // given
-        var event = new InternalEventWriteDto(null,
+        var event = new EventWriteDto(null,
                 "new event",
                 "desc",
                 Criticality.HIGH,
@@ -140,7 +139,7 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_create_event_with_invalid_sub_category() {
         // given
-        var event = new InternalEventWriteDto(null,
+        var event = new EventWriteDto(null,
                 "new event",
                 "desc",
                 Criticality.HIGH,
@@ -164,7 +163,7 @@ public class EventServiceTest {
     @Test
     void should_throw_exception_create_event_category_without_kwnown_sub_category() {
         // given
-        var event = new InternalEventWriteDto(null,
+        var event = new EventWriteDto(null,
                 "new event",
                 "desc",
                 Criticality.HIGH,
@@ -270,8 +269,8 @@ public class EventServiceTest {
     @Transactional
     void should_throw_exception_update_external_source_event() {
         // given
-        var event = dataService.getEvent1();
-        var eventUpdate = new ExternalEventWriteDto(event.getId(),
+        var event = dataService.getExternalEvent();
+        var eventUpdate = new EventWriteDto(event.getId(),
                 event.getName(),
                 event.getDescription(),
                 event.getCriticality(),
@@ -299,7 +298,7 @@ public class EventServiceTest {
     void should_throw_exception_update_creator_event() {
         // given
         var event = dataService.getEvent1();
-        var eventUpdate = new InternalEventWriteDto(event.getId(),
+        var eventUpdate = new EventWriteDto(event.getId(),
                 event.getName(),
                 event.getDescription(),
                 event.getCriticality(),
@@ -326,7 +325,7 @@ public class EventServiceTest {
     void should_throw_exception_update_external_source_event_2() {
         // given
         var event = dataService.getExternalEvent();
-        var eventUpdate = new ExternalEventWriteDto(
+        var eventUpdate = new EventWriteDto(
                 event.getId(),
                 event.getName(),
                 event.getDescription(),
@@ -355,7 +354,7 @@ public class EventServiceTest {
     void should_save_event_with_same_external_id_but_different_source_when_save_event() {
         // given
         var equipment = equipmentService.getEquipmentByName("A-230").getId();
-        var event = new ExternalEventWriteDto(null,
+        var event = new EventWriteDto(null,
                 "new event",
                 "desc",
                 Criticality.HIGH,
@@ -373,7 +372,7 @@ public class EventServiceTest {
         eventService.saveEvent(event);
 
         // when
-        var eventSameExternalId = new ExternalEventWriteDto(null,
+        var eventSameExternalId = new EventWriteDto(null,
                 "new event",
                 "desc",
                 Criticality.HIGH,

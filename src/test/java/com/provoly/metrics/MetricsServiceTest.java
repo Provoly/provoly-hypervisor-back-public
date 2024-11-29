@@ -10,19 +10,19 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 import com.provoly.TestDataService;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.EquipmentWriteDto;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventService;
-import com.provoly.event.dto.InternalEventWriteDto;
+import com.provoly.event.dto.EventWriteDto;
 import com.provoly.user.UserService;
 
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -98,7 +98,7 @@ public class MetricsServiceTest {
         // given
         saveDeletedEPEquipment();
         var equipmentId = equipmentService.getEquipmentByName("deleted").getId();
-        var event = new InternalEventWriteDto(null,
+        var event = new EventWriteDto(null,
                 "deleted",
                 "desc",
                 Criticality.LOW,
@@ -200,7 +200,7 @@ public class MetricsServiceTest {
         // when adding a new event for an unmanaged equipment
         var equipUnmanaged = equipmentService.getEquipmentByName("C-762");
 
-        eventService.saveEvent(new InternalEventWriteDto(null,
+        eventService.saveEvent(new EventWriteDto(null,
                 "new report event",
                 "description",
                 Criticality.LOW,
@@ -508,7 +508,7 @@ public class MetricsServiceTest {
         //given
         saveDeletedVPEquipment();
         var equipmentId = equipmentService.getEquipmentByName("deleted_VP").getId();
-        var event = new InternalEventWriteDto(null,
+        var event = new EventWriteDto(null,
                 "deleted",
                 "desc",
                 Criticality.LOW,
@@ -582,7 +582,7 @@ public class MetricsServiceTest {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
 
-        eventService.saveEvent(new InternalEventWriteDto(null,
+        eventService.saveEvent(new EventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -615,7 +615,7 @@ public class MetricsServiceTest {
         saveDeletedVPEquipment();
         var vpEquipment = equipmentService.getEquipmentByName("deleted_VP");
 
-        eventService.saveEvent(new InternalEventWriteDto(null,
+        eventService.saveEvent(new EventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -647,7 +647,7 @@ public class MetricsServiceTest {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
 
-        eventService.saveEvent(new InternalEventWriteDto(null,
+        eventService.saveEvent(new EventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -680,7 +680,7 @@ public class MetricsServiceTest {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
 
-        var savedEvent = eventService.saveEvent(new InternalEventWriteDto(null,
+        var savedEvent = eventService.saveEvent(new EventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -712,7 +712,7 @@ public class MetricsServiceTest {
     void should_get_all_anomalies_number_grouped_by_subcategories_and_equipment_entities() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
-        eventService.saveEvent(new InternalEventWriteDto(null,
+        eventService.saveEvent(new EventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -744,7 +744,7 @@ public class MetricsServiceTest {
         // given
         saveDeletedVPEquipment();
         var vpEquipment = equipmentService.getEquipmentByName("deleted_VP");
-        eventService.saveEvent(new InternalEventWriteDto(null,
+        eventService.saveEvent(new EventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -775,7 +775,7 @@ public class MetricsServiceTest {
     void should_get_anomaly_event_for_last_2_months() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
-        eventService.saveEvent(new InternalEventWriteDto(null,
+        eventService.saveEvent(new EventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -806,7 +806,7 @@ public class MetricsServiceTest {
     void should_get_anomaly_event_for_last_2_months_for_fagniere_place() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
-        eventService.saveEvent(new InternalEventWriteDto(null,
+        eventService.saveEvent(new EventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -838,7 +838,7 @@ public class MetricsServiceTest {
     void should_get_anomaly_event_for_last_2_months_for_entity_SMP() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
-        eventService.saveEvent(new InternalEventWriteDto(null,
+        eventService.saveEvent(new EventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -867,7 +867,7 @@ public class MetricsServiceTest {
     void should_get_anomaly_event_for_last_2_months_for_all_domains() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
-        eventService.saveEvent(new InternalEventWriteDto(null,
+        eventService.saveEvent(new EventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -898,7 +898,7 @@ public class MetricsServiceTest {
     void should_get_anomaly_event_for_last_2_months_with_null_criticality() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
-        eventService.saveEvent(new InternalEventWriteDto(null,
+        eventService.saveEvent(new EventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -928,7 +928,7 @@ public class MetricsServiceTest {
     void should_get_anomaly_events_count_for_vp_equipments() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
-        eventService.saveEvent(new InternalEventWriteDto(null,
+        eventService.saveEvent(new EventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,
@@ -957,7 +957,7 @@ public class MetricsServiceTest {
     void should_not_get_anomaly_events_count_for_vp_equipments_date_is_too_late() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
-        eventService.saveEvent(new InternalEventWriteDto(null,
+        eventService.saveEvent(new EventWriteDto(null,
                 "new anomaly event",
                 "description",
                 Criticality.LOW,

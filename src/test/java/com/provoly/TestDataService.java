@@ -21,8 +21,6 @@ import com.provoly.comment.Comment;
 import com.provoly.equipment.*;
 import com.provoly.event.*;
 import com.provoly.event.dto.EventWriteDto;
-import com.provoly.event.dto.ExternalEventWriteDto;
-import com.provoly.event.dto.InternalEventWriteDto;
 import com.provoly.model.ProcedureModel;
 import com.provoly.procedure.Procedure;
 import com.provoly.service.Service;
@@ -188,7 +186,7 @@ public class TestDataService {
     }
 
     public EventWriteDto buildEvent(String name, String category, Criticality criticality, boolean isWithDate) {
-        return new InternalEventWriteDto(null,
+        return new EventWriteDto(null,
                 name,
                 "desc",
                 criticality,
@@ -206,7 +204,7 @@ public class TestDataService {
 
     public EventWriteDto buildExternalEvent(String name, String category, Criticality criticality, boolean isWithDate,
             UUID equipmentId, String source) {
-        return new ExternalEventWriteDto(null,
+        return new EventWriteDto(null,
                 name,
                 "desc",
                 criticality,
@@ -258,7 +256,6 @@ public class TestDataService {
 
         Event event;
         if (externalRef != null) {
-
             event = new Event(UUID.randomUUID().toString(), externalRef);
         } else {
             event = new Event("creator");

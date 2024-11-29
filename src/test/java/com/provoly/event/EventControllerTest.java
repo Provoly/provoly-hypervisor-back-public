@@ -20,7 +20,7 @@ import jakarta.validation.ConstraintViolationException;
 
 import com.provoly.TestDataService;
 import com.provoly.comment.CommentWriteDto;
-import com.provoly.event.dto.InternalEventWriteDto;
+import com.provoly.event.dto.EventWriteDto;
 import com.provoly.user.UserService;
 
 import io.quarkus.security.ForbiddenException;
@@ -472,7 +472,7 @@ public class EventControllerTest {
     @TestSecurity(user = "reader", roles = { "event_write" })
     void should_throw_create_event_missing_required_property() {
         // given
-        var event = new InternalEventWriteDto(null,
+        var event = new EventWriteDto(null,
                 null,
                 "desc",
                 null,
@@ -729,7 +729,7 @@ public class EventControllerTest {
     @TestSecurity(user = "reader", roles = { "event_read", "event_write" })
     void should_return_event_closed_from_close_date_and_not_before() {
         // given
-        var event = new InternalEventWriteDto(null,
+        var event = new EventWriteDto(null,
                 "closed",
                 "desc",
                 HIGH,

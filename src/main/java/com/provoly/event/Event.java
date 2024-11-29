@@ -252,4 +252,8 @@ public class Event {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    public boolean isExternal() {
+        return externalSourceRef != null && !externalSourceRef.equals(DEFAULT_SOURCE);
+    }
 }

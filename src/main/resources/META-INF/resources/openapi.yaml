@@ -138,9 +138,7 @@ paths:
         content:
           application/json:
             schema:
-              OneOf:
-                - $ref: '#/components/schemas/ExternalEventWriteDto'
-                - $ref: '#/components/schemas/InternalEventWriteDto'
+              $ref: '#/components/schemas/EventWriteDto'
       responses:
         "201":
           description: Created
@@ -2156,26 +2154,17 @@ components:
           type: integer
           description: Parent event
           example: 3
-    ExternalEventWriteDto:
-      allOf:
-        - $ref: '#/components/schemas/EventWriteDto'
-        - type : object
-          required:
-            - creator
-          properties:
-            creator:
-              type: string
-    InternalEventWriteDto:
-      allOf:
-        - $ref: '#/components/schemas/EventWriteDto'
-        - type: object
-          required:
-            - externalSourceRef
-          properties:
-            externalSourceRef:
-              type: string
-            externalId:
-              type: string
+        creator:
+          type: string
+          description: Event creator, required if event is created from Hypervisor
+          example: "toto"
+        externalSourceRef:
+          type: string
+          description: Event source, required if event is external
+          example: "Citylinx"
+        externalId:
+          type: string
+          description: If event is external, it's possible to provide an external id
     ParentReadDto:
       type: object
       properties:

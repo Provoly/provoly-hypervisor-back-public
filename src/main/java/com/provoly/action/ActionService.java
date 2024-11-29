@@ -16,6 +16,7 @@ import com.provoly.user.Role;
 import com.provoly.user.UserService;
 
 import io.quarkus.security.ForbiddenException;
+
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
@@ -25,7 +26,8 @@ public class ActionService {
     private final ActionMapper actionMapper;
     private final UserService userService;
 
-    public ActionService(Logger logger, ActionDatabaseReader databaseReader, ActionMapper actionMapper, UserService userService) {
+    public ActionService(Logger logger, ActionDatabaseReader databaseReader, ActionMapper actionMapper,
+            UserService userService) {
         this.logger = logger;
         this.databaseReader = databaseReader;
         this.actionMapper = actionMapper;

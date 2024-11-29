@@ -9,12 +9,8 @@ import jakarta.validation.constraints.NotNull;
 import com.provoly.event.Criticality;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION, defaultImpl = InternalEventWriteDto.class)
-@JsonSubTypes({ @JsonSubTypes.Type(ExternalEventWriteDto.class), @JsonSubTypes.Type(InternalEventWriteDto.class) })
-public abstract sealed class EventWriteDto permits ExternalEventWriteDto, InternalEventWriteDto {
+public class EventWriteDto {
     private final Integer id;
 
     @NotNull
@@ -47,8 +43,14 @@ public abstract sealed class EventWriteDto permits ExternalEventWriteDto, Intern
 
     private final Integer parent;
 
+    private final String externalSourceRef;
+
+    private final String externalId;
+
+    private final String creator;
+
     @JsonCreator
-    protected EventWriteDto(Integer id,
+    public EventWriteDto(Integer id,
             String name,
             String description,
             Criticality criticality,
@@ -60,7 +62,10 @@ public abstract sealed class EventWriteDto permits ExternalEventWriteDto, Intern
             Instant startDate,
             Instant endDate,
             Instant creationDate,
-            Integer parent) {
+            Integer parent,
+            String creator,
+            String externalSourceRef,
+            String externalId) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -74,6 +79,74 @@ public abstract sealed class EventWriteDto permits ExternalEventWriteDto, Intern
         this.endDate = endDate;
         this.creationDate = creationDate;
         this.parent = parent;
+        this.externalSourceRef = externalSourceRef;
+        this.externalId = externalId;
+        this.creator = creator;
+    }
+
+    public EventWriteDto(Integer id,
+            String name,
+            String description,
+            Criticality criticality,
+            String category,
+            String subCategory,
+            String address,
+            UUID equipmentId,
+            String domain,
+            Instant startDate,
+            Instant endDate,
+            Instant creationDate,
+            Integer parent,
+            String creator) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.criticality = criticality;
+        this.category = category;
+        this.subCategory = subCategory;
+        this.address = address;
+        this.equipmentId = equipmentId;
+        this.domain = domain;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.creationDate = creationDate;
+        this.parent = parent;
+        this.externalSourceRef = null;
+        this.externalId = null;
+        this.creator = creator;
+    }
+
+    public EventWriteDto(Integer id,
+            String name,
+            String description,
+            Criticality criticality,
+            String category,
+            String subCategory,
+            String address,
+            UUID equipmentId,
+            String domain,
+            Instant startDate,
+            Instant endDate,
+            Instant creationDate,
+            Integer parent,
+            String externalSourceRef,
+            String externalId) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.criticality = criticality;
+        this.category = category;
+        this.subCategory = subCategory;
+        this.address = address;
+        this.equipmentId = equipmentId;
+        this.domain = domain;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.creationDate = creationDate;
+        this.parent = parent;
+        this.externalSourceRef = externalSourceRef;
+        this.externalId = externalId;
+        this.creator = null;
     }
 
     public Integer getId() {
@@ -126,5 +199,17 @@ public abstract sealed class EventWriteDto permits ExternalEventWriteDto, Intern
 
     public Integer getParent() {
         return parent;
+    }
+
+    public String getExternalSourceRef() {
+        return externalSourceRef;
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public String getCreator() {
+        return creator;
     }
 }
