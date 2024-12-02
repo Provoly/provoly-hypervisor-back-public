@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.*;
 
+import com.provoly.error.AlreadyExistsException;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ForbiddenException;
 
@@ -159,6 +160,24 @@ public class ProcedureModelControllerTest {
 
         //then
         assertThat(udpatedProcedureModel).extracting("description").isEqualTo("desc updated");
+    }
+
+    @Test
+    @TestSecurity(user = "reader", roles = { "proc_model_write", "proc_model_read" })
+    void should_not_update_procedure_model_name_already_exits() {
+        // given
+        var id = procedureModelController.getProceduresModel(1, 1, null, null, List.of(), "flora model2")
+                .stream()
+                .findFirst()
+                .get()
+                .id();
+        var procedureModelToUpdate = new ProcedureModelWriteDto(id, "ç'est le model1", "desc updated", "EP", "stella",
+                List.of());
+
+        // when
+        assertThatThrownBy(() -> procedureModelController.updateProcedureModel(id, procedureModelToUpdate))
+                .isInstanceOf(AlreadyExistsException.class)
+                .hasMessageContaining("already exists");
     }
 
     @Test

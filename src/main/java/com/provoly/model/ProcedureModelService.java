@@ -100,6 +100,11 @@ public class ProcedureModelService {
             throw new IllegalArgumentException(
                     "It's not possible to update Procedure model creator for procedure %s".formatted(model.getId()));
         }
+
+        if (!model.getName().equals(dto.name()) && databaseReader.isProcedureModelWithNameExists(dto.name())) {
+            throw new AlreadyExistsException("Procedure model with name '%s' already exists".formatted(dto.name()));
+        }
+
         procedureModelMapper.updateProcedureModel(model, dto);
 
         var currentActionIds = model.getActions().stream().map(Action::getId).collect(Collectors.toSet());
