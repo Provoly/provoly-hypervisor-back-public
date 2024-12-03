@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.*;
 
-import com.provoly.error.AlreadyExistsException;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ForbiddenException;
 
@@ -13,6 +12,7 @@ import com.provoly.TestDataService;
 import com.provoly.action.dto.ActionWriteDto;
 import com.provoly.action.dto.OtherActionWriteDto;
 import com.provoly.action.dto.PhoneActionWriteDto;
+import com.provoly.error.AlreadyExistsException;
 import com.provoly.event.Status;
 
 import io.quarkus.test.junit.QuarkusTest;

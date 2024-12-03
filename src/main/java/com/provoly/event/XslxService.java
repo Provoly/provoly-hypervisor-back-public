@@ -76,7 +76,7 @@ public class XslxService {
                 setRow(row, rowIndex++, event.services().toString());
                 setRow(row, rowIndex++, event.startDate());
                 setRow(row, rowIndex++, event.endDate());
-                setRow(row, rowIndex++, event.creator());
+                setRow(row, rowIndex++, event.creator() == null ? "-" : event.creator());
                 setRow(row, rowIndex++, event.creationDate());
                 setRow(row, rowIndex++, event.lastModificationDate());
                 setRow(row, rowIndex++, event.closeDate());
