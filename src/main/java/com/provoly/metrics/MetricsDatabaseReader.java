@@ -32,7 +32,6 @@ public class MetricsDatabaseReader extends DatabaseReader {
     public static final String ANOMALY_CATEGORY = "ANOMALY";
     public static final String UNMANAGED = "unmanaged";
     public static final String MANAGED = "managed";
-    public static final String NONE_SUBCATEGORY = "NONE";
 
     private final Logger logger;
 
@@ -81,7 +80,6 @@ public class MetricsDatabaseReader extends DatabaseReader {
                         .stream()
                         .map(c -> getSubCategories(c).toList())
                         .flatMap(Collection::stream)
-                        .filter(c -> !c.getCode().equals(NONE_SUBCATEGORY))
                         .collect(Collectors.toList());
                 subcategory.addAll(categories);
                 logger.debugf("filter on  %s", subcategory);
@@ -481,7 +479,6 @@ public class MetricsDatabaseReader extends DatabaseReader {
     private List<String> getAnomalySubCategoriesCode() {
         return getSubCategories(getCategoryByCode(ANOMALY_CATEGORY))
                 .map(EnumEntity::getCode)
-                .filter(code -> !code.equals(NONE_SUBCATEGORY))
                 .toList();
     }
 
