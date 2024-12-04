@@ -604,6 +604,7 @@ public class MetricsServiceTest {
                 List.of(), List.of(), null);
 
         //then
+        assertThat(result).containsOnlyKeys("TRAFFIC_CONGESTION", "WILD_STORAGE", "UNUSUAL_FLOW");
         assertThat(result).extracting("TRAFFIC_CONGESTION").isEqualTo(1L);
         assertThat(result).extracting("WILD_STORAGE").isEqualTo(0L);
         assertThat(result).extracting("UNUSUAL_FLOW").isEqualTo(0L);
@@ -637,6 +638,7 @@ public class MetricsServiceTest {
                 List.of(), List.of(), null);
 
         //then
+        assertThat(result).containsOnlyKeys("TRAFFIC_CONGESTION", "WILD_STORAGE", "UNUSUAL_FLOW");
         assertThat(result).extracting("TRAFFIC_CONGESTION").isEqualTo(0L);
         assertThat(result).extracting("WILD_STORAGE").isEqualTo(0L);
         assertThat(result).extracting("UNUSUAL_FLOW").isEqualTo(0L);
@@ -669,6 +671,7 @@ public class MetricsServiceTest {
                 List.of(), List.of(), "camera1");
 
         //then
+        assertThat(result).containsOnlyKeys("TRAFFIC_CONGESTION", "WILD_STORAGE", "UNUSUAL_FLOW");
         assertThat(result).extracting("TRAFFIC_CONGESTION").isEqualTo(1L);
         assertThat(result).extracting("WILD_STORAGE").isEqualTo(0L);
         assertThat(result).extracting("UNUSUAL_FLOW").isEqualTo(0L);
@@ -703,6 +706,7 @@ public class MetricsServiceTest {
                 List.of(), List.of(), null);
 
         //then
+        assertThat(result).containsOnlyKeys("TRAFFIC_CONGESTION", "WILD_STORAGE", "UNUSUAL_FLOW");
         assertThat(result).extracting("TRAFFIC_CONGESTION").isEqualTo(0L);
         assertThat(result).extracting("WILD_STORAGE").isEqualTo(0L);
         assertThat(result).extracting("UNUSUAL_FLOW").isEqualTo(0L);
@@ -772,7 +776,7 @@ public class MetricsServiceTest {
     }
 
     @Test
-    void should_get_anomaly_event_for_last_2_months() {
+    void should_get_1_anomaly_event_for_last_2_months_because_NONE_subcategory_is_ignored() {
         // given
         var vpEquipment = equipmentService.getEquipmentByName("camera1");
         eventService.saveEvent(new EventWriteDto(null,
@@ -781,6 +785,21 @@ public class MetricsServiceTest {
                 Criticality.LOW,
                 "ANOMALY",
                 "TRAFFIC_CONGESTION",
+                "address",
+                vpEquipment.getId(),
+                "VP",
+                null,
+                null,
+                null,
+                null,
+                "creator"));
+
+        eventService.saveEvent(new EventWriteDto(null,
+                "new anomaly event",
+                "description",
+                Criticality.LOW,
+                "ANOMALY",
+                "NONE",
                 "address",
                 vpEquipment.getId(),
                 "VP",
