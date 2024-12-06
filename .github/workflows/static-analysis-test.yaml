@@ -84,7 +84,7 @@ jobs:
           mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1.2184:sonar \
             -Dsonar.host.url=${{ env.SONAR_URL }}\
             -Dsonar.login=${{ env.SONAR_TOKEN }}\
-            -Dsonar.projectKey=provoly-streams \
+            -Dsonar.projectKey=provoly-hypervisor-back \
             -Dsonar.dependencyCheck.jsonReportPath=${{ github.workspace }}/target/dependency-check-report.json\
             -Dsonar.dependencyCheck.htmlReportPath=${{ github.workspace }}/target/dependency-check-report.html\
             -Dsonar.coverage.jacoco.xmlReportPaths=${{ github.workspace }}/target/**/coverage/jacoco.xml
