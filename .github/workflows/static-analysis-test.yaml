@@ -47,6 +47,7 @@ jobs:
       - run: echo $(pwd)
       - run: ls /home/runner/.m2/repository/org/owasp/dependency-check-data
       - run: sudo apt-get update && sudo apt-get install -y tree && tree /home/runner/.m2/
+      - run: sudo find / -name dependency-check-data -type d 2>/dev/null
 
       - name: Generate Coverage
         run: |
