@@ -31,10 +31,6 @@ jobs:
         with:
           maven-version: 3.9.1
 
-      - run: ls ~
-      - run: echo $HOME
-      - run: echo $(pwd)
-
       - name: Cache local Maven repository
         uses: actions/cache@v4
         with:
@@ -45,6 +41,12 @@ jobs:
 
       - name: Check cve and generate report
         run: mvn ${{ env.MAVEN_CLI_OPTS }} -P cve org.owasp:dependency-check-maven:8.1.2:aggregate
+
+      - run: ls ~
+      - run: echo $HOME
+      - run: echo $(pwd)
+      - run: ls /home/runner/.m2/repository/org/owasp/dependency-check-data
+      - run: tree /home/runner/.m2/
 
       - name: Generate Coverage
         run: |
