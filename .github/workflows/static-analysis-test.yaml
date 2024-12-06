@@ -31,11 +31,15 @@ jobs:
         with:
           maven-version: 3.9.1
 
+      - run: ls ~
+      - run: echo $HOME
+      - run: echo $(pwd)
+
       - name: Cache local Maven repository
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
-          key: provoly-maven-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('~/.m2/repository/org/owasp/dependency-check-data/7.0/odc.mv.db') }}
+          key: provoly-maven-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('/home/runner/.m2/repository/org/owasp/dependency-check-data/7.0/odc.mv.db') }}
           restore-keys: |
             provoly-maven-
 
