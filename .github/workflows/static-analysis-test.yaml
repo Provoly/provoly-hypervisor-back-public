@@ -35,7 +35,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
-          key: provoly-maven-${{ hashFiles('**/pom.xml') }}
+          key: provoly-maven-${{ hashFiles('**/pom.xml', '~/.m2/repository/org/owasp/dependency-check-data/7.0/odc.mv.db') }}
           restore-keys: |
             provoly-maven-
 
@@ -72,9 +72,6 @@ jobs:
         with:
           name: code-coverage-report
           path: ${{ github.workspace }}/target
-
-      - run: ls -ail
-      - run: ls -ail target
 
       - name: Run sonar analysis
         env:
