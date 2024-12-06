@@ -35,7 +35,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
-          key: provoly-maven-${{ hashFiles('**/pom.xml', '~/.m2/repository/org/owasp/dependency-check-data/7.0/odc.mv.db') }}
+          key: provoly-maven-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('~/.m2/repository/org/owasp/dependency-check-data/7.0/odc.mv.db') }}
           restore-keys: |
             provoly-maven-
 
