@@ -66,7 +66,11 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          echo "| Sonar |  ${{ steps.sonar.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "# Steps status " >> $GITHUB_STEP_SUMMARY
+          echo "| Step | State |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Setting up runner | ${{ steps.cache-maven.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| CVE's | ${{ steps.cve.outcome }} |" >> $GITHUB_STEP_SUMMARY
 
   sonar:
     needs: generate-coverage
