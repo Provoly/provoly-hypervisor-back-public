@@ -89,4 +89,4 @@ jobs:
             -Dsonar.projectKey=provoly-hypervisor-back \
             -Dsonar.dependencyCheck.jsonReportPath=${{ github.workspace }}/target/dependency-check-report.json\
             -Dsonar.dependencyCheck.htmlReportPath=${{ github.workspace }}/target/dependency-check-report.html\
-            -Dsonar.coverage.jacoco.xmlReportPaths=${{ github.workspace }}/target/**/coverage/jacoco.xml
+            -Dsonar.coverage.jacoco.xmlReportPaths=${{ github.workspace }}/target/jacoco-report/jacoco.xml
