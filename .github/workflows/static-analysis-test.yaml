@@ -31,6 +31,9 @@ jobs:
         with:
           maven-version: 3.9.1
 
+      - name: Check cve and generate report
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} -P cve org.owasp:dependency-check-maven:8.1.2:aggregate
+
       - name: Cache local Maven repository
         uses: actions/cache@v4
         with:
@@ -40,9 +43,6 @@ jobs:
             provoly-maven-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('/home/runner/.m2/repository/org/owasp/dependency-check-data/7.0/odc.mv.db') }}
             provoly-maven-${{ hashFiles('**/pom.xml') }}
             provoly-maven-
-
-      - name: Check cve and generate report
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} -P cve org.owasp:dependency-check-maven:8.1.2:aggregate
 
       - name: Generate Coverage
         run: |
