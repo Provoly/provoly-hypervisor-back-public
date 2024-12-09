@@ -31,18 +31,21 @@ jobs:
         with:
           maven-version: 3.9.1
 
-      - name: Check cve and generate report
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} -P cve org.owasp:dependency-check-maven:8.1.2:aggregate
+      - name: Get latest CVE version
+        run: curl https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json -o known_exploited_vulnerabilities.json
 
       - name: Cache local Maven repository
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
-          key: provoly-maven-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('/home/runner/.m2/repository/org/owasp/dependency-check-data/7.0/odc.mv.db') }}
+          key: provoly-maven-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('known_exploited_vulnerabilities.json') }}
           restore-keys: |
-            provoly-maven-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('/home/runner/.m2/repository/org/owasp/dependency-check-data/7.0/odc.mv.db') }}
+            provoly-maven-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('known_exploited_vulnerabilities.json') }}
             provoly-maven-${{ hashFiles('**/pom.xml') }}
             provoly-maven-
+
+      - name: Check cve and generate report
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} -P cve org.owasp:dependency-check-maven:8.1.2:aggregate
 
       - name: Generate Coverage
         run: |
