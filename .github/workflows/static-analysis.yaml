@@ -40,6 +40,7 @@ jobs:
 
       - name: Cache local Maven repository
         uses: actions/cache@v4
+        id: cache-maven
         with:
           path: ~/.m2/repository
           key: provoly-maven-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('known_exploited_vulnerabilities.json') }}
@@ -49,6 +50,7 @@ jobs:
             provoly-maven-
 
       - name: Check cve and generate report
+        id: cve
         run: mvn ${{ env.MAVEN_CLI_OPTS }} -P cve org.owasp:dependency-check-maven:8.1.2:aggregate
 
       - name: Generate Coverage
@@ -60,6 +62,11 @@ jobs:
         with:
           name: code-coverage-report
           path: ${{ github.workspace }}/target
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "| Sonar |  ${{ steps.sonar.outcome }} |" >> $GITHUB_STEP_SUMMARY
 
   sonar:
     needs: generate-coverage
@@ -83,6 +90,7 @@ jobs:
           path: ${{ github.workspace }}/target
 
       - name: Run sonar analysis
+        id: sonar
         env:
           SONAR_URL: ${{ vars.SONAR_URL }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -94,3 +102,8 @@ jobs:
             -Dsonar.dependencyCheck.jsonReportPath=${{ github.workspace }}/target/dependency-check-report.json\
             -Dsonar.dependencyCheck.htmlReportPath=${{ github.workspace }}/target/dependency-check-report.html\
             -Dsonar.coverage.jacoco.xmlReportPaths=${{ github.workspace }}/target/jacoco-report/jacoco.xml
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "| Sonar |  ${{ steps.sonar.outcome }} |" >> $GITHUB_STEP_SUMMARY
