@@ -1,4 +1,4 @@
-package com.provoly.equipmentEnriched;
+package com.provoly.equipmentenriched;
 
 import static com.provoly.service.ServiceStatus.ASKED;
 import static com.provoly.service.ServiceStatus.IN_PROGRESS;
@@ -58,10 +58,19 @@ public class EquipmentEnriched {
                 .toList();
     }
 
-    public EquipmentEnriched(UUID id, String externalId, String name, String code, String domain, String entity, String family,
-            String place, boolean deleted, Map<String, Object> attributes, EquipmentEnriched parent,
+    public EquipmentEnriched(UUID id,
+            String name,
+            String code,
+            String domain,
+            String entity,
+            String family,
+            String place,
+            boolean deleted,
+            Map<String, Object> attributes,
+            EquipmentEnriched parent,
             List<CondensedEvent> events,
-            long nbServicesAskedInProgress, List<CondensedService> services) {
+            long nbServicesAskedInProgress,
+            List<CondensedService> services) {
         this.id = id;
         this.name = name;
         this.code = code;

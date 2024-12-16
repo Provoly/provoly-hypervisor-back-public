@@ -11,7 +11,7 @@ import jakarta.transaction.Transactional;
 
 import com.provoly.action.ActionService;
 import com.provoly.action.AskedService;
-import com.provoly.equipmentEnriched.EquipmentEnrichedProducer;
+import com.provoly.equipmentenriched.EquipmentEnrichedProducer;
 import com.provoly.service.coswin.CoswinService;
 
 import org.jboss.logging.Logger;

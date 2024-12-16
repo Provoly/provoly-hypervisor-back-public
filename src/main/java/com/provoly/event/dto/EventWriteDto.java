@@ -98,22 +98,22 @@ public class EventWriteDto {
             Instant creationDate,
             Integer parent,
             String creator) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.criticality = criticality;
-        this.category = category;
-        this.subCategory = subCategory;
-        this.address = address;
-        this.equipmentId = equipmentId;
-        this.domain = domain;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.creationDate = creationDate;
-        this.parent = parent;
-        this.externalSourceRef = null;
-        this.externalId = null;
-        this.creator = creator;
+        this(id,
+                name,
+                description,
+                criticality,
+                category,
+                subCategory,
+                address,
+                equipmentId,
+                domain,
+                startDate,
+                endDate,
+                creationDate,
+                parent,
+                creator,
+                null,
+                null);
     }
 
     public EventWriteDto(Integer id,
@@ -131,22 +131,22 @@ public class EventWriteDto {
             Integer parent,
             String externalSourceRef,
             String externalId) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.criticality = criticality;
-        this.category = category;
-        this.subCategory = subCategory;
-        this.address = address;
-        this.equipmentId = equipmentId;
-        this.domain = domain;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.creationDate = creationDate;
-        this.parent = parent;
-        this.externalSourceRef = externalSourceRef;
-        this.externalId = externalId;
-        this.creator = null;
+        this(id,
+                name,
+                description,
+                criticality,
+                category,
+                subCategory,
+                address,
+                equipmentId,
+                domain,
+                startDate,
+                endDate,
+                creationDate,
+                parent,
+                null,
+                externalSourceRef,
+                externalId);
     }
 
     public Integer getId() {

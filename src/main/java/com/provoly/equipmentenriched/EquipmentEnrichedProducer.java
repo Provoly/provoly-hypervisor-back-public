@@ -1,4 +1,4 @@
-package com.provoly.equipmentEnriched;
+package com.provoly.equipmentenriched;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -15,12 +15,8 @@ import org.jboss.logging.Logger;
 @ApplicationScoped
 public class EquipmentEnrichedProducer {
 
-    // TODO : Add and clean configuration for kafka broker
-    // TODO : Create topic with good parameters
-    // TODO : Key should be an externalReference
-    private Logger log;
-
-    private Emitter<EquipmentEnriched> equipmentEmitter;
+    private final Logger log;
+    private final Emitter<EquipmentEnriched> equipmentEmitter;
 
     public EquipmentEnrichedProducer(Logger log,
             @Channel("equipment") Emitter<EquipmentEnriched> equipmentEmitter) {
@@ -52,7 +48,7 @@ public class EquipmentEnrichedProducer {
     }
 
     public void send(EquipmentEnriched enriched) {
-        equipmentEmitter.send(KafkaRecord.of(enriched.getCode(), enriched));
+        equipmentEmitter.send(KafkaRecord.of(null, enriched));
     }
 
 }

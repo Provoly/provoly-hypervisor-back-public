@@ -20,7 +20,6 @@ public class XslxService {
 
     public static final int ID_SIZE = 6;
     private final Logger logger;
-    private CellStyle style;
 
     public XslxService(Logger logger) {
         this.logger = logger;

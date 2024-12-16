@@ -1,4 +1,4 @@
-package com.provoly;
+package com.provoly.equipmentenriched;
 
 import static com.provoly.service.ServiceStatus.ASKED;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,9 +10,9 @@ import java.util.List;
 
 import jakarta.inject.Inject;
 
+import com.provoly.TestDataService;
 import com.provoly.equipment.EquipmentService;
 import com.provoly.equipment.EquipmentWriteDto;
-import com.provoly.equipmentEnriched.EquipmentEnriched;
 import com.provoly.event.Criticality;
 import com.provoly.event.EventService;
 import com.provoly.event.dto.EventWriteDto;

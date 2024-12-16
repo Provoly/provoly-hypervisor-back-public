@@ -27,7 +27,7 @@ public class ConstraintViolationMapper implements ExceptionMapper<ConstraintViol
                 .orElse(null);
     }
 
-    private String getMessageForViolation(ConstraintViolation constraintViolation) {
+    private String getMessageForViolation(ConstraintViolation<?> constraintViolation) {
         String propertyName = "";
         Integer index = null; // To manage constraint violations on entities collection
 
