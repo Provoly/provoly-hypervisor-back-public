@@ -139,7 +139,7 @@ public class EventService {
                 .toList();
 
         var entities = entity.stream()
-                .map(equipmentService::getEquipmentEntity)
+                .map(equipmentService::getEquipmentEntityByCode)
                 .toList();
 
         var families = family.stream()

@@ -36,10 +36,11 @@ public class EquipmentController {
     @GET
     @RolesAllowed({ Role.STR_EQUIPMENT_READ })
     public Collection<EquipmentReadDto> getEquipments(@RestQuery List<String> entity,
+            @RestQuery List<String> family,
             @RestQuery String search,
             @DefaultValue("1") @Positive @RestQuery int page,
             @DefaultValue("20") @Positive @RestQuery int pageSize) {
-        var equipments = equipmentService.getEquipments(entity, search, page, pageSize);
+        var equipments = equipmentService.getEquipments(entity, family, search, page, pageSize);
         return equipmentMapper.mapToEquipmentReadDto(equipments);
 
     }

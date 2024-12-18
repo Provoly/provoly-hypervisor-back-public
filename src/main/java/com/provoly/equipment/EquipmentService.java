@@ -67,10 +67,13 @@ public class EquipmentService {
     }
 
     @Transactional
-    public Collection<Equipment> getEquipments(Collection<String> entities, String search, int page, int pageSize) {
-        logger.debugf("Get all equipments with entities %s", entities);
-        var equipmentEntities = entities.stream().map(this::getEquipmentEntity).toList();
-        return databaseReader.getEquipments(equipmentEntities, search, page, pageSize);
+    public Collection<Equipment> getEquipments(Collection<String> entities, Collection<String> families, String search,
+            int page,
+            int pageSize) {
+        logger.debugf("Get all equipments with entities %s and families", entities, families);
+        var equipmentEntities = entities.stream().map(this::getEquipmentEntityByCode).toList();
+        var equipmentFamilies = families.stream().map(this::getFamilyByCode).toList();
+        return databaseReader.getEquipments(equipmentEntities, equipmentFamilies, search, page, pageSize);
     }
 
     @Transactional
@@ -80,7 +83,7 @@ public class EquipmentService {
     }
 
     @Transactional
-    public EquipmentEntity getEquipmentEntity(String entity) {
+    public EquipmentEntity getEquipmentEntityByCode(String entity) {
         logger.debugf("Get equipment entity %s", entity);
         return databaseReader.getEquipmentEntityByCode(entity)
                 .orElseThrow(() -> new IllegalArgumentException("Entity code %s invalid".formatted(entity)));

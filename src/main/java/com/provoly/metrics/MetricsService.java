@@ -278,7 +278,7 @@ public class MetricsService {
         var districts = place.stream()
                 .map(code -> code == null || code.isEmpty() ? null : equipmentService.getDistrictByCode(code).getId()).toList();
         var entities = entity.stream()
-                .map(code -> code == null || code.isEmpty() ? null : equipmentService.getEquipmentEntity(code).getId())
+                .map(code -> code == null || code.isEmpty() ? null : equipmentService.getEquipmentEntityByCode(code).getId())
                 .toList();
         var criticalities = getCriticalityList(criticality);
 
