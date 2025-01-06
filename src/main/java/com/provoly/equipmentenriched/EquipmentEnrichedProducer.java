@@ -48,7 +48,7 @@ public class EquipmentEnrichedProducer {
     }
 
     public void send(EquipmentEnriched enriched) {
-        equipmentEmitter.send(KafkaRecord.of(null, enriched));
+        equipmentEmitter.send(KafkaRecord.of(enriched.getCode(), enriched));
     }
 
 }
