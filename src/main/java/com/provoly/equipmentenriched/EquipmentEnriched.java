@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.provoly.equipment.Equipment;
 import com.provoly.event.Event;
 import com.provoly.event.Status;
@@ -58,6 +59,7 @@ public class EquipmentEnriched {
                 .toList();
     }
 
+    @JsonCreator
     public EquipmentEnriched(UUID id,
             String name,
             String code,
