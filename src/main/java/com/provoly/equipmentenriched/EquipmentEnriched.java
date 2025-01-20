@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.provoly.equipment.Equipment;
 import com.provoly.event.Event;
 import com.provoly.event.Status;
 import com.provoly.service.Service;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 public class EquipmentEnriched {
     private final UUID id;

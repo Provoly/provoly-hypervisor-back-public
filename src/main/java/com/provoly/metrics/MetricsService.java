@@ -249,7 +249,7 @@ public class MetricsService {
     }
 
     @Transactional
-    public Collection<AggregateServiceDto> aggregateAnomaliesEvents(DateInterval interval,
+    public Collection<AggregateAnomalyDto> aggregateAnomaliesEvents(DateInterval interval,
             int buckets,
             String domain,
             Instant startDate,

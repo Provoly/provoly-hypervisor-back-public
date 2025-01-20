@@ -125,7 +125,7 @@ public class MetricsController {
     @Path("/aggregate/anomalies/{interval}")
     @GET
     @RolesAllowed({ Role.STR_METRIC_READ })
-    public Collection<AggregateServiceDto> aggregateAnomaliesEvents(
+    public Collection<AggregateAnomalyDto> aggregateAnomaliesEvents(
             DateInterval interval,
             @RestQuery @Positive @DefaultValue("12") int buckets,
             @RestQuery String domain,

@@ -421,7 +421,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
         return results;
     }
 
-    public Collection<AggregateServiceDto> aggregateAnomaliesEvents(DateInterval interval,
+    public Collection<AggregateAnomalyDto> aggregateAnomaliesEvents(DateInterval interval,
             int buckets,
             Instant startDate,
             Long domainId,
