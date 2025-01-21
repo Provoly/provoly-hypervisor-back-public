@@ -71,7 +71,8 @@ public class EquipmentDatabaseReader extends DatabaseReader {
         }
 
         var query = criteriaQuery.select(root)
-                .where(cb.and(getPredicatesAsArray(predicates)));
+                .where(cb.and(getPredicatesAsArray(predicates)))
+                .orderBy(cb.desc(root.get(Equipment_.id)));
 
         return em.createQuery(query)
                 .setFirstResult((page - 1) * pageSize)
