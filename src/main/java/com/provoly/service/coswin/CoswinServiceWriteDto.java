@@ -7,7 +7,7 @@ public record CoswinServiceWriteDto(
         @NotNull String jrjrPriority, // priority
         @NotNull String jrjrJobDescription, // request subject
         @NotNull String jrjrLongString, // request type
-        @NotNull String jrjrRemarks, // request description
+        @NotNull String jrjrRemarksHelper, // request description
         Integer jrjrNumber1, // GTI
         Integer jrjrNumber2, // GTR
         Integer jrjrNumber3, // GTRP
