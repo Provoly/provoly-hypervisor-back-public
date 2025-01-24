@@ -2,6 +2,7 @@ package com.provoly.event.dto;
 
 import java.time.Instant;
 
+import com.provoly.comment.CommentReadDto;
 import com.provoly.equipment.EquipmentShortDto;
 import com.provoly.event.Criticality;
 import com.provoly.event.Status;
@@ -21,5 +22,6 @@ public record JournalEventDto(int id,
         long linkedEvents,
         Integer procedureId,
         String domain,
-        Instant closeDate) {
+        Instant closeDate,
+        CommentReadDto comment) {
 }
