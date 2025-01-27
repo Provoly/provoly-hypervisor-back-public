@@ -247,7 +247,9 @@ public class EventDatabaseReader extends DatabaseReader {
         logger.debugf("Sort on %s with order %s", sort, order);
         var sortProperty = getSortProperty(sort, builder, root);
         orders.add(order == SortOrder.DESC ? builder.desc(sortProperty) : builder.asc(sortProperty));
-
+        if (!sortProperty.equals(Event_.lastModificationDate)) {
+            orders.add(builder.desc(root.get(Event_.lastModificationDate)));
+        }
         return orders;
     }
 

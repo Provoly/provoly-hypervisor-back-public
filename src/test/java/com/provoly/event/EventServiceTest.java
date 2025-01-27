@@ -2,6 +2,7 @@ package com.provoly.event;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 import java.io.File;
@@ -263,6 +264,24 @@ public class EventServiceTest {
         // then
         assertThat(book.getSheetAt(0).getLastRowNum()).isEqualTo(events.size());
         tempFile.deleteOnExit();
+    }
+
+    @Test
+    @Transactional
+    void should_orders_events_by_LastModificationDate() {
+        // given
+
+        // when
+        var events = eventService
+                .getEvents(1, 100, "status", null, null, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
+                        null, null, null, null)
+                .toList();
+
+        // then
+        for (int i = 1; i < events.size(); i++) {
+            assertTrue(events.get(i - 1).getLastModificationDate().getEpochSecond() <= events.get(i).getLastModificationDate()
+                    .getEpochSecond());
+        }
     }
 
     @Test
