@@ -103,7 +103,7 @@ public class MetricsController {
     public Map<String, Long> getAnomalyEventsGroupedBySubCategories(
             @RestQuery String domain,
             @RestQuery Instant date,
-            @RestQuery String status,
+            @RestQuery List<String> status,
             @RestQuery List<String> place,
             @RestQuery List<String> entity,
             @RestQuery List<String> criticality,

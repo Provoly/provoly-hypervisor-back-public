@@ -199,7 +199,7 @@ public class MetricsService {
     @Transactional
     public Map<String, Long> getAnomalyEventsBySubCategories(String domain,
             Instant date,
-            String status,
+            List<String> status,
             List<String> place,
             List<String> entity,
             List<String> criticality,
@@ -225,10 +225,14 @@ public class MetricsService {
         List<String> criticalities = getCriticalityList(criticality);
 
         var equipmentName = name != null ? equipmentService.getEquipmentByName(name).getName() : null;
+        List<Status> statusList = List.of();
+        if (!status.isEmpty()) {
+            statusList = status.stream().map(Status::fromString).toList();
+        }
 
         return metricsDatabaseReader.getAnomalyEventsBySubCategories(domainEntity,
                 date,
-                Status.fromString(status),
+                statusList,
                 entities,
                 districts,
                 criticalities,

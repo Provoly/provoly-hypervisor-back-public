@@ -330,7 +330,7 @@ public class MetricsDatabaseReader extends DatabaseReader {
     @Transactional
     public Map<String, Long> getAnomalyEventsBySubCategories(Domain domain,
             Instant date,
-            Status status,
+            List<Status> ListStatus,
             List<EquipmentEntity> entities,
             List<District> districts,
             List<String> criticalities,
@@ -359,9 +359,9 @@ public class MetricsDatabaseReader extends DatabaseReader {
             predicates.add(builder.notEqual(event.get(Event_.status), Status.DONE));
         }
 
-        if (status != null) {
-            logger.debugf("filter on status %s", status);
-            predicates.add(builder.equal(event.get(Event_.status), status));
+        if (!ListStatus.isEmpty()) {
+            logger.debugf("filter on status %s", ListStatus);
+            predicates.add(event.get(Event_.status).in(ListStatus));
         }
 
         if (equipmentName != null) {

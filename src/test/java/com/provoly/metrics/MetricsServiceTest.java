@@ -599,8 +599,9 @@ public class MetricsServiceTest {
 
         var creationDate = Instant.parse(LocalDate.now().atStartOfDay() + ":00.000Z");
 
+        List<String> ListStatus = List.of("NEW", "IN_PROGRESS");
         // when
-        var result = metricsService.getAnomalyEventsBySubCategories("VP", creationDate, null, List.of(), List.of(),
+        var result = metricsService.getAnomalyEventsBySubCategories("VP", creationDate, ListStatus, List.of(), List.of(),
                 List.of(), List.of(), null);
 
         //then
@@ -633,7 +634,7 @@ public class MetricsServiceTest {
         var creationDate = Instant.parse(LocalDate.now().atStartOfDay() + ":00.000Z");
 
         // when
-        var result = metricsService.getAnomalyEventsBySubCategories("VP", creationDate, null, List.of(), List.of(),
+        var result = metricsService.getAnomalyEventsBySubCategories("VP", creationDate, List.of(), List.of(), List.of(),
                 List.of(), List.of(), null);
 
         //then
@@ -665,7 +666,7 @@ public class MetricsServiceTest {
         var creationDate = Instant.parse(LocalDate.now().atStartOfDay() + ":00.000Z");
 
         // when
-        var result = metricsService.getAnomalyEventsBySubCategories("VP", creationDate, null, List.of(), List.of(),
+        var result = metricsService.getAnomalyEventsBySubCategories("VP", creationDate, List.of(), List.of(), List.of(),
                 List.of(), List.of(), "camera1");
 
         //then
@@ -699,7 +700,7 @@ public class MetricsServiceTest {
         eventService.closeEvent(savedEvent);
 
         // when
-        var result = metricsService.getAnomalyEventsBySubCategories("VP", creationDate, null, List.of(), List.of(),
+        var result = metricsService.getAnomalyEventsBySubCategories("VP", creationDate,  List.of(), List.of(), List.of(),
                 List.of(), List.of(), null);
 
         //then
