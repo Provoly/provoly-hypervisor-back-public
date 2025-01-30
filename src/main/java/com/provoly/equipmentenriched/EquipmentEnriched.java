@@ -1,7 +1,6 @@
 package com.provoly.equipmentenriched;
 
-import static com.provoly.service.ServiceStatus.ASKED;
-import static com.provoly.service.ServiceStatus.IN_PROGRESS;
+import static com.provoly.service.ServiceStatus.*;
 
 import java.util.List;
 import java.util.Map;
@@ -50,7 +49,7 @@ public class EquipmentEnriched {
         this.nbServicesAskedInProgress = equipment
                 .getServices()
                 .stream()
-                .filter(service -> List.of(ASKED, IN_PROGRESS).contains(service.getStatus()))
+                .filter(service -> List.of(ASKED, IN_PROGRESS, NEW).contains(service.getStatus()))
                 .count();
         this.services = equipment
                 .getServices()
