@@ -2,6 +2,7 @@ package com.provoly.procedure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.ForbiddenException;
 
@@ -19,6 +21,7 @@ import com.provoly.event.Criticality;
 import com.provoly.event.Event;
 import com.provoly.event.EventController;
 import com.provoly.event.Status;
+import com.provoly.event.dto.EventReadDto;
 import com.provoly.event.dto.EventWriteDto;
 import com.provoly.user.Role;
 import com.provoly.user.UserService;
@@ -306,6 +309,7 @@ public class ProcedureControllerTest {
     }
 
     @Test
+    @Transactional
     @TestSecurity(user = "reader", roles = { "event_write", "event_read" })
     void should_close_procedure() {
         // given
@@ -319,6 +323,10 @@ public class ProcedureControllerTest {
         // then
         assertThat(procedure.closeComment()).isNotNull();
         assertThat(procedure.events()).extracting("status").containsExactly(Status.DONE);
+        for (EventReadDto e : procedure.events()) {
+            assertEquals(e.getLastComment().message(), "close procedure");
+        }
+
     }
 
     @Test

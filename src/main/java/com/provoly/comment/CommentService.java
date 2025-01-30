@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.ForbiddenException;
 
 import com.provoly.action.ActionService;
+import com.provoly.event.Event;
 import com.provoly.event.EventService;
 import com.provoly.event.Status;
 import com.provoly.procedure.Procedure;
@@ -29,7 +30,8 @@ public class CommentService {
     public CommentService(Logger logger,
             CommentDatabaseReader databaseReader,
             CommentMapper commentMapper,
-            EventService eventService, ActionService actionService, ProcedureService procedureService,
+            EventService eventService, ActionService actionService,
+            ProcedureService procedureService,
             UserService userService) {
         this.logger = logger;
         this.databaseReader = databaseReader;
@@ -51,8 +53,18 @@ public class CommentService {
 
         var user = userService.getCurrentUser();
         var comment = new Comment(dto.id(), dto.message(), user);
+
         procedure.setCloseComment(comment);
+
+        for (Event e : procedure.getEvents()) {
+            if (e.getStatus() != Status.DONE) {
+                var commentEvent = new Comment(UUID.randomUUID(), dto.message(), user);
+                e.addComment(commentEvent);
+                databaseReader.saveComment(commentEvent);
+            }
+        }
         databaseReader.saveComment(comment);
+
         procedureService.closeAllProcedureEvent(procedure);
     }
 
