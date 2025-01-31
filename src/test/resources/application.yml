@@ -9,10 +9,11 @@ quarkus:
     devservices:
       port: 5433
       init-script-path: db/init.sql
+      image-name: dh2wltsh.gra7.container-registry.ovh.net/docker-mirror/library/postgres:17
 
   kafka:
     devservices:
-      image-name: docker.io/redpandadata/redpanda:v24.1.2
+      image-name: dh2wltsh.gra7.container-registry.ovh.net/docker-mirror/redpandadata/redpanda:v24.1.2
       enabled: true
       port: 9092
 
