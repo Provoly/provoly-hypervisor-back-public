@@ -1,7 +1,6 @@
 package com.provoly.event;
 
-import static com.provoly.service.ServiceStatus.ASKED;
-import static com.provoly.service.ServiceStatus.IN_PROGRESS;
+import static com.provoly.service.ServiceStatus.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -341,7 +340,7 @@ public class EventService {
                         .stream();
 
         return Stream.concat(procedureServices, equipmentServices)
-                .filter(service -> service.getStatus() == ASKED || service.getStatus() == IN_PROGRESS)
+                .filter(service -> List.of(ASKED, IN_PROGRESS, NEW).contains(service.getStatus()))
                 .sorted(compareByStatusThenLastDate())
                 .toList();
     }
