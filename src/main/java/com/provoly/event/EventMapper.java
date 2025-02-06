@@ -15,6 +15,8 @@ import com.provoly.event.dto.*;
 import com.provoly.procedure.Procedure;
 import com.provoly.service.Service;
 
+import static com.provoly.service.ServiceStatus.*;
+
 @ApplicationScoped
 public class EventMapper {
     public static final String DEFAULT_SOURCE = "Hyperviseur";
@@ -61,6 +63,7 @@ public class EventMapper {
     }
 
     public EventSummaryDto mapToEventSummaryDto(Event event, List<Service> services) {
+        long numberServices = services.stream().filter(service -> List.of(ASKED, IN_PROGRESS, NEW).contains(service.getStatus())).count();
         return new EventSummaryDto(event.getId(),
                 event.getName(),
                 event.getCriticality(),
@@ -68,7 +71,7 @@ public class EventMapper {
                 event.getLastModificationDate(),
                 event.getCategory().getCode(),
                 services.isEmpty() ? null : services.getFirst().getExternalId(),
-                (long) services.size(),
+                numberServices,
                 event.getStartDate(),
                 event.getEndDate(),
                 event.getProcedure() == null ? null : event.getProcedure().getId());
