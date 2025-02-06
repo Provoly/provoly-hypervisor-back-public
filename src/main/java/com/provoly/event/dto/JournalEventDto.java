@@ -23,5 +23,6 @@ public record JournalEventDto(int id,
         Integer procedureId,
         String domain,
         Instant closeDate,
-        CommentReadDto comment) {
+        CommentReadDto comment,
+        String externalId) {
 }

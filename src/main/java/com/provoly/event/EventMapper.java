@@ -142,7 +142,8 @@ public class EventMapper {
                         event.getProcedure() == null ? null : event.getProcedure().getId(),
                         event.getDomain() == null ? null : event.getDomain().getCode(),
                         event.getCloseDate(),
-                        commentMapper.mapLastCommentToDto(event.getComments())))
+                        commentMapper.mapLastCommentToDto(event.getComments()),
+                        event.getExternalId()))
                 .toList();
     }
 
