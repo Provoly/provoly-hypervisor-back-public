@@ -147,6 +147,13 @@ public class EventService {
         var categories = category.stream()
                 .map(this::getCategory).toList();
 
+        Integer idEvent;
+        try{
+            idEvent = Integer.parseUnsignedInt(id);
+        }catch (NumberFormatException e){
+            idEvent = null;
+        }
+
         return databaseReader.getEvents(page,
                 pageSize,
                 EventSort.fromName(sort),
@@ -159,7 +166,7 @@ public class EventService {
                 entities,
                 families,
                 name,
-                id,
+                idEvent,
                 equipment,
                 closeDate);
     }

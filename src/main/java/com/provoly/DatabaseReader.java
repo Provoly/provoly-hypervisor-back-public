@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import io.opentelemetry.api.common.Value;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
@@ -86,7 +87,7 @@ public class DatabaseReader {
 
     protected String formatId(String search) {
         try {
-            return stripAccentAndAddPercents(Integer.valueOf(search).toString());
+            return stripAccentAndAddPercents(String.valueOf(Integer.parseInt(search)));
         } catch (NumberFormatException e) {
             return "";
         }

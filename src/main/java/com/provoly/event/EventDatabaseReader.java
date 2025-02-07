@@ -40,7 +40,7 @@ public class EventDatabaseReader extends DatabaseReader {
             List<EquipmentEntity> entities,
             List<Family> families,
             String name,
-            String id,
+            Integer id,
             String equipment,
             Instant closeDate) {
         var cb = em.getCriteriaBuilder();
@@ -105,9 +105,7 @@ public class EventDatabaseReader extends DatabaseReader {
         }
 
         if (id != null) {
-            logger.debugf("filter on event that contains '%s' in id".formatted(id));
-            var idSearch = formatId(id);
-            searchFilters.add(cb.like(((JpaExpression<Integer>) root.get(Event_.id)).cast(String.class), idSearch));
+            searchFilters.add(root.get(Event_.id).in(id));
         }
 
         if (equipment != null) {
