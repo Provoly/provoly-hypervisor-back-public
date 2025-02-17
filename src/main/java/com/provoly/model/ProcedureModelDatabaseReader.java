@@ -11,7 +11,6 @@ import com.provoly.event.Domain;
 import com.provoly.event.Domain_;
 import com.provoly.event.SortOrder;
 
-import org.hibernate.query.criteria.JpaExpression;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
@@ -48,11 +47,17 @@ public class ProcedureModelDatabaseReader extends DatabaseReader {
             logger.debugf("filter on procedures model that contains '%s' in id, name or creator".formatted(search));
             var idSearch = formatId(search);
             search = stripAccentAndAddPercents(search);
+            if (idSearch != null) {
+                filters = cb.or(
+                        cb.or(root.get(ProcedureModel_.id).in(idSearch)),
+                        cb.like(unaccent(cb, root.get(ProcedureModel_.name)), search),
+                        cb.like(unaccent(cb, root.get(ProcedureModel_.creator)), search));
+            } else {
+                filters = cb.or(
+                        cb.like(unaccent(cb, root.get(ProcedureModel_.name)), search),
+                        cb.like(unaccent(cb, root.get(ProcedureModel_.creator)), search));
+            }
 
-            filters = cb.or(
-                    cb.like(((JpaExpression<Integer>) root.get(ProcedureModel_.id)).cast(String.class), idSearch),
-                    cb.like(unaccent(cb, root.get(ProcedureModel_.name)), search),
-                    cb.like(unaccent(cb, root.get(ProcedureModel_.creator)), search));
         }
 
         if (!domains.isEmpty()) {

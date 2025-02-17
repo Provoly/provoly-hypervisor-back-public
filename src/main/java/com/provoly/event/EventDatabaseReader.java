@@ -16,7 +16,6 @@ import com.provoly.equipment.Equipment_;
 import com.provoly.equipment.Family;
 import com.provoly.procedure.Procedure_;
 
-import org.hibernate.query.criteria.JpaExpression;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped

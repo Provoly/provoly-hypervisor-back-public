@@ -18,10 +18,7 @@ import com.provoly.event.Status;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -32,12 +29,12 @@ public class ProcedureModelControllerTest {
     @Inject
     TestDataService dataService;
 
-    @BeforeAll
+    @BeforeEach
     public void init() {
         dataService.init();
     }
 
-    @AfterAll
+    @AfterEach
     public void clean() {
         dataService.clean();
     }
@@ -105,8 +102,14 @@ public class ProcedureModelControllerTest {
     @Test
     @TestSecurity(user = "reader", roles = { "proc_model_read" })
     void should_return_procedure_model_that_with_corresponding_id_without_zeros() {
+        // given
+        var procedure = procedureModelController.getProceduresModel(1, 3, null, null, List.of(), null);
+
+        var id = procedure.stream().findFirst().get().id();
+
+        String idString = "000" + id;
         // when
-        var procedures = procedureModelController.getProceduresModel(1, 3, null, null, List.of(), "00003");
+        var procedures = procedureModelController.getProceduresModel(1, 3, null, null, List.of(), idString);
 
         //then
         assertThat(procedures).isNotEmpty();

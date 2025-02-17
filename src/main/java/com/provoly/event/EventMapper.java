@@ -1,5 +1,7 @@
 package com.provoly.event;
 
+import static com.provoly.service.ServiceStatus.*;
+
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
@@ -14,8 +16,6 @@ import com.provoly.equipment.ShortEquipmentMapper;
 import com.provoly.event.dto.*;
 import com.provoly.procedure.Procedure;
 import com.provoly.service.Service;
-
-import static com.provoly.service.ServiceStatus.*;
 
 @ApplicationScoped
 public class EventMapper {
@@ -63,7 +63,8 @@ public class EventMapper {
     }
 
     public EventSummaryDto mapToEventSummaryDto(Event event, List<Service> services) {
-        long numberServices = services.stream().filter(service -> List.of(ASKED, IN_PROGRESS, NEW).contains(service.getStatus())).count();
+        long numberServices = services.stream()
+                .filter(service -> List.of(ASKED, IN_PROGRESS, NEW).contains(service.getStatus())).count();
         return new EventSummaryDto(event.getId(),
                 event.getName(),
                 event.getCriticality(),

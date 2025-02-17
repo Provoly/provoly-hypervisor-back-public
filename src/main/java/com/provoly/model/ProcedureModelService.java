@@ -125,7 +125,7 @@ public class ProcedureModelService {
 
     @Transactional
     public Procedure associateProcedureModelToEvents(Integer id, Collection<Integer> eventIds) {
-        logger.infof("Associate procedure model %s to events %", String.valueOf(id), eventIds);
+        logger.infof("Associate procedure model %s to events %s", String.valueOf(id), eventIds);
         var model = databaseReader.getProcedureModelById(id);
 
         logger.debugf("Retrieve events to associate them to procedure");
