@@ -403,7 +403,7 @@ public class EventControllerTest {
         assertThat(result.get(Status.IN_PROGRESS).events())
                 .extracting("serviceTitle").isNotEmpty();
         assertThat(result.get(Status.IN_PROGRESS).events())
-                .extracting("serviceCount").containsExactly(0L);
+                .extracting("serviceCount").containsExactly(1L);
 
         assertThat(result.get(Status.DONE).events())
                 .extracting("serviceTitle").isNotEmpty();
