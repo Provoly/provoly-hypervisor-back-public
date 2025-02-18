@@ -59,8 +59,8 @@ Créer un store de type Provoly dans le workspace "chalons"
 * client_secret: dummy
 * user: `geoserver`
 * password: `geoserver_passsword`
-* chunkSize: 5000
-* maxItems: 5000
+* chunkSize: 10000
+* maxItems: 50000
 * timeout: 60
 
 image::geoserver-store.png[]
