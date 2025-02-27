@@ -126,8 +126,9 @@ public class ProcedureService {
                 ((AskedService) asked).setServiceExternalId(null);
                 actionDatabaseReader.saveAction(asked);
             }
+            procedure.removeAction(a);
         }
-        procedure.removeActions();
+
         databaseReader.removeProcedure(procedure);
     }
 
