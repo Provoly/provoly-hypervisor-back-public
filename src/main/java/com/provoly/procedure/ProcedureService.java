@@ -4,12 +4,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.provoly.action.*;
+import com.provoly.service.Service;
+import com.provoly.service.ServiceService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
-import com.provoly.action.Action;
-import com.provoly.action.ActionMapper;
-import com.provoly.action.ActionService;
 import com.provoly.action.dto.ActionWriteDto;
 import com.provoly.event.Event;
 import com.provoly.event.EventService;
@@ -25,16 +25,19 @@ import org.jboss.logging.Logger;
 @ApplicationScoped
 public class ProcedureService {
     private final ProcedureDatabaseReader databaseReader;
+
+    private final ActionDatabaseReader actionDatabaseReader;
     private final EventService eventService;
     private final ActionService actionService;
     private final ActionMapper actionMapper;
     private final Logger logger;
     private final SecurityIdentity securityIdentity;
 
-    public ProcedureService(ProcedureDatabaseReader databaseReader, EventService eventService, ActionService actionService,
-            ActionMapper actionMapper,
-            Logger logger, SecurityIdentity securityIdentity) {
+    public ProcedureService(ProcedureDatabaseReader databaseReader, ActionDatabaseReader actionDatabaseReader, EventService eventService, ActionService actionService,
+                            ActionMapper actionMapper,
+                            Logger logger, SecurityIdentity securityIdentity) {
         this.databaseReader = databaseReader;
+        this.actionDatabaseReader = actionDatabaseReader;
         this.eventService = eventService;
         this.actionService = actionService;
         this.actionMapper = actionMapper;
@@ -116,6 +119,15 @@ public class ProcedureService {
         logger.infof("Delete procedure %s and dissociate its events", id);
         var procedure = databaseReader.getProcedureById(id);
         procedure.dissociateEvents();
+        for(Action a: procedure.getActions()){
+            UUID idAction = a.getId();
+            Action asked = actionService.getActionById(idAction);
+            if(asked instanceof AskedService){
+                ((AskedService) asked).setServiceExternalId(null);
+                actionDatabaseReader.saveAction(asked);
+            }
+        }
+        procedure.removeActions();
         databaseReader.removeProcedure(procedure);
     }
 
