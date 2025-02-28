@@ -118,7 +118,6 @@ public class ProcedureService {
     public void deleteProcedure(Integer id) {
         logger.infof("Delete procedure %s and dissociate its events", id);
         var procedure = databaseReader.getProcedureById(id);
-        procedure.dissociateEvents();
         for(Action a: procedure.getActions()){
             UUID idAction = a.getId();
             Action asked = actionService.getActionById(idAction);
@@ -126,9 +125,12 @@ public class ProcedureService {
                 ((AskedService) asked).setServiceExternalId(null);
                 actionDatabaseReader.saveAction(asked);
             }
+
+        }
+        for(Action a: procedure.getActions()){
             procedure.removeAction(a);
         }
-
+        procedure.dissociateEvents();
         databaseReader.removeProcedure(procedure);
     }
 
