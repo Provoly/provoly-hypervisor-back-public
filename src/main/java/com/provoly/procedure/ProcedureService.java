@@ -4,12 +4,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.provoly.action.*;
-import com.provoly.service.Service;
-import com.provoly.service.ServiceService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
+import com.provoly.action.*;
 import com.provoly.action.dto.ActionWriteDto;
 import com.provoly.event.Event;
 import com.provoly.event.EventService;
@@ -33,9 +31,10 @@ public class ProcedureService {
     private final Logger logger;
     private final SecurityIdentity securityIdentity;
 
-    public ProcedureService(ProcedureDatabaseReader databaseReader, ActionDatabaseReader actionDatabaseReader, EventService eventService, ActionService actionService,
-                            ActionMapper actionMapper,
-                            Logger logger, SecurityIdentity securityIdentity) {
+    public ProcedureService(ProcedureDatabaseReader databaseReader, ActionDatabaseReader actionDatabaseReader,
+            EventService eventService, ActionService actionService,
+            ActionMapper actionMapper,
+            Logger logger, SecurityIdentity securityIdentity) {
         this.databaseReader = databaseReader;
         this.actionDatabaseReader = actionDatabaseReader;
         this.eventService = eventService;
@@ -118,9 +117,8 @@ public class ProcedureService {
     public void deleteProcedure(Integer id) {
         logger.infof("Delete procedure %s and dissociate its events", id);
         var procedure = databaseReader.getProcedureById(id);
-
-        for(Action a: procedure.getActions()){
-            procedure.removeAction(a);
+        for (int i = 0; i < procedure.getActions().size(); i++) {
+            procedure.removeAction((Action) procedure.getActions().toArray()[i]);
         }
         procedure.dissociateEvents();
         databaseReader.removeProcedure(procedure);
