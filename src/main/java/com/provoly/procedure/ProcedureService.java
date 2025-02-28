@@ -118,13 +118,7 @@ public class ProcedureService {
     public void deleteProcedure(Integer id) {
         logger.infof("Delete procedure %s and dissociate its events", id);
         var procedure = databaseReader.getProcedureById(id);
-        for(Action a: procedure.getActions()){
-            if(a instanceof AskedService){
-                ((AskedService) a).setServiceExternalId(null);
 
-            }
-        }
-        actionDatabaseReader.saveActions(procedure.getActions());
         for(Action a: procedure.getActions()){
             procedure.removeAction(a);
         }
