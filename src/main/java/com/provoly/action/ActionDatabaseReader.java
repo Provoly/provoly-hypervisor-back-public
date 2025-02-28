@@ -1,5 +1,6 @@
 package com.provoly.action;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -40,4 +41,7 @@ public class ActionDatabaseReader extends DatabaseReader {
                 .isPresent();
     }
 
+    public void saveActions(Collection<Action> actions) {
+        em.persist(actions);
+    }
 }

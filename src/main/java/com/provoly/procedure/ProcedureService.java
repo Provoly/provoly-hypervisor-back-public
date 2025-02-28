@@ -121,9 +121,10 @@ public class ProcedureService {
         for(Action a: procedure.getActions()){
             if(a instanceof AskedService){
                 ((AskedService) a).setServiceExternalId(null);
-                actionDatabaseReader.saveAction(a);
+
             }
         }
+        actionDatabaseReader.saveActions(procedure.getActions());
         for(Action a: procedure.getActions()){
             procedure.removeAction(a);
         }
