@@ -9,6 +9,7 @@ import com.provoly.event.Status;
 
 public class EventReadDto {
     private Integer id;
+    private String externalId;
     private String name;
     private String address;
     private String description;
@@ -33,6 +34,7 @@ public class EventReadDto {
     private String creator;
 
     public EventReadDto(Integer id,
+            String externalId,
             String name,
             String address,
             String description,
@@ -56,6 +58,7 @@ public class EventReadDto {
             ParentReadDto parent,
             String creator) {
         this.id = id;
+        this.externalId = externalId;
         this.name = name;
         this.address = address;
         this.description = description;
@@ -82,6 +85,10 @@ public class EventReadDto {
 
     public Integer getId() {
         return id;
+    }
+
+    public String getExternalId() {
+        return externalId;
     }
 
     public String getName() {

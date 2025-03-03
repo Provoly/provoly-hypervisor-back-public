@@ -38,6 +38,7 @@ public class EventMapper {
     public EventReadDto mapToEventReadDto(Event event) {
         return new EventReadDto(
                 event.getId(),
+                event.getExternalId(),
                 event.getName(),
                 event.getAddress(),
                 event.getDescription(),
