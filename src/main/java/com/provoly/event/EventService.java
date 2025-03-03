@@ -340,14 +340,9 @@ public class EventService {
     private List<Service> getLastUndoneServiceFromProcedureOrEquipment(Event event) {
         Stream<Service> procedureServices = getProcedureServices(event);
 
-        Stream<Service> equipmentServices = event.getEquipment() == null
-                ? Stream.of()
-                : event.getEquipment()
-                        .getServices()
-                        .stream();
 
-        return Stream.concat(procedureServices, equipmentServices)
-                .filter(service -> service.getStatus() == ASKED || service.getStatus() == IN_PROGRESS
+        return procedureServices
+                .filter(service ->service.getExternalId() != null && service.getStatus() == ASKED || service.getStatus() == IN_PROGRESS
                         || service.getStatus() == NEW)
                 .sorted(compareByStatusThenLastDate()).distinct()
                 .toList();
