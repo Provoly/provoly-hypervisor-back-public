@@ -29,7 +29,7 @@ public class XslxService {
         ByteArrayOutputStream outputStream;
         try (Workbook workbook = new XSSFWorkbook()) {
 
-            Sheet sheet = workbook.createSheet("Evènements");
+            Sheet sheet = workbook.createSheet("Événements");
             Row header = sheet.createRow(0);
 
             logger.debugf("Generate header");
