@@ -44,7 +44,7 @@ public class ProcedureModel {
     private Collection<Action> actions = new ArrayList<>();
 
     public ProcedureModel() {
-        // Only for JPA
+        // Only for  JPA
     }
 
     public ProcedureModel(String creator) {

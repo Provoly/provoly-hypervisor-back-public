@@ -1,9 +1,9 @@
-insert into domain (id,name,code) values (1, 'Éclairage public','EP');
-insert into domain (id,name,code) values (2, 'Vidéoprotection','VP');
-insert into domain (id,name,code) values (3, 'Signalisation lumineuse tricolore','SLT');
-insert into domain (id,name,code) values (4, 'Réseaux & Télécoms','RT');
+insert into domain (id,name,code) values (1, 'Eclairage Public','EP');
+insert into domain (id,name,code) values (2, 'Vidéoprotection et surveillance','VP');
+insert into domain (id,name,code) values (3, 'Signalisation Lumineuse Tricolore ','SLT');
+insert into domain (id,name,code) values (4, 'Réseaux télécoms','RT');
 insert into domain (id,name,code) values (5, 'Patrimoine','PAT');
-insert into domain (id,name,code) values (6, 'Mobilité et stationnement','MOB');
+insert into domain (id,name,code) values (6, 'Stationnement et mobilité','MOB');
 insert into domain (id,name,code) values (7, 'Cadre de vie','CDV');
 
 insert into family (id,name,code) values (1,'Armoire','EP_ARMOIRE');
@@ -18,7 +18,7 @@ insert into category (id,name,code, parent_id) values (4,'Anomalie','ANOMALY',nu
 insert into category (id,name,code, parent_id) values (5,'Affluence anormale de personnes','UNUSUAL_FLOW',4);
 insert into category (id,name,code, parent_id) values (6,'Congestion de véhicules','TRAFFIC_CONGESTION',4);
 insert into category (id,name,code, parent_id) values (7,'Dépôts sauvages','WILD_STORAGE',4);
-insert into category (id,name,code, parent_id) values (8,'Aucune','NONE',4);
+insert into category (id,name,code, parent_id) values (8,'Aucun','NONE',4);
 
 insert into service_category (id,name,code) values (1,'Préventive','PREV');
 insert into service_category (id,name,code) values (2,'Curative','CURA');
