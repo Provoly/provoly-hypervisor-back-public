@@ -1269,6 +1269,82 @@ paths:
       security:
         - oidc:
             - authenticated
+  /metrics/equipments-with-events/SLT:
+    get:
+      tags:
+        - Metrics Controller
+      summary: Retrieve equipments from SLT domain with event metrics
+      description: |
+        Returns the number of Carrefours and unmanaged equipments linked with 
+        at least one event that has not been closed, the number of services `ASKED` for this equipment, 
+        and the number of services `IN_PROGRESS`.
+        Filter on equipments without `deleted` property.
+      operationId: com.provoly.metrics.MetricsController_getSltEquipmentWithEvent
+      parameters:
+        - name: entity
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: criticality
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Criticality'
+        - name: category
+          in: query
+          schema:
+            items:
+              type: string
+        - name: place
+          in: query
+          description: Must match city or district value from equipment
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          content:
+            description: Returns Equipments with events
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SltEquipmentWithEventDto'
+        "400":
+          description: |
+            - Entity/Criticality/Category not found
+            - Place is not a valid City/District
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
+      security:
+        - oidc:
+            - authenticated
+  /metrics/equipments-with-events/SLT/detailed:
+    get:
+      tags:
+        - Metrics Controller
+      summary: Retrieve equipments from EP domain with event metrics
+      description: |
+        Similar to the endpoint `/metrics/equipments-with-events/Slt` but the number of events is grouped by category and includes the "MANIFESTATION" category.
+        Filter on equipments without `deleted` property.
+      operationId: com.provoly.metrics.MetricsController_getSltEquipmentWithEventDetailed
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EpEquipmentWithEventDetailedDto'
+        "401":
+          description: Not Authorized
+        "403":
+          description: Forbidden
+      security:
+        - oidc:
+            - authenticated
   /metrics/equipments-with-events/VP:
     get:
       tags:
@@ -2660,7 +2736,7 @@ components:
           description: Count of in progress services linked to an unmanaged equipment
     EpEquipmentWithEventDetailedDto:
       allOf:
-        - $ref: '#/components/schemas/EpEquipmentWithEventDto'
+        - $ref: '#/components/schemas/SltEquipmentWithEventDto'
         - type: object
           properties:
             manifestation:
@@ -2696,6 +2772,66 @@ components:
                 nbEquipWithEvent_A:
                   type: integer
                 nbEquipWithEvent_FL:
+                  type: integer
+                nbEquipWithEvent_unmanaged:
+                  type: integer
+    SltEquipmentWithEventDto:
+      type: object
+      properties:
+        nbEquipWithEvent_CF:
+          type: integer
+          description: Count of equipments "Carrefours" with at least one event not finished and that is not a "MANIFESTATION"
+        totalEquipWithEvent_CF:
+          type: integer
+          description: Total count of equipments "Carrefours"
+        nbServiceTodoWithEquip_CF:
+          type: integer
+          description: Count of requested services linked to an "Carrefours" equipment
+        nbServiceInProgressWithEquip_CF:
+          type: integer
+          description: Count of in progress services linked to an "Carrefours" equipment
+        nbEquipWithEvent_unmanaged:
+          type: integer
+          description: Count of unmanaged equipments with at least one event not finished and that is not a "MANIFESTATION"
+        totalEquipWithEvent_unmanaged:
+          type: integer
+          description: Total count of unmanaged equipments
+        nbServiceTodoWithEquip_unmanaged:
+          type: integer
+          description: Count of requested services linked to an unmanaged equipment
+        nbServiceInProgressWithEquip_unmanaged:
+          type: integer
+          description: Count of in progress services linked to an unmanaged equipment
+    SltEquipmentWithEventDetailedDto:
+      allOf:
+        - $ref: '#/components/schemas/SltEquipmentWithEventDto'
+        - type: object
+          properties:
+            manifestation:
+              type: object
+              properties:
+                nbEquipWithEvent_CF:
+                  type: integer
+                nbEquipWithEvent_unmanaged:
+                  type: integer
+            outoforder:
+              type: object
+              properties:
+                nbEquipWithEvent_CF:
+                  type: integer
+                nbEquipWithEvent_unmanaged:
+                  type: integer
+            anomaly:
+              type: object
+              properties:
+                nbEquipWithEvent_CF:
+                  type: integer
+                nbEquipWithEvent_unmanaged:
+                  type: integer
+            limit:
+              type: object
+              properties:
+                nbEquipWithEvent_CF:
                   type: integer
                 nbEquipWithEvent_unmanaged:
                   type: integer

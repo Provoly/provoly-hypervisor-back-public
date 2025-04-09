@@ -44,6 +44,24 @@ public class MetricsController {
         return metricsService.getEpEquipmentWithEventDetailed();
     }
 
+    @Path("/equipments-with-events/SLT")
+    @GET
+    @RolesAllowed({ Role.STR_METRIC_READ })
+    public SltEquipmentWithEventsDto getSltEquipmentWithEvent(@RestQuery List<String> criticality,
+            @RestQuery List<String> category,
+            @RestQuery List<String> entity,
+            @RestQuery List<String> place) {
+
+        return metricsService.getSltEquipmentsWithEvent(criticality, category, entity, place);
+    }
+
+    @Path("/equipments-with-events/SLT/detailed")
+    @GET
+    @RolesAllowed({ Role.STR_METRIC_READ })
+    public SltEquipmentWithEventsDetailedDto getSltEquipmentWithEventDetailed() {
+        return metricsService.getSltEquipmentWithEventDetailed();
+    }
+
     @Path("/equipments-with-events/VP")
     @GET
     @RolesAllowed({ Role.STR_METRIC_READ })

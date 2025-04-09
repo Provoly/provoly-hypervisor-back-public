@@ -28,6 +28,8 @@ import org.jboss.logging.Logger;
 public class MetricsService {
     public static final String ARMOIRE_CODE = "EP_ARMOIRE";
     public static final String FOYER_LUMINEUX_CODE = "EP_FOYER_LUMINEUX";
+
+    public static final String CARREFOURS_CODE = "SLT_CARREFOURS";
     public static final String MANIFESTATION = "MANIFESTATION";
     public static final String LIMIT = "LIMIT";
     public static final String OUTOFORDER = "OUTOFORDER";
@@ -435,6 +437,89 @@ public class MetricsService {
         return new EpEquipmentByCategoryDto(
                 equipmentsByCategory.getOrDefault(category, Map.of()).getOrDefault(ARMOIRE_CODE, 0L),
                 equipmentsByCategory.getOrDefault(category, Map.of()).getOrDefault(FOYER_LUMINEUX_CODE, 0L),
+                equipmentsByCategory.getOrDefault(category, Map.of()).getOrDefault(UNMANAGED, 0L));
+    }
+
+    @Transactional
+    public SltEquipmentWithEventsDto getSltEquipmentsWithEvent(
+            Collection<String> criticalities,
+            Collection<String> categories,
+            Collection<String> entities,
+            Collection<String> places) {
+
+        var districts = places.stream().map(equipmentService::getDistrictByCodeOrNull).toList();
+        var entitiesEntity = entities.stream().map(equipmentService::getEquipmentEntityOrNull).toList();
+
+        var equipments = getEquipmentForEventsExceptManifestation("SLT",
+                criticalities,
+                categories,
+                entitiesEntity,
+                districts);
+        return buildSltEquimentWithEvent(equipments, entitiesEntity, districts);
+
+    }
+
+    @Transactional
+    public SltEquipmentWithEventsDetailedDto getSltEquipmentWithEventDetailed() {
+        var domainEntity = metricsDatabaseReader.getDomainByCode("SLT");
+
+        logger.debug("Get equipments with events grouped by event category");
+        var equipmentByCategory = metricsDatabaseReader.getEquipmentsByEventCategory(domainEntity,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of());
+
+        List<Equipment> equipments = equipmentByCategory
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .distinct()
+                .toList();
+
+        var equipmentsWithEvent = buildSltEquimentWithEvent(equipments, List.of(), List.of());
+
+        var equipmentsByFamily = equipmentByCategory.entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        item -> metricsDatabaseReader.getEpEquipmentByFamily(item.getValue())));
+
+        return new SltEquipmentWithEventsDetailedDto(equipmentsWithEvent,
+                buildSltEquipmentByCategory(MANIFESTATION, equipmentsByFamily),
+                buildSltEquipmentByCategory(OUTOFORDER, equipmentsByFamily),
+                buildSltEquipmentByCategory(ANOMALY, equipmentsByFamily),
+                buildSltEquipmentByCategory(LIMIT, equipmentsByFamily));
+    }
+
+    private SltEquipmentWithEventsDto buildSltEquimentWithEvent(Collection<Equipment> equipmentWithUndoneEvents,
+            List<EquipmentEntity> entitiesEntity, List<District> districts) {
+        logger.debug("grouped by familiy and managed/unmanaged");
+        var equipments = metricsDatabaseReader.getEpEquipmentByFamily(equipmentWithUndoneEvents);
+
+        logger.debug("Get all equipments grouped by family");
+        var totalEquipmentWithEvent = metricsDatabaseReader.getTotalEpEquipmentByFamily(entitiesEntity, districts);
+
+        logger.debug("Get ep services equipments grouped by family and service status");
+        var servicesByEquipments = metricsDatabaseReader.getEpServicesByStatus(equipmentWithUndoneEvents);
+
+        return new SltEquipmentWithEventsDto(
+
+                equipments.getOrDefault(CARREFOURS_CODE, 0L),
+                totalEquipmentWithEvent.getOrDefault(CARREFOURS_CODE, 0L),
+                getServicesForEquipmentAndStatus(servicesByEquipments, CARREFOURS_CODE, ASKED),
+                getServicesForEquipmentAndStatus(servicesByEquipments, CARREFOURS_CODE, IN_PROGRESS),
+
+                equipments.getOrDefault(UNMANAGED, 0L),
+                totalEquipmentWithEvent.getOrDefault(UNMANAGED, 0L),
+                getServicesForEquipmentAndStatus(servicesByEquipments, UNMANAGED, ASKED),
+                getServicesForEquipmentAndStatus(servicesByEquipments, UNMANAGED, IN_PROGRESS));
+    }
+
+    private SltEquipmentByCategoryDto buildSltEquipmentByCategory(String category,
+            Map<String, Map<String, Long>> equipmentsByCategory) {
+        return new SltEquipmentByCategoryDto(
+                equipmentsByCategory.getOrDefault(category, Map.of()).getOrDefault(CARREFOURS_CODE, 0L),
                 equipmentsByCategory.getOrDefault(category, Map.of()).getOrDefault(UNMANAGED, 0L));
     }
 
