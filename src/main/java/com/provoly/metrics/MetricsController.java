@@ -108,9 +108,9 @@ public class MetricsController {
             @RestQuery List<String> entity,
             @RestQuery List<String> criticality,
             @RestQuery List<String> family,
-            @RestQuery String equipment) {
+            @RestQuery String name) {
         return metricsService.getAnomalyEventsBySubCategories(domain, date, status, place, entity, criticality, family,
-                equipment);
+                name);
     }
 
     @Path("/events/anomalies-by-entity")
