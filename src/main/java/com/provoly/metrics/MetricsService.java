@@ -216,7 +216,7 @@ public class MetricsService {
                 entities: %s,
                 criticalities: %s,
                 family: %s
-                equipment: %s
+                name: %s
                 """, domain, date, status, place, entity, criticality, family, name);
 
         var domainEntity = getDomainByCode(domain);
