@@ -84,6 +84,8 @@ public class EquipmentMapper {
                     .orElseThrow(() -> new IllegalArgumentException(
                             "Equipment parent with code %s not found".formatted(dto.parent())));
             entity.setParent(equipmentParent);
+        }else{
+            entity.setParent(null);
         }
 
         for (var attr : dto.attributes().entrySet()) {
