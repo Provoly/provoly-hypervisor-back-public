@@ -13,6 +13,7 @@ on:
     workflows: [Build]
     branches:
       - main
+      - v1
     types:
       - completed
 
@@ -27,9 +28,12 @@ jobs:
     runs-on: provoly-runner
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+
       - name: Sets env vars for main branch
         run: |
-          echo CI_SHORT_COMMIT_SHA=$(echo ${{ github.sha }} | cut -c1-8) >> $GITHUB_ENV
+          echo CI_SHORT_COMMIT_SHA=$(echo ${{ github.event.workflow_run.head_sha }} | cut -c1-8) >> $GITHUB_ENV
 
       - name: Update values on chalons-dev (v2)
         uses: peter-evans/repository-dispatch@v3
