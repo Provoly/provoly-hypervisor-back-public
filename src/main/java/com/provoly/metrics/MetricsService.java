@@ -3,6 +3,7 @@ package com.provoly.metrics;
 import static com.provoly.metrics.MetricsDatabaseReader.UNMANAGED;
 import static com.provoly.service.ServiceStatus.ASKED;
 import static com.provoly.service.ServiceStatus.IN_PROGRESS;
+import static com.provoly.service.ServiceStatus.NEW;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -508,11 +509,13 @@ public class MetricsService {
                 equipments.getOrDefault(CARREFOURS_CODE, 0L),
                 totalEquipmentWithEvent.getOrDefault(CARREFOURS_CODE, 0L),
                 getServicesForEquipmentAndStatus(servicesByEquipments, CARREFOURS_CODE, ASKED),
+                getServicesForEquipmentAndStatus(servicesByEquipments, CARREFOURS_CODE, NEW),
                 getServicesForEquipmentAndStatus(servicesByEquipments, CARREFOURS_CODE, IN_PROGRESS),
 
                 equipments.getOrDefault(UNMANAGED, 0L),
                 totalEquipmentWithEvent.getOrDefault(UNMANAGED, 0L),
                 getServicesForEquipmentAndStatus(servicesByEquipments, UNMANAGED, ASKED),
+                getServicesForEquipmentAndStatus(servicesByEquipments, UNMANAGED, NEW),
                 getServicesForEquipmentAndStatus(servicesByEquipments, UNMANAGED, IN_PROGRESS));
     }
 

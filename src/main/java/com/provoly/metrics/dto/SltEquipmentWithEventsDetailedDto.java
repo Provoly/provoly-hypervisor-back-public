@@ -12,14 +12,17 @@ public class SltEquipmentWithEventsDetailedDto extends SltEquipmentWithEventsDto
             SltEquipmentByCategoryDto outoforder,
             SltEquipmentByCategoryDto anomaly,
             SltEquipmentByCategoryDto limit) {
-        super(equipment.getNbEquipWithEvent_CF(),
-                equipment.getTotalEquipWithEvent_CF(),
-                equipment.getNbServiceTodoWithEquip_CF(),
-                equipment.getNbServiceInProgressWithEquip_CF(),
-                equipment.getNbEquipWithEvent_unmanaged(),
-                equipment.getTotalEquipWithEvent_unmanaged(),
-                equipment.getNbServiceTodoWithEquip_unmanaged(),
-                equipment.getNbServiceInProgressWithEquip_unmanaged());
+        super(equipment.getNbEquipWithEvent_CA(),
+                equipment.getTotalEquipWithEvent_CA(),
+                equipment.getNbServiceTodoWithEquip_CA(),
+                equipment.getNbServiceCreatedWithEquip_CA(),
+                equipment.getNbServiceInProgressWithEquip_CA(),
+                equipment.getNbEquipWithEvent_CO(),
+                equipment.getTotalEquipWithEvent_CO(),
+                equipment.getNbServiceCreatedWithEquip_CO(),
+                equipment.getNbServiceTodoWithEquip_CO(),
+                equipment.getNbServiceInProgressWithEquip_CO()
+                );
         this.manifestation = manifestation;
         this.outoforder = outoforder;
         this.anomaly = anomaly;
