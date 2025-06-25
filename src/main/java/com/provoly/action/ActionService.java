@@ -98,6 +98,7 @@ public class ActionService {
                 yield new PhoneAction();
             }
             case AskedServiceWriteDto ignored -> new AskedService();
+            case AlertElectedWriteDto ignored -> new AlertElected();
             case OtherActionWriteDto ignored -> new OtherAction();
             default -> new Action();
         };

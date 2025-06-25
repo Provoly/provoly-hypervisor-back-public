@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 public enum ActionType {
     ASKED_SERVICE,
+    ALERT_ELECTED,
     OTHER,
     PHONE,
     SMS,

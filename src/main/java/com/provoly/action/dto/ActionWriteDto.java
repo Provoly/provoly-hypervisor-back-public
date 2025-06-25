@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = EmailActionWriteDto.class, name = "EMAIL"),
         @JsonSubTypes.Type(value = OtherActionWriteDto.class, name = "OTHER"),
         @JsonSubTypes.Type(value = AskedServiceWriteDto.class, name = "ASKED_SERVICE"),
+        @JsonSubTypes.Type(value = AlertElectedWriteDto.class, name = "ALERT_ELECTED"),
         @JsonSubTypes.Type(value = PhoneActionWriteDto.class, name = "PHONE"),
         @JsonSubTypes.Type(value = PhoneActionWriteDto.class, name = "SMS")
 })

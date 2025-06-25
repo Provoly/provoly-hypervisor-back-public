@@ -69,7 +69,7 @@ public class ActionControllerTest {
                 "procedure maintenance",
                 "desc",
                 List.of(),
-                List.of(new ActionWriteDto(actionId, "CSU", Status.NEW)));
+                List.of(new ActionWriteDto(actionId, "DOUTE_CSU", Status.NEW)));
         procedureController.updateProcedure(procedureId, dto);
 
         var comment = new CommentWriteDto(UUID.randomUUID(), "message");
@@ -98,7 +98,7 @@ public class ActionControllerTest {
                 "procedure maintenance",
                 "desc",
                 List.of(),
-                List.of(new ActionWriteDto(actionId, "CSU", Status.NEW)));
+                List.of(new ActionWriteDto(actionId, "DOUTE_CSU", Status.NEW)));
         procedureController.updateProcedure(procedureId, dto);
 
         var comment = new CommentWriteDto(UUID.randomUUID(), "message");
@@ -144,7 +144,7 @@ public class ActionControllerTest {
                 "procedure maintenance",
                 "desc",
                 List.of(reportDto),
-                List.of(new ActionWriteDto(actionId, "CSU", Status.NEW)));
+                List.of(new ActionWriteDto(actionId, "DOUTE_CSU", Status.NEW)));
 
         procedureController.updateProcedure(procedureId, dto);
         procedureController.closeAllProcedureEvents(procedureId, new CommentWriteDto(UUID.randomUUID(), "close proc"));

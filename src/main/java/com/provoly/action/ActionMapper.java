@@ -90,4 +90,11 @@ public class ActionMapper {
         var additionalInfo = service != null ? service.getAdditionalInfo() : null;
         return new AskedServiceReadDto(actionDto, a.getName(), a.getServiceExternalId(), additionalInfo, status);
     }
+
+    private AlertElectedReadDto buildAlerteElectedReadDto(AlertElected a, ActionReadDto actionDto) {
+        var service = serviceService.getServiceByExternalId(a.getServiceExternalId());
+        var status = service != null ? service.getStatus() : null;
+        var additionalInfo = service != null ? service.getAdditionalInfo() : null;
+        return new AlertElectedReadDto(actionDto, a.getName(), a.getServiceExternalId(), additionalInfo, status);
+    }
 }
