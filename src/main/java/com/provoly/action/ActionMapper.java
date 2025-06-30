@@ -33,6 +33,7 @@ public class ActionMapper {
             case EmailAction a -> new EmailActionReadDto(actionDto, a.getName(), a.getEmail());
             case OtherAction a -> new OtherActionReadDto(actionDto, a.getName());
             case AskedService a -> buildAskedServiceReadDto(a, actionDto);
+            case AlertElected a -> buildAlerteElectedReadDto(a, actionDto);
             case SmsAction a -> new PhoneActionReadDto(actionDto, a.getName(), a.getNumber());
             case PhoneAction a -> new PhoneActionReadDto(actionDto, a.getName(), a.getNumber());
             default -> actionDto;
@@ -58,6 +59,10 @@ public class ActionMapper {
             case AskedServiceWriteDto dto -> {
                 ((AskedService) action).setName(dto.getName());
                 ((AskedService) action).setServiceExternalId(dto.getServiceExternalId());
+            }
+            case AlertElectedWriteDto dto -> {
+                ((AlertElected) action).setName(dto.getName());
+                ((AlertElected) action).setServiceExternalId(dto.getServiceExternalId());
             }
             case PhoneActionWriteDto dto -> {
                 if (ActionType.valueOf(dto.getType()) == ActionType.SMS) {

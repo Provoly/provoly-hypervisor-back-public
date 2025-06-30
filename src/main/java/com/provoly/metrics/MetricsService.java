@@ -164,7 +164,7 @@ public class MetricsService {
 
         date = date != null ? date : Instant.now();
         logger.infof("""
-                Aggregate done services in the last %s %s from %s
+                Aggregate ot_closed services in the last %s %s from %s
                 filter on
                 category : curative
                 domain: %s

@@ -5,7 +5,8 @@ public enum ServiceStatus {
     ASKED(2),
     IN_PROGRESS(3),
     DONE(4),
-    CANCELLED(5);
+    CANCELLED(5),
+    OT_CLOSED(6);
 
     private final int priority;
 

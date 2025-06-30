@@ -33,3 +33,4 @@ public class AlertElectedReadDto extends ActionReadDto {
         return serviceStatus;
     }
 }
+

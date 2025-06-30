@@ -3,6 +3,7 @@ package com.provoly;
 import static com.provoly.service.ServiceStatus.ASKED;
 import static com.provoly.service.ServiceStatus.DONE;
 import static com.provoly.service.ServiceStatus.IN_PROGRESS;
+import static com.provoly.service.ServiceStatus.OT_CLOSED;
 
 import java.time.Instant;
 import java.time.Period;
@@ -225,7 +226,7 @@ public class TestDataService {
     public void persistDoneService(String externalId, Instant closeDate, Equipment equip, boolean isCura, boolean isVp) {
         var service = new Service(UUID.randomUUID(), externalId, null, Instant.now(), Instant.now(), Instant.now(),
                 Instant.now(),
-                closeDate, equip, isVp ? domainVP : domainEP, DONE, isCura ? cura : prev);
+                closeDate, equip, isVp ? domainVP : domainEP, OT_CLOSED, isCura ? cura : prev);
         em.persist(service);
     }
 
